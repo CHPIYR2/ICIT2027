@@ -1,0 +1,61 @@
+{
+  "protocol": "Protocol v2",
+  "status": "proposed_pending_author_approval",
+  "execution_enabled": false,
+  "interpretation": "exploratory / post-confirmatory; prior 84 evaluation events already observed",
+  "proposal_document": "docs/network_observability_protocol_v2.md",
+  "version": "evaluation-v2",
+  "model_parameters_ref": "configs/models.v1.json",
+  "split_ref": "configs/split.v1.json",
+  "split_interpretation": "Basic 35 development; same already-observed Semiurban/Rural 84 exploratory evaluation; not unseen validation",
+  "regimes": [
+    "N_FULL_T60",
+    "N_TRANSPORT_T60",
+    "N_DEGRADED_TRANSPORT_T45",
+    "N_DEGRADED_TRANSPORT_T30",
+    "N_DEGRADED_TRANSPORT_T15"
+  ],
+  "views": "One E-only reference per classifier; paired N and EN for every regime; E identical across regimes",
+  "conditions": 33,
+  "reused_reference_conditions": 9,
+  "new_conditions_pending_approval": 24,
+  "training": "Regime-matched visibility in Basic CV and final fit; no parameter search; this is not train-full/test-degraded robustness",
+  "seed": 20270921,
+  "threshold": 0.5,
+  "primary": "Macro F1 EN-N, report both absolute N and EN scores",
+  "secondary": [
+    "balanced accuracy",
+    "false cyber attribution numerator/denominator",
+    "missed cyber numerator/denominator"
+  ],
+  "bootstrap": {
+    "repetitions": 2000,
+    "seed": 20270921,
+    "strata": "scenario x truth",
+    "unit": "event",
+    "pairing": "identical sampled event indices for every view/regime",
+    "interval": "95% percentile, conditional descriptive only"
+  },
+  "groups": [
+    "scenario",
+    "scenario/recording",
+    "exact family_description"
+  ],
+  "transitions": [
+    "corrected_N",
+    "hurt_N",
+    "unchanged_both_correct",
+    "unchanged_both_wrong"
+  ],
+  "curve": "TRANSPORT N vs EN against post-visible seconds; FULL a separate categorical reference; report non-monotonic curves",
+  "output_root": "results/exploratory-v2/",
+  "lock_after_approval": "configs/protocol.v2.lock.json",
+  "approval_required": [
+    "N_FULL definition",
+    "N_TRANSPORT definition incl U exclusion",
+    "N_DEGRADED export-view design and schedule",
+    "No new E for initial matrix",
+    "Matrix and paired analysis",
+    "New config/version naming"
+  ]
+}

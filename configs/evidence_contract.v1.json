@@ -1,0 +1,148 @@
+{
+  "version": "evidence-v1",
+  "status": "frozen",
+  "decision_layer": "binary conventional ML; LLM explanation and verifier are later phases",
+  "classifier_classes": [
+    "CYBER_RELATED",
+    "BENIGN_OPERATIONAL"
+  ],
+  "final_insufficient_evidence": "Layer-3 sufficiency outcome, not a third training class",
+  "E": {
+    "source": "raw PCAP IEC-104 observed MEASUREMENT objects",
+    "attribute_families": {
+      "voltage": [
+        "voltage",
+        "voltage_from",
+        "voltage_hv",
+        "voltage_lv",
+        "voltage_to"
+      ],
+      "current": [
+        "current_from",
+        "current_hv",
+        "current_lv",
+        "current_to"
+      ],
+      "active_power": [
+        "active_power",
+        "active_power_from",
+        "active_power_hv",
+        "active_power_lv",
+        "active_power_to"
+      ],
+      "reactive_power": [
+        "reactive_power",
+        "reactive_power_from",
+        "reactive_power_hv",
+        "reactive_power_lv",
+        "reactive_power_to"
+      ],
+      "reported_state": [
+        "is_closed",
+        "is_connected"
+      ]
+    },
+    "units": {
+      "voltage": "PER_UNIT",
+      "current": "AMPERE",
+      "active_power": "WATT",
+      "reactive_power": "VAR",
+      "reported_state": "NONE"
+    },
+    "exclude": [
+      "CONFIGURATION values",
+      "initial values",
+      "state.test",
+      "malicious",
+      "state aggregates without packet lineage"
+    ],
+    "missing_policy": "No observation => None plus missing flag; never turn missing into 0; preserve quality and last observation time."
+  },
+  "N": {
+    "source": "same raw PCAP, headers and protocol activity only",
+    "fields": [
+      "observation_time",
+      "source_endpoint",
+      "destination_endpoint",
+      "ip_protocol",
+      "source_port",
+      "destination_port",
+      "tcp_flags",
+      "apci_format",
+      "asdu_type",
+      "cause_of_transmission",
+      "packet_length"
+    ],
+    "excluded": [
+      "electrical/process payload values",
+      "setpoint values",
+      "gold event metadata"
+    ],
+    "note": "TCP ACK and IEC activation confirmation must remain distinct."
+  },
+  "M": {
+    "fields": [
+      "asset_mapping",
+      "ca_ioa_mapping",
+      "context",
+      "attribute",
+      "unit",
+      "scale",
+      "fixed_vantage_mapping"
+    ],
+    "constant_across_views": true,
+    "exclude": [
+      "initial_value",
+      "scenario narrative",
+      "playbook",
+      "raw filenames"
+    ]
+  },
+  "G": {
+    "sources": [
+      "events.json",
+      "events.jsonl",
+      "physical.zip",
+      "sherlock-config.yml",
+      "malicious",
+      "attack_point",
+      "initial_state.json"
+    ],
+    "allowed": [
+      "isolated trainer target y",
+      "offline scoring",
+      "annotation",
+      "error analysis"
+    ],
+    "forbidden": [
+      "model X",
+      "runtime retrieval",
+      "LLM prompts",
+      "normal runtime tools"
+    ]
+  },
+  "lineage": {
+    "root_identity": [
+      "archive_sha256",
+      "member",
+      "packet_index"
+    ],
+    "derived_identity": [
+      "parent_ids",
+      "APDU index",
+      "object offset",
+      "transformation version"
+    ],
+    "source_file_visibility": "opaque source handle; raw path resolver stays outside model/LLM inputs",
+    "removal": "Remove descendants and recompute aggregates when a parent packet is hidden."
+  },
+  "time_policy": "Use PCAP capture time in Unix seconds; simulator time is evaluator-only. No observations at/after the decision cutoff.",
+  "runtime_enforcement_status": "implementation tracked separately; frozen contract specifies requirements",
+  "approved_at_utc": "2026-09-21T12:29:05.164629+00:00",
+  "approval": "User explicitly approved the three settings: Basic 35 development / other 84 held-out, shared primary-PCAP E/N evidence, fixed -60/+60 second window.",
+  "primary_vantages": {
+    "01-Basic": "n302",
+    "02-Semiurban": "n406",
+    "03-Rural": "n402"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "version": "features-v1",
+  "status": "fixed_before_first_model_fit",
+  "window": "[t0-60,t0+60); pre < t0; post >= t0; PCAP capture seconds",
+  "E_numeric_relative_change": {
+    "families": [
+      "voltage",
+      "current",
+      "active_power",
+      "reactive_power"
+    ],
+    "formula": "max over channels with valid pre and post observations: abs(mean(post)-mean(pre))/max(abs(mean(pre)),floor)",
+    "floors": {
+      "voltage": 0.01,
+      "current": 1.0,
+      "active_power": 1000.0,
+      "reactive_power": 1000.0
+    },
+    "no_eligible_channel": null
+  },
+  "E_post_missing": {
+    "families": [
+      "voltage",
+      "current",
+      "active_power",
+      "reactive_power",
+      "reported_state"
+    ],
+    "formula": "channels without any valid post observation / all statically eligible mapped channels in that family",
+    "empty_family": null
+  },
+  "E_state_changed_fraction": "fraction with last(pre) != last(post), among reported-state channels observed validly in both halves; null if none",
+  "E_quality": "Exclude null/nonfinite or any quality-flagged observations from features; retain them in evidence. No forward filling. BASE/NONE scales require no multiplier.",
+  "N_order": [
+    "n_post_log_rate",
+    "n_log_rate_change",
+    "n_command_log_count",
+    "n_activation_response_log_count",
+    "n_rst_log_count",
+    "n_post_max_gap_fraction",
+    "n_u_log_count",
+    "n_endpoint_log_count"
+  ],
+  "N_formulas_in_order": [
+    "log1p(post fresh IEC104 APDU count / 60)",
+    "log1p(post count / 60) - log1p(pre count / 60)",
+    "log1p(post ASDU 45..51 and COT=6 count)",
+    "log1p(post ASDU 45..51 and COT=7 count); response, not proof of positive confirmation or execution",
+    "log1p(post TCP RST packet count on port 2404)",
+    "maximum gap between sorted fresh post APDU times including t0 and t0+60, divided by 60; no APDU => 1",
+    "log1p(post U-format APDU count)",
+    "log1p(unique IP endpoint count in post TCP port-2404 packets)"
+  ],
+  "TCP_policy": "Exact same-range same-byte TCP retransmissions are not new messages/process values. Same-start different-length or different-byte payloads remain distinct captured APDUs and process observations, with conflicts counted in private build audit. Neither first-seen nor later bytes are assumed accepted by the receiver. All E features summarize observed reports, not reconstructed endpoint state or independent physical truth. IP fragmentation and partial APDUs fail closed. This is a capture-observation decoder, not TCP receiver reconstruction; only exact segment retransmissions are deduplicated.",
+  "provenance": "Each feature row points to SHA256 of full label-free EvidenceEpisode plus versioned extraction recipe; recomputation after source removal is mandatory.",
+  "predictor_exclusions": [
+    "episode_id",
+    "asset_id",
+    "source_id",
+    "raw endpoint identity",
+    "raw path",
+    "absolute timestamp",
+    "event end/recovery",
+    "event truth",
+    "family description",
+    "initial values"
+  ]
+}

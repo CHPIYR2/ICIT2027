@@ -1,0 +1,12 @@
+{
+  "version": "pipeline-v2",
+  "reason": "Basic pre-evaluation audit identified 4 duplicate APDUs missed when TCP grouping changed. Fix APDU byte-range identity before held-out scores; preserve all v1 results.",
+  "decoder": "Existing per-packet/APDU decoding and field sanitization unchanged; dedup at directional-connection, unwrapped TCP offset, APDU byte hash",
+  "conflict_policy": "Different bytes at same offset remain different observed reports; no receiver acceptance inference",
+  "capture_scope": "Only data up to final event cutoff required. A Basic train trailing timestamp regression discovered by full-file probe is outside all evaluated windows and is not used.",
+  "feature_formulas": "configs/features.v1.json unchanged; this pipeline supersedes its segment-only TCP dedup policy",
+  "models": "configs/models.v1.json unchanged; all refit on corrected Basic 35; no tuning",
+  "protocol": "Original user-approved split, sources, and -60/+60 window unchanged",
+  "preservation": "Original data/processed and results/development-v1 retained. Corrected episodes under data/processed/v2; corrected models under results/development-v2 and ablation-development-v2.",
+  "capture_order": "Primary PCAP probes found 1\u20134 microsecond capture-order regressions, including one in a Rural event window. Stable timestamp/index ordering with fixed 1 ms buffer, preserve original times and packet indices; larger regressions fail closed. Offline capture-time evaluation; no deployed wall-clock latency claim."
+}

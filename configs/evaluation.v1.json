@@ -1,0 +1,24 @@
+{
+  "version": "evaluation-v1",
+  "primary": "All three frozen models, E/N/EN, threshold 0.5; no held-out fitting or model selection",
+  "diagnostic_drop_features": ["n_command_log_count", "n_activation_response_log_count"],
+  "diagnostic_views": ["N", "EN"],
+  "diagnostic_status": "Designed from Basic development observation before held-out scoring; does not replace main baseline",
+  "command_presence_rule": "BENIGN if n_command_log_count > 0, otherwise CYBER; descriptive development-derived rule, no learned probability",
+  "grouping": ["overall", "scenario", "recording", "family_description"],
+  "family_policy": "Exact raw event family_description strings, evaluator-only; no post-result merging",
+  "bootstrap": {
+    "repetitions": 2000,
+    "seed": 20270921,
+    "unit": "one event; all predictions/views for sampled event move together",
+    "stratification": "resample within scenario and truth strata, preserving their sample counts",
+    "interval": "percentile 2.5%/97.5%; descriptive conditional interval, not independent-simulation uncertainty",
+    "contrasts": ["EN-E", "EN-N"],
+    "metrics": ["macro_f1", "balanced_accuracy"],
+    "groups": ["overall", "scenario"],
+    "interpretation": "No multiplicity-adjusted significance claims; three scenarios are insufficient to estimate population scenario uncertainty"
+  },
+  "gates": ["Original protocol hashes unchanged", "All development unit tests pass", "APDU dedup audit equivalent within event windows", "Pre-evaluation code/config/model hash lock verified", "Exactly 84 held-out IDs; same episode features for all models/views"],
+  "score_policy": "Predict with already-fitted Basic-only model artifacts; never fit during held-out runner",
+  "failure_policy": "Fail closed on parsing/schema/hash/coverage error. Preserve lock and error; version any changes and disclose whether held-out scores were exposed."
+}

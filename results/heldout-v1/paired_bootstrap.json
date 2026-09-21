@@ -1,0 +1,736 @@
+{
+  "config": {
+    "repetitions": 2000,
+    "seed": 20270921,
+    "unit": "one event; all predictions/views for sampled event move together",
+    "stratification": "resample within scenario and truth strata, preserving their sample counts",
+    "interval": "percentile 2.5%/97.5%; descriptive conditional interval, not independent-simulation uncertainty",
+    "contrasts": [
+      "EN-E",
+      "EN-N"
+    ],
+    "metrics": [
+      "macro_f1",
+      "balanced_accuracy"
+    ],
+    "groups": [
+      "overall",
+      "scenario"
+    ],
+    "interpretation": "No multiplicity-adjusted significance claims; three scenarios are insufficient to estimate population scenario uncertainty"
+  },
+  "results": {
+    "primary": {
+      "logistic_regression": {
+        "overall": {
+          "EN-E": {
+            "macro_f1": {
+              "point": -0.4761167004880737,
+              "ci95": [
+                -0.5771416462792087,
+                -0.36605908233815215
+              ],
+              "replicates": 2000
+            },
+            "balanced_accuracy": {
+              "point": -0.20662768031189083,
+              "ci95": [
+                -0.30704191033138395,
+                -0.10526315789473684
+              ],
+              "replicates": 2000
+            }
+          },
+          "EN-N": {
+            "macro_f1": {
+              "point": 0.0,
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "replicates": 2000
+            },
+            "balanced_accuracy": {
+              "point": 0.0,
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "replicates": 2000
+            }
+          }
+        },
+        "scenario": {
+          "02-Semiurban": {
+            "EN-E": {
+              "macro_f1": {
+                "point": -0.41627361030346105,
+                "ci95": [
+                  -0.5423762176987329,
+                  -0.27774547177532255
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": -0.1941923774954628,
+                "ci95": [
+                  -0.3248865698729583,
+                  -0.06440562613430134
+                ],
+                "replicates": 2000
+              }
+            },
+            "EN-N": {
+              "macro_f1": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              }
+            }
+          },
+          "03-Rural": {
+            "EN-E": {
+              "macro_f1": {
+                "point": -0.5521719659650695,
+                "ci95": [
+                  -0.729511867442902,
+                  -0.33532041728763035
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": -0.2142857142857143,
+                "ci95": [
+                  -0.4017857142857143,
+                  -0.0267857142857143
+                ],
+                "replicates": 2000
+              }
+            },
+            "EN-N": {
+              "macro_f1": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              }
+            }
+          }
+        }
+      },
+      "random_forest": {
+        "overall": {
+          "EN-E": {
+            "macro_f1": {
+              "point": 0.2634802091112771,
+              "ci95": [
+                0.1766826923076923,
+                0.35998226688340473
+              ],
+              "replicates": 2000
+            },
+            "balanced_accuracy": {
+              "point": 0.232943469785575,
+              "ci95": [
+                0.14230019493177393,
+                0.33140838206627676
+              ],
+              "replicates": 2000
+            }
+          },
+          "EN-N": {
+            "macro_f1": {
+              "point": 0.0,
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "replicates": 2000
+            },
+            "balanced_accuracy": {
+              "point": 0.0,
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "replicates": 2000
+            }
+          }
+        },
+        "scenario": {
+          "02-Semiurban": {
+            "EN-E": {
+              "macro_f1": {
+                "point": 0.27189542483660123,
+                "ci95": [
+                  0.14900221729490026,
+                  0.3974553682815817
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.25136116152450094,
+                "ci95": [
+                  0.13793103448275867,
+                  0.3811252268602541
+                ],
+                "replicates": 2000
+              }
+            },
+            "EN-N": {
+              "macro_f1": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              }
+            }
+          },
+          "03-Rural": {
+            "EN-E": {
+              "macro_f1": {
+                "point": 0.27692307692307694,
+                "ci95": [
+                  0.1384615384615384,
+                  0.4369747899159664
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.2321428571428572,
+                "ci95": [
+                  0.0803571428571428,
+                  0.4107142857142857
+                ],
+                "replicates": 2000
+              }
+            },
+            "EN-N": {
+              "macro_f1": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              }
+            }
+          }
+        }
+      },
+      "gradient_boosting": {
+        "overall": {
+          "EN-E": {
+            "macro_f1": {
+              "point": 0.37860576923076916,
+              "ci95": [
+                0.27764423076923084,
+                0.4861913430420708
+              ],
+              "replicates": 2000
+            },
+            "balanced_accuracy": {
+              "point": 0.3606237816764133,
+              "ci95": [
+                0.2514619883040936,
+                0.47173489278752434
+              ],
+              "replicates": 2000
+            }
+          },
+          "EN-N": {
+            "macro_f1": {
+              "point": 0.0,
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "replicates": 2000
+            },
+            "balanced_accuracy": {
+              "point": 0.0,
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "replicates": 2000
+            }
+          }
+        },
+        "scenario": {
+          "02-Semiurban": {
+            "EN-E": {
+              "macro_f1": {
+                "point": 0.4001755155770075,
+                "ci95": [
+                  0.26134301270417426,
+                  0.542608695652174
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.3911070780399275,
+                "ci95": [
+                  0.25136116152450094,
+                  0.5381125226860254
+                ],
+                "replicates": 2000
+              }
+            },
+            "EN-N": {
+              "macro_f1": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              }
+            }
+          },
+          "03-Rural": {
+            "EN-E": {
+              "macro_f1": {
+                "point": 0.3697478991596639,
+                "ci95": [
+                  0.21052631578947367,
+                  0.5418060200668896
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.3303571428571428,
+                "ci95": [
+                  0.1517857142857143,
+                  0.5267857142857143
+                ],
+                "replicates": 2000
+              }
+            },
+            "EN-N": {
+              "macro_f1": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              }
+            }
+          }
+        }
+      }
+    },
+    "without_commands": {
+      "logistic_regression": {
+        "overall": {
+          "EN-E": {
+            "macro_f1": {
+              "point": -0.4761167004880737,
+              "ci95": [
+                -0.5771416462792087,
+                -0.36605908233815215
+              ],
+              "replicates": 2000
+            },
+            "balanced_accuracy": {
+              "point": -0.20662768031189083,
+              "ci95": [
+                -0.30704191033138395,
+                -0.10526315789473684
+              ],
+              "replicates": 2000
+            }
+          },
+          "EN-N": {
+            "macro_f1": {
+              "point": 0.0,
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "replicates": 2000
+            },
+            "balanced_accuracy": {
+              "point": 0.0,
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "replicates": 2000
+            }
+          }
+        },
+        "scenario": {
+          "02-Semiurban": {
+            "EN-E": {
+              "macro_f1": {
+                "point": -0.41627361030346105,
+                "ci95": [
+                  -0.5423762176987329,
+                  -0.27774547177532255
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": -0.1941923774954628,
+                "ci95": [
+                  -0.3248865698729583,
+                  -0.06440562613430134
+                ],
+                "replicates": 2000
+              }
+            },
+            "EN-N": {
+              "macro_f1": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              }
+            }
+          },
+          "03-Rural": {
+            "EN-E": {
+              "macro_f1": {
+                "point": -0.5521719659650695,
+                "ci95": [
+                  -0.729511867442902,
+                  -0.33532041728763035
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": -0.2142857142857143,
+                "ci95": [
+                  -0.4017857142857143,
+                  -0.0267857142857143
+                ],
+                "replicates": 2000
+              }
+            },
+            "EN-N": {
+              "macro_f1": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              }
+            }
+          }
+        }
+      },
+      "random_forest": {
+        "overall": {
+          "EN-E": {
+            "macro_f1": {
+              "point": 0.06433369417528856,
+              "ci95": [
+                -0.011265783077001844,
+                0.14859254590854684
+              ],
+              "replicates": 2000
+            },
+            "balanced_accuracy": {
+              "point": 0.04288499025341119,
+              "ci95": [
+                -0.03801169590643272,
+                0.12378167641325544
+              ],
+              "replicates": 2000
+            }
+          },
+          "EN-N": {
+            "macro_f1": {
+              "point": 0.19155115948261603,
+              "ci95": [
+                0.09053591440607668,
+                0.29674975291960526
+              ],
+              "replicates": 2000
+            },
+            "balanced_accuracy": {
+              "point": 0.20467836257309935,
+              "ci95": [
+                0.11306042884990253,
+                0.29532163742690054
+              ],
+              "replicates": 2000
+            }
+          }
+        },
+        "scenario": {
+          "02-Semiurban": {
+            "EN-E": {
+              "macro_f1": {
+                "point": 0.04021486318675482,
+                "ci95": [
+                  -0.06223657166227446,
+                  0.14602892814921462
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.03448275862068961,
+                "ci95": [
+                  -0.06170598911070768,
+                  0.13974591651542645
+                ],
+                "replicates": 2000
+              }
+            },
+            "EN-N": {
+              "macro_f1": {
+                "point": 0.2725211190224225,
+                "ci95": [
+                  0.12521381033151371,
+                  0.4346609295833731
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.2640653357531759,
+                "ci95": [
+                  0.13248638838475502,
+                  0.39473684210526316
+                ],
+                "replicates": 2000
+              }
+            }
+          },
+          "03-Rural": {
+            "EN-E": {
+              "macro_f1": {
+                "point": 0.09958317544524442,
+                "ci95": [
+                  -0.06243636050911592,
+                  0.2321428571428572
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.026785714285714413,
+                "ci95": [
+                  -0.1160714285714286,
+                  0.1428571428571429
+                ],
+                "replicates": 2000
+              }
+            },
+            "EN-N": {
+              "macro_f1": {
+                "point": 0.033186414311641155,
+                "ci95": [
+                  -0.07204433497536944,
+                  0.13355227148330606
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.017857142857142905,
+                "ci95": [
+                  -0.03571428571428581,
+                  0.07142857142857151
+                ],
+                "replicates": 2000
+              }
+            }
+          }
+        }
+      },
+      "gradient_boosting": {
+        "overall": {
+          "EN-E": {
+            "macro_f1": {
+              "point": 0.027979651162790664,
+              "ci95": [
+                -0.12566215355484478,
+                0.18470433729466457
+              ],
+              "replicates": 2000
+            },
+            "balanced_accuracy": {
+              "point": 0.0009746588693957392,
+              "ci95": [
+                -0.1442495126705653,
+                0.15694444444444433
+              ],
+              "replicates": 2000
+            }
+          },
+          "EN-N": {
+            "macro_f1": {
+              "point": 0.0,
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "replicates": 2000
+            },
+            "balanced_accuracy": {
+              "point": 0.0,
+              "ci95": [
+                0.0,
+                0.0
+              ],
+              "replicates": 2000
+            }
+          }
+        },
+        "scenario": {
+          "02-Semiurban": {
+            "EN-E": {
+              "macro_f1": {
+                "point": -0.07454975914826723,
+                "ci95": [
+                  -0.2932814724690458,
+                  0.15278744039397552
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": -0.055353901996370136,
+                "ci95": [
+                  -0.24773139745916517,
+                  0.15338021778584388
+                ],
+                "replicates": 2000
+              }
+            },
+            "EN-N": {
+              "macro_f1": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              }
+            }
+          },
+          "03-Rural": {
+            "EN-E": {
+              "macro_f1": {
+                "point": 0.2289395549614892,
+                "ci95": [
+                  0.0342646745732571,
+                  0.3959454338764684
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.1428571428571428,
+                "ci95": [
+                  -0.0535714285714286,
+                  0.3392857142857143
+                ],
+                "replicates": 2000
+              }
+            },
+            "EN-N": {
+              "macro_f1": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              },
+              "balanced_accuracy": {
+                "point": 0.0,
+                "ci95": [
+                  0.0,
+                  0.0
+                ],
+                "replicates": 2000
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

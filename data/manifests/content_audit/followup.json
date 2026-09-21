@@ -1,0 +1,141 @@
+{
+  "scope": "targeted follow-up after full core scans",
+  "findings": {
+    "semiurban_initialization_and_test_field": {
+      "train": {
+        "initial_fields": 3565,
+        "first_row_fields_equal_to_initial": 3548,
+        "first_row_different_fields": [
+          "bus.10:voltage",
+          "bus.10:voltage_angle",
+          "bus.10:active_power",
+          "bus.10:reactive_power",
+          "line.6:active_power_to",
+          "line.6:reactive_power_to",
+          "line.6:current_to",
+          "line.6:voltage_to",
+          "line.7:active_power_from",
+          "line.7:reactive_power_from",
+          "line.7:current_from",
+          "line.7:voltage_from",
+          "load.7:active_power",
+          "load.7:reactive_power",
+          "sgen.7:active_power",
+          "sgen.120:active_power",
+          "storage.10:active_power"
+        ]
+      },
+      "test": {
+        "initial_fields": 3565,
+        "first_row_fields_equal_to_initial": 3549,
+        "first_row_different_fields": [
+          "trafo.2:active_power_hv",
+          "trafo.2:reactive_power_hv",
+          "trafo.2:active_power_lv",
+          "trafo.2:active_power_loss",
+          "trafo.2:reactive_power_loss",
+          "trafo.2:current_hv",
+          "trafo.2:current_lv",
+          "trafo.2:voltage_hv",
+          "trafo.2:voltage_lv",
+          "trafo.2:voltage_angle_hv",
+          "trafo.2:voltage_angle_lv",
+          "trafo.2:loading",
+          "load.6:active_power",
+          "load.6:reactive_power",
+          "sgen.6:active_power",
+          "storage.91:active_power"
+        ]
+      },
+      "test_field": {
+        "first_row_index": 1420,
+        "first_timestamp": 1743599823.367243,
+        "value": 1,
+        "nearby_testfr_apdus": [
+          {
+            "member": "02-Semiurban/raw/test/pcap/switch-n406-pcap-mir2.pcap",
+            "packet_index": 75736,
+            "timestamp": 1743599822.509228,
+            "apdu_hex": "680443000000",
+            "control_octet": "0x43"
+          },
+          {
+            "member": "02-Semiurban/raw/test/pcap/switch-n406-pcap-mir2.pcap",
+            "packet_index": 75752,
+            "timestamp": 1743599822.746859,
+            "apdu_hex": "680443000000",
+            "control_octet": "0x43"
+          },
+          {
+            "member": "02-Semiurban/raw/test/pcap/switch-n406-pcap-mir2.pcap",
+            "packet_index": 75773,
+            "timestamp": 1743599822.986845,
+            "apdu_hex": "680443000000",
+            "control_octet": "0x43"
+          },
+          {
+            "member": "02-Semiurban/raw/test/pcap/switch-n406-pcap-mir2.pcap",
+            "packet_index": 75818,
+            "timestamp": 1743599823.457865,
+            "apdu_hex": "680443000000",
+            "control_octet": "0x43"
+          }
+        ]
+      }
+    },
+    "cross_vantage": {
+      "sample_limit_per_capture": 2000,
+      "identity_fields": "src/dst IP, TCP ports/seq/ack/flags, payload; TTL/checksums/MAC excluded",
+      "matches": [
+        {
+          "left": "01-Basic/raw/train/pcap/switch-n318-pcap-mir3.pcap",
+          "right": "01-Basic/raw/train/pcap/switch-n302-pcap-mir2.pcap",
+          "matching_sample_identities": 376,
+          "identity_sha256": "000e288b170de71b67815bd113b6ed66ed1aac2f8c097f2d588c00b76eca735f",
+          "left_reference": {
+            "packet_index": 1171,
+            "timestamp": 1741556036.231155
+          },
+          "right_reference": {
+            "packet_index": 3624,
+            "timestamp": 1741556036.249189
+          }
+        },
+        {
+          "left": "01-Basic/raw/train/pcap/switch-n302-pcap-mir2.pcap",
+          "right": "01-Basic/raw/train/pcap/switch-n303-pcap-mir6.pcap",
+          "matching_sample_identities": 314,
+          "identity_sha256": "002301f1f4cee0363ce092c0de23f58a64fa9f16f04943b12c0d5253980fc54d",
+          "left_reference": {
+            "packet_index": 122,
+            "timestamp": 1741555765.881431
+          },
+          "right_reference": {
+            "packet_index": 24,
+            "timestamp": 1741555765.891464
+          }
+        },
+        {
+          "left": "01-Basic/raw/train/pcap/switch-n302-pcap-mir2.pcap",
+          "right": "01-Basic/raw/train/pcap/switch-n321-pcap-mir2.pcap",
+          "matching_sample_identities": 62,
+          "identity_sha256": "046d029ae70bfdfb609b28e11bb78e1803108cd081edd249408986cb4bf05b98",
+          "left_reference": {
+            "packet_index": 2561,
+            "timestamp": 1741555955.342753
+          },
+          "right_reference": {
+            "packet_index": 497,
+            "timestamp": 1741555955.326721
+          }
+        }
+      ]
+    }
+  },
+  "source_hashes": {
+    "ipal_iec104.py.txt": "63f4a5da37b3718e585ff32af6529a9f3d0c34493af25d2707ebe96f6ff19c31",
+    "ipal_timeslice.py.txt": "6fce2ca9de9c3339c299be8ef4cde28a5406e69eee30b71954e7f96af1b2f291",
+    "ipal_state_extractor.py.txt": "118a213c0108b691226021e2929e983aea9920f7d42fd962effee275a18e85de"
+  },
+  "source_note": "Current upstream source is corroborative; exact historical release transcriber commit remains unknown."
+}

@@ -1,0 +1,18 @@
+{
+  "version": "models-v1",
+  "status": "fixed_before_first_model_fit",
+  "seed": 20270921,
+  "views": ["E", "N", "EN"],
+  "preprocessing": "Training-fold median imputation with keep_empty_features=True; parallel MissingIndicator(features=all); training-fold StandardScaler. An entirely missing training column uses sklearn's numerical zero fallback only inside the estimator, never as evidence.",
+  "models": {
+    "logistic_regression": {"C": 1.0, "solver": "lbfgs", "max_iter": 2000, "class_weight": null},
+    "random_forest": {"n_estimators": 300, "max_depth": 4, "min_samples_leaf": 2, "max_features": "sqrt", "class_weight": null, "n_jobs": 1},
+    "gradient_boosting": {"n_estimators": 100, "learning_rate": 0.05, "max_depth": 2, "min_samples_leaf": 2, "subsample": 1.0}
+  },
+  "prediction_threshold": 0.5,
+  "hyperparameter_search": false,
+  "probability_claim": "Uncalibrated estimator scores; no calibrated-probability claim",
+  "selection": "Report all three models and all three views; no best-held-out model selection.",
+  "development": "Fixed event-stratified folds in split.v1.json. Out-of-fold predictions only. Descriptive within-Basic validation; not independent simulation runs.",
+  "held_out": "Separate evaluation only after development integrity checks and implementation lock; same final models fit on Basic 35 only. Not executed by development runner."
+}

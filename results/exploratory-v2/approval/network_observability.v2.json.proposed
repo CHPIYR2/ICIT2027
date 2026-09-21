@@ -1,0 +1,61 @@
+{
+  "protocol": "Protocol v2",
+  "status": "proposed_pending_author_approval",
+  "execution_enabled": false,
+  "interpretation": "exploratory / post-confirmatory; prior 84 evaluation events already observed",
+  "proposal_document": "docs/network_observability_protocol_v2.md",
+  "version": "network-observability-v2",
+  "N_FULL": {
+    "source": "Existing pipeline-v2 PCAP episodes",
+    "features_ref": "configs/features.v1.json:N_order",
+    "feature_count": 8,
+    "policy": "Exact original representation; reproduce/reuse frozen results"
+  },
+  "N_TRANSPORT": {
+    "source": "TCP/2404 packet headers at original primary vantage; both directions; includes ACK/retransmission/handshake",
+    "fields": [
+      "observation_time",
+      "source_endpoint",
+      "destination_endpoint",
+      "ip_protocol",
+      "source_port",
+      "destination_port",
+      "tcp_flags"
+    ],
+    "excluded": [
+      "APDU boundaries/counts",
+      "ASDU identity",
+      "COT",
+      "APCI/U-format",
+      "process/setpoint payload",
+      "raw endpoint identity as predictor",
+      "raw filename",
+      "truth/family/recording/scenario"
+    ],
+    "u_format_decision": "Exclude: IEC-specific control format, not TCP activity; explicit author approval requested",
+    "packet_size_decision": "Operationally transport-visible but omitted from minimal initial set; may indirectly reveal message structure",
+    "indirect_associations": "Transport visibility does not imply independence from command procedures or topology"
+  },
+  "N_DEGRADED": {
+    "base": "N_TRANSPORT",
+    "mechanism": "Network analytics/export-view tail outage; canonical capture and E analytics remain available",
+    "post_visible_seconds": [
+      60,
+      45,
+      30,
+      15
+    ],
+    "pre_visible_seconds": 60,
+    "decision_time": "t0+60",
+    "visible_network_intervals": "[t0-60,t0) union [t0,t0+T)",
+    "E_visibility": "Original full [t0-60,t0+60)",
+    "lineage": "Deny removed packets and their N descendants in the N projection, recompute all N features. Private canonical E parents remain; never call this global raw-source removal.",
+    "raw_source_loss": "Not part of proposed primary matrix; true source removal must remove E descendants and recompute E, with a separate matrix",
+    "rate_denominator": "Actual visible post duration T",
+    "gap_support": "Only visible post interval, not hidden tail",
+    "selection": "Fixed quarter-minute tail-outage schedule based on window/coverage feasibility, no resulting score search",
+    "random_packet_loss": false,
+    "total_outage": false
+  },
+  "cross_layer": "LLM must obey same projection; private lineage verification may not reveal hidden headers or intervals"
+}

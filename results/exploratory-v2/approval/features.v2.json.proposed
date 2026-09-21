@@ -1,0 +1,32 @@
+{
+  "protocol": "Protocol v2",
+  "status": "proposed_pending_author_approval",
+  "execution_enabled": false,
+  "interpretation": "exploratory / post-confirmatory; prior 84 evaluation events already observed",
+  "proposal_document": "docs/network_observability_protocol_v2.md",
+  "version": "features-v2",
+  "E": {
+    "action": "Keep original 10 features and permitted observations unchanged",
+    "ref": "configs/features.v1.json",
+    "new_features_approved": false
+  },
+  "N_FULL": {
+    "ref": "configs/features.v1.json:N_order"
+  },
+  "N_TRANSPORT": {
+    "nt_post_log_packet_rate": "log1p(number of visible post TCP/2404 packets / T)",
+    "nt_log_packet_rate_change": "log1p(post_packets/T)-log1p(pre_packets/60)",
+    "nt_rst_log_count": "log1p(number of visible post TCP/2404 packet roots with RST set)",
+    "nt_post_max_packet_gap_fraction": "max consecutive gap among visible post packet times plus t0,t0+T, divided by T; no packets in observed interval => 1",
+    "nt_endpoint_log_count": "log1p(unique IP endpoint count in visible post TCP/2404 packet roots)"
+  },
+  "unknown_policy": "Hidden intervals are unknown, not zero traffic; T>0 in initial matrix; no forward fill from hidden evidence",
+  "preprocessing": "Original fold-train-only median imputation, all-column missing indicators, scaler; parameters from models.v1, no exposed-evaluation fitting",
+  "future_E_candidates_not_implemented": [
+    "family p90 normalized maximum post deviation from pre mean",
+    "family median log variance change, >=2 valid samples per half",
+    "observation freshness",
+    "within-observed state transitions"
+  ],
+  "identity_policy": "Event/asset/source/endpoint identifiers index evidence only, never numeric predictors"
+}
