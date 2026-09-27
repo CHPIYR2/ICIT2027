@@ -1,0 +1,1112 @@
+{
+  "version": "r5-exact-replay",
+  "event_id": "ev_0961f1c2da8a257e3ebc",
+  "repetition": 2,
+  "B3_run_id": "authorized-r6-24576-v1",
+  "B3_input_sha256": "ea3ea679b30b01792dd64a627bd44f24dacdc632cb6ac03d2ba3959da66daa7f",
+  "bundle_sha256": "6cf2c2d6469ef8e7b178e04ec7dc69fe33164782421d65caa2b3425fbf08b550",
+  "receipt_sha256": "354c51ecc8e26dbe33201654664f710f53b9216693d90053196dc38c237ad830",
+  "verifier_implementation": [
+    {
+      "path": "src/investigation_dryrun/claims.py",
+      "sha256": "094fc6f6e01465c13341e0aa7dcda6f15fced70259f59504750d2969a0be5f3e"
+    },
+    {
+      "path": "src/investigation_dryrun/runner.py",
+      "sha256": "f136fdc13a17e0674d3e81d3e4628b4947f82efd5384b758ff586f0b92bde87b"
+    },
+    {
+      "path": "schemas/investigation_claim.v3.json",
+      "sha256": "33c2e19af5d5515ca43557a31748159e695aa3035514f1eb4487bbb377b16ac0"
+    },
+    {
+      "path": "prompts/investigation-v1-r4/canonical_text.v1.json",
+      "sha256": "36ccf53992b06a327433b25f43a072e6aac344753ca53612a75e13bd0ac8c8a4"
+    }
+  ],
+  "llm_calls": 0,
+  "new_generation_prompt": null,
+  "raw_B3_validation_errors": [],
+  "question_actions": [
+    {
+      "question_id": "Q1",
+      "action": "partial_or_withheld_replayed_answer",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    },
+    {
+      "question_id": "Q2",
+      "action": "retain_original_response",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    },
+    {
+      "question_id": "Q3",
+      "action": "partial_or_withheld_replayed_answer",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    },
+    {
+      "question_id": "Q4",
+      "action": "retain_original_response",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    },
+    {
+      "question_id": "Q5",
+      "action": "partial_or_withheld_replayed_answer",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    },
+    {
+      "question_id": "Q6",
+      "action": "partial_or_withheld_replayed_answer",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    },
+    {
+      "question_id": "Q7",
+      "action": "partial_or_withheld_replayed_answer",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "c_0001",
+      "disposition": "INSUFFICIENT",
+      "reason": "endpoint_ids_mismatch",
+      "published_claim": null,
+      "checks": {
+        "status": "NOT_SUPPORTED_OR_NOT_CHECKABLE"
+      }
+    },
+    {
+      "claim_id": "c_0002",
+      "disposition": "INSUFFICIENT",
+      "reason": "endpoint_ids_mismatch",
+      "published_claim": null,
+      "checks": {
+        "status": "NOT_SUPPORTED_OR_NOT_CHECKABLE"
+      }
+    },
+    {
+      "claim_id": "c_0003",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [],
+        "channel_ids": [],
+        "claim_id": "c_0003",
+        "claim_text": "Within the approved captured TCP/2404 population, query d_fa8b058c3822a3538a79e090 reports interval -40.85218286514282 to -39.85706281661987 s, duration 0.9951200485229492 SECOND, bounds p_16d9700a37f5609a51bd857d and p_1faa30a769f33937d9915db2. This does not establish outage, DoS or absence outside the covered scope.",
+        "claim_type": "communication_gap",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "d_fa8b058c3822a3538a79e090",
+          "p_16d9700a37f5609a51bd857d",
+          "p_1faa30a769f33937d9915db2"
+        ],
+        "payload": {
+          "coverage_id": "d_fa8b058c3822a3538a79e090",
+          "duration_seconds": 0.9951200485229492,
+          "end": -39.85706281661987,
+          "left_id": "p_16d9700a37f5609a51bd857d",
+          "population": "observed_tcp_2404_packets",
+          "right_id": "p_1faa30a769f33937d9915db2",
+          "start": -40.85218286514282
+        },
+        "question_ids": [
+          "Q1"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "communication_gap",
+        "raw_claim_sha256": "c3ce0573bce380093af4332e6bf840145f193251b13d1f43b90118111c1829cc",
+        "bundle_sha256": "6cf2c2d6469ef8e7b178e04ec7dc69fe33164782421d65caa2b3425fbf08b550",
+        "canonical_text": "Within the approved captured TCP/2404 population, query d_fa8b058c3822a3538a79e090 reports interval -40.85218286514282 to -39.85706281661987 s, duration 0.9951200485229492 SECOND, bounds p_16d9700a37f5609a51bd857d and p_1faa30a769f33937d9915db2. This does not establish outage, DoS or absence outside the covered scope.",
+        "required_ids": [
+          "d_fa8b058c3822a3538a79e090",
+          "p_16d9700a37f5609a51bd857d",
+          "p_1faa30a769f33937d9915db2"
+        ],
+        "allowed_ids": [
+          "d_fa8b058c3822a3538a79e090",
+          "p_16d9700a37f5609a51bd857d",
+          "p_1faa30a769f33937d9915db2"
+        ],
+        "substantive": true,
+        "key_kind": "communication_gap",
+        "key_identity": {
+          "coverage_id": "d_fa8b058c3822a3538a79e090",
+          "population": "observed_tcp_2404_packets",
+          "start": -40.85218286514282,
+          "end": -39.85706281661987
+        },
+        "fact_key": "fk_f18845a32d047962262f33e3fbce0de0f9117575b5a0bb63cdbc0328eec75505"
+      }
+    },
+    {
+      "claim_id": "c_0004",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [
+          "asset_05f863fa83922ddb"
+        ],
+        "channel_ids": [
+          "ch_01e1fd95179ba1da"
+        ],
+        "claim_id": "c_0004",
+        "claim_text": "Reported current on channel ch_01e1fd95179ba1da mapped to asset asset_05f863fa83922ddb: 28.60183334350586 AMPERE at capture time -51.630345821380615 s (e_f79c50051691ab57394c1db9), then 29.26837158203125 AMPERE at capture time 58.42261528968811 s (e_c7521e1be419df0881c7d453); difference = 0.6665382385253906 AMPERE. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_f79c50051691ab57394c1db9",
+          "e_c7521e1be419df0881c7d453",
+          "d_d5446e0b059bed83cf219051"
+        ],
+        "payload": {
+          "after_id": "e_c7521e1be419df0881c7d453",
+          "after_time": 58.42261528968811,
+          "after_value": 29.26837158203125,
+          "before_id": "e_f79c50051691ab57394c1db9",
+          "before_time": -51.630345821380615,
+          "before_value": 28.60183334350586,
+          "operation": "difference",
+          "result": 0.6665382385253906,
+          "unit": "AMPERE"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "reported_change",
+        "raw_claim_sha256": "2d187abcdc31c9f2b767a2fa4400841a9e702ce4cdc5a661a203f23fb9f7d338",
+        "bundle_sha256": "6cf2c2d6469ef8e7b178e04ec7dc69fe33164782421d65caa2b3425fbf08b550",
+        "canonical_identity": {
+          "projection_version": "numeric-fact-projection-v1",
+          "event_id": "ev_0961f1c2da8a257e3ebc",
+          "evidence_export_version": "investigation-export-v2",
+          "canonical_kind": "reported_numeric_change",
+          "before_e_id": "e_f79c50051691ab57394c1db9",
+          "after_e_id": "e_c7521e1be419df0881c7d453",
+          "asset_id": "asset_05f863fa83922ddb",
+          "channel_id": "ch_01e1fd95179ba1da",
+          "family": "current",
+          "source_unit": "AMPERE",
+          "operation": "difference",
+          "result_unit": "AMPERE"
+        },
+        "canonical_text": "Reported current on channel ch_01e1fd95179ba1da mapped to asset asset_05f863fa83922ddb: 28.60183334350586 AMPERE at capture time -51.630345821380615 s (e_f79c50051691ab57394c1db9), then 29.26837158203125 AMPERE at capture time 58.42261528968811 s (e_c7521e1be419df0881c7d453); difference = 0.6665382385253906 AMPERE. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "required_ids": [
+          "e_c7521e1be419df0881c7d453",
+          "e_f79c50051691ab57394c1db9"
+        ],
+        "allowed_ids": [
+          "d_d5446e0b059bed83cf219051",
+          "e_c7521e1be419df0881c7d453",
+          "e_f79c50051691ab57394c1db9",
+          "meta_935631e97fcb4884c0d00c39"
+        ],
+        "substantive": true,
+        "key_kind": "reported_change",
+        "key_identity": {
+          "before_id": "e_f79c50051691ab57394c1db9",
+          "after_id": "e_c7521e1be419df0881c7d453",
+          "quantity": "difference",
+          "unit": "AMPERE"
+        },
+        "fact_key": "fk_5fd7caae4e82ada0dd94207f7766ddfc57db86b955433d3c43e6a8f639ca250a"
+      }
+    },
+    {
+      "claim_id": "c_0005",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [
+          "asset_05f863fa83922ddb"
+        ],
+        "channel_ids": [
+          "ch_01e1fd95179ba1da"
+        ],
+        "claim_id": "c_0005",
+        "claim_text": "Reported current on channel ch_01e1fd95179ba1da mapped to asset asset_05f863fa83922ddb: 28.60183334350586 AMPERE at capture time -51.630345821380615 s (e_f79c50051691ab57394c1db9), then 29.26837158203125 AMPERE at capture time 58.42261528968811 s (e_c7521e1be419df0881c7d453); percent_change = 2.330403895863306 PERCENT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_f79c50051691ab57394c1db9",
+          "e_c7521e1be419df0881c7d453",
+          "d_d5446e0b059bed83cf219051"
+        ],
+        "payload": {
+          "after_id": "e_c7521e1be419df0881c7d453",
+          "after_time": 58.42261528968811,
+          "after_value": 29.26837158203125,
+          "before_id": "e_f79c50051691ab57394c1db9",
+          "before_time": -51.630345821380615,
+          "before_value": 28.60183334350586,
+          "operation": "percent_change",
+          "result": 2.330403895863306,
+          "unit": "PERCENT"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "reported_change",
+        "raw_claim_sha256": "9af45f5f9d185ac64dfebea02f9c6377b8f5494bb5f4917bcdbd0cc725311074",
+        "bundle_sha256": "6cf2c2d6469ef8e7b178e04ec7dc69fe33164782421d65caa2b3425fbf08b550",
+        "canonical_identity": {
+          "projection_version": "numeric-fact-projection-v1",
+          "event_id": "ev_0961f1c2da8a257e3ebc",
+          "evidence_export_version": "investigation-export-v2",
+          "canonical_kind": "reported_numeric_change",
+          "before_e_id": "e_f79c50051691ab57394c1db9",
+          "after_e_id": "e_c7521e1be419df0881c7d453",
+          "asset_id": "asset_05f863fa83922ddb",
+          "channel_id": "ch_01e1fd95179ba1da",
+          "family": "current",
+          "source_unit": "AMPERE",
+          "operation": "percent_change",
+          "result_unit": "PERCENT"
+        },
+        "canonical_text": "Reported current on channel ch_01e1fd95179ba1da mapped to asset asset_05f863fa83922ddb: 28.60183334350586 AMPERE at capture time -51.630345821380615 s (e_f79c50051691ab57394c1db9), then 29.26837158203125 AMPERE at capture time 58.42261528968811 s (e_c7521e1be419df0881c7d453); percent_change = 2.330403895863306 PERCENT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "required_ids": [
+          "e_c7521e1be419df0881c7d453",
+          "e_f79c50051691ab57394c1db9"
+        ],
+        "allowed_ids": [
+          "d_d5446e0b059bed83cf219051",
+          "e_c7521e1be419df0881c7d453",
+          "e_f79c50051691ab57394c1db9",
+          "meta_935631e97fcb4884c0d00c39"
+        ],
+        "substantive": true,
+        "key_kind": "reported_change",
+        "key_identity": {
+          "before_id": "e_f79c50051691ab57394c1db9",
+          "after_id": "e_c7521e1be419df0881c7d453",
+          "quantity": "percent_change",
+          "unit": "PERCENT"
+        },
+        "fact_key": "fk_2c9e766ee516f99facd240c7aed35df4958d6f9c698d494880313b29b9b40676"
+      }
+    },
+    {
+      "claim_id": "c_0006",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [
+          "asset_81911edb216ad8f2"
+        ],
+        "channel_ids": [
+          "ch_0270f5cae2a7db0e"
+        ],
+        "claim_id": "c_0006",
+        "claim_text": "Reported active_power on channel ch_0270f5cae2a7db0e mapped to asset asset_81911edb216ad8f2: 65318.13671875 WATT at capture time -57.80423188209534 s (e_30a86d04af2d70a9348dba53), then -264395.0 WATT at capture time 52.182199239730835 s (e_c399418c5bc1fdd08852021b); difference = -329713.13671875 WATT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_30a86d04af2d70a9348dba53",
+          "e_c399418c5bc1fdd08852021b",
+          "d_d3c3b933ea7f44790a7d0535"
+        ],
+        "payload": {
+          "after_id": "e_c399418c5bc1fdd08852021b",
+          "after_time": 52.182199239730835,
+          "after_value": -264395.0,
+          "before_id": "e_30a86d04af2d70a9348dba53",
+          "before_time": -57.80423188209534,
+          "before_value": 65318.13671875,
+          "operation": "difference",
+          "result": -329713.13671875,
+          "unit": "WATT"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "reported_change",
+        "raw_claim_sha256": "d440ac02ec8901372449d9d7d9c82a34b742582b268ce50359022a7461896c1b",
+        "bundle_sha256": "6cf2c2d6469ef8e7b178e04ec7dc69fe33164782421d65caa2b3425fbf08b550",
+        "canonical_identity": {
+          "projection_version": "numeric-fact-projection-v1",
+          "event_id": "ev_0961f1c2da8a257e3ebc",
+          "evidence_export_version": "investigation-export-v2",
+          "canonical_kind": "reported_numeric_change",
+          "before_e_id": "e_30a86d04af2d70a9348dba53",
+          "after_e_id": "e_c399418c5bc1fdd08852021b",
+          "asset_id": "asset_81911edb216ad8f2",
+          "channel_id": "ch_0270f5cae2a7db0e",
+          "family": "active_power",
+          "source_unit": "WATT",
+          "operation": "difference",
+          "result_unit": "WATT"
+        },
+        "canonical_text": "Reported active_power on channel ch_0270f5cae2a7db0e mapped to asset asset_81911edb216ad8f2: 65318.13671875 WATT at capture time -57.80423188209534 s (e_30a86d04af2d70a9348dba53), then -264395.0 WATT at capture time 52.182199239730835 s (e_c399418c5bc1fdd08852021b); difference = -329713.13671875 WATT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "required_ids": [
+          "e_30a86d04af2d70a9348dba53",
+          "e_c399418c5bc1fdd08852021b"
+        ],
+        "allowed_ids": [
+          "d_d3c3b933ea7f44790a7d0535",
+          "e_30a86d04af2d70a9348dba53",
+          "e_c399418c5bc1fdd08852021b",
+          "meta_edfa635116eb3f1d76ccd099"
+        ],
+        "substantive": true,
+        "key_kind": "reported_change",
+        "key_identity": {
+          "before_id": "e_30a86d04af2d70a9348dba53",
+          "after_id": "e_c399418c5bc1fdd08852021b",
+          "quantity": "difference",
+          "unit": "WATT"
+        },
+        "fact_key": "fk_8d941c78c025e7fab13f43ef12ac30b14b8aedda70bbb8b2bbd38e2ad5524179"
+      }
+    },
+    {
+      "claim_id": "c_0007",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [
+          "asset_81911edb216ad8f2"
+        ],
+        "channel_ids": [
+          "ch_0270f5cae2a7db0e"
+        ],
+        "claim_id": "c_0007",
+        "claim_text": "Reported active_power on channel ch_0270f5cae2a7db0e mapped to asset asset_81911edb216ad8f2: 65318.13671875 WATT at capture time -57.80423188209534 s (e_30a86d04af2d70a9348dba53), then -264395.0 WATT at capture time 52.182199239730835 s (e_c399418c5bc1fdd08852021b); percent_change = -504.7803769088589 PERCENT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_30a86d04af2d70a9348dba53",
+          "e_c399418c5bc1fdd08852021b",
+          "d_d3c3b933ea7f44790a7d0535"
+        ],
+        "payload": {
+          "after_id": "e_c399418c5bc1fdd08852021b",
+          "after_time": 52.182199239730835,
+          "after_value": -264395.0,
+          "before_id": "e_30a86d04af2d70a9348dba53",
+          "before_time": -57.80423188209534,
+          "before_value": 65318.13671875,
+          "operation": "percent_change",
+          "result": -504.7803769088589,
+          "unit": "PERCENT"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "reported_change",
+        "raw_claim_sha256": "e9f33ce03a5708741bca5c47a56af97134c3703cdfa55fb767acf4f3bb20ce3d",
+        "bundle_sha256": "6cf2c2d6469ef8e7b178e04ec7dc69fe33164782421d65caa2b3425fbf08b550",
+        "canonical_identity": {
+          "projection_version": "numeric-fact-projection-v1",
+          "event_id": "ev_0961f1c2da8a257e3ebc",
+          "evidence_export_version": "investigation-export-v2",
+          "canonical_kind": "reported_numeric_change",
+          "before_e_id": "e_30a86d04af2d70a9348dba53",
+          "after_e_id": "e_c399418c5bc1fdd08852021b",
+          "asset_id": "asset_81911edb216ad8f2",
+          "channel_id": "ch_0270f5cae2a7db0e",
+          "family": "active_power",
+          "source_unit": "WATT",
+          "operation": "percent_change",
+          "result_unit": "PERCENT"
+        },
+        "canonical_text": "Reported active_power on channel ch_0270f5cae2a7db0e mapped to asset asset_81911edb216ad8f2: 65318.13671875 WATT at capture time -57.80423188209534 s (e_30a86d04af2d70a9348dba53), then -264395.0 WATT at capture time 52.182199239730835 s (e_c399418c5bc1fdd08852021b); percent_change = -504.7803769088589 PERCENT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "required_ids": [
+          "e_30a86d04af2d70a9348dba53",
+          "e_c399418c5bc1fdd08852021b"
+        ],
+        "allowed_ids": [
+          "d_d3c3b933ea7f44790a7d0535",
+          "e_30a86d04af2d70a9348dba53",
+          "e_c399418c5bc1fdd08852021b",
+          "meta_edfa635116eb3f1d76ccd099"
+        ],
+        "substantive": true,
+        "key_kind": "reported_change",
+        "key_identity": {
+          "before_id": "e_30a86d04af2d70a9348dba53",
+          "after_id": "e_c399418c5bc1fdd08852021b",
+          "quantity": "percent_change",
+          "unit": "PERCENT"
+        },
+        "fact_key": "fk_961df3ffdf780bf8cd751c2dc2360d7b9ad2f58832e8c9755fb7625fccb4ae56"
+      }
+    },
+    {
+      "claim_id": "c_0008",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [
+          "asset_5c5dca51985d37c3"
+        ],
+        "channel_ids": [
+          "ch_139683601a10167d"
+        ],
+        "claim_id": "c_0008",
+        "claim_text": "Observation e_8606b7842af56e3d54832106 reported true NONE on channel ch_139683601a10167d mapped to asset asset_5c5dca51985d37c3 at capture time 0.2723042964935303 s. This is a reported observation, not independent physical truth.",
+        "claim_type": "reported_value",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_8606b7842af56e3d54832106"
+        ],
+        "payload": {
+          "record_id": "e_8606b7842af56e3d54832106",
+          "time": 0.2723042964935303,
+          "unit": "NONE",
+          "value": true
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "reported_value",
+        "raw_claim_sha256": "e40a92f0989894631d81025bb42776b7c242d5fff23333839b09cb9c04c141e7",
+        "bundle_sha256": "6cf2c2d6469ef8e7b178e04ec7dc69fe33164782421d65caa2b3425fbf08b550",
+        "canonical_text": "Observation e_8606b7842af56e3d54832106 reported true NONE on channel ch_139683601a10167d mapped to asset asset_5c5dca51985d37c3 at capture time 0.2723042964935303 s. This is a reported observation, not independent physical truth.",
+        "required_ids": [
+          "e_8606b7842af56e3d54832106"
+        ],
+        "allowed_ids": [
+          "e_8606b7842af56e3d54832106",
+          "meta_4d4540079d9a2a1c6b19fd04"
+        ],
+        "substantive": true,
+        "key_kind": "reported_value",
+        "key_identity": {
+          "record_id": "e_8606b7842af56e3d54832106"
+        },
+        "fact_key": "fk_e2122c52777875410bd6db849c49a19874f6f710cc5a3fb1ed0c409c6be076de"
+      }
+    },
+    {
+      "claim_id": "c_0009",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [
+          "asset_775f0166e0b4e63d"
+        ],
+        "channel_ids": [
+          "ch_575655c67552cca7"
+        ],
+        "claim_id": "c_0009",
+        "claim_text": "Observation e_7b8830649376545175bb2cd6 reported false NONE on channel ch_575655c67552cca7 mapped to asset asset_775f0166e0b4e63d at capture time 11.330389261245728 s. This is a reported observation, not independent physical truth.",
+        "claim_type": "reported_value",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_7b8830649376545175bb2cd6"
+        ],
+        "payload": {
+          "record_id": "e_7b8830649376545175bb2cd6",
+          "time": 11.330389261245728,
+          "unit": "NONE",
+          "value": false
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "reported_value",
+        "raw_claim_sha256": "5eba096003d0b0c3fd267b48dab2cb1d4c6d146bb6e862f8e94370b51c4281dd",
+        "bundle_sha256": "6cf2c2d6469ef8e7b178e04ec7dc69fe33164782421d65caa2b3425fbf08b550",
+        "canonical_text": "Observation e_7b8830649376545175bb2cd6 reported false NONE on channel ch_575655c67552cca7 mapped to asset asset_775f0166e0b4e63d at capture time 11.330389261245728 s. This is a reported observation, not independent physical truth.",
+        "required_ids": [
+          "e_7b8830649376545175bb2cd6"
+        ],
+        "allowed_ids": [
+          "e_7b8830649376545175bb2cd6",
+          "meta_9010171a9695ece698db7aa5"
+        ],
+        "substantive": true,
+        "key_kind": "reported_value",
+        "key_identity": {
+          "record_id": "e_7b8830649376545175bb2cd6"
+        },
+        "fact_key": "fk_65db369fe3208bee2d18ca63c32028f488025ef69b92d76c17304d5a561a9398"
+      }
+    },
+    {
+      "claim_id": "c_0010",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [
+          "asset_3cf0311a09f7bd43"
+        ],
+        "channel_ids": [
+          "ch_cea9ace8e45434cd"
+        ],
+        "claim_id": "c_0010",
+        "claim_text": "Observation e_96d6bf5a6af6d6695942f280 reported false NONE on channel ch_cea9ace8e45434cd mapped to asset asset_3cf0311a09f7bd43 at capture time 22.408055067062378 s. This is a reported observation, not independent physical truth.",
+        "claim_type": "reported_value",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_96d6bf5a6af6d6695942f280"
+        ],
+        "payload": {
+          "record_id": "e_96d6bf5a6af6d6695942f280",
+          "time": 22.408055067062378,
+          "unit": "NONE",
+          "value": false
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "reported_value",
+        "raw_claim_sha256": "e2cd08820bdf508e9e47ac34871e43e2af0a31317e775bc9c2e73e35efd5e4c6",
+        "bundle_sha256": "6cf2c2d6469ef8e7b178e04ec7dc69fe33164782421d65caa2b3425fbf08b550",
+        "canonical_text": "Observation e_96d6bf5a6af6d6695942f280 reported false NONE on channel ch_cea9ace8e45434cd mapped to asset asset_3cf0311a09f7bd43 at capture time 22.408055067062378 s. This is a reported observation, not independent physical truth.",
+        "required_ids": [
+          "e_96d6bf5a6af6d6695942f280"
+        ],
+        "allowed_ids": [
+          "e_96d6bf5a6af6d6695942f280",
+          "meta_9263cf1e4fb94b5399301ed2"
+        ],
+        "substantive": true,
+        "key_kind": "reported_value",
+        "key_identity": {
+          "record_id": "e_96d6bf5a6af6d6695942f280"
+        },
+        "fact_key": "fk_c704c54f326f2fb0bb51e60c19081e41412dcb4c24466dbdfe677a9efdbadd32"
+      }
+    },
+    {
+      "claim_id": "c_0011",
+      "disposition": "INSUFFICIENT",
+      "reason": "noncanonical_text_requires_hash_bound_human_review",
+      "published_claim": null,
+      "checks": {
+        "status": "NOT_SUPPORTED_OR_NOT_CHECKABLE"
+      }
+    },
+    {
+      "claim_id": "c_0012",
+      "disposition": "INSUFFICIENT",
+      "reason": "noncanonical_text_requires_hash_bound_human_review",
+      "published_claim": null,
+      "checks": {
+        "status": "NOT_SUPPORTED_OR_NOT_CHECKABLE"
+      }
+    },
+    {
+      "claim_id": "c_0013",
+      "disposition": "INSUFFICIENT",
+      "reason": "noncanonical_text_requires_hash_bound_human_review",
+      "published_claim": null,
+      "checks": {
+        "status": "NOT_SUPPORTED_OR_NOT_CHECKABLE"
+      }
+    },
+    {
+      "claim_id": "c_0014",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [],
+        "channel_ids": [],
+        "claim_id": "c_0014",
+        "claim_text": "Observations e_8606b7842af56e3d54832106 and e_7b8830649376545175bb2cd6 have capture-time relation precedes, delta 11.058084964752197 SECOND, scope episode_only, mapped asset null. This does not establish execution, physical causation, malicious intent, successful compromise or attribution.",
+        "claim_type": "temporal_association",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_8606b7842af56e3d54832106",
+          "e_7b8830649376545175bb2cd6"
+        ],
+        "payload": {
+          "delta_seconds": 11.058084964752197,
+          "earlier_id": "e_8606b7842af56e3d54832106",
+          "later_id": "e_7b8830649376545175bb2cd6",
+          "mapped_asset_id": null,
+          "mapping_ids": [],
+          "relation": "precedes",
+          "scope": "episode_only"
+        },
+        "question_ids": [
+          "Q4"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "temporal_association",
+        "raw_claim_sha256": "a24d9e1156513a3f284446ae151dd389cd415e11c28fdf364ff6206a96bde2ba",
+        "bundle_sha256": "6cf2c2d6469ef8e7b178e04ec7dc69fe33164782421d65caa2b3425fbf08b550",
+        "canonical_text": "Observations e_8606b7842af56e3d54832106 and e_7b8830649376545175bb2cd6 have capture-time relation precedes, delta 11.058084964752197 SECOND, scope episode_only, mapped asset null. This does not establish execution, physical causation, malicious intent, successful compromise or attribution.",
+        "required_ids": [
+          "e_7b8830649376545175bb2cd6",
+          "e_8606b7842af56e3d54832106"
+        ],
+        "allowed_ids": [
+          "e_7b8830649376545175bb2cd6",
+          "e_8606b7842af56e3d54832106"
+        ],
+        "substantive": true,
+        "key_kind": "temporal_association",
+        "key_identity": {
+          "earlier_id": "e_8606b7842af56e3d54832106",
+          "later_id": "e_7b8830649376545175bb2cd6",
+          "relation": "precedes",
+          "scope": "episode_only",
+          "mapping_ids": [],
+          "asset_id": null
+        },
+        "fact_key": "fk_b3920371f208276ae5203f448df8ef49ec0aea944fae77b31bc67a7b7b7e37b0"
+      }
+    },
+    {
+      "claim_id": "c_0015",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [],
+        "channel_ids": [],
+        "claim_id": "c_0015",
+        "claim_text": "Observations e_7b8830649376545175bb2cd6 and e_96d6bf5a6af6d6695942f280 have capture-time relation precedes, delta 11.07766580581665 SECOND, scope episode_only, mapped asset null. This does not establish execution, physical causation, malicious intent, successful compromise or attribution.",
+        "claim_type": "temporal_association",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_7b8830649376545175bb2cd6",
+          "e_96d6bf5a6af6d6695942f280"
+        ],
+        "payload": {
+          "delta_seconds": 11.07766580581665,
+          "earlier_id": "e_7b8830649376545175bb2cd6",
+          "later_id": "e_96d6bf5a6af6d6695942f280",
+          "mapped_asset_id": null,
+          "mapping_ids": [],
+          "relation": "precedes",
+          "scope": "episode_only"
+        },
+        "question_ids": [
+          "Q4"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "temporal_association",
+        "raw_claim_sha256": "45f5b75c272924629c705b0f604d1f7611b4ebbc10a73c743eea907153d5a5a1",
+        "bundle_sha256": "6cf2c2d6469ef8e7b178e04ec7dc69fe33164782421d65caa2b3425fbf08b550",
+        "canonical_text": "Observations e_7b8830649376545175bb2cd6 and e_96d6bf5a6af6d6695942f280 have capture-time relation precedes, delta 11.07766580581665 SECOND, scope episode_only, mapped asset null. This does not establish execution, physical causation, malicious intent, successful compromise or attribution.",
+        "required_ids": [
+          "e_7b8830649376545175bb2cd6",
+          "e_96d6bf5a6af6d6695942f280"
+        ],
+        "allowed_ids": [
+          "e_7b8830649376545175bb2cd6",
+          "e_96d6bf5a6af6d6695942f280"
+        ],
+        "substantive": true,
+        "key_kind": "temporal_association",
+        "key_identity": {
+          "earlier_id": "e_7b8830649376545175bb2cd6",
+          "later_id": "e_96d6bf5a6af6d6695942f280",
+          "relation": "precedes",
+          "scope": "episode_only",
+          "mapping_ids": [],
+          "asset_id": null
+        },
+        "fact_key": "fk_8c0301d3de9633667192b20c7effbec9f514953ca8fa0d1eff38402b9c7ceaf7"
+      }
+    },
+    {
+      "claim_id": "c_0016",
+      "disposition": "INSUFFICIENT",
+      "reason": "unknown_subject_not_checkable",
+      "published_claim": null,
+      "checks": {
+        "status": "NOT_SUPPORTED_OR_NOT_CHECKABLE"
+      }
+    },
+    {
+      "claim_id": "c_0017",
+      "disposition": "INSUFFICIENT",
+      "reason": "Q6_relevance_requires_human_review_not_deterministically_checkable",
+      "published_claim": null,
+      "checks": {
+        "status": "NOT_SUPPORTED_OR_NOT_CHECKABLE"
+      }
+    },
+    {
+      "claim_id": "c_0018",
+      "disposition": "INSUFFICIENT",
+      "reason": "unknown_subject_not_checkable",
+      "published_claim": null,
+      "checks": {
+        "status": "NOT_SUPPORTED_OR_NOT_CHECKABLE"
+      }
+    }
+  ],
+  "published_report": {
+    "schema_version": "investigation-claim-v3",
+    "event_id": "ev_0961f1c2da8a257e3ebc",
+    "evidence_view": "EN",
+    "citation_mode": "required",
+    "claims": [
+      {
+        "asset_ids": [],
+        "channel_ids": [],
+        "claim_id": "c_0003",
+        "claim_text": "Within the approved captured TCP/2404 population, query d_fa8b058c3822a3538a79e090 reports interval -40.85218286514282 to -39.85706281661987 s, duration 0.9951200485229492 SECOND, bounds p_16d9700a37f5609a51bd857d and p_1faa30a769f33937d9915db2. This does not establish outage, DoS or absence outside the covered scope.",
+        "claim_type": "communication_gap",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "d_fa8b058c3822a3538a79e090",
+          "p_16d9700a37f5609a51bd857d",
+          "p_1faa30a769f33937d9915db2"
+        ],
+        "payload": {
+          "coverage_id": "d_fa8b058c3822a3538a79e090",
+          "duration_seconds": 0.9951200485229492,
+          "end": -39.85706281661987,
+          "left_id": "p_16d9700a37f5609a51bd857d",
+          "population": "observed_tcp_2404_packets",
+          "right_id": "p_1faa30a769f33937d9915db2",
+          "start": -40.85218286514282
+        },
+        "question_ids": [
+          "Q1"
+        ],
+        "support_assertion": "asserted"
+      },
+      {
+        "asset_ids": [
+          "asset_05f863fa83922ddb"
+        ],
+        "channel_ids": [
+          "ch_01e1fd95179ba1da"
+        ],
+        "claim_id": "c_0004",
+        "claim_text": "Reported current on channel ch_01e1fd95179ba1da mapped to asset asset_05f863fa83922ddb: 28.60183334350586 AMPERE at capture time -51.630345821380615 s (e_f79c50051691ab57394c1db9), then 29.26837158203125 AMPERE at capture time 58.42261528968811 s (e_c7521e1be419df0881c7d453); difference = 0.6665382385253906 AMPERE. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_f79c50051691ab57394c1db9",
+          "e_c7521e1be419df0881c7d453",
+          "d_d5446e0b059bed83cf219051"
+        ],
+        "payload": {
+          "after_id": "e_c7521e1be419df0881c7d453",
+          "after_time": 58.42261528968811,
+          "after_value": 29.26837158203125,
+          "before_id": "e_f79c50051691ab57394c1db9",
+          "before_time": -51.630345821380615,
+          "before_value": 28.60183334350586,
+          "operation": "difference",
+          "result": 0.6665382385253906,
+          "unit": "AMPERE"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      {
+        "asset_ids": [
+          "asset_05f863fa83922ddb"
+        ],
+        "channel_ids": [
+          "ch_01e1fd95179ba1da"
+        ],
+        "claim_id": "c_0005",
+        "claim_text": "Reported current on channel ch_01e1fd95179ba1da mapped to asset asset_05f863fa83922ddb: 28.60183334350586 AMPERE at capture time -51.630345821380615 s (e_f79c50051691ab57394c1db9), then 29.26837158203125 AMPERE at capture time 58.42261528968811 s (e_c7521e1be419df0881c7d453); percent_change = 2.330403895863306 PERCENT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_f79c50051691ab57394c1db9",
+          "e_c7521e1be419df0881c7d453",
+          "d_d5446e0b059bed83cf219051"
+        ],
+        "payload": {
+          "after_id": "e_c7521e1be419df0881c7d453",
+          "after_time": 58.42261528968811,
+          "after_value": 29.26837158203125,
+          "before_id": "e_f79c50051691ab57394c1db9",
+          "before_time": -51.630345821380615,
+          "before_value": 28.60183334350586,
+          "operation": "percent_change",
+          "result": 2.330403895863306,
+          "unit": "PERCENT"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      {
+        "asset_ids": [
+          "asset_81911edb216ad8f2"
+        ],
+        "channel_ids": [
+          "ch_0270f5cae2a7db0e"
+        ],
+        "claim_id": "c_0006",
+        "claim_text": "Reported active_power on channel ch_0270f5cae2a7db0e mapped to asset asset_81911edb216ad8f2: 65318.13671875 WATT at capture time -57.80423188209534 s (e_30a86d04af2d70a9348dba53), then -264395.0 WATT at capture time 52.182199239730835 s (e_c399418c5bc1fdd08852021b); difference = -329713.13671875 WATT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_30a86d04af2d70a9348dba53",
+          "e_c399418c5bc1fdd08852021b",
+          "d_d3c3b933ea7f44790a7d0535"
+        ],
+        "payload": {
+          "after_id": "e_c399418c5bc1fdd08852021b",
+          "after_time": 52.182199239730835,
+          "after_value": -264395.0,
+          "before_id": "e_30a86d04af2d70a9348dba53",
+          "before_time": -57.80423188209534,
+          "before_value": 65318.13671875,
+          "operation": "difference",
+          "result": -329713.13671875,
+          "unit": "WATT"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      {
+        "asset_ids": [
+          "asset_81911edb216ad8f2"
+        ],
+        "channel_ids": [
+          "ch_0270f5cae2a7db0e"
+        ],
+        "claim_id": "c_0007",
+        "claim_text": "Reported active_power on channel ch_0270f5cae2a7db0e mapped to asset asset_81911edb216ad8f2: 65318.13671875 WATT at capture time -57.80423188209534 s (e_30a86d04af2d70a9348dba53), then -264395.0 WATT at capture time 52.182199239730835 s (e_c399418c5bc1fdd08852021b); percent_change = -504.7803769088589 PERCENT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_30a86d04af2d70a9348dba53",
+          "e_c399418c5bc1fdd08852021b",
+          "d_d3c3b933ea7f44790a7d0535"
+        ],
+        "payload": {
+          "after_id": "e_c399418c5bc1fdd08852021b",
+          "after_time": 52.182199239730835,
+          "after_value": -264395.0,
+          "before_id": "e_30a86d04af2d70a9348dba53",
+          "before_time": -57.80423188209534,
+          "before_value": 65318.13671875,
+          "operation": "percent_change",
+          "result": -504.7803769088589,
+          "unit": "PERCENT"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      {
+        "asset_ids": [
+          "asset_5c5dca51985d37c3"
+        ],
+        "channel_ids": [
+          "ch_139683601a10167d"
+        ],
+        "claim_id": "c_0008",
+        "claim_text": "Observation e_8606b7842af56e3d54832106 reported true NONE on channel ch_139683601a10167d mapped to asset asset_5c5dca51985d37c3 at capture time 0.2723042964935303 s. This is a reported observation, not independent physical truth.",
+        "claim_type": "reported_value",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_8606b7842af56e3d54832106"
+        ],
+        "payload": {
+          "record_id": "e_8606b7842af56e3d54832106",
+          "time": 0.2723042964935303,
+          "unit": "NONE",
+          "value": true
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      {
+        "asset_ids": [
+          "asset_775f0166e0b4e63d"
+        ],
+        "channel_ids": [
+          "ch_575655c67552cca7"
+        ],
+        "claim_id": "c_0009",
+        "claim_text": "Observation e_7b8830649376545175bb2cd6 reported false NONE on channel ch_575655c67552cca7 mapped to asset asset_775f0166e0b4e63d at capture time 11.330389261245728 s. This is a reported observation, not independent physical truth.",
+        "claim_type": "reported_value",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_7b8830649376545175bb2cd6"
+        ],
+        "payload": {
+          "record_id": "e_7b8830649376545175bb2cd6",
+          "time": 11.330389261245728,
+          "unit": "NONE",
+          "value": false
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      {
+        "asset_ids": [
+          "asset_3cf0311a09f7bd43"
+        ],
+        "channel_ids": [
+          "ch_cea9ace8e45434cd"
+        ],
+        "claim_id": "c_0010",
+        "claim_text": "Observation e_96d6bf5a6af6d6695942f280 reported false NONE on channel ch_cea9ace8e45434cd mapped to asset asset_3cf0311a09f7bd43 at capture time 22.408055067062378 s. This is a reported observation, not independent physical truth.",
+        "claim_type": "reported_value",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_96d6bf5a6af6d6695942f280"
+        ],
+        "payload": {
+          "record_id": "e_96d6bf5a6af6d6695942f280",
+          "time": 22.408055067062378,
+          "unit": "NONE",
+          "value": false
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      {
+        "asset_ids": [],
+        "channel_ids": [],
+        "claim_id": "c_0014",
+        "claim_text": "Observations e_8606b7842af56e3d54832106 and e_7b8830649376545175bb2cd6 have capture-time relation precedes, delta 11.058084964752197 SECOND, scope episode_only, mapped asset null. This does not establish execution, physical causation, malicious intent, successful compromise or attribution.",
+        "claim_type": "temporal_association",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_8606b7842af56e3d54832106",
+          "e_7b8830649376545175bb2cd6"
+        ],
+        "payload": {
+          "delta_seconds": 11.058084964752197,
+          "earlier_id": "e_8606b7842af56e3d54832106",
+          "later_id": "e_7b8830649376545175bb2cd6",
+          "mapped_asset_id": null,
+          "mapping_ids": [],
+          "relation": "precedes",
+          "scope": "episode_only"
+        },
+        "question_ids": [
+          "Q4"
+        ],
+        "support_assertion": "asserted"
+      },
+      {
+        "asset_ids": [],
+        "channel_ids": [],
+        "claim_id": "c_0015",
+        "claim_text": "Observations e_7b8830649376545175bb2cd6 and e_96d6bf5a6af6d6695942f280 have capture-time relation precedes, delta 11.07766580581665 SECOND, scope episode_only, mapped asset null. This does not establish execution, physical causation, malicious intent, successful compromise or attribution.",
+        "claim_type": "temporal_association",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_7b8830649376545175bb2cd6",
+          "e_96d6bf5a6af6d6695942f280"
+        ],
+        "payload": {
+          "delta_seconds": 11.07766580581665,
+          "earlier_id": "e_7b8830649376545175bb2cd6",
+          "later_id": "e_96d6bf5a6af6d6695942f280",
+          "mapped_asset_id": null,
+          "mapping_ids": [],
+          "relation": "precedes",
+          "scope": "episode_only"
+        },
+        "question_ids": [
+          "Q4"
+        ],
+        "support_assertion": "asserted"
+      }
+    ],
+    "questions": [
+      {
+        "question_id": "Q1",
+        "claim_ids": [
+          "c_0003"
+        ],
+        "response": "insufficient"
+      },
+      {
+        "question_id": "Q2",
+        "claim_ids": [
+          "c_0004",
+          "c_0005",
+          "c_0006",
+          "c_0007",
+          "c_0008",
+          "c_0009",
+          "c_0010"
+        ],
+        "response": "substantive"
+      },
+      {
+        "question_id": "Q3",
+        "claim_ids": [],
+        "response": "insufficient"
+      },
+      {
+        "question_id": "Q4",
+        "claim_ids": [
+          "c_0014",
+          "c_0015"
+        ],
+        "response": "substantive"
+      },
+      {
+        "question_id": "Q5",
+        "claim_ids": [],
+        "response": "insufficient"
+      },
+      {
+        "question_id": "Q6",
+        "claim_ids": [],
+        "response": "insufficient"
+      },
+      {
+        "question_id": "Q7",
+        "claim_ids": [],
+        "response": "insufficient"
+      }
+    ]
+  },
+  "question_action_limit": "Question links are retained; independent human scoring decides substantive minimum and correct insufficiency reason. No answerability inferred from claim count.",
+  "cell_id": "V1-EN",
+  "source_cell_id": "G1-EN",
+  "source_output_sha256": "ea3ea679b30b01792dd64a627bd44f24dacdc632cb6ac03d2ba3959da66daa7f",
+  "r5_adapter": {
+    "path": "src/investigation_r5/runner.py",
+    "sha256": "f34270fea88e4cec0d0c823876d6e8036d31944e4b0a0bcf8f4ba7ce4bc5f0b8"
+  },
+  "historical_verifier_engine": "r4 B4; unchanged finite verification/publishing implementation",
+  "status": "REPLAYED"
+}

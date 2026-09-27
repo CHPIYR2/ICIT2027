@@ -1,0 +1,49 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "investigation-retrieval-v2"
+    },
+    "event_id": {
+      "type": "string",
+      "pattern": "^ev_[0-9a-f]{20}$"
+    },
+    "view": {
+      "enum": [
+        "E",
+        "N",
+        "EN"
+      ]
+    },
+    "retrieved_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(?:p_[0-9a-f]{24}|m_[0-9a-f]{24}|e_[0-9a-f]{24}|a_[0-9a-f]{24}|d_[0-9a-f]{24})$"
+      },
+      "uniqueItems": true
+    },
+    "mapping_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(?:meta_[0-9a-f]{24})$"
+      },
+      "uniqueItems": true
+    },
+    "scope_id": {
+      "type": "string",
+      "pattern": "^(?:d_[0-9a-f]{24})$"
+    }
+  },
+  "required": [
+    "schema_version",
+    "event_id",
+    "view",
+    "retrieved_ids",
+    "mapping_ids",
+    "scope_id"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

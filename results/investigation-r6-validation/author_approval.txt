@@ -1,0 +1,468 @@
+AUTHOR APPROVAL:
+
+The r6 offline candidate is approved for controlled DEVELOPMENT execution.
+
+You are authorized to execute the complete predeclared 64-position r6 validation using:
+
+`model_max_output_tokens = 24576`
+
+mapped to the Responses API parameter:
+
+`max_output_tokens = 24576`
+
+This authorization is DEVELOPMENT ONLY.
+
+It is NOT protocol freeze and NOT final evaluation authorization.
+
+# 1. Important rate-limit interpretation
+
+Use the current approved interpretation documented for this run:
+
+OpenAI rate-limit token demand is evaluated using the applicable provider rate-limit mechanism; the current developer documentation describes the estimate in terms of the maximum of the configured maximum-output allowance and the estimated request-token demand, rather than simply summing input tokens and maximum output tokens.
+
+Historical r5 provider headers recorded:
+
+`x-ratelimit-limit-tokens = 30000`
+
+for 17 successful responses.
+
+Therefore 24576 is currently considered a feasible candidate under the preserved evidence, subject to live provider behavior.
+
+Do NOT assume historical headers guarantee current capacity.
+
+# 2. Pre-execution integrity gate
+
+Before the first API call:
+
+1. Run the complete relevant local test suite.
+2. Require all tests to pass.
+3. Verify the r6 candidate inventory:
+   SHA-256:
+   `cc0b0f9a03578aa1cecaf45f742bd29284a0cceccb510a4bd73b21d53e86f84e`
+4. Verify all r4 protected hashes.
+5. Verify all r5 candidate hashes.
+6. Verify all r5 8192 validation/forensic preservation hashes.
+7. Verify sealed human-gold hashes.
+8. Verify the 64-position r6 manifest.
+9. Verify all 64 request-equivalence records.
+10. Verify that the only intended substantive generation change from r5 is:
+    `max_output_tokens: 8192 -> 24576`.
+11. Verify:
+    - model = `gpt-4.1-2025-04-14`
+    - Responses API
+    - temperature = 0
+    - no seed assumption
+    - 3 repetitions
+    - prompt bytes unchanged
+    - schema bytes unchanged
+    - retrieval unchanged
+    - verifier unchanged
+    - metrics unchanged
+    - human gold unchanged.
+12. Verify:
+    - `evidence_input_token_safety_ceiling = 16384`
+    - `model_max_output_tokens = 24576`
+    remain distinct concepts.
+13. Verify the development execution path cannot access evaluation evidence/gold/truth/review ledgers/results.
+
+If ANY integrity check fails:
+
+STOP BEFORE API CALLS.
+
+Do not patch research semantics mid-run.
+
+Report the blocker.
+
+# 3. Rate-limit preflight
+
+Before execution, calculate and record the request-size estimate available locally for all 64 predeclared requests.
+
+Report:
+
+- minimum estimated request/input tokens
+- median
+- p90
+- p95
+- maximum
+
+Confirm that no known per-request request-size estimate itself exceeds the preserved 30,000-token rate-limit evidence.
+
+Do not change evidence or prompts to reduce request size.
+
+If a request is locally estimated above 30,000 tokens:
+
+STOP before API execution and report it.
+
+Do not remove evidence.
+
+Do not shorten the prompt.
+
+# 4. Authorized positions
+
+Execute exactly the complete r6 manifest:
+
+G0:
+19 positions
+
+G1-EN:
+21 positions
+
+G1-E:
+12 positions
+
+G1-N:
+12 positions
+
+Total:
+64 logical generation positions.
+
+All 64 must use the same r6 24576 output-cap configuration.
+
+Do not reuse any r5 8192 answer as an r6 result.
+
+The 4096 and 8192 runs remain historical development configuration-selection diagnostics only.
+
+# 5. Global scheduling
+
+Use a GLOBAL SINGLE-REQUEST scheduler.
+
+Never have more than one model request in flight.
+
+Maintain at least 60 seconds between request starts.
+
+For every response, preserve all available rate-limit metadata, including where present:
+
+- x-ratelimit-limit-tokens
+- x-ratelimit-remaining-tokens
+- x-ratelimit-reset-tokens
+- project-token equivalents
+- Retry-After
+- request ID
+- response ID
+- HTTP status
+- timestamps.
+
+If provider headers require a longer wait than 60 seconds, use the longer wait.
+
+Do not increase concurrency.
+
+Do not batch experimental positions into a single request.
+
+Do not switch to Batch API in this validation.
+
+The API execution surface must remain the approved Responses API path.
+
+# 6. Distinguish rate-limit failure classes
+
+Do not treat every 429 identically.
+
+If a 429 is an ordinary temporary/ramp/rate exhaustion condition that can be resolved by waiting:
+
+- preserve it;
+- follow Retry-After where present;
+- apply the approved transport-only retry policy;
+- count the attempt;
+- do not exceed 3 transport attempts.
+
+If the provider explicitly reports that a SINGLE request's configured token demand exceeds the applicable token-rate limit and waiting cannot make that request admissible:
+
+- preserve the exact error;
+- do NOT repeatedly retry it;
+- STOP the validation;
+- classify it as a configuration/rate-limit feasibility blocker;
+- report to the author.
+
+Never modify max_output_tokens during the run to work around a 429.
+
+# 7. Output-cap HARD STOP
+
+If ANY delivered r6 response has:
+
+`status = incomplete`
+
+with:
+
+`incomplete_details.reason = max_output_tokens`
+
+then:
+
+1. preserve the complete provider artifact;
+2. do NOT retry that position;
+3. stop scheduling NEW model-generation positions;
+4. mark 24576 capacity validation as FAILED / NOT ACCEPTED;
+5. do NOT change to 32768;
+6. do NOT change prompt/schema/retrieval;
+7. do NOT continue merely to complete the 64-position matrix;
+8. report to the author.
+
+This rule has priority over completing all 64 positions.
+
+# 8. Transport retry policy
+
+Maximum:
+3 transport attempts per logical position.
+
+Retry ONLY failures authorized by the existing r6 transport policy.
+
+Never retry because of:
+
+- answer quality;
+- factual quality;
+- citation quality;
+- unsupported claims;
+- low metric score;
+- verifier disposition;
+- schema semantic quality;
+- coverage;
+- withholding behavior;
+- output-cap truncation.
+
+Every attempt must remain preserved.
+
+Unknown delivery status remains UNKNOWN.
+
+Never infer zero usage.
+
+# 9. G1-E and G1-N isolation
+
+For all G1-E positions verify:
+
+- E evidence only;
+- approved necessary metadata only;
+- no hidden N support;
+- citation/reference visibility;
+- input-budget compliance.
+
+For all G1-N positions verify:
+
+- N evidence only;
+- approved necessary metadata only;
+- no hidden E/process values;
+- citation/reference visibility;
+- input-budget compliance.
+
+Do not permit single-source views to manufacture cross-source relationships.
+
+Do not tune prompts based on smoke-test output.
+
+# 10. G1-EN to V1-EN replay
+
+For every eligible completed G1-EN r6 output:
+
+- perform deterministic V1-EN replay;
+- make zero model calls;
+- verify exact-byte/hash identity of the raw G1-EN input consumed by the verifier;
+- preserve raw and published outputs separately.
+
+If the raw G1-EN output is unavailable or ineligible:
+
+record the existing r6 equivalent of `REPLAY_UNAVAILABLE`.
+
+Do not regenerate it.
+
+Do not create V1-E or V1-N.
+
+# 11. Development-only interpretation
+
+The r6 run validates:
+
+- output capacity;
+- schema/conformance;
+- evidence visibility;
+- view isolation;
+- reference binding;
+- replay identity;
+- execution integrity.
+
+Do NOT use this development run as final research performance results.
+
+Do NOT tune:
+- prompts
+- retrieval
+- claim policy
+- verifier
+- metrics
+- gold
+
+based on observed factual scores.
+
+# 12. Evaluation isolation
+
+Do NOT access:
+
+- evaluation evidence;
+- evaluation gold;
+- evaluation truth;
+- evaluation review ledgers;
+- evaluation results.
+
+Do not provision custody in this run.
+
+If any evaluation material becomes accessible through the development execution path:
+
+STOP immediately.
+
+Preserve evidence of the isolation failure without reading unnecessary evaluation content.
+
+# 13. Human-gold preservation
+
+Human gold must remain byte-for-byte unchanged.
+
+Do not:
+
+- add aliases;
+- rewrite facts;
+- modify guardrails;
+- alter review decisions;
+- generate annotation suggestions from model output.
+
+Verify sealed-gold hashes after execution.
+
+# 14. Usage and cost
+
+For every attempt preserve actual provider usage:
+
+- input_tokens
+- cached_input_tokens
+- output_tokens
+- total_tokens where available.
+
+At completion report:
+
+- known total input tokens
+- known cached input tokens
+- known uncached input tokens
+- known output tokens
+- attempts with missing usage
+- calculable API cost under the documented GPT-4.1 rates used by the protocol.
+
+Do not treat `max_output_tokens=24576` as billed output.
+
+Billing must use actual provider usage.
+
+# 15. Per-cell results
+
+Return separately for:
+
+- G0
+- G1-E
+- G1-N
+- G1-EN
+
+the following:
+
+- planned positions
+- attempted positions
+- completed provider deliveries
+- max_output_tokens truncations
+- other incomplete responses
+- strict schema passes
+- strict schema failures
+- view/reference violations
+- transport failures
+- retry count and reasons
+- output-token min/median/p90/p95/max for delivered responses.
+
+Do not report these development values as paper performance results.
+
+# 16. V1-EN results
+
+Report:
+
+- eligible G1-EN r6 outputs
+- replayed
+- replay unavailable
+- exact-byte/hash identity passes/failures
+- verifier model calls = 0.
+
+Verifier dispositions may be reported as conformance diagnostics only.
+
+Do not report them as verifier accuracy.
+
+# 17. r6 acceptance rule
+
+The 24576 candidate passes THIS DEVELOPMENT OUTPUT-CAP VALIDATION only if:
+
+1. ZERO delivered responses terminate due to `max_output_tokens`;
+2. required strict schema/conformance checks pass under the predeclared rules;
+3. evidence-view isolation remains valid;
+4. request/inventory integrity remains valid;
+5. no execution defect invalidates the run.
+
+A passing development run does NOT guarantee final evaluation will never truncate.
+
+Do NOT automatically freeze 24576 after a pass.
+
+# 18. Post-run integrity
+
+After execution:
+
+1. rerun all relevant local tests;
+2. verify protected r4 hashes;
+3. verify protected r5 hashes;
+4. verify r5 validation/forensic hashes;
+5. verify r6 pre-run candidate hashes;
+6. verify sealed human-gold hashes;
+7. create a NEW post-validation artifact manifest;
+8. hash the post-validation manifest.
+
+Do not overwrite the r6 pre-run candidate inventory.
+
+If preservation fails:
+
+do not freeze;
+report the discrepancy.
+
+# 19. Required final report
+
+Return:
+
+A. preflight integrity
+
+B. request-size/rate-limit preflight
+
+C. executed logical positions and attempts
+
+D. per-cell delivery/capacity summary
+
+E. 24576 acceptance decision
+
+F. G1-E/G1-N isolation result
+
+G. G1-EN/V1-EN replay result
+
+H. rate-limit and transport events
+
+I. token usage and calculable cost
+
+J. pre/post local tests
+
+K. r4/r5/r6/gold preservation
+
+L. post-validation manifest/hash
+
+M. any deviations
+
+N. remaining freeze blockers
+
+O. exact recommended next author action
+
+# FINAL HARD STOP
+
+Even if all 64 positions pass:
+
+DO NOT:
+
+- freeze the protocol;
+- start the 32-event evaluation;
+- access evaluation gold/results;
+- provision custody without separate authorization;
+- modify 24576;
+- modify prompts;
+- modify schemas;
+- modify retrieval;
+- modify verifier;
+- modify metrics;
+- modify human gold.
+
+Return A–O and STOP for author review.

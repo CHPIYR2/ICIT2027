@@ -1,0 +1,41 @@
+{
+  "version": "investigation-phase1",
+  "authorization": "results/investigation-v1/approval/author_review.txt",
+  "status": "PHASE1_IMPLEMENTATION_ONLY_NOT_FINAL_PROTOCOL",
+  "llm_calls_authorized": false,
+  "command_target_amendment_enabled": false,
+  "event_manifest": "configs/investigation_events.v1.json",
+  "pilots": "configs/investigation_pilots.v1.json",
+  "views": [
+    "E",
+    "N",
+    "EN"
+  ],
+  "baseline": "B0",
+  "budget": {
+    "E": {
+      "E": 64,
+      "N": 0
+    },
+    "N": {
+      "E": 0,
+      "N": 64
+    },
+    "EN": {
+      "E": 32,
+      "N": 32
+    }
+  },
+  "serialized_bundle_max_bytes": 48000,
+  "token_budget_status": "Not applicable to B0; must fix tokenizer budget before LLM use",
+  "pair_policy": "earliest valid pre + latest valid post; if no pre/post, earliest/latest observed numeric pair; earliest unequal adjacent time-ordered state pair; no initial state",
+  "questions": {
+    "Q1": "What network activities, command requests and responses were observed?",
+    "Q2": "What process/electrical values and changes were reported?",
+    "Q3": "Which observed assets/channels/endpoints are involved and which mappings are unknown?",
+    "Q4": "What capture-time ordering is supported?",
+    "Q5": "What temporal associations between N/E are supported, without causality?",
+    "Q6": "Which security-relevant observations warrant investigation and what interpretation is supported?",
+    "Q7": "What cannot be concluded and what support is missing?"
+  }
+}

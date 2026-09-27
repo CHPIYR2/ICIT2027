@@ -1,0 +1,390 @@
+AUTHOR DECISION:
+
+The r5 8192 failure forensics are accepted.
+
+The diagnosis `LIKELY_LEGITIMATE_CAPACITY` is accepted as a development diagnosis only.
+
+No evidence currently justifies modifying the investigation task, prompt semantics, claim schema, retrieval, verifier, metrics, or human gold.
+
+However, the proposed `max_output_tokens=32768` candidate is NOT approved.
+
+Reason:
+
+The selected GPT-4.1 model contract supports 32,768 output tokens, but the previously observed account/project rate limit has been approximately 30,000 TPM. OpenAI rate-limit accounting may depend on the larger of the configured maximum output-token allowance and estimated request tokens.
+
+Therefore model capability and account/project execution capacity must not be conflated.
+
+Prepare an r6 OFFLINE output-only candidate using:
+
+`model_max_output_tokens = 24576`
+
+Do NOT call the model in this turn.
+
+# 1. Scientific rationale
+
+Record the output-cap selection history explicitly:
+
+- 4096: rejected after 55/144 development positions terminated at max_output_tokens.
+- 8192: rejected after the predeclared validation stopped on the first observed max_output_tokens termination.
+- forensic analysis of the preserved 8192 partial response classified the failure as `LIKELY_LEGITIMATE_CAPACITY`, with no observed pathological repetition, combinatorial temporal expansion, or serialization duplication sufficient to justify prompt/schema modification.
+- 12288 is not selected because the right-censored 8192 observation gives insufficient evidence that only 4096 additional tokens would be adequate.
+- 16384 provides more headroom but still risks another sequential cap-selection round and is easily confused with the separately defined input evidence safety ceiling.
+- 24576 provides 3× the failed 8192 output allowance while remaining below the previously observed approximately 30,000 TPM execution constraint.
+- 32768 is not selected at this stage because model maximum-output capability does not imply that the current account/project TPM limit can accept a request configured with that maximum.
+
+Do not describe 24576 as mathematically guaranteed to be sufficient.
+
+It is the next and intended FINAL DEVELOPMENT CANDIDATE subject to validation.
+
+# 2. Configuration naming cleanup
+
+For r6 candidate files, make the distinction explicit wherever safe and mechanically possible:
+
+- `evidence_input_token_safety_ceiling = 16384`
+- `model_max_output_tokens = 24576`
+
+If there is a separate full-input limit, use a distinct descriptive name such as:
+
+- `prompt_plus_evidence_input_token_ceiling`
+
+Do NOT globally rename historical fields.
+
+Do NOT modify r3/r4/r5 historical artifacts.
+
+The actual Responses API request parameter remains the provider-defined:
+
+`max_output_tokens`
+
+with value 24576.
+
+Document the mapping from the internal r6 name to the provider request parameter.
+
+# 3. Output-only change
+
+The r6 scientific generation configuration must differ from the approved r5 configuration only in the output-cap configuration and necessary non-semantic versioning/binding fields.
+
+Do NOT change:
+
+- model snapshot
+- Responses API
+- temperature
+- prompt content
+- prompt semantics
+- Structured Output schema
+- claim schema
+- evidence schema
+- retrieval ranking
+- evidence quotas
+- evidence byte limit
+- input evidence safety ceiling
+- evidence visibility
+- Q1–Q7
+- claim support policy
+- verifier
+- matching
+- metrics
+- metric denominators
+- gold
+- aliases
+- guardrails
+- event IDs
+- scenario strata
+- repetitions
+- bootstrap/statistical plan.
+
+If any of these would need to change to support 24576:
+
+STOP and report the blocker.
+
+# 4. Actual rate-limit feasibility gate
+
+Before preparing live execution authorization, inspect the provider rate-limit metadata already preserved from the most recent successful r5 requests.
+
+Do not make a new API call merely to query the limit.
+
+Report all available relevant preserved values, including where available:
+
+- `x-ratelimit-limit-tokens`
+- project-token limit headers
+- remaining-token headers
+- reset-token headers
+- any other recorded TPM-related metadata.
+
+Determine whether the preserved provider evidence supports executing a request with:
+
+`max_output_tokens = 24576`
+
+under the current project/account limits.
+
+Distinguish:
+
+1. GPT-4.1 model maximum output capability;
+2. organization/project TPM rate limit;
+3. monthly/account usage or billing limit;
+4. actual token billing.
+
+Do not treat these as interchangeable.
+
+If preserved provider headers show a token-rate limit below 24576:
+
+STOP.
+
+Do not prepare the run as executable.
+
+If preserved headers are absent or insufficient, mark live rate-limit feasibility as requiring confirmation at execution preflight; do not invent a value.
+
+# 5. Full 64-position r6 validation
+
+Prepare a NEW predeclared r6 validation manifest containing the same logical 64 development positions as the r5 validation design:
+
+G0:
+- 19 positions corresponding to the original B2 4096 output-cap truncation stress set.
+
+G1-EN:
+- 21 positions corresponding to the original B3 4096 output-cap truncation stress set.
+
+G1-E:
+- 4 predeclared human-reviewed pilot development events × 3 repetitions = 12.
+
+G1-N:
+- the same 4 pilot development events × 3 repetitions = 12.
+
+Total:
+64 logical generation positions.
+
+This r6 validation is a CLEAN SAME-CONFIGURATION validation.
+
+Therefore all 64 positions are included, including positions that previously completed under 8192.
+
+Do not reuse an 8192 output as if it had been generated under the 24576 configuration.
+
+Do not overwrite or invalidate prior 4096/8192 outputs.
+
+They remain development configuration-selection diagnostics.
+
+# 6. Why full 64 is selected
+
+Document that the author deliberately chooses full 64-position revalidation rather than the cheaper 47-position staged continuation.
+
+Reason:
+
+The objective is to obtain one clean final development validation matrix in which all positions use the same intended final output-cap configuration.
+
+The previous 4096 and 8192 runs remain provenance for configuration selection, not components of the final same-configuration validation matrix.
+
+Do not interpret this as performance-driven rerunning.
+
+The rerun is triggered solely by a predeclared configuration-level capacity failure.
+
+# 7. Request-diff verification
+
+For every r6 position, generate an offline request-equivalence record.
+
+Relative to the corresponding approved r5 scientific request, the only intended substantive provider-generation change is:
+
+`max_output_tokens: 8192 -> 24576`
+
+For positions that were not actually sent under r5, compare against their predeclared r5 request artifact/manifest.
+
+Allow only necessary non-semantic changes such as:
+
+- r6 run identifier
+- candidate version
+- output paths
+- manifest/hash bindings
+- timestamps generated at execution time.
+
+Prompt bytes, evidence bytes, schema bytes, model, temperature, view, citation policy, and scientific content must remain unchanged.
+
+Return a diff summary before any live authorization.
+
+# 8. Capacity acceptance criterion
+
+Predeclare the r6 capacity criterion:
+
+For the full 64-position validation:
+
+- ZERO delivered responses may terminate specifically because of `max_output_tokens`.
+
+If ANY delivered response has:
+
+`status = incomplete`
+
+and:
+
+`incomplete_details.reason = max_output_tokens`
+
+then:
+
+- preserve it;
+- do not retry it;
+- stop scheduling new model-generation positions;
+- mark 24576 capacity validation as failed;
+- report to the author;
+- do not automatically escalate to 32768;
+- do not modify prompt/schema/retrieval;
+- do not continue merely to complete the matrix.
+
+Other transport/delivery failures remain governed by the separately approved transport policy and do not automatically establish output-cap failure.
+
+# 9. Conformance acceptance
+
+In addition to zero output-cap truncations, the future validation must retain the existing requirements for:
+
+- strict schema parsing;
+- evidence/reference visibility;
+- view isolation;
+- input budget;
+- receipt/hash binding;
+- G1-E no hidden N;
+- G1-N no hidden E/process values;
+- exact G1-EN to V1-EN replay identity where applicable;
+- zero model calls for V1-EN.
+
+Do not use factual performance scores to select the output cap.
+
+# 10. Execution pacing candidate
+
+Prepare, but do not execute, the live scheduling policy.
+
+Use:
+
+- global single-request execution;
+- never more than one request in flight;
+- at least 60 seconds between request starts;
+- provider Retry-After as a minimum;
+- rate-limit reset headers where available;
+- maximum 3 transport attempts under the already approved transport-only retry policy.
+
+Before EACH future request, the runner should ensure the current provider/account rate-limit state does not require a longer delay based on preserved/live response headers.
+
+Do not increase concurrency.
+
+Do not use batching.
+
+# 11. Cost accounting
+
+Do not predict a fixed total bill for the 64-position validation.
+
+Prepare accounting using actual provider usage:
+
+- uncached input tokens
+- cached input tokens
+- output tokens
+- attempts with missing usage
+
+Preserve the existing rule that configured maximum output tokens are not equivalent to actual billed output tokens.
+
+# 12. Historical 8192 failure
+
+Preserve the 8192 failure and forensic artifacts exactly.
+
+Do not reinterpret the truncated response as a valid experiment output.
+
+Do not use its partial claims in research performance scoring.
+
+It remains evidence supporting the configuration-selection history only.
+
+# 13. Offline integrity and tests
+
+Run all relevant LOCAL tests.
+
+Add/update only tests necessary for the r6 output-only candidate, including:
+
+- 24576 model output configuration;
+- 16384 evidence input ceiling remains unchanged;
+- explicit distinction between input ceiling and output cap;
+- 64-position r6 manifest identity;
+- all-position same-cap validation;
+- request-diff enforcement;
+- rate-limit feasibility gate;
+- output-cap hard-stop behavior;
+- preservation of r4/r5 artifacts and sealed gold;
+- no evaluation access;
+- V1-EN zero-model-call replay.
+
+Do not use new model output to tune tests.
+
+# 14. Preservation
+
+Verify:
+
+- r4 protected artifacts
+- r5 candidate artifacts
+- r5 8192 validation artifacts
+- r5 forensic inputs
+- sealed human gold
+
+remain unchanged.
+
+Create a new r6 namespace.
+
+Do not overwrite historical manifests.
+
+# 15. Required offline report
+
+Return:
+
+A. r6 candidate configuration
+
+B. exact scientific diff from r5
+
+C. rationale for 24576 versus 12288 / 16384 / 32768
+
+D. preserved provider rate-limit evidence and feasibility assessment
+
+E. full 64-position validation manifest summary
+
+F. request-equivalence/diff verification
+
+G. capacity and conformance acceptance rules
+
+H. proposed execution pacing
+
+I. local test results
+
+J. preservation/hash verification
+
+K. r6 candidate inventory/hash
+
+L. remaining blockers
+
+M. exact recommended next author authorization
+
+Also explicitly answer:
+
+1. Does r6 require any human-gold modification?
+   Expected: NO.
+
+2. Does r6 modify prompt/schema/retrieval/verifier/metrics?
+   Expected: NO, except non-semantic version/config plumbing if strictly necessary.
+
+3. Is 24576 guaranteed to prevent truncation?
+   Expected: NO.
+
+4. Is 32768 currently rejected because the model cannot support it?
+   Expected: NO. The concern is account/project rate-limit feasibility, not model capability.
+
+# HARD CONSTRAINTS
+
+This turn is OFFLINE ONLY.
+
+Do NOT:
+
+- call GPT-4.1;
+- call any external model API;
+- execute the 64 positions;
+- resume the stopped 8192 run;
+- access evaluation evidence/gold/results;
+- provision custody;
+- modify human gold;
+- modify r4/r5 historical artifacts;
+- change prompt/schema/retrieval/verifier/metrics;
+- freeze the protocol;
+- start final evaluation.
+
+After producing the r6 offline candidate and report:
+
+STOP.
+
+Wait for explicit author approval.

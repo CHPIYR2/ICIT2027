@@ -1,0 +1,42 @@
+{
+  "version": "generation-controls-development-v1",
+  "temperature": 0,
+  "repetitions": 3,
+  "repetition_ids": [
+    1,
+    2,
+    3
+  ],
+  "selection": "retain and score all repetitions; no best-of selection",
+  "max_attempts_per_repetition": 3,
+  "max_retries": 2,
+  "backoff_seconds": [
+    1,
+    2
+  ],
+  "timeout_seconds": 120,
+  "retry_allowed": [
+    "HTTP 408, 429, 5xx",
+    "transport connection failure",
+    "timeout",
+    "malformed provider envelope",
+    "completed provider response with no recoverable JSON experiment envelope"
+  ],
+  "retry_forbidden": [
+    "incorrect answer",
+    "missing evidence/citations",
+    "invalid claim semantics",
+    "low score",
+    "verifier rejection",
+    "provider refusal",
+    "output token-limit truncation",
+    "recoverable experiment output with schema violations",
+    "HTTP 400/401/403/404 or unsupported controls"
+  ],
+  "schema_delivery_boundary": "Retry only when no JSON object with claims list and questions list can be recovered from a completed text response. Claim/payload/citation/question/context violations are retained experiment outputs, not delivery retries.",
+  "all_attempts_logged": true,
+  "same_request_body_across_retries": true,
+  "no_seed_emulation": true,
+  "B4_repetitions": "one replay for each corresponding stored B3 repetition; no provider call",
+  "B0_repetitions": "deterministic output retained once; reference the same artifact for the three aligned slots, never claim three independent B0 generations"
+}

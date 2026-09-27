@@ -1,0 +1,235 @@
+# Final Development Dry Run Authorization
+
+The development candidate is accepted with two required pre-freeze amendments.
+
+Investigation Protocol v1 is NOT frozen.
+
+Do not run any evaluation event.
+
+Do not inspect evaluation gold or evaluation results.
+
+## Approved configuration
+
+Approve the following candidate configuration:
+
+Model:
+`gpt-4.1-2025-04-14`
+
+API:
+OpenAI Responses API
+
+Temperature:
+`0`
+
+Repetitions:
+`3`
+
+Seed:
+unsupported; record this limitation
+
+Retry policy:
+retain the currently proposed transport/delivery-only retry policy.
+
+Do not retry incorrect, low-scoring, unsupported, uncited, or verifier-rejected answers.
+
+Numeric matching:
+
+`atol = 0`
+
+`rtol = 5e-8`
+
+Presented Δt comparison:
+
+`atol = 5e-7 seconds`
+
+Timestamp ordering remains exact.
+
+Retain the approved Q5/Q6 definitions, semantic-resolution B, canonical numeric-fact projection, single-reviewer methodology, B0–B4 matrix, and event-level statistical plan.
+
+## Required schema compatibility amendment
+
+Resolve the four reviewed gold facts representing a single electrical/process observation channel-to-asset relationship that cannot currently be represented by the v2 generation schema.
+
+This must be a narrow compatibility amendment.
+
+Use the existing `asset_relationship` ontology.
+
+Add only the minimum representation necessary for an approved observation/channel-to-asset static mapping.
+
+The supported semantics must remain limited to:
+
+an observed electrical/process evidence record is associated with channel C, and approved static metadata maps channel C to asset A.
+
+This must NOT imply:
+
+physical state truth;
+
+physical change;
+
+command execution;
+
+command effect;
+
+causation;
+
+malicious intent;
+
+successful compromise;
+
+attribution.
+
+Require exact evidence, channel, asset, metadata, visibility, and lineage checks.
+
+Do not modify the four human gold annotations.
+
+Do not broaden unrelated claim types.
+
+Add conformance and negative tests.
+
+## Evidence token ceiling amendment
+
+Do not use the observed development maximum of 11,162 tokens as an evaluation hard-failure threshold.
+
+Retain the existing production retrieval quotas, ordering, serialization policy, and 48,000-byte limit unchanged.
+
+Set:
+
+`evidence_token_safety_ceiling = 16384`
+
+This is a serialization/preflight safety ceiling only.
+
+It must NOT authorize additional evidence retrieval.
+
+B1/B2/B3 must continue using their already approved retrieval quotas.
+
+If serialized evidence exceeds the ceiling, record a protocol preflight failure.
+
+Do not dynamically truncate, re-rank, re-retrieve, or increase the ceiling after evaluation begins.
+
+Record actual token count for every run.
+
+## Output configuration
+
+Use candidate:
+
+`max_output_tokens = 4096`
+
+Use the approved strict structured investigation schema through Responses API Structured Outputs.
+
+During development only, determine whether any valid response terminates because of the output-token limit.
+
+If and only if development runs demonstrate genuine output truncation at 4096, report the evidence and propose 8192 before freeze.
+
+Do not increase the output limit because of answer quality or evaluation score.
+
+## Evaluation custody
+
+Use:
+
+Gold reviewer = R1
+
+Evaluation custodian = Author/R1
+
+Method = logical, filesystem, access-control, and hash-based isolation.
+
+Do not claim an independent second custodian.
+
+Generation/retrieval/prompt/verifier development code must not read evaluation gold.
+
+Record access attempts and deny evaluation event IDs through the development runner.
+
+Scenario strata must come from the already frozen event/scenario mapping and must not be chosen from model performance.
+
+## Development dry run
+
+You are now authorized to call the selected model ONLY on the existing 16 development events.
+
+Run B1, B2, and B3 with three retained repetitions per event.
+
+B4 must replay each corresponding stored B3 output.
+
+Do not select the best repetition.
+
+Do not modify prompts during this run.
+
+Do not modify retrieval, matching, verifier rules, tolerances, claim ontology, or metrics based on observed scores.
+
+This run is a protocol-conformance dry run, not the final evaluation.
+
+## Required checks
+
+Verify:
+
+schema compliance;
+
+API completion status;
+
+actual model identifier returned by the provider;
+
+actual input/output/total token usage;
+
+evidence token count;
+
+response termination reason/status;
+
+citation parsing;
+
+evidence visibility;
+
+B4 identity with stored B3 input;
+
+canonical matching;
+
+channel-to-asset relationship representation;
+
+retry logging;
+
+all three repetitions retained;
+
+no evaluation IDs accessed.
+
+Record provider response IDs and reproducibility metadata where available.
+
+Do not treat temperature zero as deterministic.
+
+## Return
+
+After the development dry run, return a freeze-readiness report containing:
+
+development run counts and completion/failure counts;
+
+schema-compliance counts;
+
+token usage distributions;
+
+any output truncations;
+
+retry counts and reasons;
+
+provider-returned model identifiers;
+
+B1/B2/B3/B4 protocol-conformance results;
+
+channel-to-asset amendment test results;
+
+evidence-token-ceiling test results;
+
+any implementation defect discovered;
+
+a clear separation between implementation defects and model-performance errors;
+
+updated prompts/config/schema hashes;
+
+updated freeze inventory;
+
+all remaining decisions required before formal freeze.
+
+Development performance metrics may be reported for debugging, but they must be explicitly labeled DEVELOPMENT ONLY and must not be used to select the best repetition or alter the frozen research hypothesis.
+
+STOP after the report.
+
+Do not run the 32 evaluation events.
+
+Do not freeze Investigation Protocol v1 automatically.
+
+Wait for explicit author approval.

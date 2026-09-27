@@ -1,0 +1,253 @@
+# Investigation Phase 2A — Human Gold Preparation
+
+Phase 1 command-address amendment and B0 validation are accepted.
+
+Do not implement B1–B4 and do not call any LLM.
+
+The next objective is to support human annotation of the four existing pilot packets and prepare Investigation Protocol v1 for freeze.
+
+## 1. Preserve all current v2 artifacts
+
+Do not overwrite:
+
+- evidence/export v2
+- claim schema v2
+- verification schema v2
+- retrieval v2
+- B0 outputs
+- command-target audit
+- frozen event selection
+
+The previous classification experiments and contracts remain immutable.
+
+## 2. Prepare reviewer annotation templates
+
+For each of the four existing pilot events, create a blank human-review annotation template.
+
+The template must contain fields for:
+
+`gold_claim_id`
+
+`event_id`
+
+`question_ids`
+
+`claim_type`
+
+`epistemic_category`
+
+`atomic_statement`
+
+`fact_key`
+
+`minimal_support_sets`
+
+`E_answerability`
+
+`N_answerability`
+
+`EN_answerability`
+
+`acceptable_action`
+
+`prohibited_stronger_interpretation`
+
+`ambiguity_notes`
+
+`reviewer_id`
+
+`review_status`
+
+Do not populate human judgments automatically.
+
+Automated observation candidates may be shown separately and must remain clearly labeled:
+
+`DRAFT_UNREVIEWED`
+
+## 3. Separate evidence universe from production retrieval
+
+The reviewer interface/packet must allow inspection of the full approved evidence universe for the event.
+
+Do not restrict human gold construction to the 64-entry production retrieval bundle.
+
+For every eventual gold fact, preserve separately:
+
+`eligible_in_view`
+
+`retrieved_in_production_bundle`
+
+`recovered_by_system`
+
+These are different concepts and must never be collapsed.
+
+## 4. Create a fact deduplication mechanism
+
+Provide a deterministic `fact_key` proposal for mechanically equivalent facts.
+
+Examples include:
+
+same command observation;
+
+same reported value;
+
+same numerical change from the same pair;
+
+same asset relationship;
+
+same temporal relationship.
+
+Do not automatically merge semantically different claims.
+
+The reviewer must be able to override or flag ambiguous aliases.
+
+`reported_change` and `electrical_change` based on the same underlying pair must not count as two independent gold facts.
+
+## 5. Keep reported_state_change optional
+
+Do not require `reported_state_change` for event coverage or question sufficiency.
+
+Only generate a candidate when two valid same-channel boolean observations are strictly ordered and have different values.
+
+A single state observation remains `reported_value`.
+
+## 6. Security claim handling
+
+Do not automatically generate positive `security_interpretation` gold.
+
+Primitive observations such as command requests, TCP RST, gaps, and reported numerical differences may be presented to the reviewer.
+
+The reviewer determines whether a weak `review_required` interpretation is meaningful.
+
+The following stronger conclusions remain unsupported unless a future, separately approved evidence policy exists:
+
+execution;
+
+physical causation;
+
+malicious intent;
+
+attacker identity;
+
+successful compromise;
+
+benign/safe from absence of evidence.
+
+These should primarily appear as guardrail / insufficiency opportunities.
+
+## 7. Human annotation statistics
+
+After the reviewer fills the four pilot templates, provide a script that summarizes:
+
+number of unique gold facts per claim type;
+
+number of aliases merged;
+
+number of supported / partially supported / insufficient facts under E, N and EN;
+
+number of assert / qualify / withhold decisions;
+
+number of mechanically checkable facts;
+
+number requiring human semantic judgment;
+
+question-level answerability for Q1–Q7;
+
+claim types with zero usable positive examples.
+
+Do not calculate research performance metrics yet.
+
+## 8. Protocol freeze candidate
+
+Prepare but do not freeze:
+
+`configs/investigation_protocol.v1.proposed.json`
+
+It should include placeholders for:
+
+claim schema hash;
+
+verification policy hash;
+
+event-selection hash;
+
+annotation-guideline hash;
+
+retrieval configuration hash;
+
+Q1–Q7;
+
+baseline matrix B0–B4;
+
+metric definitions;
+
+LLM provider/model snapshot;
+
+sampling parameters;
+
+context token limit;
+
+output token limit;
+
+prompt hash;
+
+reviewer policy;
+
+gold version.
+
+Leave unresolved fields explicitly marked pending.
+
+Do not invent values.
+
+## 9. Evaluation matching specification
+
+Draft a precise matching policy for later system-vs-gold evaluation.
+
+Prefer typed claim matching and fact keys.
+
+Specify separately:
+
+exact ID/reference checks;
+
+numerical tolerance;
+
+asset matching;
+
+temporal relation matching;
+
+fact-key equivalence;
+
+human semantic review for free-text stronger interpretations.
+
+Do not use generic text similarity as the main correctness criterion.
+
+## 10. Do not access evaluation gold during later development
+
+Prepare an isolation rule:
+
+development/pilot gold may be used to refine annotation rules, prompts and verifier implementation;
+
+the 32 evaluation events must be frozen before their final gold is used for system scoring;
+
+once evaluation gold is finalized, prompt/verifier changes based on its errors require a new exploratory version and cannot be reported as the same frozen evaluation.
+
+## 11. Required output and stop
+
+Return:
+
+the four blank reviewer annotation templates;
+
+reviewer instructions;
+
+fact-key/deduplication proposal;
+
+human annotation summary script;
+
+draft system-vs-gold matching policy;
+
+proposed protocol-freeze config with explicit pending fields;
+
+a short list of decisions that still require author approval.
+
+STOP.
+
+Do not implement or call any LLM.

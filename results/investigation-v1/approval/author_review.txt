@@ -1,0 +1,341 @@
+# Author Review — Proceed to Investigation Phase 1
+
+The proposed Verifiable OT Incident Investigation direction is approved in principle.
+
+The following components are approved and should be preserved:
+
+- Working title and event-conditioned investigation scope
+- RQ1–RQ3
+- Q1–Q7
+- deterministic verification architecture
+- SUPPORTED / QUALIFIED / INSUFFICIENT semantics
+- human-reviewed gold design
+- 16 development + 32 evaluation candidate structure
+- B0–B4 × E/N/EN baseline matrix
+- proposed investigation metrics
+- fixed total retrieval-budget principle
+
+Do NOT begin formal LLM evaluation yet.
+
+One important research-design issue must be resolved before Protocol v1 is frozen.
+
+# 1. Mandatory command-target feasibility audit
+
+The repository audit found that current canonical network evidence does not preserve usable command-to-asset linkage.
+
+Current limitations include:
+
+- packet/message asset_id is None;
+- command CA/IOA is not preserved in the canonical network evidence;
+- command setpoint/select-execute information is not preserved;
+- a command observation therefore cannot currently be linked to a target asset.
+
+This may substantially weaken cross-source OT incident investigation.
+
+Before final protocol freeze, perform a narrow feasibility audit using raw allowed Sherlock evidence.
+
+Determine whether IEC-104 command ASDUs (types 45–51) contain reliably parseable:
+
+```text
+Common Address (CA)
+Information Object Address (IOA)
+```
+
+and whether those identifiers can be mapped through the existing sanitized mapping to an opaque asset/control point without using:
+
+```text
+gold attack_point
+event family
+malicious label
+scenario playbook
+physical simulator truth
+hidden evaluator metadata
+```
+
+Do not expose command setpoint values merely to solve this problem unless separately justified.
+
+Create:
+
+```text
+docs/command_target_feasibility.md
+```
+
+The document must answer:
+
+1. What exact raw bytes / parser fields contain CA and IOA for command ASDUs?
+2. Does the existing mapping contain a valid corresponding entry?
+3. Is the mapping static operational metadata M or evaluator-only G?
+4. Can a target asset/control point be represented with sanitized opaque IDs?
+5. What fraction of candidate investigation events contain commands for which this mapping is available?
+6. Are there ambiguous, duplicated, configuration/measurement-colliding, or unmapped addresses?
+7. Can this be implemented without changing the previous classification results/contracts?
+8. What new leakage risks would it create?
+
+Do not infer command execution from target mapping.
+
+Do not infer causality.
+
+Do not infer malicious intent.
+
+## If feasible
+
+Propose, but do not silently implement, an amendment to `command_observed` such as:
+
+```text
+command_observed
+- command evidence ID
+- ASDU type
+- COT
+- CA
+- IOA
+- mapped_target_id: optional opaque asset/control-point ID
+- observation time
+```
+
+The strongest permitted statement should be equivalent to:
+
+> A command-type activation request addressed to the mapped control point of asset X was observed.
+
+It must NOT support:
+
+> asset X executed the command
+
+or:
+
+> the command caused the later process/electrical change.
+
+Also propose how `asset_relationship` and `temporal_association` would use this mapping.
+
+## If not feasible
+
+Do not invent the mapping.
+
+Record this as a dataset/evidence limitation.
+
+Revise RQ1 interpretation so that cross-source reconstruction means cross-domain timeline/context completeness, not asset-linked causal reconstruction.
+
+---
+
+# 2. Freeze event IDs
+
+The proposed 16 development + 32 evaluation IDs may now be frozen because they were selected before any investigation LLM results existed.
+
+Preserve:
+
+```text
+development = 16
+evaluation = 32
+```
+
+Do not replace difficult events later based on LLM performance.
+
+Record that the evaluation set is a balanced investigation benchmark and does not represent real operational prevalence.
+
+---
+
+# 3. Implement only the first investigation milestone
+
+After the command-target audit, implement only:
+
+```text
+investigation export adapter
+structured retrieval
+retrieval receipts
+B0 deterministic timeline
+human-review evidence packets
+```
+
+Do NOT call an LLM yet.
+
+Do NOT implement agent frameworks, vector databases, new classifiers, deep learning, or adaptive E/N fusion.
+
+---
+
+# 4. Retrieval accounting
+
+Maintain the proposed primary retrieval budgets:
+
+```text
+E-only: 64 E entries
+N-only: 64 N entries
+E+N: 32 E + 32 N entries
+```
+
+However, every evaluation must preserve three separate quantities:
+
+```text
+eligible evidence universe
+retrieved evidence bundle
+final recovered investigation facts
+```
+
+This is necessary to distinguish:
+
+```text
+evidence unavailable in a view
+retrieval truncation/failure
+LLM reasoning failure
+```
+
+For every gold fact later record:
+
+```text
+supportable from eligible universe?
+complete support retrieved?
+correctly recovered by system?
+```
+
+Do not attribute retrieval loss to multimodal reasoning.
+
+---
+
+# 5. Build four pilot evidence packets
+
+Use the already proposed development-event policy.
+
+Select four development pilot events:
+
+```text
+2 cyber from different families
+2 benign from different operational families
+```
+
+The set should include:
+
+```text
+at least one event with numeric missingness
+at least one event with observed post-state evidence
+```
+
+Selection must not use LLM output.
+
+Create human-review packets containing the complete allowed event evidence needed for annotation, not merely the production top-k retrieval bundle.
+
+The packets must NOT reveal:
+
+```text
+malicious label
+attack family
+gold attack point
+gold narrative
+playbook
+physical truth
+```
+
+Automated tools may propose observation candidates but must mark them:
+
+```text
+DRAFT_UNREVIEWED
+```
+
+They are not gold until human sign-off.
+
+---
+
+# 6. Pilot annotation objective
+
+The first four pilot annotations are intended to test whether the proposed claim ontology and support policy are actually usable.
+
+During the pilot, record for every proposed claim type:
+
+```text
+number of supportable examples
+number of insufficient examples
+ambiguities encountered
+duplicate/alias fact issues
+whether deterministic verification is possible
+```
+
+Pay special attention to:
+
+```text
+reported_state_change
+asset_relationship
+temporal_association
+security_indicator
+security_interpretation
+```
+
+Do not add new claim types merely because the LLM might want to say something.
+
+If a claim type has no meaningful support in the pilot, flag it for author review before protocol freeze.
+
+---
+
+# 7. Preserve the current semantic boundaries
+
+Continue enforcing:
+
+```text
+command observed ≠ command executed
+
+acknowledgement observed ≠ physical success
+
+electrical/process change observed ≠ attack-caused change
+
+temporal association ≠ causation
+
+missing evidence ≠ benign
+
+classifier prediction ≠ investigation evidence
+```
+
+The deterministic verifier remains an evidence-consistency/support checker, not a semantic truth oracle.
+
+---
+
+# 8. B0 must come before the LLM
+
+Implement the deterministic timeline baseline first.
+
+B0 should establish what can be reconstructed mechanically from available evidence without language-model reasoning.
+
+It should produce:
+
+```text
+network observations
+electrical/process observations
+asset/channel mappings where supported
+capture-time ordering
+deterministic numerical differences
+explicit unknowns
+```
+
+B0 must not generate speculative security narratives.
+
+---
+
+# 9. Do not implement B1–B4 yet
+
+After completing:
+
+```text
+command-target feasibility audit
+frozen event IDs
+retrieval/export adapter
+B0
+four pilot evidence packets
+```
+
+STOP.
+
+Return to the author with:
+
+1. command-target feasibility result;
+2. exact proposed schema amendment, if any;
+3. frozen event-set manifest;
+4. retrieval/export design;
+5. one representative B0 output;
+6. four pilot evidence-packet summaries;
+7. claim-type supportability audit;
+8. remaining protocol decisions required before LLM use.
+
+No LLM API call is authorized at this stage.
+
+---
+
+# Research principle
+
+The objective is not to make an LLM produce a convincing incident narrative.
+
+The objective is to determine whether OT incident investigation can remain useful while every substantive conclusion is traceable to observable electrical/network evidence, mechanically checked where possible, and explicitly weakened or withheld when the available evidence is insufficient.

@@ -1,0 +1,153 @@
+{
+  "version": "investigation-development-run-v1",
+  "kind": "DEVELOPMENT_EXPERIMENT",
+  "event_id": "ev_0961f1c2da8a257e3ebc",
+  "baseline": "B1",
+  "repetition": 2,
+  "run_id": "authorized-dev-v1-r4",
+  "started_at": "2026-09-25T15:48:56.096978+00:00",
+  "status": "FAILED_NO_VALID_DELIVERY",
+  "bundle_sha256": "68e389008bb7d3ba814b162ac567a3b9c2409572c1e358df6ba72b63480ddc53",
+  "receipt_sha256": "7667723115bdd59b79151c68f731ca2b8ebb90869d9a6dd621726662232bbb86",
+  "configuration": {
+    "model.candidate.json": {
+      "path": "configs/investigation-dryrun-v1/model.candidate.json",
+      "sha256": "fb70c15f4cc35cf775849369b3b1109667763b1db2fe3c10e4f48dd02674dd45"
+    },
+    "token_budget.candidate.json": {
+      "path": "configs/investigation-dryrun-v1/token_budget.candidate.json",
+      "sha256": "147e976a6982441e0ed0649a79d65545661e7063dbd184e9abc7a0837459d656"
+    },
+    "generation.json": {
+      "path": "configs/investigation-dryrun-v1/generation.json",
+      "sha256": "237659dfff325043a88940788afb8b3d2b8941d61de5a61b8fbd38f396fef867"
+    }
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "started_at": "2026-09-25T15:48:56.133792+00:00",
+      "client_request_id": "2d2a0ab910490303b5b68d54f778313a48e3df4cb3c1bf74ea759877179dd8a3",
+      "request_sha256": "8980969d57330e8a3f1c01e858f1c77410f4fffe8841ddaee87735449bc8a580",
+      "HTTP_status": 429,
+      "response_headers": {
+        "date": "Fri, 25 Sep 2026 15:48:57 GMT",
+        "retry-after": "33",
+        "x-request-id": "req_5afbd84da1f44c8599d56b137e5f9089"
+      },
+      "response_sha256": "6c1a10358cfd1a07895f0de3ffc4cc3e861dd818ba32d0a069fc872d77181167",
+      "reason": "retryable_HTTP_transport_status",
+      "finished_at": "2026-09-25T15:48:57.110663+00:00",
+      "will_retry": true
+    },
+    {
+      "attempt": 2,
+      "started_at": "2026-09-25T15:48:58.116570+00:00",
+      "client_request_id": "85bef3fb1ad99277435a907cf25cbabf78af8362a5ea2251bf27df2cb85a0024",
+      "request_sha256": "8980969d57330e8a3f1c01e858f1c77410f4fffe8841ddaee87735449bc8a580",
+      "HTTP_status": 429,
+      "response_headers": {
+        "date": "Fri, 25 Sep 2026 15:48:59 GMT",
+        "retry-after": "31",
+        "x-request-id": "req_f7f2e3fa6f844779bbe3e4a402ec22e7"
+      },
+      "response_sha256": "81d9f2c9eb86ccf006322639c87523a5456a372407fe3733c97c897288373b31",
+      "reason": "retryable_HTTP_transport_status",
+      "finished_at": "2026-09-25T15:48:59.174568+00:00",
+      "will_retry": true
+    },
+    {
+      "attempt": 3,
+      "started_at": "2026-09-25T15:49:01.179825+00:00",
+      "client_request_id": "78976f3c359ee3bd8dce723974cb41190ad361ea1a3126ead7053ede90c033aa",
+      "request_sha256": "8980969d57330e8a3f1c01e858f1c77410f4fffe8841ddaee87735449bc8a580",
+      "HTTP_status": 429,
+      "response_headers": {
+        "date": "Fri, 25 Sep 2026 15:49:02 GMT",
+        "retry-after": "28",
+        "x-request-id": "req_feaa2e7cd9224ba8aa3b08d0911976a0"
+      },
+      "response_sha256": "f9aef9c067d0d72962b30c3a8c4cc0673cb25694f14cef248901828bb57963be",
+      "reason": "retryable_HTTP_transport_status",
+      "finished_at": "2026-09-25T15:49:02.311652+00:00",
+      "will_retry": false
+    }
+  ],
+  "actual_evidence_tokens": 8727,
+  "temperature_zero_is_deterministic": false,
+  "implementation": [
+    {
+      "path": "src/investigation_dryrun/__init__.py",
+      "sha256": "3eb7a2f93e9f7e4ef4ba626629518412612a3a2e0fa05170606c5d1fe76dbf96"
+    },
+    {
+      "path": "src/investigation_dryrun/adapter.py",
+      "sha256": "067e51c0ae4e428b81e89151079a57831a8d4f8df905ed6ae7a9e7e4ae1417c7"
+    },
+    {
+      "path": "src/investigation_dryrun/batch.py",
+      "sha256": "020ea5824b8fb0b005c2a2cca2290897f78aac43d2e30a98b2f4f13b277e8d7b"
+    },
+    {
+      "path": "src/investigation_dryrun/claims.py",
+      "sha256": "094fc6f6e01465c13341e0aa7dcda6f15fced70259f59504750d2969a0be5f3e"
+    },
+    {
+      "path": "src/investigation_dryrun/common.py",
+      "sha256": "36de5b8a2f84bf6467dc54fb3ad1ec51a0713f5e3f54b395383666bdd258041c"
+    },
+    {
+      "path": "src/investigation_dryrun/custody.py",
+      "sha256": "2e9ea23eee922cc64a1a0d624b1a48b993fa9d21852851bffc14a097bd1857db"
+    },
+    {
+      "path": "src/investigation_dryrun/gold_contract.py",
+      "sha256": "518b4d3e54372bf9e9240e892d0fabb39f8b7cedf2b0be3e1f67071c72b77d42"
+    },
+    {
+      "path": "src/investigation_dryrun/metrics.py",
+      "sha256": "5ad64526e011b381f6adb7b2015478a75f2caa7ecd163b623a8f2a55e7f766bb"
+    },
+    {
+      "path": "src/investigation_dryrun/report.py",
+      "sha256": "45fa7e56cb58268059d1d42ec7ca7dc55a1fc2c2a97129623da141ad208ae7eb"
+    },
+    {
+      "path": "src/investigation_dryrun/runner.py",
+      "sha256": "f136fdc13a17e0674d3e81d3e4628b4947f82efd5384b758ff586f0b92bde87b"
+    },
+    {
+      "path": "src/investigation_dryrun/schema.py",
+      "sha256": "eccf0b2c55ec24b5990a524bd944b0f011bcfd3527e38017d72382bea16220be"
+    },
+    {
+      "path": "src/investigation_dryrun/statistics.py",
+      "sha256": "018b7e67721c8f893579a4ae094a1b68c6ec71a4d8bd8fd8381bd021ae6c0ce6"
+    },
+    {
+      "path": "src/investigation_dryrun/structured.py",
+      "sha256": "8cfda5f4c20ec9de45e7dcba89ac52bb4adb4e7d431c3b11f7a9df537ae78a51"
+    },
+    {
+      "path": "src/investigation_dryrun/tokens.py",
+      "sha256": "7eb85306d624956287d38321fca3d372173f7a8db66b389479ad6f025d019a9f"
+    },
+    {
+      "path": "schemas/investigation_claim.v3.json",
+      "sha256": "33c2e19af5d5515ca43557a31748159e695aa3035514f1eb4487bbb377b16ac0"
+    },
+    {
+      "path": "prompts/investigation-v1-r4/canonical_text.v1.json",
+      "sha256": "36ccf53992b06a327433b25f43a072e6aac344753ca53612a75e13bd0ac8c8a4"
+    }
+  ],
+  "request_sha256": "8980969d57330e8a3f1c01e858f1c77410f4fffe8841ddaee87735449bc8a580",
+  "prompt": {
+    "path": "prompts/investigation-v1-r4/B1.v1.txt",
+    "sha256": "957fc4ee8aa333d8a154e14ec91b928951bbbd5d3406c1c4ec723cbf500ed843"
+  },
+  "structured_schema_sha256": "78398f471f11f0b91159c05ad6acc7542d993fa62fe44e81cee1b478f5f7bffa",
+  "local_input_text_tokens": 13489,
+  "local_schema_tokens": 11186,
+  "finished_at": "2026-09-25T15:49:02.312414+00:00"
+}

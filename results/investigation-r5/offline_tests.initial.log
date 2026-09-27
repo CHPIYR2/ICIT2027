@@ -1,0 +1,115 @@
+test_always_withhold_sanity (test_investigation_r5.ContractAndMetricTests.test_always_withhold_sanity) ... ok
+test_citation_pending_blocks (test_investigation_r5.ContractAndMetricTests.test_citation_pending_blocks) ... ok
+test_citation_precision_requires_role_not_existence (test_investigation_r5.ContractAndMetricTests.test_citation_precision_requires_role_not_existence) ... ok
+test_citation_visibility_missing_not_credit (test_investigation_r5.ContractAndMetricTests.test_citation_visibility_missing_not_credit) ... ok
+test_common_G_and_view_Gv (test_investigation_r5.ContractAndMetricTests.test_common_G_and_view_Gv) ... ok
+test_consistency_metrics (test_investigation_r5.ContractAndMetricTests.test_consistency_metrics) ... ok
+test_duplicate_gold_not_extra_denominator (test_investigation_r5.ContractAndMetricTests.test_duplicate_gold_not_extra_denominator) ... ok
+test_existing_gold_E_contract (test_investigation_r5.ContractAndMetricTests.test_existing_gold_E_contract) ... ok
+test_fixed_withholding_opportunities (test_investigation_r5.ContractAndMetricTests.test_fixed_withholding_opportunities) ... ok
+test_historical_citation_valid_cannot_override_role (test_investigation_r5.ContractAndMetricTests.test_historical_citation_valid_cannot_override_role) ... ok
+test_missing_is_not_correct_withholding (test_investigation_r5.ContractAndMetricTests.test_missing_is_not_correct_withholding) ... ok
+test_new_primary_metrics_not_added (test_investigation_r5.ContractAndMetricTests.test_new_primary_metrics_not_added) ... ok
+test_retrieval_partition (test_investigation_r5.ContractAndMetricTests.test_retrieval_partition) ... ok
+test_support_not_retrieved_no_recovery (test_investigation_r5.ContractAndMetricTests.test_support_not_retrieved_no_recovery) ... ok
+test_zero_denominator_NA (test_investigation_r5.ContractAndMetricTests.test_zero_denominator_NA) ... ok
+test_acceptance_no_delivery_not_pass (test_investigation_r5.ReplayAndPlanTests.test_acceptance_no_delivery_not_pass) ... ok
+test_acceptance_synthetic_all_completed (test_investigation_r5.ReplayAndPlanTests.test_acceptance_synthetic_all_completed) ... ok
+test_acceptance_truncation_stops (test_investigation_r5.ReplayAndPlanTests.test_acceptance_truncation_stops) ... ok
+test_exact_replay_no_model (test_investigation_r5.ReplayAndPlanTests.test_exact_replay_no_model) ... ERROR
+test_manifest_identity_64 (test_investigation_r5.ReplayAndPlanTests.test_manifest_identity_64) ... ok
+test_mutated_raw_replay_rejected (test_investigation_r5.ReplayAndPlanTests.test_mutated_raw_replay_rejected) ... ERROR
+test_preservation_all_r4_files (test_investigation_r5.ReplayAndPlanTests.test_preservation_all_r4_files) ... ok
+test_wrong_view_source_rejected (test_investigation_r5.ReplayAndPlanTests.test_wrong_view_source_rejected) ... ERROR
+test_exact_contrasts (test_investigation_r5.StatisticsTests.test_exact_contrasts) ... ok
+test_macro_and_D0_micro_not_tripled (test_investigation_r5.StatisticsTests.test_macro_and_D0_micro_not_tripled) ... ok
+test_missing_repetitions_rejected (test_investigation_r5.StatisticsTests.test_missing_repetitions_rejected) ... ok
+test_arbitrary_transport_forbidden (test_investigation_r5.TransportTests.test_arbitrary_transport_forbidden) ... ok
+test_connection_reset_history_and_identical_requests (test_investigation_r5.TransportTests.test_connection_reset_history_and_identical_requests) ... ok
+test_http_retry_and_pacing (test_investigation_r5.TransportTests.test_http_retry_and_pacing) ... ok
+test_malformed_envelope_delivery_retry (test_investigation_r5.TransportTests.test_malformed_envelope_delivery_retry) ... ok
+test_no_quality_citation_semantic_retry (test_investigation_r5.TransportTests.test_no_quality_citation_semantic_retry) ... ok
+test_refusal_not_retried (test_investigation_r5.TransportTests.test_refusal_not_retried) ... ok
+test_related_exceptions (test_investigation_r5.TransportTests.test_related_exceptions) ... ok
+test_three_attempt_ceiling (test_investigation_r5.TransportTests.test_three_attempt_ceiling) ... ok
+test_truncation_not_retried (test_investigation_r5.TransportTests.test_truncation_not_retried) ... ok
+test_8192_output_16384_input (test_investigation_r5.ViewsAndRequestTests.test_8192_output_16384_input) ... ok
+test_E_blocks_hidden_N (test_investigation_r5.ViewsAndRequestTests.test_E_blocks_hidden_N) ... ok
+test_N_blocks_hidden_E (test_investigation_r5.ViewsAndRequestTests.test_N_blocks_hidden_E) ... ok
+test_all_development_bundles_audited (test_investigation_r5.ViewsAndRequestTests.test_all_development_bundles_audited) ... ok
+test_cell_view_citation_separation (test_investigation_r5.ViewsAndRequestTests.test_cell_view_citation_separation) ... ok
+test_common_prompt_required_semantics (test_investigation_r5.ViewsAndRequestTests.test_common_prompt_required_semantics) ... ok
+test_evaluation_denied_before_read (test_investigation_r5.ViewsAndRequestTests.test_evaluation_denied_before_read) ... ok
+test_input_safety_boundary (test_investigation_r5.ViewsAndRequestTests.test_input_safety_boundary) ... ok
+test_non_generation_cells_no_request (test_investigation_r5.ViewsAndRequestTests.test_non_generation_cells_no_request) ... ok
+test_reference_visibility_checks_payload (test_investigation_r5.ViewsAndRequestTests.test_reference_visibility_checks_payload) ... ok
+test_unnecessary_metadata_blocked (test_investigation_r5.ViewsAndRequestTests.test_unnecessary_metadata_blocked) ... ok
+test_zero_network_generation (test_investigation_r5.ViewsAndRequestTests.test_zero_network_generation) ... ok
+
+======================================================================
+ERROR: test_exact_replay_no_model (test_investigation_r5.ReplayAndPlanTests.test_exact_replay_no_model)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/potinglu/Documents/ICIT2027/tests/test_investigation_r5.py", line 140, in test_exact_replay_no_model
+    b,r,raw,m=self.replay_fixture()
+              ~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/potinglu/Documents/ICIT2027/tests/test_investigation_r5.py", line 138, in replay_fixture
+    b,r=bundle_fixture();es=[e for e in b['entries'] if e['source_type']=='process'];c=numeric_claim(b,es[0]['evidence_id'],es[1]['evidence_id']);x=output(claims=[c]);raw=dumps(x).encode();m={'event_id':EID,'cell_id':'G1-EN','view':'EN','citation_mode':'required','repetition':1,'run_id':'synthetic','output_sha256':hashlib.sha256(raw).hexdigest(),'bundle_sha256':digest(b),'receipt_sha256':digest(r)};return b,r,raw,m
+                                                                                       ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/potinglu/Documents/ICIT2027/src/investigation_dryrun/claims.py", line 254, in numeric_claim
+    c['claim_text']=typed_support(c,bundle)['canonical_text'];return c
+                    ~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/potinglu/Documents/ICIT2027/src/investigation_dryrun/claims.py", line 87, in typed_support
+    need(a['evidence_id']!=b['evidence_id'] and a['observation_time']<b['observation_time'],'nonordered_pair')
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/potinglu/Documents/ICIT2027/src/investigation_dryrun/claims.py", line 23, in need
+    if not condition: raise Unsupported(reason)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+investigation_dryrun.claims.Unsupported: nonordered_pair
+
+======================================================================
+ERROR: test_mutated_raw_replay_rejected (test_investigation_r5.ReplayAndPlanTests.test_mutated_raw_replay_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/potinglu/Documents/ICIT2027/tests/test_investigation_r5.py", line 144, in test_mutated_raw_replay_rejected
+    b,r,raw,m=self.replay_fixture()
+              ~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/potinglu/Documents/ICIT2027/tests/test_investigation_r5.py", line 138, in replay_fixture
+    b,r=bundle_fixture();es=[e for e in b['entries'] if e['source_type']=='process'];c=numeric_claim(b,es[0]['evidence_id'],es[1]['evidence_id']);x=output(claims=[c]);raw=dumps(x).encode();m={'event_id':EID,'cell_id':'G1-EN','view':'EN','citation_mode':'required','repetition':1,'run_id':'synthetic','output_sha256':hashlib.sha256(raw).hexdigest(),'bundle_sha256':digest(b),'receipt_sha256':digest(r)};return b,r,raw,m
+                                                                                       ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/potinglu/Documents/ICIT2027/src/investigation_dryrun/claims.py", line 254, in numeric_claim
+    c['claim_text']=typed_support(c,bundle)['canonical_text'];return c
+                    ~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/potinglu/Documents/ICIT2027/src/investigation_dryrun/claims.py", line 87, in typed_support
+    need(a['evidence_id']!=b['evidence_id'] and a['observation_time']<b['observation_time'],'nonordered_pair')
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/potinglu/Documents/ICIT2027/src/investigation_dryrun/claims.py", line 23, in need
+    if not condition: raise Unsupported(reason)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+investigation_dryrun.claims.Unsupported: nonordered_pair
+
+======================================================================
+ERROR: test_wrong_view_source_rejected (test_investigation_r5.ReplayAndPlanTests.test_wrong_view_source_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/potinglu/Documents/ICIT2027/tests/test_investigation_r5.py", line 147, in test_wrong_view_source_rejected
+    b,r,raw,m=self.replay_fixture();m['cell_id']='G1-E'
+              ~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/potinglu/Documents/ICIT2027/tests/test_investigation_r5.py", line 138, in replay_fixture
+    b,r=bundle_fixture();es=[e for e in b['entries'] if e['source_type']=='process'];c=numeric_claim(b,es[0]['evidence_id'],es[1]['evidence_id']);x=output(claims=[c]);raw=dumps(x).encode();m={'event_id':EID,'cell_id':'G1-EN','view':'EN','citation_mode':'required','repetition':1,'run_id':'synthetic','output_sha256':hashlib.sha256(raw).hexdigest(),'bundle_sha256':digest(b),'receipt_sha256':digest(r)};return b,r,raw,m
+                                                                                       ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/potinglu/Documents/ICIT2027/src/investigation_dryrun/claims.py", line 254, in numeric_claim
+    c['claim_text']=typed_support(c,bundle)['canonical_text'];return c
+                    ~~~~~~~~~~~~~^^^^^^^^^^
+  File "/Users/potinglu/Documents/ICIT2027/src/investigation_dryrun/claims.py", line 87, in typed_support
+    need(a['evidence_id']!=b['evidence_id'] and a['observation_time']<b['observation_time'],'nonordered_pair')
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/potinglu/Documents/ICIT2027/src/investigation_dryrun/claims.py", line 23, in need
+    if not condition: raise Unsupported(reason)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+investigation_dryrun.claims.Unsupported: nonordered_pair
+
+----------------------------------------------------------------------
+Ran 47 tests in 2.547s
+
+FAILED (errors=3)

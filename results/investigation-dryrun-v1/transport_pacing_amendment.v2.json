@@ -1,0 +1,23 @@
+{
+  "created_at": "2026-09-25T15:55:26.661903+00:00",
+  "kind": "IMPLEMENTATION_INFRASTRUCTURE_DEFECT_CORRECTION",
+  "observed_limit_TPM": 30000,
+  "finding": "Concurrent requests and fixed short backoff exhausted delivery budgets under account rate limits. No model semantics prompted this correction.",
+  "action": "One request at a time; minimum 60 seconds between request starts, including authorized transport retries. Original attempt maximum remains three. Delivered outputs are not regenerated. The separately authorized 86 exclusively rate-limited failures use a distinct recovery batch with identical requests.",
+  "protocol_semantics_unchanged": true,
+  "files": [
+    {
+      "path": "scripts/resume_investigation_dryrun_v2.py",
+      "sha256": "04b3045d80445a60d1f8aeeff29d1ac60fb08a338274ceaa8f349b6c989d0441"
+    },
+    {
+      "path": "src/investigation_dryrun/transport_resume_v2.py",
+      "sha256": "36b15a69df9574d985007b4f9c698bbad68926c306c772532d1abb26436057be"
+    },
+    {
+      "path": "results/investigation-dryrun-v1/transport_recovery_authorization.json",
+      "sha256": "3512290afd7d28c6b9de5c34a38d43e25978afdc228c5f323fab509b3a38d631"
+    }
+  ],
+  "preflight_sha256": "b50c1c999028f642f3db634c731041a765921689d29a4d034a2e7df69d83f185"
+}

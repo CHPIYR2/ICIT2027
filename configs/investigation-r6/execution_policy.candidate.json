@@ -1,0 +1,23 @@
+{
+  "version": "r6-offline-scheduling-candidate",
+  "live_execution_authorized": false,
+  "inherited_transport_policy": {
+    "path": "configs/investigation-r5/transport.candidate.json",
+    "sha256": "bc0d778fa6e72b044e5d30d558db1bc2653a0047643b155ba8a00b0643cc276d"
+  },
+  "max_inflight": 1,
+  "minimum_seconds_between_request_starts": 60,
+  "maximum_transport_attempts": 3,
+  "retry_after_is_minimum": true,
+  "use_longer_reset_headers": true,
+  "before_each_request": "Evaluate latest provider token/project limits, remaining/reset state, elapsed time, Retry-After and conservative request estimate; missing or insufficient state requires preflight confirmation",
+  "retry_policy_changed": false,
+  "no_batching": true,
+  "failure_cap": "FIRST incomplete/max_output_tokens: preserve, no retry, stop new positions, fail capacity, author review; no automatic 32768",
+  "monthly_quota_or_billing_error": "Account action, never solved by longer pacing",
+  "missing_usage": "Unknown, never zero; charge using actual uncached input, cached input and output meters",
+  "accounting_source": {
+    "path": "scripts/report_investigation_api_usage.py",
+    "sha256": "a92a01c770e9d2a13bd0260b8424b078899f0f30360407bd82ce7666d5b734cb"
+  }
+}

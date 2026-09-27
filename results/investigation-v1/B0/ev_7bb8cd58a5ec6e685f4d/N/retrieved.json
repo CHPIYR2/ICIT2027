@@ -1,0 +1,1274 @@
+{
+  "schema_version": "investigation-retrieval-phase1",
+  "scope": {
+    "evidence_id": "d_4aac62c4a84ee92658c829f9",
+    "event_id": "ev_7bb8cd58a5ec6e685f4d",
+    "view": "N",
+    "window": [
+      -60,
+      60
+    ],
+    "right_boundary_exclusive": true,
+    "time_basis": "capture_time_relative_to_supplied_event_anchor",
+    "reported_measurement_time_available": false,
+    "source_relationship": "E and N may share packet ancestry; not independent sensors",
+    "visibility": "export view restriction, not canonical source removal",
+    "available_domains": [
+      "N"
+    ],
+    "command_target_mapping": "not_in_current_contract"
+  },
+  "entries": [
+    {
+      "evidence_id": "p_b0991d9e7c03e9866d7fe2be",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 56.84953999519348,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_fcff6cf54d2dbc02",
+        "destination_endpoint": "ep_f2aa5abba5fc37fe",
+        "source_port": 50052,
+        "destination_port": 2404,
+        "tcp_flags": 16,
+        "packet_length": 66
+      },
+      "lineage_ref": "lin_ed41c62066a63784e2221781"
+    },
+    {
+      "evidence_id": "p_702566ae10e9c52b9ab5b50a",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 57.050873041152954,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_e6cbd6569649c420",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 60810,
+        "tcp_flags": 24,
+        "packet_length": 134
+      },
+      "lineage_ref": "lin_036d750757e0750a39bc3b89"
+    },
+    {
+      "evidence_id": "d_1546523b0668f62a6f76f1a6",
+      "view": "N",
+      "source_type": "derived",
+      "asset_id": null,
+      "observation_time": 57.050873041152954,
+      "unit": "SECOND",
+      "parent_ids": [
+        "p_b0991d9e7c03e9866d7fe2be",
+        "p_702566ae10e9c52b9ab5b50a"
+      ],
+      "fields": {
+        "kind": "communication_gap",
+        "population": "captured_TCP_2404_packets",
+        "window": [
+          -60,
+          60
+        ],
+        "complete_visible_query": true,
+        "eligible_count": 9795,
+        "ordered_population_sha256": "fc27e17538a614eb3b33640e65d5c4afc765d2e08acecde0a52222fe5266f104",
+        "universe_sha256": "1771a3685d0817a280f7832e7a92038a7c0f091ac96582b7575c61d27c9c95dd",
+        "start": 56.84953999519348,
+        "end": 57.050873041152954,
+        "duration_seconds": 0.20133304595947266,
+        "left_id": "p_b0991d9e7c03e9866d7fe2be",
+        "right_id": "p_702566ae10e9c52b9ab5b50a",
+        "left_censored": false,
+        "right_censored": false,
+        "interpretation": "No matching captured packet inside this interval; not proof of outage or attack."
+      }
+    },
+    {
+      "evidence_id": "m_0ad443611c1c6a7fe3574477",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": 0.04658389091491699,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 45,
+        "cause_of_transmission": 6
+      },
+      "lineage_ref": "lin_689bcd33cd4149a124745085"
+    },
+    {
+      "evidence_id": "m_189f230384faad86e6aadb46",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": 0.08423304557800293,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 45,
+        "cause_of_transmission": 7
+      },
+      "lineage_ref": "lin_c7b4a27d1f7cc531036a2d5f"
+    },
+    {
+      "evidence_id": "m_2177510fb0e0adc9bf3982ec",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.998481035232544,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_c89f0550d5c64ebbf45a9f5b"
+    },
+    {
+      "evidence_id": "m_a5ea77ee7e809048365b5a10",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.72355103492737,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_2f1f0dcfc2a8335818e30b6f"
+    },
+    {
+      "evidence_id": "p_bcf9200b83bc4090a23d472d",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -59.998481035232544,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_56e761dc5b554b7d",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 48376,
+        "tcp_flags": 24,
+        "packet_length": 86
+      },
+      "lineage_ref": "lin_ec7c880fa33461fd50254a9a"
+    },
+    {
+      "evidence_id": "m_b0dfc7dc6428bcbb6d35a927",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": 8.095764875411987,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 45,
+        "cause_of_transmission": 6
+      },
+      "lineage_ref": "lin_a8ba757d561f43b938d98136"
+    },
+    {
+      "evidence_id": "m_ecb1042446e734e67d9807f4",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": 8.370217084884644,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 45,
+        "cause_of_transmission": 7
+      },
+      "lineage_ref": "lin_e6c8ca4d2c6311c254597450"
+    },
+    {
+      "evidence_id": "m_7c5847835d2e3d12b69c0d1e",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.994070053100586,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_ebdb85bb2cc09f1dbc1d66a5"
+    },
+    {
+      "evidence_id": "m_e03898f843be7767615b3d39",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.69265294075012,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_ed7ff6412118c352659ada5d"
+    },
+    {
+      "evidence_id": "p_66055be52840bf35b4878584",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -44.94700312614441,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_37a4be72bbb20b97",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 52634,
+        "tcp_flags": 24,
+        "packet_length": 222
+      },
+      "lineage_ref": "lin_06c5a7c08ad562ab629c7a87"
+    },
+    {
+      "evidence_id": "m_49fca00b6fa0b24f9219e10d",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.96522903442383,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_f4341883f66566898469c9b0"
+    },
+    {
+      "evidence_id": "m_0d2ac4f5170187fa5f0ca94a",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.522331953048706,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_90a9602c5a3088a118f85ca4"
+    },
+    {
+      "evidence_id": "p_9c974a66c82a1ee2737ffb39",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -29.99647307395935,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_14149487c2f1729e",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 42740,
+        "tcp_flags": 24,
+        "packet_length": 102
+      },
+      "lineage_ref": "lin_15e997b92c78c53d81cf702b"
+    },
+    {
+      "evidence_id": "m_ac30cc9a857a933406da71e2",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.95577907562256,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_f80150e2f02ebf005edd5c1c"
+    },
+    {
+      "evidence_id": "m_5837c75a1b963aac0785ff28",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.37530493736267,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_c1a38e5201f110e7a8c53d23"
+    },
+    {
+      "evidence_id": "p_bb9ca1c3502dca825332aad5",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -14.915719032287598,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_37a4be72bbb20b97",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 52634,
+        "tcp_flags": 24,
+        "packet_length": 222
+      },
+      "lineage_ref": "lin_9183865909e1fd7a4775a148"
+    },
+    {
+      "evidence_id": "m_edf53aa1a7d8b02567026107",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.943974018096924,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_55bacca7333334812e72d3c5"
+    },
+    {
+      "evidence_id": "m_5c7adf34ae0d674962517643",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.117270946502686,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_10d7d34e4af9d2c93181433c"
+    },
+    {
+      "evidence_id": "p_409b3632c46a96d2b2e32e4f",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 0.00308990478515625,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_fcff6cf54d2dbc02",
+        "destination_endpoint": "ep_56e761dc5b554b7d",
+        "source_port": 48376,
+        "destination_port": 2404,
+        "tcp_flags": 16,
+        "packet_length": 66
+      },
+      "lineage_ref": "lin_43fc36835740c2d3c5428487"
+    },
+    {
+      "evidence_id": "m_e61b71ed8f55e6421dda6859",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.94076895713806,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_1ce0365e52c45b0cbb73bbbc"
+    },
+    {
+      "evidence_id": "m_58a5c63f0e1831719333e1e5",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.06963300704956,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_dcb7e5e7ec9316484173d94c"
+    },
+    {
+      "evidence_id": "p_038491645792e3aa37e8d097",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 15.004999876022339,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_5c565f7e7f2701ed",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 47182,
+        "tcp_flags": 16,
+        "packet_length": 66
+      },
+      "lineage_ref": "lin_c215a0ff9208e2aa3c00596c"
+    },
+    {
+      "evidence_id": "m_90993d626942197704bb4bdd",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.90071892738342,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_f9597ebbb35880fc8c951111"
+    },
+    {
+      "evidence_id": "m_c31e55b24d8968a44a8ee24b",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.027650117874146,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_90c610a943534505b9753a0f"
+    },
+    {
+      "evidence_id": "p_31262d91ed62107adf32aea2",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 30.01149606704712,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_52d5e312fb66fbc9",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 39968,
+        "tcp_flags": 24,
+        "packet_length": 86
+      },
+      "lineage_ref": "lin_8499e6ce874a4afe7473a7e8"
+    },
+    {
+      "evidence_id": "m_a8befeeae03da8e4f3ab8843",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.882232904434204,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_dea9cb5a33428409c79648e2"
+    },
+    {
+      "evidence_id": "m_205af44584dab429116fadf2",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.882538080215454,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_296f8cb2840df48c20d852c7"
+    },
+    {
+      "evidence_id": "p_d376811fe04985dafbe7210f",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 45.001736879348755,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_fcff6cf54d2dbc02",
+        "destination_endpoint": "ep_37a4be72bbb20b97",
+        "source_port": 52634,
+        "destination_port": 2404,
+        "tcp_flags": 16,
+        "packet_length": 66
+      },
+      "lineage_ref": "lin_a600f52b367d6568654176a2"
+    },
+    {
+      "evidence_id": "m_1558fd901a8ec75dcfef3045",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.84518098831177,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_920c585fdd356b9a35dbe0bf"
+    },
+    {
+      "evidence_id": "m_f34ebc7e96b3e62e7994f1ad",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.59568405151367,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_8ad413510df75af3faaba598"
+    },
+    {
+      "evidence_id": "p_9f073d799c95a27244dcc444",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -59.99446392059326,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_fcff6cf54d2dbc02",
+        "destination_endpoint": "ep_56e761dc5b554b7d",
+        "source_port": 48376,
+        "destination_port": 2404,
+        "tcp_flags": 16,
+        "packet_length": 66
+      },
+      "lineage_ref": "lin_ed2f81263c415a587dcef5f3"
+    },
+    {
+      "evidence_id": "m_9d2ce43de6b1d384cc0f4a14",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.81814908981323,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_e2863370339beaf3d8e81f54"
+    },
+    {
+      "evidence_id": "m_76d6bd20bceec701c2545d40",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.589617013931274,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_215e1fa56bb4fe91a000dd76"
+    },
+    {
+      "evidence_id": "p_109549c00dec39ce9bc52d1d",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -44.945449113845825,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_5c565f7e7f2701ed",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 47182,
+        "tcp_flags": 24,
+        "packet_length": 150
+      },
+      "lineage_ref": "lin_956c3eb0ca226439ef20fe64"
+    },
+    {
+      "evidence_id": "m_e73059b2fe982b31f1c4d9ab",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.80885601043701,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_59bdb20d41300e2f12e81edf"
+    },
+    {
+      "evidence_id": "m_22269f8b5f0f97ed60eb9e54",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.546945095062256,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_f435cfaa4eb9dc9af7042c1b"
+    },
+    {
+      "evidence_id": "p_bf8411f25fa49002723a1957",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -29.99372100830078,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_2b4ab76ffa866c0a",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 50320,
+        "tcp_flags": 24,
+        "packet_length": 126
+      },
+      "lineage_ref": "lin_24faf95b8760b190b135d6a3"
+    },
+    {
+      "evidence_id": "m_ccf6a2d1cf69ec808f78f669",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.796858072280884,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_0945f9ca7cabf022320b46ce"
+    },
+    {
+      "evidence_id": "m_c950a4b215e92493661def0c",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.4314501285553,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_9bffdbd2525cf3ff6d3889f4"
+    },
+    {
+      "evidence_id": "p_a7e58beeaf24f92320c9c423",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -14.915374040603638,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_5c565f7e7f2701ed",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 47182,
+        "tcp_flags": 24,
+        "packet_length": 150
+      },
+      "lineage_ref": "lin_cd1070f4a765dc588988d9ef"
+    },
+    {
+      "evidence_id": "m_23ee738d927caffcbbe76cad",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.73833894729614,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_be47a0a985a88f04cecc67bc"
+    },
+    {
+      "evidence_id": "m_b174ed23ebb046c614154e56",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.267492055892944,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_0123de5f5ff5cbb756cc6d01"
+    },
+    {
+      "evidence_id": "p_7dec498fbe4742a7681405c2",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 0.011162996292114258,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_926ef5080db67a38",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 60528,
+        "tcp_flags": 24,
+        "packet_length": 86
+      },
+      "lineage_ref": "lin_1de94d1464f00ab9a23b95ff"
+    },
+    {
+      "evidence_id": "m_6c0386b0697b131c75a812e5",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.70034313201904,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_14112a46684d2ea58b1763cd"
+    },
+    {
+      "evidence_id": "m_cbb8bb7cc45ec5d0749637ba",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.25955295562744,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_411dcc5ac0c5807f143c29d2"
+    },
+    {
+      "evidence_id": "p_67e3f156d3dbf6c8ae7f6129",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 15.007183074951172,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_37a4be72bbb20b97",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 52634,
+        "tcp_flags": 24,
+        "packet_length": 86
+      },
+      "lineage_ref": "lin_dbd1b23e2edb76bfb0129efd"
+    },
+    {
+      "evidence_id": "m_dd86e19425abe4889df1a4eb",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.68373107910156,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_afd4642c72115cd241e8ec3c"
+    },
+    {
+      "evidence_id": "m_78a2f52cc9d59627e535e233",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.21299409866333,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_80e30634c861aae9e243234a"
+    },
+    {
+      "evidence_id": "p_efe37c2059fcf96f31e05c8b",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 30.018858909606934,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_56e761dc5b554b7d",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 48376,
+        "tcp_flags": 24,
+        "packet_length": 86
+      },
+      "lineage_ref": "lin_bc3f4ea23f8ac6e4c39e0484"
+    },
+    {
+      "evidence_id": "m_8b02145ae7e0ff30c3b48b20",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.68277907371521,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_4ffccf40a18f9b4ac00ee41a"
+    },
+    {
+      "evidence_id": "m_c4b19127dfaff3aff859b5fb",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.13519310951233,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_5c3ded463975802b3af2a80b"
+    },
+    {
+      "evidence_id": "p_8e06f86309d72aa38a0b5e5d",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 45.0293710231781,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_5c565f7e7f2701ed",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 47182,
+        "tcp_flags": 16,
+        "packet_length": 66
+      },
+      "lineage_ref": "lin_06fea345a9c2fee847a3a733"
+    },
+    {
+      "evidence_id": "m_69b4d8c9a8372bb9a8732761",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.6237530708313,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_a82806487970a130fccb76db"
+    },
+    {
+      "evidence_id": "m_d8d536189460d7505e82422f",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.13291907310486,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_a007d8fb43675b6c9d0fd1b5"
+    },
+    {
+      "evidence_id": "p_1568992a9ed54eea10fabeac",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -59.994070053100586,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_3e324386f8cb68e1",
+        "destination_endpoint": "ep_fcff6cf54d2dbc02",
+        "source_port": 2404,
+        "destination_port": 43190,
+        "tcp_flags": 24,
+        "packet_length": 102
+      },
+      "lineage_ref": "lin_3ab9a10dc7020d3a62c83d8e"
+    },
+    {
+      "evidence_id": "m_1e64f39eab5e65d4cc1602fc",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.5220091342926,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_ab445e7234a1bfe8db705376"
+    },
+    {
+      "evidence_id": "m_ffe9ed7adb4eb26551c8b3fb",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -57.9888710975647,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_458a393f91b2c19d1c4ab21a"
+    },
+    {
+      "evidence_id": "p_815166c7b465d1bad085e027",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -44.94298505783081,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_fcff6cf54d2dbc02",
+        "destination_endpoint": "ep_37a4be72bbb20b97",
+        "source_port": 52634,
+        "destination_port": 2404,
+        "tcp_flags": 16,
+        "packet_length": 66
+      },
+      "lineage_ref": "lin_7dcb9bcb0eb342446a06d172"
+    },
+    {
+      "evidence_id": "m_f293b35b7520e5fa01f6e4b5",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.52097511291504,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_a249669c3db36e31c094e128"
+    },
+    {
+      "evidence_id": "m_2caafaef393c9962b4ef1839",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -57.935571908950806,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_1e5b39d7c5fc204d6385af5d"
+    },
+    {
+      "evidence_id": "p_f7394de8ed4dfa6c08d6aab8",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -29.992440938949585,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_fcff6cf54d2dbc02",
+        "destination_endpoint": "ep_14149487c2f1729e",
+        "source_port": 42740,
+        "destination_port": 2404,
+        "tcp_flags": 16,
+        "packet_length": 66
+      },
+      "lineage_ref": "lin_42a4bbb1562be15b1dad84cd"
+    }
+  ],
+  "metadata": {}
+}

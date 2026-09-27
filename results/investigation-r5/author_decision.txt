@@ -1,0 +1,515 @@
+AUTHOR DECISION:
+
+The read-only pre-freeze audit is accepted with the clarifications below.
+
+Proceed with an **r5 OFFLINE methodology and implementation candidate revision only**.
+
+You are now authorized to modify development code/config/docs/tests needed to construct the r5 candidate package.
+
+You are NOT authorized to make any model API call, run the 8192 validation, access evaluation gold/results, provision evaluation custody, or freeze the protocol.
+
+Preserve all r4 artifacts byte-for-byte.
+
+# 1. Approved final experimental matrix
+
+Adopt the following two-axis design.
+
+## Deterministic reference
+
+D0
+- Evidence view: EN
+- Method: deterministic structured reference/timeline
+- Role: descriptive/reference baseline
+- No model generation
+
+## Generation conditions
+
+G0
+- Evidence view: EN
+- Generator: fixed GPT-4.1 snapshot already selected
+- Citation mode: citation-optional
+- This corresponds conceptually to the current B2 behavior.
+- Do NOT call it “uncited”.
+- Role: RQ2 grounding/citation-requirement comparison.
+
+G1-E
+- Evidence view: E
+- Same generator
+- Citation-required
+- New condition
+- Role: RQ1
+
+G1-N
+- Evidence view: N
+- Same generator
+- Citation-required
+- New condition
+- Do NOT reuse B1 semantics because B1 was citation-optional.
+- Role: RQ1
+
+G1-EN
+- Evidence view: EN
+- Same generator
+- Citation-required
+- Corresponds conceptually to current B3
+- Role: RQ1, RQ2, RQ3
+
+## Verification condition
+
+V1-EN
+- Exact-byte replay of corresponding G1-EN output
+- Zero model calls
+- Deterministic evidence-consistency/support verification and publish/qualify/withhold processing
+- Role: RQ3
+
+Do NOT add V1-E or V1-N to the primary matrix.
+
+Do NOT add local models, model comparisons, agents, datasets, new RQs, or additional evidence views.
+
+# 2. Approved RQ contrasts
+
+## RQ1
+
+Primary evidence-view comparison:
+
+- G1-EN vs G1-E
+- G1-EN vs G1-N
+
+Hold fixed:
+- event
+- questions Q1–Q7
+- generator snapshot
+- temperature
+- repetitions
+- citation-required method
+- schema
+- output-token limit
+- total evidence-entry/byte policy
+- matching/evaluation rules
+
+Independent variable:
+- evidence view and its predeclared view-specific retrieval allocation.
+
+Important interpretation:
+
+This estimates investigation performance under the fixed total evidence budget and the predeclared retrieval policy.
+
+It is NOT a causal estimate of “adding E while keeping all N unchanged”.
+
+E and N derived from the same PCAP lineage must NOT be described as independent sensors.
+
+Both EN-vs-E and EN-vs-N contrasts must be reported.
+
+Do not claim superiority over both single-source views unless the final evaluation supports both contrasts.
+
+## RQ2
+
+Primary characterization:
+- reliability of G1-EN under required evidence citations.
+
+Grounding/citation-requirement comparison:
+- G1-EN vs G0
+
+The EN evidence bundle must otherwise be held fixed.
+
+G0 is citation-optional, not citation-forbidden.
+
+Therefore describe this comparison precisely as the effect/association of imposing the required-citation generation policy and its predeclared schema enforcement, not “citations versus no citations”.
+
+## RQ3
+
+Primary paired comparison:
+- V1-EN vs the exact corresponding G1-EN output.
+
+The raw generation, evidence bundle, receipt, and evidence IDs must be identical.
+
+The only added layer is the frozen deterministic verification/publish/qualify/withhold processing.
+
+Do not claim truth verification, causal verification, or improvement of the original generator.
+
+# 3. RQ3 coverage policy — author clarification
+
+Do NOT invent a numerical acceptable-coverage-loss threshold.
+
+There is currently no justified basis for choosing an arbitrary non-inferiority margin such as 5%, 10%, or 20%.
+
+Instead, predeclare paired trade-off reporting.
+
+RQ3 must jointly report, at minimum:
+
+- Unsupported Security-Claim Rate
+- Q1–Q6 Substantive Coverage
+- Evidence Completeness where applicable
+- Required Withholding Recall
+- Withholding Precision
+
+Report verifier-before versus verifier-after paired differences and the already approved uncertainty/statistical treatment.
+
+Do not interpret a reduction in unsupported claims alone as success if useful coverage collapses.
+
+Preserve the existing sanity rule:
+
+- always-withhold → Q1–Q6 coverage = 0
+- if there are no security assertions, Unsupported Security-Claim Rate = NA, not zero.
+
+The paper should report the safety/coverage trade-off rather than use an arbitrary binary pass/fail margin.
+
+# 4. Metric vocabulary — do not silently expand it
+
+Use the already approved investigation metric set as the canonical metric vocabulary.
+
+Canonical metrics include:
+
+- Citation Precision
+- Complete-support rate
+- Evidence Completeness / Gold Fact Recall
+- View-conditional completeness
+- Unsupported Security-Claim Rate
+- Numerical Accuracy / consistency as already defined
+- Asset Consistency
+- Temporal Consistency
+- Required Withholding Recall
+- Withholding Precision
+- Action Accuracy if retained by the existing approved protocol
+- Q1–Q6 Substantive Coverage
+- Retrieval Recall
+- Schema Compliance
+
+Do NOT silently introduce a new primary metric named:
+- Supported Claim Precision
+- verifier disposition accuracy
+- false-withhold rate
+or another newly invented metric.
+
+If an existing implementation field uses a different historical name, document the mapping to the canonical metric rather than silently creating a second metric.
+
+Specifically inspect the current “Citation Validity” implementation versus the approved Citation Precision definition.
+
+The intended Citation Precision definition is:
+
+supporting visible citation pairs / all cited pairs
+
+where support includes the required claim/evidence role semantics, not merely existence of an evidence ID.
+
+If implementation and policy disagree, report the disagreement and make the minimum candidate correction needed to implement the approved definition.
+
+Do not change human gold to make metrics easier to compute.
+
+# 5. Denominators
+
+Preserve the approved distinction:
+
+Let G_e be the common positive full-EN gold fact set for event e.
+
+Let G_ev be the subset supportable from complete evidence view v.
+
+Primary RQ1 Evidence Completeness uses the common G_e denominator across E/N/EN.
+
+View-conditional completeness uses G_ev.
+
+Report |G_ev| / |G_e| or equivalent counts so the reader can understand view limitations.
+
+Retrieval Recall must distinguish:
+- source unavailable in the view,
+- supportable but not retrieved,
+- retrieved but not generated/recovered.
+
+Guardrails do not enter the positive gold-fact recall denominator.
+
+Zero denominator → NA and report counts.
+
+Preserve duplicate/alias handling and the existing numeric specialization B.
+
+# 6. E-only and N citation-required implementation
+
+Implement G1-E and G1-N as mechanical view variants of the same citation-required generation policy used by G1-EN.
+
+Do not create independently drifting prompt logic.
+
+Where possible:
+- use one canonical citation-required prompt template,
+- bind evidence view explicitly,
+- preserve identical investigation questions and claim semantics.
+
+G1-E must see only:
+- E evidence
+- approved necessary configuration/channel metadata
+
+It must not receive hidden N evidence.
+
+G1-N must see only:
+- N evidence
+- approved necessary network/configuration mapping metadata
+
+It must not receive hidden electrical/process values.
+
+Single-source views must not manufacture cross-source temporal relationships.
+
+Preserve:
+- E=64
+- N=64
+- EN=32N+32E
+- existing 48,000-byte policy
+- existing retrieval ordering
+- existing evidence safety ceiling
+- existing claim support semantics.
+
+Do NOT change retrieval ranking or quotas merely to improve a result.
+
+# 7. Human gold
+
+Human gold must remain unchanged.
+
+Do NOT:
+- rewrite gold facts,
+- add aliases to accommodate system outputs,
+- modify guardrails,
+- alter human judgments,
+- regenerate annotations,
+- introduce LLM-created gold.
+
+Preserve the single-reviewer methodology.
+
+Gold reviewer = R1.
+
+Do not claim:
+- dual annotation,
+- independent second reviewer,
+- adjudication,
+- IAA.
+
+Extend only the mechanical contract/readers necessary to consume already-existing E eligibility/accounting if required.
+
+If any requested new condition cannot be evaluated without changing human gold semantics, STOP and report the blocker instead.
+
+# 8. Statistics
+
+Preserve:
+
+- 3 repetitions
+- repetition metrics first aggregated within event
+- event as primary statistical unit
+- event-macro primary
+- pooled micro supplementary
+- 2,000 bootstrap resamples
+- seed 20270922
+- scenario-stratified resampling
+- repetitions/claims/packets are not independent experimental units.
+
+Update only the predeclared contrast list to the approved r5 matrix.
+
+Do not change event IDs or scenario strata.
+
+# 9. 8192 output candidate
+
+4096 is rejected as the intended final output configuration because r4 observed 55/144 max-output truncations.
+
+8192 is approved only as the next DEVELOPMENT CANDIDATE.
+
+Do NOT call the model in this turn.
+
+Prepare the r5 candidate configuration with:
+
+max_output_tokens = 8192
+
+but clearly mark it:
+NOT YET VALIDATED
+NOT FROZEN
+
+Keep the existing 16384 INPUT EVIDENCE SAFETY CEILING conceptually and operationally separate from the 8192 model output limit.
+
+# 10. Predeclare the next development validation manifest
+
+Prepare, but DO NOT execute, the following minimum 64-position validation manifest:
+
+Capacity stress validation:
+- G0: the 19 prior B2 positions that ended specifically due to max_output_tokens
+- G1-EN: the 21 prior B3 positions that ended specifically due to max_output_tokens
+
+New-condition smoke validation:
+- G1-E: 4 existing human-reviewed pilot events × 3 repetitions = 12
+- G1-N: same 4 pilot events × 3 repetitions = 12
+
+Total model-generation positions = 64.
+
+Do not include the 15 historical B1 truncations in the primary 64-position validation because B1 is no longer a primary final condition and does not have the G1-N required-citation method.
+
+Preserve those 15 r4 records as historical diagnostics.
+
+Before any future API authorization, run offline checks across all 16 development E bundles for:
+- schema compatibility
+- evidence visibility
+- metadata allowance
+- byte budget
+- token safety ceiling
+- receipt/hash binding
+- no hidden N support.
+
+# 11. Predeclare 8192 validation acceptance rules
+
+The future 64-position run will pass output-cap validation only if:
+
+1. zero delivered responses terminate because of `max_output_tokens`;
+2. all otherwise delivered smoke-test responses satisfy strict output/schema parsing and view/reference visibility checks;
+3. request diffs confirm the intended configuration;
+4. no prompt, retrieval, gold, matching, verifier, metric, or evidence-policy change occurs during the run.
+
+Transport failures, provider refusals, rate limits, or other no-delivery failures must be reported separately and do not count as evidence that the output cap passed or failed.
+
+If ANY future 8192 response terminates specifically because of `max_output_tokens`:
+
+- preserve it,
+- stop the capacity acceptance process,
+- report to the author,
+- do NOT automatically change to 16384,
+- do NOT automatically rerun it.
+
+No API calls are authorized in this turn.
+
+# 12. Transport policy
+
+Preserve all r4 transport history.
+
+For the r5 candidate, inspect and test offline the treatment of ConnectionResetError and related transport-only exceptions.
+
+Do not alter historical r4 status.
+
+Any proposed r5 transport handling must:
+- remain transport-only,
+- never retry based on answer quality,
+- never retry based on citations, scores, verifier result, or semantic correctness,
+- preserve attempt history.
+
+Return the proposed exact transport policy for author review.
+
+Do NOT exercise it against the API.
+
+# 13. Evaluation custody
+
+Do NOT provision or access evaluation custody in this turn.
+
+Prepare an exact offline checklist for the later custody step covering:
+
+- storage location/role confirmation
+- OS/account ACL
+- proof that development/generation identity cannot read evaluation gold/truth/review ledgers
+- scoring-role access
+- OS/account access logging
+- external log commitments
+- non-sensitive allow/deny test
+- gold manifest/version/hash commitment
+- separate authorization for evaluation runner.
+
+Preserve the historical disclosure that some selected-event evidence/B0 may have been inspected during earlier research phases.
+
+Do not claim the entire evaluation set has historically been untouched merely because r4 did not access it.
+
+# 14. Versioning and preservation
+
+Create a NEW r5 candidate package.
+
+Do not overwrite r4.
+
+Preserve byte-for-byte:
+- r4 prompts
+- r4 configs
+- r4 manifests
+- r4 API responses
+- r4 failures
+- recovery records
+- delivery-unknown records
+- human gold sealed snapshots.
+
+For r5:
+- generate new hashes for changed/new files;
+- reuse unchanged bytes where possible;
+- record parent/version relationships;
+- include authoritative RQ definitions, baseline/matrix definitions, metric definitions, support policy, statistical plan, model config, token/output config, runner bindings, prompts, schemas, custody config/checklist, and development validation manifest in the candidate freeze inventory.
+
+Do NOT mark the inventory frozen.
+
+# 15. Offline tests
+
+Run all relevant local tests.
+
+Add targeted tests for at least:
+
+- G1-E visibility isolation
+- G1-N visibility isolation
+- shared citation-required prompt semantics
+- cell_id/view/citation_mode separation
+- E gold-contract compatibility
+- common G_e denominator
+- G_ev view-conditional denominator
+- zero-denominator NA
+- withholding metric opportunities
+- always-withhold sanity behavior
+- G1-EN→V1-EN exact replay identity
+- no model call by V1-EN
+- new contrast configuration
+- 8192 candidate config
+- distinction between 8192 output cap and 16384 input safety ceiling
+- 64-position validation manifest identity
+- transport-only exception policy
+- preservation/hash checks for r4.
+
+Do not use model outputs to tune tests.
+
+# 16. Required deliverables
+
+Return:
+
+A. exact r5 matrix
+
+B. RQ→contrast mapping
+
+C. list of files changed/added
+
+D. explicit list of files intentionally unchanged
+
+E. metric/denominator specification
+
+F. any implementation-policy disagreement discovered
+
+G. all local test results
+
+H. 64-position development validation manifest summary
+
+I. proposed transport policy
+
+J. evaluation custody checklist
+
+K. r5 candidate inventory and hashes
+
+L. remaining freeze blockers
+
+M. exact next action you recommend the author authorize
+
+Also report whether any change would invalidate or require modification of the sealed human gold.
+
+Expected answer should be NO; if not, STOP and explain before proceeding further.
+
+# HARD STOP CONDITIONS
+
+During this turn, DO NOT:
+
+- call GPT-4.1 or any external model API;
+- run the 64-position development validation;
+- access evaluation evidence beyond already-authorized non-sensitive selection metadata;
+- access evaluation gold;
+- access evaluation results;
+- provision evaluation custody;
+- modify human gold;
+- modify r4 artifacts;
+- freeze the protocol;
+- start final evaluation;
+- choose results based on model quality;
+- add a new RQ;
+- add a new model;
+- silently add new primary metrics.
+
+After producing the r5 offline candidate package and sections A–M:
+
+STOP.
+
+Wait for explicit author approval.

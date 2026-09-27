@@ -1,0 +1,1449 @@
+{
+  "schema_version": "investigation-retrieval-v2",
+  "scope": {
+    "evidence_id": "d_516c02e3c028bd804d81e6ba",
+    "event_id": "ev_47f867601cdff155820e",
+    "view": "EN",
+    "window": [
+      -60,
+      60
+    ],
+    "right_boundary_exclusive": true,
+    "time_basis": "capture_time_relative_to_supplied_event_anchor",
+    "reported_measurement_time_available": false,
+    "source_relationship": "E and N may share packet ancestry; not independent sensors",
+    "visibility": "export view restriction, not canonical source removal",
+    "available_domains": [
+      "E",
+      "N"
+    ],
+    "command_target_mapping": "approved_static_command_address_v2"
+  },
+  "entries": [
+    {
+      "evidence_id": "m_706601ec37bb0451a137455f",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": 0.01782369613647461,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 47,
+        "cause_of_transmission": 6
+      },
+      "lineage_ref": "lin_2807b942a6ba6dbe296d641d"
+    },
+    {
+      "evidence_id": "a_6f9a7c8532d33c5b1199e16c",
+      "source_type": "command_address_observation",
+      "view": "N",
+      "parent_ids": [
+        "m_706601ec37bb0451a137455f"
+      ],
+      "asdu_type": 47,
+      "cause_of_transmission": 6,
+      "object_index": 0,
+      "observation_time": 0.01782369613647461,
+      "mapped_control_point_id": "cp_eec22f800ef36118",
+      "mapped_target_asset_id": "asset_b577c35caecef041",
+      "mapping_evidence_id": "meta_72243784d8824a41a4856558",
+      "mapping_status": "exact_static_match",
+      "reason": "exact_allowlisted_static_mapping"
+    },
+    {
+      "evidence_id": "m_f25b42299085d6ed7cda5dbb",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": 0.043381690979003906,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 47,
+        "cause_of_transmission": 7
+      },
+      "lineage_ref": "lin_d830619c933a01b80902d7cd"
+    },
+    {
+      "evidence_id": "a_9e5d025e357c21e6a957e05b",
+      "source_type": "command_address_observation",
+      "view": "N",
+      "parent_ids": [
+        "m_f25b42299085d6ed7cda5dbb"
+      ],
+      "asdu_type": 47,
+      "cause_of_transmission": 7,
+      "object_index": 0,
+      "observation_time": 0.043381690979003906,
+      "mapped_control_point_id": "cp_eec22f800ef36118",
+      "mapped_target_asset_id": "asset_b577c35caecef041",
+      "mapping_evidence_id": "meta_72243784d8824a41a4856558",
+      "mapping_status": "exact_static_match",
+      "reason": "exact_allowlisted_static_mapping"
+    },
+    {
+      "evidence_id": "p_b308691dd3eeba6ea18e2b9e",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 58.35782074928284,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_e554cd31a5e47609",
+        "destination_endpoint": "ep_2271b471b54eae65",
+        "source_port": 34018,
+        "destination_port": 2404,
+        "tcp_flags": 16,
+        "packet_length": 66
+      },
+      "lineage_ref": "lin_89eb75c02b8d206ebc887239"
+    },
+    {
+      "evidence_id": "p_53a06becbb1741617e958996",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 59.42603373527527,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_e554cd31a5e47609",
+        "destination_endpoint": "ep_5310943d915582cf",
+        "source_port": 43150,
+        "destination_port": 2404,
+        "tcp_flags": 24,
+        "packet_length": 72
+      },
+      "lineage_ref": "lin_55cc93f18af48917a2417c1f"
+    },
+    {
+      "evidence_id": "d_d2504bba7faaf6aca379773c",
+      "view": "N",
+      "source_type": "derived",
+      "asset_id": null,
+      "observation_time": 59.42603373527527,
+      "unit": "SECOND",
+      "parent_ids": [
+        "p_b308691dd3eeba6ea18e2b9e",
+        "p_53a06becbb1741617e958996"
+      ],
+      "fields": {
+        "kind": "communication_gap",
+        "population": "captured_TCP_2404_packets",
+        "window": [
+          -60,
+          60
+        ],
+        "complete_visible_query": true,
+        "eligible_count": 1544,
+        "ordered_population_sha256": "0f82c56ea6123a651b464185f7caebf348f2591c8d92541e76079df9e5ef800a",
+        "universe_sha256": "5510c2615c344b04be9cbb968a1850af1b3697b58da20900dd0238fa7d35c1f6",
+        "start": 58.35782074928284,
+        "end": 59.42603373527527,
+        "duration_seconds": 1.0682129859924316,
+        "left_id": "p_b308691dd3eeba6ea18e2b9e",
+        "right_id": "p_53a06becbb1741617e958996",
+        "left_censored": false,
+        "right_censored": false,
+        "interpretation": "No matching captured packet inside this interval; not proof of outage or attack."
+      }
+    },
+    {
+      "evidence_id": "m_8f3244b2c398ac9abaf9db49",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.98543834686279,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_49a1c421c3298497872722f8"
+    },
+    {
+      "evidence_id": "m_1be9aa9824bc25daac1d7fb0",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.96496844291687,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_23bfb4ba8835b3b69e2d31fa"
+    },
+    {
+      "evidence_id": "p_9897b5946049718f5f046cbe",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -59.98543834686279,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_b88d03f3c6e0faff",
+        "destination_endpoint": "ep_e554cd31a5e47609",
+        "source_port": 2404,
+        "destination_port": 59412,
+        "tcp_flags": 24,
+        "packet_length": 174
+      },
+      "lineage_ref": "lin_b8c2446cb2b461c333d58e34"
+    },
+    {
+      "evidence_id": "m_666abf36e8082252e7450876",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.396151304244995,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_978c23bd657b595f58aa886f"
+    },
+    {
+      "evidence_id": "m_c03dbf6f649f6fffa4d70c51",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.82915139198303,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_34b7ab478eca8f8cd0b17d25"
+    },
+    {
+      "evidence_id": "p_d5ebdab2711687ab668d614f",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -44.668129444122314,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_e554cd31a5e47609",
+        "destination_endpoint": "ep_cbf7a78e20f00525",
+        "source_port": 44700,
+        "destination_port": 2404,
+        "tcp_flags": 24,
+        "packet_length": 72
+      },
+      "lineage_ref": "lin_5784a473f45c1a1e144bdd6d"
+    },
+    {
+      "evidence_id": "m_0ac7c59026400a02a3af5dce",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.052921295166016,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_8cd69beaaf7a90687cfe8adf"
+    },
+    {
+      "evidence_id": "m_df90a63de4d529828646faa0",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -59.65977740287781,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_b55cb2b1e4773539a0babca4"
+    },
+    {
+      "evidence_id": "p_7e0d512ee95dca2243a63fc1",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -29.91243624687195,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_e554cd31a5e47609",
+        "destination_endpoint": "ep_260035033b365a98",
+        "source_port": 50978,
+        "destination_port": 2404,
+        "tcp_flags": 24,
+        "packet_length": 72
+      },
+      "lineage_ref": "lin_825e35f161f4492b94405a10"
+    },
+    {
+      "evidence_id": "m_08e0d55436ea3770ee4abd82",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.92985439300537,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_5e839881b13df28419bbc60f"
+    },
+    {
+      "evidence_id": "m_64ec3e30a5593e59b5ef0b45",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -57.97653532028198,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_25276dbf634ff1109354a7fe"
+    },
+    {
+      "evidence_id": "p_17207448d2b0239fdf097b66",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": -14.689507246017456,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_e554cd31a5e47609",
+        "destination_endpoint": "ep_cbf7a78e20f00525",
+        "source_port": 44700,
+        "destination_port": 2404,
+        "tcp_flags": 24,
+        "packet_length": 72
+      },
+      "lineage_ref": "lin_c9380591e8bff985b9f3998c"
+    },
+    {
+      "evidence_id": "m_5c052905e90498780aed4dc2",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.922157287597656,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_9a67ab46bda0909ddfe16e7d"
+    },
+    {
+      "evidence_id": "m_42d33b0b10d878b658f37fc6",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -57.38911437988281,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_4a8889267e76a83d01f96b37"
+    },
+    {
+      "evidence_id": "p_0dd97525d318d301934bfd35",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 0.01782369613647461,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_e554cd31a5e47609",
+        "destination_endpoint": "ep_62766148661b7d11",
+        "source_port": 46184,
+        "destination_port": 2404,
+        "tcp_flags": 24,
+        "packet_length": 82
+      },
+      "lineage_ref": "lin_656cf77e2efa5734e11935d8"
+    },
+    {
+      "evidence_id": "m_76a52268ff9e96c8f1b1b0c3",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.87766432762146,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_b1318e621647e2c4c40df7a6"
+    },
+    {
+      "evidence_id": "m_c2bc49b34635b2728d9893ea",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -57.04610538482666,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_92857e61d21a782d6d91dd8e"
+    },
+    {
+      "evidence_id": "p_a5578b64d8c132fc7bbcd10f",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 15.290453672409058,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_e554cd31a5e47609",
+        "destination_endpoint": "ep_cbf7a78e20f00525",
+        "source_port": 44700,
+        "destination_port": 2404,
+        "tcp_flags": 24,
+        "packet_length": 72
+      },
+      "lineage_ref": "lin_f900a22d946a85d837b6936d"
+    },
+    {
+      "evidence_id": "m_532b4a868888f73d822f2523",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.83069324493408,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_04d2faf8f3dd1217dadb190e"
+    },
+    {
+      "evidence_id": "m_c1213870ebe9f8a91c71d2f9",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -56.92198038101196,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_d2304cb1891093e5b653a4d1"
+    },
+    {
+      "evidence_id": "p_e58a4b0144eea13b3fd7ccaa",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 30.031076669692993,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_b88d03f3c6e0faff",
+        "destination_endpoint": "ep_e554cd31a5e47609",
+        "source_port": 2404,
+        "destination_port": 59412,
+        "tcp_flags": 24,
+        "packet_length": 174
+      },
+      "lineage_ref": "lin_adb2a8a9d2807817efa5245e"
+    },
+    {
+      "evidence_id": "m_eb8c9e0dca8e84b949d252f7",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.64412045478821,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_cb176b01c3249f2ba044b34e"
+    },
+    {
+      "evidence_id": "m_405b0ced5dc2f96fb3acf1cc",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -56.91519546508789,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "S",
+        "asdu_type": null,
+        "cause_of_transmission": null
+      },
+      "lineage_ref": "lin_6eda6b1c2224847343a521c0"
+    },
+    {
+      "evidence_id": "p_b76e616bc2c3351198eff42e",
+      "view": "N",
+      "source_type": "packet",
+      "observation_time": 45.370359659194946,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "TCP",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "ip_protocol": 6,
+        "source_endpoint": "ep_e554cd31a5e47609",
+        "destination_endpoint": "ep_cbf7a78e20f00525",
+        "source_port": 44700,
+        "destination_port": 2404,
+        "tcp_flags": 24,
+        "packet_length": 72
+      },
+      "lineage_ref": "lin_638231d7b4956a19133d0d51"
+    },
+    {
+      "evidence_id": "m_27279e61a902154383e20ce8",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": -58.563605308532715,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 13,
+        "cause_of_transmission": 1
+      },
+      "lineage_ref": "lin_f23de8bdb096380a17e21495"
+    },
+    {
+      "evidence_id": "e_3492b8ccb078eeef2a5c6194",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": 2.3742475509643555,
+      "reported_time": null,
+      "asset_id": "asset_b577c35caecef041",
+      "protocol": "IEC104",
+      "value": -6086076.5,
+      "unit": "VAR",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_7d2fa08ef1f6721a",
+        "family": "reactive_power",
+        "attribute": "reactive_power_lv",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_bfe91c43bd273ca0cac6d530"
+    },
+    {
+      "evidence_id": "e_f97d55b7e588333339102605",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": -58.92985439300537,
+      "reported_time": null,
+      "asset_id": "asset_e2ac935da817f983",
+      "protocol": "IEC104",
+      "value": 1.0138846635818481,
+      "unit": "PER_UNIT",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_076a19f4adcfcfee",
+        "family": "voltage",
+        "attribute": "voltage",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_987b0f7b4790a8828321961e"
+    },
+    {
+      "evidence_id": "e_aaee4a2258a8b5f812effc7b",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": 51.1192307472229,
+      "reported_time": null,
+      "asset_id": "asset_e2ac935da817f983",
+      "protocol": "IEC104",
+      "value": 0.9980059862136841,
+      "unit": "PER_UNIT",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_076a19f4adcfcfee",
+        "family": "voltage",
+        "attribute": "voltage",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_41016e097d5992040410beee"
+    },
+    {
+      "evidence_id": "d_0fb2c2d25f0eb3926c54bc56",
+      "view": "E",
+      "source_type": "derived",
+      "asset_id": "asset_e2ac935da817f983",
+      "observation_time": 51.1192307472229,
+      "unit": "PER_UNIT",
+      "parent_ids": [
+        "e_f97d55b7e588333339102605",
+        "e_aaee4a2258a8b5f812effc7b"
+      ],
+      "fields": {
+        "kind": "numeric_difference",
+        "channel_id": "ch_076a19f4adcfcfee",
+        "family": "voltage",
+        "before_id": "e_f97d55b7e588333339102605",
+        "after_id": "e_aaee4a2258a8b5f812effc7b",
+        "before_value": 1.0138846635818481,
+        "after_value": 0.9980059862136841,
+        "before_time": -58.92985439300537,
+        "after_time": 51.1192307472229,
+        "difference": -0.015878677368164062,
+        "percent_change": -1.56612265068375,
+        "percent_unavailable_reason": null
+      }
+    },
+    {
+      "evidence_id": "e_8c6017fe47f27dc25b527ad5",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": -52.30606245994568,
+      "reported_time": null,
+      "asset_id": "asset_05f863fa83922ddb",
+      "protocol": "IEC104",
+      "value": -0.2338903248310089,
+      "unit": "AMPERE",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_01e1fd95179ba1da",
+        "family": "current",
+        "attribute": "current_from",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_ca82404defe69f35dad349b6"
+    },
+    {
+      "evidence_id": "e_aa60a293680a97e66758e0ee",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": 57.756980657577515,
+      "reported_time": null,
+      "asset_id": "asset_05f863fa83922ddb",
+      "protocol": "IEC104",
+      "value": 0.13768534362316132,
+      "unit": "AMPERE",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_01e1fd95179ba1da",
+        "family": "current",
+        "attribute": "current_from",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_88f4ab17791ae56983e3a4ad"
+    },
+    {
+      "evidence_id": "d_8d246f5e31719fb878cd6b1d",
+      "view": "E",
+      "source_type": "derived",
+      "asset_id": "asset_05f863fa83922ddb",
+      "observation_time": 57.756980657577515,
+      "unit": "AMPERE",
+      "parent_ids": [
+        "e_8c6017fe47f27dc25b527ad5",
+        "e_aa60a293680a97e66758e0ee"
+      ],
+      "fields": {
+        "kind": "numeric_difference",
+        "channel_id": "ch_01e1fd95179ba1da",
+        "family": "current",
+        "before_id": "e_8c6017fe47f27dc25b527ad5",
+        "after_id": "e_aa60a293680a97e66758e0ee",
+        "before_value": -0.2338903248310089,
+        "after_value": 0.13768534362316132,
+        "before_time": -52.30606245994568,
+        "after_time": 57.756980657577515,
+        "difference": 0.3715756684541702,
+        "percent_change": 158.86748146706884,
+        "percent_unavailable_reason": null
+      }
+    },
+    {
+      "evidence_id": "e_4721fa06cfbae5e050f8a769",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": -57.71600341796875,
+      "reported_time": null,
+      "asset_id": "asset_4d923a00ddbc2ebb",
+      "protocol": "IEC104",
+      "value": 0.0,
+      "unit": "WATT",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_001bab0aa0d8aca6",
+        "family": "active_power",
+        "attribute": "active_power",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_2721c1adebf2e6c12d18ee66"
+    },
+    {
+      "evidence_id": "e_fe98b069686602de8753035e",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": 52.35004472732544,
+      "reported_time": null,
+      "asset_id": "asset_4d923a00ddbc2ebb",
+      "protocol": "IEC104",
+      "value": 0.0,
+      "unit": "WATT",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_001bab0aa0d8aca6",
+        "family": "active_power",
+        "attribute": "active_power",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_b228c4b17a24af9202d1a008"
+    },
+    {
+      "evidence_id": "d_156403f55c4479033f1d30b7",
+      "view": "E",
+      "source_type": "derived",
+      "asset_id": "asset_4d923a00ddbc2ebb",
+      "observation_time": 52.35004472732544,
+      "unit": "WATT",
+      "parent_ids": [
+        "e_4721fa06cfbae5e050f8a769",
+        "e_fe98b069686602de8753035e"
+      ],
+      "fields": {
+        "kind": "numeric_difference",
+        "channel_id": "ch_001bab0aa0d8aca6",
+        "family": "active_power",
+        "before_id": "e_4721fa06cfbae5e050f8a769",
+        "after_id": "e_fe98b069686602de8753035e",
+        "before_value": 0.0,
+        "after_value": 0.0,
+        "before_time": -57.71600341796875,
+        "after_time": 52.35004472732544,
+        "difference": 0.0,
+        "percent_change": null,
+        "percent_unavailable_reason": "zero_baseline"
+      }
+    },
+    {
+      "evidence_id": "e_b63093a1b1fc19990001bc07",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": -54.612831354141235,
+      "reported_time": null,
+      "asset_id": "asset_de9190407c63f4f6",
+      "protocol": "IEC104",
+      "value": 0.0,
+      "unit": "VAR",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_01b8d2ffcf69123e",
+        "family": "reactive_power",
+        "attribute": "reactive_power",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_223de2dfd11487f185e1109e"
+    },
+    {
+      "evidence_id": "e_46d1fa9e6523723a7c9b9d3d",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": 55.402432680130005,
+      "reported_time": null,
+      "asset_id": "asset_de9190407c63f4f6",
+      "protocol": "IEC104",
+      "value": 0.0,
+      "unit": "VAR",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_01b8d2ffcf69123e",
+        "family": "reactive_power",
+        "attribute": "reactive_power",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_6d68d81a2c64797879f0b2b4"
+    },
+    {
+      "evidence_id": "d_3d8927fd0cf4c1ee496f9881",
+      "view": "E",
+      "source_type": "derived",
+      "asset_id": "asset_de9190407c63f4f6",
+      "observation_time": 55.402432680130005,
+      "unit": "VAR",
+      "parent_ids": [
+        "e_b63093a1b1fc19990001bc07",
+        "e_46d1fa9e6523723a7c9b9d3d"
+      ],
+      "fields": {
+        "kind": "numeric_difference",
+        "channel_id": "ch_01b8d2ffcf69123e",
+        "family": "reactive_power",
+        "before_id": "e_b63093a1b1fc19990001bc07",
+        "after_id": "e_46d1fa9e6523723a7c9b9d3d",
+        "before_value": 0.0,
+        "after_value": 0.0,
+        "before_time": -54.612831354141235,
+        "after_time": 55.402432680130005,
+        "difference": 0.0,
+        "percent_change": null,
+        "percent_unavailable_reason": "zero_baseline"
+      }
+    },
+    {
+      "evidence_id": "e_62226168cd9abe764dbf0c17",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": -58.563605308532715,
+      "reported_time": null,
+      "asset_id": "asset_81911edb216ad8f2",
+      "protocol": "IEC104",
+      "value": 0.9860643148422241,
+      "unit": "PER_UNIT",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_0df799387203cb49",
+        "family": "voltage",
+        "attribute": "voltage_to",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_e1a2f725a2fb07de69296898"
+    },
+    {
+      "evidence_id": "e_06b01f45cdb23a6ff329d690",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": 51.524895668029785,
+      "reported_time": null,
+      "asset_id": "asset_81911edb216ad8f2",
+      "protocol": "IEC104",
+      "value": 0.9746437668800354,
+      "unit": "PER_UNIT",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_0df799387203cb49",
+        "family": "voltage",
+        "attribute": "voltage_to",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_9f0957e2cd47b0b5225558c4"
+    },
+    {
+      "evidence_id": "d_7fd74b42206b81d1e3e5e138",
+      "view": "E",
+      "source_type": "derived",
+      "asset_id": "asset_81911edb216ad8f2",
+      "observation_time": 51.524895668029785,
+      "unit": "PER_UNIT",
+      "parent_ids": [
+        "e_62226168cd9abe764dbf0c17",
+        "e_06b01f45cdb23a6ff329d690"
+      ],
+      "fields": {
+        "kind": "numeric_difference",
+        "channel_id": "ch_0df799387203cb49",
+        "family": "voltage",
+        "before_id": "e_62226168cd9abe764dbf0c17",
+        "after_id": "e_06b01f45cdb23a6ff329d690",
+        "before_value": 0.9860643148422241,
+        "after_value": 0.9746437668800354,
+        "before_time": -58.563605308532715,
+        "after_time": 51.524895668029785,
+        "difference": -0.01142054796218872,
+        "percent_change": -1.1581950376143642,
+        "percent_unavailable_reason": null
+      }
+    },
+    {
+      "evidence_id": "e_5b321e456136402d04088bc3",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": -56.31067728996277,
+      "reported_time": null,
+      "asset_id": "asset_bb32093e58313f5a",
+      "protocol": "IEC104",
+      "value": 15.376551628112793,
+      "unit": "AMPERE",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_1038cbb1a8c65915",
+        "family": "current",
+        "attribute": "current_from",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_2fab389a71b6492d9657cf8b"
+    },
+    {
+      "evidence_id": "e_9dfb5d7f23ed267b40d05edd",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": 53.82407069206238,
+      "reported_time": null,
+      "asset_id": "asset_bb32093e58313f5a",
+      "protocol": "IEC104",
+      "value": 14.76878547668457,
+      "unit": "AMPERE",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_1038cbb1a8c65915",
+        "family": "current",
+        "attribute": "current_from",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_285cb8a937f442fe031dffc2"
+    },
+    {
+      "evidence_id": "d_d358e0fac167ebf9207d37c0",
+      "view": "E",
+      "source_type": "derived",
+      "asset_id": "asset_bb32093e58313f5a",
+      "observation_time": 53.82407069206238,
+      "unit": "AMPERE",
+      "parent_ids": [
+        "e_5b321e456136402d04088bc3",
+        "e_9dfb5d7f23ed267b40d05edd"
+      ],
+      "fields": {
+        "kind": "numeric_difference",
+        "channel_id": "ch_1038cbb1a8c65915",
+        "family": "current",
+        "before_id": "e_5b321e456136402d04088bc3",
+        "after_id": "e_9dfb5d7f23ed267b40d05edd",
+        "before_value": 15.376551628112793,
+        "after_value": 14.76878547668457,
+        "before_time": -56.31067728996277,
+        "after_time": 53.82407069206238,
+        "difference": -0.6077661514282227,
+        "percent_change": -3.952551691219571,
+        "percent_unavailable_reason": null
+      }
+    },
+    {
+      "evidence_id": "e_6556edcb9a73ce409ec544b9",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": -58.563605308532715,
+      "reported_time": null,
+      "asset_id": "asset_81911edb216ad8f2",
+      "protocol": "IEC104",
+      "value": -289644.15625,
+      "unit": "WATT",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_0270f5cae2a7db0e",
+        "family": "active_power",
+        "attribute": "active_power_to",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_9bc82fe36570d26885a52a90"
+    },
+    {
+      "evidence_id": "e_1da0aa951634dca5263a79c4",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": 51.524895668029785,
+      "reported_time": null,
+      "asset_id": "asset_81911edb216ad8f2",
+      "protocol": "IEC104",
+      "value": -157838.234375,
+      "unit": "WATT",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_0270f5cae2a7db0e",
+        "family": "active_power",
+        "attribute": "active_power_to",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_6289b197ba2948dc5d551c40"
+    },
+    {
+      "evidence_id": "d_775e2057d8b0cc10200da21f",
+      "view": "E",
+      "source_type": "derived",
+      "asset_id": "asset_81911edb216ad8f2",
+      "observation_time": 51.524895668029785,
+      "unit": "WATT",
+      "parent_ids": [
+        "e_6556edcb9a73ce409ec544b9",
+        "e_1da0aa951634dca5263a79c4"
+      ],
+      "fields": {
+        "kind": "numeric_difference",
+        "channel_id": "ch_0270f5cae2a7db0e",
+        "family": "active_power",
+        "before_id": "e_6556edcb9a73ce409ec544b9",
+        "after_id": "e_1da0aa951634dca5263a79c4",
+        "before_value": -289644.15625,
+        "after_value": -157838.234375,
+        "before_time": -58.563605308532715,
+        "after_time": 51.524895668029785,
+        "difference": 131805.921875,
+        "percent_change": 45.50615609908408,
+        "percent_unavailable_reason": null
+      }
+    },
+    {
+      "evidence_id": "e_697839fd8619610f9e09375f",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": -57.437124252319336,
+      "reported_time": null,
+      "asset_id": "asset_cd5cd99228029725",
+      "protocol": "IEC104",
+      "value": 5407056.5,
+      "unit": "VAR",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_0ae2e038e7d56a1d",
+        "family": "reactive_power",
+        "attribute": "reactive_power_hv",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_a35c33aa15cdba48535018c6"
+    },
+    {
+      "evidence_id": "e_abb7795a24799ffa25670e8b",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": 52.62197661399841,
+      "reported_time": null,
+      "asset_id": "asset_cd5cd99228029725",
+      "protocol": "IEC104",
+      "value": 5239077.5,
+      "unit": "VAR",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_0ae2e038e7d56a1d",
+        "family": "reactive_power",
+        "attribute": "reactive_power_hv",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_94d0c3fbf288bb371bcde3c1"
+    },
+    {
+      "evidence_id": "d_431531aa583fcb4815eee71a",
+      "view": "E",
+      "source_type": "derived",
+      "asset_id": "asset_cd5cd99228029725",
+      "observation_time": 52.62197661399841,
+      "unit": "VAR",
+      "parent_ids": [
+        "e_697839fd8619610f9e09375f",
+        "e_abb7795a24799ffa25670e8b"
+      ],
+      "fields": {
+        "kind": "numeric_difference",
+        "channel_id": "ch_0ae2e038e7d56a1d",
+        "family": "reactive_power",
+        "before_id": "e_697839fd8619610f9e09375f",
+        "after_id": "e_abb7795a24799ffa25670e8b",
+        "before_value": 5407056.5,
+        "after_value": 5239077.5,
+        "before_time": -57.437124252319336,
+        "after_time": 52.62197661399841,
+        "difference": -167979.0,
+        "percent_change": -3.106662562153734,
+        "percent_unavailable_reason": null
+      }
+    },
+    {
+      "evidence_id": "e_83323b8279822c69108715f5",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": -51.92440843582153,
+      "reported_time": null,
+      "asset_id": "asset_c6f616ca8417c234",
+      "protocol": "IEC104",
+      "value": 0.9868950843811035,
+      "unit": "PER_UNIT",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_1050b0e0a5f690c5",
+        "family": "voltage",
+        "attribute": "voltage_to",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_5d96462489529f13110881c0"
+    },
+    {
+      "evidence_id": "e_dcfc4d0a56237049958112cf",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": 58.142003536224365,
+      "reported_time": null,
+      "asset_id": "asset_c6f616ca8417c234",
+      "protocol": "IEC104",
+      "value": 0.9754214286804199,
+      "unit": "PER_UNIT",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_1050b0e0a5f690c5",
+        "family": "voltage",
+        "attribute": "voltage_to",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_226a015c48239ee70d969b16"
+    },
+    {
+      "evidence_id": "d_dab08c24e5569f2325661f52",
+      "view": "E",
+      "source_type": "derived",
+      "asset_id": "asset_c6f616ca8417c234",
+      "observation_time": 58.142003536224365,
+      "unit": "PER_UNIT",
+      "parent_ids": [
+        "e_83323b8279822c69108715f5",
+        "e_dcfc4d0a56237049958112cf"
+      ],
+      "fields": {
+        "kind": "numeric_difference",
+        "channel_id": "ch_1050b0e0a5f690c5",
+        "family": "voltage",
+        "before_id": "e_83323b8279822c69108715f5",
+        "after_id": "e_dcfc4d0a56237049958112cf",
+        "before_value": 0.9868950843811035,
+        "after_value": 0.9754214286804199,
+        "before_time": -51.92440843582153,
+        "after_time": 58.142003536224365,
+        "difference": -0.011473655700683594,
+        "percent_change": -1.1626013628266163,
+        "percent_unavailable_reason": null
+      }
+    },
+    {
+      "evidence_id": "e_a005c865fea85c07b136d3a6",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": -51.92440843582153,
+      "reported_time": null,
+      "asset_id": "asset_81911edb216ad8f2",
+      "protocol": "IEC104",
+      "value": 18.237972259521484,
+      "unit": "AMPERE",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_1172139178576b3b",
+        "family": "current",
+        "attribute": "current_from",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_8f18679fdcca527b1808819e"
+    },
+    {
+      "evidence_id": "e_28616020c04e9b3b1e52a156",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": 58.142003536224365,
+      "reported_time": null,
+      "asset_id": "asset_81911edb216ad8f2",
+      "protocol": "IEC104",
+      "value": 17.605627059936523,
+      "unit": "AMPERE",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_1172139178576b3b",
+        "family": "current",
+        "attribute": "current_from",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_b46c10527bc3409c8d0cc417"
+    },
+    {
+      "evidence_id": "d_a35dc5478639077bfe1f4dcf",
+      "view": "E",
+      "source_type": "derived",
+      "asset_id": "asset_81911edb216ad8f2",
+      "observation_time": 58.142003536224365,
+      "unit": "AMPERE",
+      "parent_ids": [
+        "e_a005c865fea85c07b136d3a6",
+        "e_28616020c04e9b3b1e52a156"
+      ],
+      "fields": {
+        "kind": "numeric_difference",
+        "channel_id": "ch_1172139178576b3b",
+        "family": "current",
+        "before_id": "e_a005c865fea85c07b136d3a6",
+        "after_id": "e_28616020c04e9b3b1e52a156",
+        "before_value": 18.237972259521484,
+        "after_value": 17.605627059936523,
+        "before_time": -51.92440843582153,
+        "after_time": 58.142003536224365,
+        "difference": -0.6323451995849609,
+        "percent_change": -3.46719026976715,
+        "percent_unavailable_reason": null
+      }
+    },
+    {
+      "evidence_id": "e_229196fdb6c6885fe90dcc17",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": -59.98543834686279,
+      "reported_time": null,
+      "asset_id": "asset_bb09550b7322df3e",
+      "protocol": "IEC104",
+      "value": 1.0041754245758057,
+      "unit": "PER_UNIT",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_c33d324519e8e06f",
+        "family": "voltage",
+        "attribute": "voltage_to",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_31c6edfb5d850403b15eb698"
+    }
+  ],
+  "metadata": {
+    "ch_001bab0aa0d8aca6": {
+      "evidence_id": "meta_ac6688d85c471f711f04c540",
+      "asset_id": "asset_4d923a00ddbc2ebb",
+      "family": "active_power",
+      "attribute": "active_power",
+      "context": "MEASUREMENT",
+      "unit": "WATT",
+      "scale": "BASE"
+    },
+    "ch_01b8d2ffcf69123e": {
+      "evidence_id": "meta_39d3e8b2939db28b62c3d4d2",
+      "asset_id": "asset_de9190407c63f4f6",
+      "family": "reactive_power",
+      "attribute": "reactive_power",
+      "context": "MEASUREMENT",
+      "unit": "VAR",
+      "scale": "BASE"
+    },
+    "ch_01e1fd95179ba1da": {
+      "evidence_id": "meta_935631e97fcb4884c0d00c39",
+      "asset_id": "asset_05f863fa83922ddb",
+      "family": "current",
+      "attribute": "current_from",
+      "context": "MEASUREMENT",
+      "unit": "AMPERE",
+      "scale": "BASE"
+    },
+    "ch_0270f5cae2a7db0e": {
+      "evidence_id": "meta_edfa635116eb3f1d76ccd099",
+      "asset_id": "asset_81911edb216ad8f2",
+      "family": "active_power",
+      "attribute": "active_power_to",
+      "context": "MEASUREMENT",
+      "unit": "WATT",
+      "scale": "BASE"
+    },
+    "ch_076a19f4adcfcfee": {
+      "evidence_id": "meta_cecfd900f23c20e8b0685a37",
+      "asset_id": "asset_e2ac935da817f983",
+      "family": "voltage",
+      "attribute": "voltage",
+      "context": "MEASUREMENT",
+      "unit": "PER_UNIT",
+      "scale": "NONE"
+    },
+    "ch_0ae2e038e7d56a1d": {
+      "evidence_id": "meta_aa6481150069cbbcf38c2177",
+      "asset_id": "asset_cd5cd99228029725",
+      "family": "reactive_power",
+      "attribute": "reactive_power_hv",
+      "context": "MEASUREMENT",
+      "unit": "VAR",
+      "scale": "BASE"
+    },
+    "ch_0df799387203cb49": {
+      "evidence_id": "meta_97261a9a0e09621b6f1509fc",
+      "asset_id": "asset_81911edb216ad8f2",
+      "family": "voltage",
+      "attribute": "voltage_to",
+      "context": "MEASUREMENT",
+      "unit": "PER_UNIT",
+      "scale": "NONE"
+    },
+    "ch_1038cbb1a8c65915": {
+      "evidence_id": "meta_4e4ec342d01af409f613b036",
+      "asset_id": "asset_bb32093e58313f5a",
+      "family": "current",
+      "attribute": "current_from",
+      "context": "MEASUREMENT",
+      "unit": "AMPERE",
+      "scale": "BASE"
+    },
+    "ch_1050b0e0a5f690c5": {
+      "evidence_id": "meta_230dbd06c335b4e8a26dab01",
+      "asset_id": "asset_c6f616ca8417c234",
+      "family": "voltage",
+      "attribute": "voltage_to",
+      "context": "MEASUREMENT",
+      "unit": "PER_UNIT",
+      "scale": "NONE"
+    },
+    "ch_1172139178576b3b": {
+      "evidence_id": "meta_b18a6f4f6a88b60859c6e60c",
+      "asset_id": "asset_81911edb216ad8f2",
+      "family": "current",
+      "attribute": "current_from",
+      "context": "MEASUREMENT",
+      "unit": "AMPERE",
+      "scale": "BASE"
+    },
+    "ch_7d2fa08ef1f6721a": {
+      "evidence_id": "meta_b70efac60555911fd85596ce",
+      "asset_id": "asset_b577c35caecef041",
+      "family": "reactive_power",
+      "attribute": "reactive_power_lv",
+      "context": "MEASUREMENT",
+      "unit": "VAR",
+      "scale": "BASE"
+    },
+    "ch_c33d324519e8e06f": {
+      "evidence_id": "meta_41f4f0663a960eda134cb73b",
+      "asset_id": "asset_bb09550b7322df3e",
+      "family": "voltage",
+      "attribute": "voltage_to",
+      "context": "MEASUREMENT",
+      "unit": "PER_UNIT",
+      "scale": "NONE"
+    }
+  },
+  "control_metadata": {
+    "meta_72243784d8824a41a4856558": {
+      "evidence_id": "meta_72243784d8824a41a4856558",
+      "control_point_id": "cp_eec22f800ef36118",
+      "asset_id": "asset_b577c35caecef041",
+      "context": "CONFIGURATION",
+      "attribute": "tap_position"
+    }
+  }
+}

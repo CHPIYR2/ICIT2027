@@ -1,0 +1,219 @@
+{
+  "citation_mode": "optional_baseline",
+  "claims": [
+    {
+      "asset_ids": [],
+      "channel_ids": [],
+      "claim_id": "c_0001",
+      "claim_text": "Observation m_14f916d320ad247b5c3593c2 captured iec_i_frame at capture time 0.01835179328918457 s. This does not establish malicious activity.",
+      "claim_type": "network_activity",
+      "endpoint_ids": [],
+      "evidence_ids": ["m_14f916d320ad247b5c3593c2"],
+      "payload": {
+        "activity": "iec_i_frame",
+        "record_id": "m_14f916d320ad247b5c3593c2",
+        "time": 0.01835179328918457
+      },
+      "question_ids": ["Q1"],
+      "support_assertion": "asserted"
+    },
+    {
+      "asset_ids": ["asset_b577c35caecef041"],
+      "channel_ids": [],
+      "claim_id": "c_0002",
+      "claim_text": "Observation m_14f916d320ad247b5c3593c2 captured a command-type activation request (ASDU 47, COT 6) at capture time 0.01835179328918457 s. Target mapping is not established; execution is not established.",
+      "claim_type": "command_observed",
+      "endpoint_ids": [],
+      "evidence_ids": ["m_14f916d320ad247b5c3593c2"],
+      "payload": {
+        "address_evidence_id": "a_96e11ec1fbccc1753f1fdda8",
+        "asdu_type": 47,
+        "cause_of_transmission": 6,
+        "mapped_control_point_id": "cp_eec22f800ef36118",
+        "mapped_target_asset_id": "asset_b577c35caecef041",
+        "mapping_evidence_id": "meta_72243784d8824a41a4856558",
+        "record_id": "m_14f916d320ad247b5c3593c2",
+        "time": 0.01835179328918457
+      },
+      "question_ids": ["Q1"],
+      "support_assertion": "asserted"
+    },
+    {
+      "asset_ids": ["asset_b577c35caecef041"],
+      "channel_ids": [],
+      "claim_id": "c_0003",
+      "claim_text": "Observations m_14f916d320ad247b5c3593c2 and a_96e11ec1fbccc1753f1fdda8 have approved relationship command_address_maps_to_asset, mappings [\"meta_72243784d8824a41a4856558\"], mapped asset asset_b577c35caecef041, endpoints []. This does not establish device execution or physical topology.",
+      "claim_type": "asset_relationship",
+      "endpoint_ids": [],
+      "evidence_ids": ["m_14f916d320ad247b5c3593c2", "a_96e11ec1fbccc1753f1fdda8", "meta_72243784d8824a41a4856558"],
+      "payload": {
+        "mapped_asset_id": "asset_b577c35caecef041",
+        "mapping_ids": ["meta_72243784d8824a41a4856558"],
+        "record_ids": ["m_14f916d320ad247b5c3593c2", "a_96e11ec1fbccc1753f1fdda8"],
+        "relation": "command_address_maps_to_asset"
+      },
+      "question_ids": ["Q3"],
+      "support_assertion": "asserted"
+    },
+    {
+      "asset_ids": [],
+      "channel_ids": [],
+      "claim_id": "c_0004",
+      "claim_text": "Observation p_41ac28c0237408eac6fa77cc captured packet_observed at capture time 16.746351957321167 s. This does not establish malicious activity.",
+      "claim_type": "network_activity",
+      "endpoint_ids": ["ep_e554cd31a5e47609", "ep_402f731c18b38a84"],
+      "evidence_ids": ["p_41ac28c0237408eac6fa77cc"],
+      "payload": {
+        "activity": "packet_observed",
+        "record_id": "p_41ac28c0237408eac6fa77cc",
+        "time": 16.746351957321167
+      },
+      "question_ids": ["Q1"],
+      "support_assertion": "asserted"
+    },
+    {
+      "asset_ids": [],
+      "channel_ids": [],
+      "claim_id": "c_0005",
+      "claim_text": "Observation p_eadbadc4db5979b08f39e939 captured packet_observed at capture time 17.8263578414917 s. This does not establish malicious activity.",
+      "claim_type": "network_activity",
+      "endpoint_ids": ["ep_e554cd31a5e47609", "ep_5310943d915582cf"],
+      "evidence_ids": ["p_eadbadc4db5979b08f39e939"],
+      "payload": {
+        "activity": "packet_observed",
+        "record_id": "p_eadbadc4db5979b08f39e939",
+        "time": 17.8263578414917
+      },
+      "question_ids": ["Q1"],
+      "support_assertion": "asserted"
+    },
+    {
+      "asset_ids": [],
+      "channel_ids": [],
+      "claim_id": "c_0006",
+      "claim_text": "Within the approved captured TCP/2404 population, query d_94fe3b2ea1f2689edf100464 reports interval 16.746351957321167 to 17.8263578414917 s, duration 1.0800058841705322 SECOND, bounds p_41ac28c0237408eac6fa77cc and p_eadbadc4db5979b08f39e939. This does not establish outage, DoS or absence outside the covered scope.",
+      "claim_type": "communication_gap",
+      "endpoint_ids": [],
+      "evidence_ids": ["d_94fe3b2ea1f2689edf100464", "p_41ac28c0237408eac6fa77cc", "p_eadbadc4db5979b08f39e939"],
+      "payload": {
+        "coverage_id": "d_94fe3b2ea1f2689edf100464",
+        "duration_seconds": 1.0800058841705322,
+        "end": 17.8263578414917,
+        "left_id": "p_41ac28c0237408eac6fa77cc",
+        "population": "observed_tcp_2404_packets",
+        "right_id": "p_eadbadc4db5979b08f39e939",
+        "start": 16.746351957321167
+      },
+      "question_ids": ["Q1"],
+      "support_assertion": "asserted"
+    },
+    {
+      "asset_ids": ["asset_b577c35caecef041"],
+      "channel_ids": [],
+      "claim_id": "c_0007",
+      "claim_text": "Cannot establish reported process/electrical values and changes from the permitted observations: no_observation. No stronger security or physical conclusion follows.",
+      "claim_type": "unknown",
+      "endpoint_ids": [],
+      "evidence_ids": [],
+      "payload": {
+        "attempted_conclusion": "reported process/electrical values and changes",
+        "missing_requirement": "no_observation",
+        "reason": "no_observation",
+        "scope_id": "d_94fe3b2ea1f2689edf100464"
+      },
+      "question_ids": ["Q2"],
+      "support_assertion": "insufficient"
+    },
+    {
+      "asset_ids": ["asset_b577c35caecef041"],
+      "channel_ids": [],
+      "claim_id": "c_0008",
+      "claim_text": "Cannot establish supported capture-time relationships connecting observed network activity and electrical/process observations, at episode-only or exactly mapped same-asset scope, from the permitted observations: no_valid_pair. No stronger security or physical conclusion follows.",
+      "claim_type": "unknown",
+      "endpoint_ids": [],
+      "evidence_ids": [],
+      "payload": {
+        "attempted_conclusion": "supported capture-time relationships connecting observed network activity and electrical/process observations, at episode-only or exactly mapped same-asset scope",
+        "missing_requirement": "no_valid_pair",
+        "reason": "no_valid_pair",
+        "scope_id": "d_94fe3b2ea1f2689edf100464"
+      },
+      "question_ids": ["Q5"],
+      "support_assertion": "insufficient"
+    },
+    {
+      "asset_ids": ["asset_b577c35caecef041"],
+      "channel_ids": [],
+      "claim_id": "c_0009",
+      "claim_text": "Cannot establish concrete observations or evidence combinations warranting further security investigation, or supported interpretation boundary, from the permitted observations: insufficient_support. No stronger security or physical conclusion follows.",
+      "claim_type": "unknown",
+      "endpoint_ids": [],
+      "evidence_ids": [],
+      "payload": {
+        "attempted_conclusion": "concrete observations or evidence combinations warranting further security investigation, or supported interpretation boundary",
+        "missing_requirement": "insufficient_support",
+        "reason": "insufficient_support",
+        "scope_id": "d_94fe3b2ea1f2689edf100464"
+      },
+      "question_ids": ["Q6"],
+      "support_assertion": "insufficient"
+    },
+    {
+      "asset_ids": ["asset_b577c35caecef041"],
+      "channel_ids": [],
+      "claim_id": "c_0010",
+      "claim_text": "Cannot establish conclusions beyond the observed network activities, command requests, asset mapping, and communication gap; missing are process/electrical values, changes, and supported temporal relationships. No stronger security or physical conclusion follows.",
+      "claim_type": "unknown",
+      "endpoint_ids": [],
+      "evidence_ids": [],
+      "payload": {
+        "attempted_conclusion": "conclusions beyond the observed network activities, command requests, asset mapping, and communication gap; missing are process/electrical values, changes, and supported temporal relationships",
+        "missing_requirement": "no_observation",
+        "reason": "no_observation",
+        "scope_id": "d_94fe3b2ea1f2689edf100464"
+      },
+      "question_ids": ["Q7"],
+      "support_assertion": "insufficient"
+    }
+  ],
+  "event_id": "ev_c7ce825223f3857cb235",
+  "evidence_view": "N",
+  "questions": [
+    {
+      "claim_ids": ["c_0001", "c_0002", "c_0004", "c_0005", "c_0006"],
+      "question_id": "Q1",
+      "response": "substantive"
+    },
+    {
+      "claim_ids": ["c_0007"],
+      "question_id": "Q2",
+      "response": "insufficient"
+    },
+    {
+      "claim_ids": ["c_0003"],
+      "question_id": "Q3",
+      "response": "substantive"
+    },
+    {
+      "claim_ids": [],
+      "question_id": "Q4",
+      "response": "insufficient"
+    },
+    {
+      "claim_ids": ["c_0008"],
+      "question_id": "Q5",
+      "response": "insufficient"
+    },
+    {
+      "claim_ids": ["c_0009"],
+      "question_id": "Q6",
+      "response": "insufficient"
+    },
+    {
+      "claim_ids": ["c_0010"],
+      "question_id": "Q7",
+      "response": "substantive"
+    }
+  ],
+  "schema_version": "investigation-claim-v3"
+}

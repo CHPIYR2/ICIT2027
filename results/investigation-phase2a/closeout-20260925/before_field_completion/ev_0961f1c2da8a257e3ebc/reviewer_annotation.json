@@ -1,0 +1,1341 @@
+{
+  "schema_version": "human-review-phase2a-proposed-v1",
+  "event_id": "ev_0961f1c2da8a257e3ebc",
+  "partition": "development_pilot",
+  "review_status": "UNREVIEWED",
+  "reviewer_id": null,
+  "signoff": null,
+  "source_packet": "annotations/events-v2/ev_0961f1c2da8a257e3ebc",
+  "source_packet_manifest_sha256": "fbe29a2362f8d73a9a9b9ab3f561791924642e77b6040464b625077f92f8028d",
+  "full_universe_path": "annotations/events-v2/ev_0961f1c2da8a257e3ebc/complete_allowed_evidence.json.gz",
+  "full_universe_sha256": "5377bdd32259c1b4d89f911d996a0cbddda0c419c82b11e296e660049b49e064",
+  "production_retrieval_paths": {
+    "E": "results/investigation-v2/B0/ev_0961f1c2da8a257e3ebc/E/retrieved.json",
+    "N": "results/investigation-v2/B0/ev_0961f1c2da8a257e3ebc/N/retrieved.json",
+    "EN": "results/investigation-v2/B0/ev_0961f1c2da8a257e3ebc/EN/retrieved.json"
+  },
+  "instructions": "Copy blank_fact_template into facts for each atomic human judgment. Do not edit the blank template. Candidates are separate, not gold.",
+  "blank_fact_template": {
+    "gold_claim_id": null,
+    "event_id": "ev_0961f1c2da8a257e3ebc",
+    "question_ids": [],
+    "claim_type": null,
+    "epistemic_category": null,
+    "atomic_statement": null,
+    "fact_key": null,
+    "proposed_fact_key": null,
+    "key_kind": null,
+    "key_identity": null,
+    "key_override_reason": null,
+    "minimal_support_sets": {
+      "E": [],
+      "N": [],
+      "EN": []
+    },
+    "E_answerability": null,
+    "N_answerability": null,
+    "EN_answerability": null,
+    "acceptable_action": {
+      "E": null,
+      "N": null,
+      "EN": null
+    },
+    "prohibited_stronger_interpretation": [],
+    "ambiguity_notes": null,
+    "reviewer_id": null,
+    "review_status": "UNREVIEWED",
+    "checkability": null,
+    "alias_of": null,
+    "alias_decision": null,
+    "alias_rationale": null,
+    "view_accounting": {
+      "E": {
+        "eligible_in_view": null,
+        "retrieved_in_production_bundle": null,
+        "recovered_by_system": null
+      },
+      "N": {
+        "eligible_in_view": null,
+        "retrieved_in_production_bundle": null,
+        "recovered_by_system": null
+      },
+      "EN": {
+        "eligible_in_view": null,
+        "retrieved_in_production_bundle": null,
+        "recovered_by_system": null
+      }
+    }
+  },
+  "facts": [
+    {
+      "gold_claim_id": "g_0002",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q1", "Q3"],
+      "claim_type": "command_observed",
+      "epistemic_category": "observation",
+      "atomic_statement": "A command-type activation request was captured at +0.022887 s, and its address statically maps to control point cp_6c4f3c31996c2844 associated with asset asset_5c5dca51985d37c3.",
+      "fact_key": "fk_dd5555e3ff10da8bf4ff677d787f177a5bd36e85630f08598aae299b4243045f",
+      "proposed_fact_key": "fk_dd5555e3ff10da8bf4ff677d787f177a5bd36e85630f08598aae299b4243045f",
+      "key_kind": "mapped_command_observed",
+      "key_identity": {
+        "message_id": "m_81c335db83989561408ba943",
+        "address_id": "a_201ac60a2dfa3237d1cef218",
+        "mapping_id": "meta_70711efe18cc741b8c651f4b",
+        "asset_id": "asset_5c5dca51985d37c3",
+        "control_point_id": "cp_6c4f3c31996c2844"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [],
+        "N": [
+          [
+            "m_81c335db83989561408ba943",
+            "a_201ac60a2dfa3237d1cef218",
+            "meta_70711efe18cc741b8c651f4b"
+          ]
+        ],
+        "EN": [
+          [
+            "m_81c335db83989561408ba943",
+            "a_201ac60a2dfa3237d1cef218",
+            "meta_70711efe18cc741b8c651f4b"
+          ]
+        ]
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "supported",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "assert",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The mapped asset executed the command.",
+        "The command caused a physical or electrical change.",
+        "The command was malicious.",
+        "The command resulted in successful compromise."
+      ],
+      "ambiguity_notes": "The static address-to-asset mapping identifies the control point associated with the captured request. It does not establish execution, acceptance, physical action, causation, or malicious intent.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "Use the mapped-command version as the canonical fact; do not separately score the weaker request-only candidate for the same message.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0003",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q4", "Q5"],
+      "claim_type": "temporal_association",
+      "epistemic_category": "temporal_association",
+      "atomic_statement": "A command-type activation request mapped to asset asset_5c5dca51985d37c3 was captured before a reported state observation from the same mapped asset, with a capture-time difference of 0.2494170666 seconds.",
+      "fact_key": "fk_654da5611c90301e42575ca31d764d6433f6d1d471e0e1d601e8f8e01ebd8c67",
+      "proposed_fact_key": "fk_654da5611c90301e42575ca31d764d6433f6d1d471e0e1d601e8f8e01ebd8c67",
+      "key_kind": "temporal_association",
+      "key_identity": {
+        "earlier_id": "a_201ac60a2dfa3237d1cef218",
+        "later_id": "e_8606b7842af56e3d54832106",
+        "relation": "precedes",
+        "scope": "same_observed_asset",
+        "mapping_ids": [
+          "meta_70711efe18cc741b8c651f4b",
+          "meta_4d4540079d9a2a1c6b19fd04"
+        ],
+        "asset_id": "asset_5c5dca51985d37c3"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": [
+          [
+            "m_81c335db83989561408ba943",
+            "a_201ac60a2dfa3237d1cef218",
+            "meta_70711efe18cc741b8c651f4b",
+            "e_8606b7842af56e3d54832106",
+            "meta_4d4540079d9a2a1c6b19fd04"
+          ]
+        ]
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The command was executed by the mapped asset.",
+        "The command caused the subsequent reported state observation.",
+        "The reported state observation proves a physical state transition.",
+        "The command was malicious.",
+        "The sequence proves successful compromise."
+      ],
+      "ambiguity_notes": "This fact establishes only same-mapped-asset capture-time ordering. The later evidence is a reported boolean state observation, not proof of a state change, physical execution, or causation.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "This is a cross-domain temporal relation distinct from the underlying command observation and reported state observation.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0004",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q2"],
+      "claim_type": "electrical_change",
+      "epistemic_category": "derived_observation",
+      "atomic_statement": "On current channel ch_e06a67812f2c7e69, the reported current changed from 11.010240 A at -51.472869 s to 0 A at +58.650480 s, corresponding to an absolute difference of -11.010240 A.",
+      "fact_key": "fk_64eb6247347ade484893439ba5ec6f34aa8f39588cef04c72b392e850b4d5968",
+      "proposed_fact_key": "fk_64eb6247347ade484893439ba5ec6f34aa8f39588cef04c72b392e850b4d5968",
+      "key_kind": "electrical_change",
+      "key_identity": {
+        "before_id": "e_ac42dffaff99e52f5feec1f7",
+        "after_id": "e_c1c1333879ae77724b9aeb35",
+        "quantity": "difference",
+        "unit": "AMPERE"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [
+          [
+            "e_ac42dffaff99e52f5feec1f7",
+            "e_c1c1333879ae77724b9aeb35"
+          ]
+        ],
+        "N": [],
+        "EN": [
+          [
+            "e_ac42dffaff99e52f5feec1f7",
+            "e_c1c1333879ae77724b9aeb35"
+          ]
+        ]
+      },
+      "E_answerability": "supported",
+      "N_answerability": "insufficient",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "assert",
+        "N": "withhold",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The event caused the current to fall to zero.",
+        "A network command caused this current change.",
+        "The zero value proves equipment shutdown or de-energization.",
+        "The current change indicates malicious activity."
+      ],
+      "ambiguity_notes": "Selected by human review from the top-3 absolute current-change candidates as the single salient current-family fact. The reported zero is treated as an observed value, not as missing data. No physical causation or equipment-state conclusion is inferred.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "candidate_003662 and candidate_003663 describe the same underlying before/after pair; electrical_change is the canonical representation.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0005",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q2"],
+      "claim_type": "electrical_change",
+      "epistemic_category": "derived_observation",
+      "atomic_statement": "On voltage channel ch_b78606e6046fb6fb, the reported voltage changed from 0.983315 pu at -56.898841 s to 0 pu at +53.192692 s, corresponding to a difference of -0.983315 pu.",
+      "fact_key": "fk_32f2e00cf90ccbcf4a0357c486bdf6f43c9ff09c5121d181fb3816779546708e",
+      "proposed_fact_key": "fk_32f2e00cf90ccbcf4a0357c486bdf6f43c9ff09c5121d181fb3816779546708e",
+      "key_kind": "electrical_change",
+      "key_identity": {
+        "before_id": "e_d545676d3c1a9c4462a69e9c",
+        "after_id": "e_17f51d4637517fe09342ea5a",
+        "quantity": "difference",
+        "unit": "PER_UNIT"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [
+          [
+            "e_d545676d3c1a9c4462a69e9c",
+            "e_17f51d4637517fe09342ea5a"
+          ]
+        ],
+        "N": [],
+        "EN": [
+          [
+            "e_d545676d3c1a9c4462a69e9c",
+            "e_17f51d4637517fe09342ea5a"
+          ]
+        ]
+      },
+      "E_answerability": "supported",
+      "N_answerability": "insufficient",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "assert",
+        "N": "withhold",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The event caused the reported voltage to become zero.",
+        "A network command caused the voltage change.",
+        "The zero value proves a blackout or de-energized equipment.",
+        "The voltage change indicates malicious activity."
+      ],
+      "ambiguity_notes": "Selected by human review from the top-3 absolute voltage-change candidates as the single salient voltage-family fact. The reported zero is an observed value, not a missing value, but no physical-state or causal conclusion is inferred.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "The reported_change and electrical_change candidates for this same before/after pair are treated as one canonical electrical_change fact.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0006",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q2"],
+      "claim_type": "electrical_change",
+      "epistemic_category": "derived_observation",
+    
+      "atomic_statement": "On active-power channel ch_3c75cfb8295373a5, the reported active power changed from 0.050119 W at -57.804232 s to 337103.968750 W at +52.182199 s, corresponding to a difference of +337103.918631 W.",
+    
+      "fact_key": "fk_50854fd1480c24bbf6001fad19659feab6020711526ccef09b44faef1feaaf87",
+      "proposed_fact_key": "fk_50854fd1480c24bbf6001fad19659feab6020711526ccef09b44faef1feaaf87",
+      "key_kind": "electrical_change",
+    
+      "key_identity": {
+        "before_id": "e_e9be23249603c4c6466a72b3",
+        "after_id": "e_96ec3ec8e9da62e1fd75e2ad",
+        "quantity": "difference",
+        "unit": "WATT"
+      },
+    
+      "key_override_reason": null,
+    
+      "minimal_support_sets": {
+        "E": [
+          [
+            "e_e9be23249603c4c6466a72b3",
+            "e_96ec3ec8e9da62e1fd75e2ad"
+          ]
+        ],
+        "N": [],
+        "EN": [
+          [
+            "e_e9be23249603c4c6466a72b3",
+            "e_96ec3ec8e9da62e1fd75e2ad"
+          ]
+        ]
+      },
+    
+      "E_answerability": "supported",
+      "N_answerability": "insufficient",
+      "EN_answerability": "supported",
+    
+      "acceptable_action": {
+        "E": "assert",
+        "N": "withhold",
+        "EN": "assert"
+      },
+    
+      "prohibited_stronger_interpretation": [
+        "The event caused the active-power change.",
+        "A network command caused the active-power change.",
+        "The active-power increase indicates malicious activity.",
+        "The magnitude proves physical impact or equipment damage."
+      ],
+    
+      "ambiguity_notes": "Selected by human review from the top-3 absolute active-power-change candidates as the single salient active-power-family fact. The large percentage change is not used as the primary description because the initial reported value is close to zero. No causal or security interpretation is inferred.",
+    
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+    
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "The reported_change and electrical_change candidates for this same before/after pair are treated as one canonical electrical_change fact.",
+    
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0007",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q2"],
+      "claim_type": "electrical_change",
+      "epistemic_category": "derived_observation",
+      "atomic_statement": "On reactive-power channel ch_17c58f2bfe05fc4a, the reported reactive power changed from -14211.559570 VAR at -57.804232 s to 147287.968750 VAR at +52.182199 s, corresponding to a difference of +161499.528320 VAR.",
+      "fact_key": "fk_358edadfab4631bc4306f38dfc63f3a5dce6eea551c5bee20977d2447020d02f",
+      "proposed_fact_key": "fk_358edadfab4631bc4306f38dfc63f3a5dce6eea551c5bee20977d2447020d02f",
+      "key_kind": "electrical_change",
+      "key_identity": {
+        "before_id": "e_13d58c005cd018560918c1c5",
+        "after_id": "e_74c26f2387aa0298ba710153",
+        "quantity": "difference",
+        "unit": "VAR"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [
+          [
+            "e_13d58c005cd018560918c1c5",
+            "e_74c26f2387aa0298ba710153"
+          ]
+        ],
+        "N": [],
+        "EN": [
+          [
+            "e_13d58c005cd018560918c1c5",
+            "e_74c26f2387aa0298ba710153"
+          ]
+        ]
+      },
+      "E_answerability": "supported",
+      "N_answerability": "insufficient",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "assert",
+        "N": "withhold",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The event caused the reactive-power change.",
+        "A network command caused the reactive-power change.",
+        "The sign change proves a physical power-flow reversal.",
+        "The change indicates malicious activity."
+      ],
+      "ambiguity_notes": "Selected by human review from the top-3 absolute reactive-power-change candidates as the single salient reactive-power-family fact. The reported value changes sign, but no physical-mode, causal, or security interpretation is inferred.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "The reported_change and electrical_change forms for the same before/after pair are treated as one canonical electrical_change fact.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0008",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q1", "Q3"],
+      "claim_type": "command_observed",
+      "epistemic_category": "observation",
+      "atomic_statement": "A command-type activation request was captured at +11.080390 s, and its address statically maps to control point cp_b8d1d4f7482cd26c associated with asset asset_775f0166e0b4e63d.",
+      "fact_key": "fk_754cdcdbefbe28fbd0b048e6c72c9a1eca886fb017c3d5f731c966714c892c2e",
+      "proposed_fact_key": "fk_754cdcdbefbe28fbd0b048e6c72c9a1eca886fb017c3d5f731c966714c892c2e",
+      "key_kind": "mapped_command_observed",
+      "key_identity": {
+        "message_id": "m_5d2f2a548ee91e883e97cb6c",
+        "address_id": "a_676b7ffb861584ae829e4f2e",
+        "mapping_id": "meta_f6236e669ebde1a2005adc05",
+        "asset_id": "asset_775f0166e0b4e63d",
+        "control_point_id": "cp_b8d1d4f7482cd26c"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [],
+        "N": [["m_5d2f2a548ee91e883e97cb6c", "a_676b7ffb861584ae829e4f2e", "meta_f6236e669ebde1a2005adc05"]],
+        "EN": [["m_5d2f2a548ee91e883e97cb6c", "a_676b7ffb861584ae829e4f2e", "meta_f6236e669ebde1a2005adc05"]]
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "supported",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "assert",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The mapped asset executed the command.",
+        "The command caused a physical or electrical change.",
+        "The command was malicious.",
+        "The command resulted in successful compromise."
+      ],
+      "ambiguity_notes": "Static address mapping establishes the addressed control point and mapped asset only; it does not establish execution, success, causation, or intent.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "Distinct command message, address, control point, and mapped asset.",
+      "view_accounting": {
+        "E": {"eligible_in_view": false, "retrieved_in_production_bundle": null, "recovered_by_system": null},
+        "N": {"eligible_in_view": true, "retrieved_in_production_bundle": null, "recovered_by_system": null},
+        "EN": {"eligible_in_view": true, "retrieved_in_production_bundle": null, "recovered_by_system": null}
+      }
+    },
+    {
+      "gold_claim_id": "g_0009",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q1", "Q3"],
+      "claim_type": "command_observed",
+      "epistemic_category": "observation",
+      "atomic_statement": "A command-type activation request was captured at +22.138317 s,and its address statically maps to control point cp_6cb9801b029e2bdd associated with asset asset_3cf0311a09f7bd43.",
+      "fact_key": "fk_955dc9d5060c9e724ca1311082cdb405e431190226edfb8e00e7f59e6737539c",
+      "proposed_fact_key": "fk_955dc9d5060c9e724ca1311082cdb405e431190226edfb8e00e7f59e6737539c",
+      "key_kind": "mapped_command_observed",
+      "key_identity": {
+        "message_id": "m_63249b4168eac3854c63d52b",
+        "address_id": "a_e586903eba2b53b8fda168d4",
+        "mapping_id": "meta_e2b19a0babe7ba16dcedb189",
+        "asset_id": "asset_3cf0311a09f7bd43",
+        "control_point_id": "cp_6cb9801b029e2bdd"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [],
+        "N": [["m_63249b4168eac3854c63d52b", "a_e586903eba2b53b8fda168d4", "meta_e2b19a0babe7ba16dcedb189"]],
+        "EN": [["m_63249b4168eac3854c63d52b", "a_e586903eba2b53b8fda168d4", "meta_e2b19a0babe7ba16dcedb189"]]
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "supported",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "assert",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The mapped asset executed the command.",
+        "The command caused a physical or electrical change.",
+        "The command was malicious.",
+        "The command resulted in successful compromise."
+      ],
+      "ambiguity_notes": "Static address mapping establishes the addressed control point and mapped asset only; it does not establish execution, success, causation, or intent.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "Distinct command message, address, control point, and mapped asset.",
+      "view_accounting": {
+        "E": {"eligible_in_view": false, "retrieved_in_production_bundle": null, "recovered_by_system": null},
+        "N": {"eligible_in_view": true, "retrieved_in_production_bundle": null, "recovered_by_system": null},
+        "EN": {"eligible_in_view": true, "retrieved_in_production_bundle": null, "recovered_by_system": null}
+      }
+    },
+    {
+      "gold_claim_id": "g_0010",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q1", "Q3"],
+      "claim_type": "command_observed",
+      "epistemic_category": "observation",
+      "atomic_statement": "A command-type activation request was captured at +33.216486 s, and its address statically maps to control point cp_e5e37aa78a693272 associated with asset asset_b563526ae7c58146.",
+      "fact_key": "fk_ffa75156593d8577e3ba548ff615518728867d04a37c064e08e3cb7218ab90ee",
+      "proposed_fact_key": "fk_ffa75156593d8577e3ba548ff615518728867d04a37c064e08e3cb7218ab90ee",
+      "key_kind": "mapped_command_observed",
+      "key_identity": {
+        "message_id": "m_d6b73974cd0ed46afb4321f0",
+        "address_id": "a_f1c2c2849adb078ef7f682d7",
+        "mapping_id": "meta_26254e0913936c49e8208669",
+        "asset_id": "asset_b563526ae7c58146",
+        "control_point_id": "cp_e5e37aa78a693272"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [],
+        "N": [["m_d6b73974cd0ed46afb4321f0", "a_f1c2c2849adb078ef7f682d7", "meta_26254e0913936c49e8208669"]],
+        "EN": [["m_d6b73974cd0ed46afb4321f0", "a_f1c2c2849adb078ef7f682d7", "meta_26254e0913936c49e8208669"]]
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "supported",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "assert",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The mapped asset executed the command.",
+        "The command caused a physical or electrical change.",
+        "The command was malicious.",
+        "The command resulted in successful compromise."
+      ],
+      "ambiguity_notes": "Static address mapping establishes the addressed control point and mapped asset only; it does not establish execution, success, causation, or intent.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "Distinct command message, address, control point, and mapped asset.",
+      "view_accounting": {
+        "E": {"eligible_in_view": false, "retrieved_in_production_bundle": null, "recovered_by_system": null},
+        "N": {"eligible_in_view": true, "retrieved_in_production_bundle": null, "recovered_by_system": null},
+        "EN": {"eligible_in_view": true, "retrieved_in_production_bundle": null, "recovered_by_system": null}
+      }
+    },
+    {
+      "gold_claim_id": "g_0013",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q4", "Q5"],
+      "claim_type": "temporal_association",
+      "epistemic_category": "temporal_association",
+      "atomic_statement": "A command-type activation request mapped to asset asset_b563526ae7c58146 was captured before a subsequent observation from the same mapped asset, with a capture-time difference of 8.7104148865 seconds.",
+      "fact_key": "fk_71c14de945254591947dea498c672063f8acc502231cf8237f0b77f5c67b9ee3",
+      "proposed_fact_key": "fk_71c14de945254591947dea498c672063f8acc502231cf8237f0b77f5c67b9ee3",
+      "key_kind": "temporal_association",
+      "key_identity": {
+        "earlier_id": "a_f1c2c2849adb078ef7f682d7",
+        "later_id": "e_0d93e44536810efc17f22c4f",
+        "relation": "precedes",
+        "scope": "same_observed_asset",
+        "mapping_ids": [
+          "meta_26254e0913936c49e8208669",
+          "meta_2ca8c20393d52da3079e71bf"
+        ],
+        "asset_id": "asset_b563526ae7c58146"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": [
+          [
+            "m_d6b73974cd0ed46afb4321f0",
+            "a_f1c2c2849adb078ef7f682d7",
+            "meta_26254e0913936c49e8208669",
+            "e_0d93e44536810efc17f22c4f",
+            "meta_2ca8c20393d52da3079e71bf"
+          ]
+        ]
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The command was executed by the mapped asset.",
+        "The command caused the subsequent observation.",
+        "The subsequent observation proves a physical state transition caused by the command.",
+        "The command was malicious.",
+        "The sequence proves successful compromise."
+      ],
+      "ambiguity_notes": "This fact establishes only same-mapped-asset capture-time ordering. The 8.7104148865-second interval is longer than the other observed command-to-same-asset intervals but is retained as a factual temporal relation. Its duration does not establish execution, causation, malicious intent, successful compromise, or security relevance.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "Distinct cross-domain temporal relation associated with a separate command message and mapped asset.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0014",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q7"],
+      "claim_type": "unknown",
+      "epistemic_category": "guardrail_insufficiency",
+    
+      "atomic_statement": "The observed command requests were executed by their mapped assets.",
+    
+      "fact_key": null,
+      "proposed_fact_key": null,
+      "key_kind": null,
+      "key_identity": null,
+    
+      "key_override_reason": "Human-reviewed guardrail proposition. Execution is a stronger conclusion that is not established by the approved command-request evidence; no positive execution candidate or approved execution evidence type exists.",
+    
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": []
+      },
+    
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "insufficient",
+    
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "withhold"
+      },
+    
+      "prohibited_stronger_interpretation": [
+        "A captured command request proves that the mapped asset executed the command.",
+        "Static mapping of a command address to an asset proves physical actuation.",
+        "A later observation from the same mapped asset proves that the command was executed.",
+        "Temporal proximity between a command request and an electrical or process observation proves execution success."
+      ],
+    
+      "ambiguity_notes": "Four distinct command-type activation requests are observed and statically mapped to control points/assets, but the approved evidence establishes only that the requests were captured and addressed to those mapped control points. No approved evidence establishes physical execution or successful actuation. The absence of execution support must not be inverted into a claim that execution definitely did not occur.",
+    
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "both",
+    
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "This is a Q7 guardrail insufficiency proposition, not an alias of any individual command-observed fact.",
+    
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0015",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q7"],
+      "claim_type": "unknown",
+      "epistemic_category": "guardrail_insufficiency",
+    
+      "atomic_statement": "The observed command requests caused the subsequent electrical or process observations on the same mapped assets.",
+    
+      "fact_key": null,
+      "proposed_fact_key": null,
+      "key_kind": null,
+      "key_identity": null,
+    
+      "key_override_reason": "Human-reviewed guardrail proposition. Same-mapped-asset temporal associations establish capture-time ordering only and do not establish physical causation.",
+    
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": []
+      },
+    
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "insufficient",
+    
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "withhold"
+      },
+    
+      "prohibited_stronger_interpretation": [
+        "A command request caused the subsequent electrical or process observation.",
+        "Temporal proximity on the same mapped asset proves a causal relationship.",
+        "A later reported electrical or process value proves that the earlier command produced that state.",
+        "The observed command-to-observation sequence proves successful physical actuation."
+      ],
+    
+      "ambiguity_notes": "Four same-mapped-asset temporal associations are retained as human-reviewed gold facts, with capture-time differences of approximately 0.249417 s, 0.249999 s, 0.269738 s, and 8.710415 s. These observations establish only capture-time ordering between an observed command request and a later observation mapped to the same asset. They do not establish command execution, device action time, physical causation, or successful actuation. The absence of causal support must not be inverted into a claim that no causal relationship existed.",
+    
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "both",
+    
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "This is a Q7 physical-causation guardrail insufficiency proposition and is distinct from the four positive temporal-association gold facts.",
+    
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0016",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q7"],
+      "claim_type": "unknown",
+      "epistemic_category": "guardrail_insufficiency",
+    
+      "atomic_statement": "The observed command requests demonstrate malicious intent.",
+    
+      "fact_key": null,
+      "proposed_fact_key": null,
+      "key_kind": null,
+      "key_identity": null,
+    
+      "key_override_reason": "Human-reviewed guardrail proposition. Captured command requests and their static mappings establish observed network activity and addressed control points only; they do not establish malicious intent.",
+    
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": []
+      },
+    
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "insufficient",
+    
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "withhold"
+      },
+    
+      "prohibited_stronger_interpretation": [
+        "A captured command request is malicious because it is a command.",
+        "Addressing a mapped control point proves malicious intent.",
+        "Temporal proximity between a command request and a later same-asset observation proves malicious intent.",
+        "A large electrical change following an observed command proves malicious intent.",
+        "Repeated command requests establish that the sender intended to cause harm."
+      ],
+    
+      "ambiguity_notes": "Four distinct command-type activation requests are observed and statically mapped to control points/assets, and four same-mapped-asset temporal associations are retained as positive gold facts. These observations establish network activity, static target mapping, and capture-time ordering only. They do not establish operator intent, attacker intent, malicious purpose, or whether the requests were authorized. Lack of support for malicious intent must not be inverted into a conclusion that the requests were benign.",
+    
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "both",
+    
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "This is a Q7 malicious-intent guardrail insufficiency proposition and is distinct from command-observed and temporal-association positive facts.",
+    
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0017",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q7"],
+      "claim_type": "unknown",
+      "epistemic_category": "guardrail_insufficiency",
+    
+      "atomic_statement": "The observed command requests and same-mapped-asset temporal associations demonstrate successful compromise.",
+    
+      "fact_key": null,
+      "proposed_fact_key": null,
+      "key_kind": null,
+      "key_identity": null,
+    
+      "key_override_reason": "Human-reviewed guardrail proposition. Observed command requests, static asset mappings, electrical/process observations, and same-mapped-asset capture-time associations do not establish successful compromise under the approved evidence policy.",
+    
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": []
+      },
+    
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "insufficient",
+    
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "withhold"
+      },
+    
+      "prohibited_stronger_interpretation": [
+        "Observed command requests prove successful compromise.",
+        "Static mapping of command addresses to control points proves compromise of the mapped assets.",
+        "A command followed by a same-asset electrical or process observation proves successful compromise.",
+        "Large reported electrical changes prove that an attacker successfully compromised the system.",
+        "Repeated command requests prove successful unauthorized control."
+      ],
+    
+      "ambiguity_notes": "The event contains four observed command-type activation requests, four static command-to-asset mappings, four same-mapped-asset temporal associations, and salient electrical changes. These facts establish captured activity, mappings, reported values, and capture-time ordering only. They do not establish unauthorized access, successful exploitation, persistent control, command execution, or successful compromise. Insufficient evidence for compromise must not be inverted into a claim that no compromise occurred.",
+    
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "both",
+    
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "This is a Q7 successful-compromise guardrail insufficiency proposition and is distinct from the positive command-observed, electrical-change, and temporal-association facts.",
+    
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0018",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q7"],
+      "claim_type": "unknown",
+      "epistemic_category": "guardrail_insufficiency",
+    
+      "atomic_statement": "The available network and electrical/process evidence identifies the attacker responsible for the observed activity.",
+    
+      "fact_key": null,
+      "proposed_fact_key": null,
+      "key_kind": null,
+      "key_identity": null,
+    
+      "key_override_reason": "Human-reviewed guardrail proposition. The approved evidence may establish observed network activity, static control-point mappings, reported electrical/process observations, and capture-time associations, but it does not establish attacker identity.",
+    
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": []
+      },
+    
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "insufficient",
+    
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "withhold"
+      },
+    
+      "prohibited_stronger_interpretation": [
+        "A network endpoint observed in the capture identifies the attacker.",
+        "The source of a captured command request identifies the attacker.",
+        "A mapped control point or asset identifies the attacker.",
+        "Repeated command requests establish the identity of a malicious operator or attacker.",
+        "A same-asset temporal association between network and electrical/process observations identifies who caused the activity."
+      ],
+    
+      "ambiguity_notes": "The approved evidence can identify captured messages, addresses, mapped control points/assets, reported electrical/process observations, and capture-time relationships. These identifiers describe observed system entities and evidence lineage; they do not establish the human, organization, host owner, operator, or other actor responsible for the activity. Insufficient support for attacker identity must not be inverted into a conclusion that no attacker existed or that the observed activity was benign.",
+    
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "both",
+    
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "This is a Q7 attacker-identity guardrail insufficiency proposition and is distinct from command-observed, asset-mapping, temporal-association, and electrical-change positive facts.",
+    
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0019",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q7"],
+      "claim_type": "unknown",
+      "epistemic_category": "guardrail_insufficiency",
+    
+      "atomic_statement": "The absence of observed attack evidence demonstrates that the event is benign or that the system is safe.",
+    
+      "fact_key": null,
+      "proposed_fact_key": null,
+      "key_kind": null,
+      "key_identity": null,
+    
+      "key_override_reason": "Human-reviewed guardrail proposition. Absence of a particular observation or unsupported stronger conclusion does not establish benignness, safety, or absence of compromise under the approved evidence policy.",
+    
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": []
+      },
+    
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "insufficient",
+    
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "withhold"
+      },
+    
+      "prohibited_stronger_interpretation": [
+        "Failure to observe explicit malicious activity proves that the event is benign.",
+        "Failure to establish command execution proves that no harmful action occurred.",
+        "Failure to establish malicious intent proves that the observed commands were benign.",
+        "Failure to establish successful compromise proves that the system was not compromised.",
+        "Failure to observe a communication anomaly proves that network operation was safe or normal.",
+        "Missing or unavailable evidence proves that the corresponding event did not occur."
+      ],
+    
+      "ambiguity_notes": "The approved evidence supports specific observed facts and specific insufficiency judgments only. A missing observation, unsupported stronger conclusion, or lack of evidence within a given view must not be converted into evidence of benignness, safety, non-compromise, or non-occurrence. Insufficient evidence means the stronger conclusion cannot be established from the available scope; it does not establish its negation.",
+    
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "both",
+    
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "This is a Q7 benign/safe-from-absence guardrail insufficiency proposition and is distinct from execution, causation, malicious-intent, compromise, and attacker-identity insufficiency guardrails.",
+    
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0020",
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "question_ids": ["Q3"],
+      "claim_type": "asset_relationship",
+      "epistemic_category": "static_relationship",
+      "atomic_statement": "Reported observation e_ac42dffaff99e52f5feec1f7 is associated with channel ch_e06a67812f2c7e69, which statically maps to asset asset_aeac17e8892abc08.",
+      "fact_key": "fk_b87c68389f3f72b8db63f90b7d1bb8456d22ba1fa9ca0ac7bbbdf278f0db386f",
+      "proposed_fact_key": "fk_b87c68389f3f72b8db63f90b7d1bb8456d22ba1fa9ca0ac7bbbdf278f0db386f",
+      "key_kind": "observation_channel_maps_to_asset",
+      "key_identity": {
+        "record_id": "e_ac42dffaff99e52f5feec1f7",
+        "mapping_id": "meta_ea9eaabec54d4a6851286961",
+        "channel_id": "ch_e06a67812f2c7e69",
+        "asset_id": "asset_aeac17e8892abc08"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [
+          [
+            "e_ac42dffaff99e52f5feec1f7",
+            "meta_ea9eaabec54d4a6851286961"
+          ]
+        ],
+        "N": [],
+        "EN": [
+          [
+            "e_ac42dffaff99e52f5feec1f7",
+            "meta_ea9eaabec54d4a6851286961"
+          ]
+        ]
+      },
+      "E_answerability": "supported",
+      "N_answerability": "insufficient",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "assert",
+        "N": "withhold",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The static channel-to-asset mapping proves a physical state of the asset.",
+        "The mapping proves that a network command acted on this asset.",
+        "The mapping establishes causation between network and electrical observations."
+      ],
+      "ambiguity_notes": "This fact establishes only the approved static observation-channel-to-asset relationship. It does not establish command execution, physical causation, or asset compromise.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "This is the selected E-side asset relationship used to support Q3 answerability.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    }
+  ],
+  "question_review": [
+    {
+      "question_id": "Q1",
+      "answerability": {
+        "E": "insufficient",
+        "N": "supported",
+        "EN": "supported"
+      },
+      "gold_claim_ids": [
+        "g_0002",
+        "g_0008",
+        "g_0009",
+        "g_0010"
+      ],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "Q1 is answerable from N and EN because four distinct mapped command requests are retained as salient human-reviewed network facts. E-only does not contain network evidence and is therefore insufficient. The communication-gap candidate was reviewed but not selected as salient gold."
+    },
+    {
+      "question_id": "Q2",
+      "answerability": {
+        "E": "supported",
+        "N": "insufficient",
+        "EN": "supported"
+      },
+      "gold_claim_ids": [
+        "g_0004",
+        "g_0005",
+        "g_0006",
+        "g_0007"
+      ],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "Q2 is answerable from E and EN because four salient human-reviewed electrical-change facts are supported by valid before/after E evidence, covering current, voltage, active power, and reactive power. N-only does not expose electrical/process values and is therefore insufficient. The gold set is intentionally salient rather than exhaustive."
+    },
+    {
+      "question_id": "Q3",
+      "answerability": {
+        "E": "supported",
+        "N": "supported",
+        "EN": "supported"
+      },
+      "gold_claim_ids": [
+        "g_0002",
+        "g_0008",
+        "g_0009",
+        "g_0010",
+        "g_0020"
+      ],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "Q3 is answerable in E from an observed electrical/process record plus its approved channel-to-asset mapping, and in N from the four human-reviewed command-address-to-control-point/asset mappings. EN contains both forms of supported asset/channel relationship."
+    },
+    {
+      "question_id": "Q4",
+      "answerability": {
+        "E": "supported",
+        "N": "supported",
+        "EN": "supported"
+      },
+      "gold_claim_ids": [
+        "g_0002",
+        "g_0004",
+        "g_0005",
+        "g_0006",
+        "g_0007",
+        "g_0008",
+        "g_0009",
+        "g_0010",
+        "g_0003",
+        "g_0013"
+      ],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "Q4 is answerable in E because supported electrical observations provide distinct capture times, and in N because four mapped command requests occur at distinct capture times. EN supports both single-domain timelines and the retained cross-domain same-asset temporal associations. Capture-time ordering does not establish device action time or causation."
+    },
+    {
+      "question_id": "Q5",
+      "answerability": {
+        "E": "insufficient",
+        "N": "insufficient",
+        "EN": "supported"
+      },
+      "gold_claim_ids": [
+        "g_0003",
+        "g_0013"
+      ],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "Q5 requires both supported network activity and supported electrical/process observations with a defensible capture-time relationship. E-only and N-only each lack one side of the cross-domain relation. EN supports multiple same-mapped-asset temporal associations; under the frozen two-temporal-fact salience cap, the retained representatives are the minimum-|delta_t| relation g_0003 and maximum-|delta_t| relation g_0013. Other valid temporal candidates remain excluded for benchmark salience only. Capture-time ordering does not establish execution or physical causation."
+    },
+    {
+      "question_id": "Q6",
+      "answerability": {
+        "E": "insufficient",
+        "N": "insufficient",
+        "EN": "insufficient"
+      },
+      "gold_claim_ids": [],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "No reviewed observation in this event supports a positive review_required security interpretation. Salient command, electrical, and temporal observations remain event-reconstruction facts and are not automatically security indicators."
+    },
+    {
+      "question_id": "Q7",
+      "answerability": {
+        "E": "supported",
+        "N": "supported",
+        "EN": "supported"
+      },
+      "gold_claim_ids": [
+        "g_0014",
+        "g_0015",
+        "g_0016",
+        "g_0017",
+        "g_0018",
+        "g_0019"
+      ],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "Q7 is answerable in E, N, and EN because each view permits supported statements about the limits of what can be concluded from its visible evidence. The retained guardrails cover insufficient support for command execution, physical causation, malicious intent, successful compromise, attacker identity, and benign/safe conclusions from absence of evidence. Question-level support means the limitations can be identified; it does not mean the prohibited stronger propositions themselves are supported."
+    }
+  ]
+}

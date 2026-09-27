@@ -1,0 +1,44 @@
+{
+  "version": "investigation-protocol-v1-dryrun-candidate-r4",
+  "status": "DEVELOPMENT_DRYRUN_COMPLETE_AWAITING_AUTHOR_NOT_FROZEN",
+  "protocol_frozen": false,
+  "evaluation_authorized": false,
+  "model": "gpt-4.1-2025-04-14",
+  "max_output_tokens_executed": 4096,
+  "proposed_output_tokens_pending_approval": 8192,
+  "evidence_token_safety_ceiling": 16384,
+  "active_development_entrypoint": "scripts/resume_investigation_dryrun_v2.py",
+  "historical_initial_entrypoint": "scripts/run_investigation_dryrun.py (initial concurrent transport superseded for this run)",
+  "pilot_gold_methodology": "single-reviewer gold",
+  "custodian": "Author/R1; not an independent custodian",
+  "preflight": {
+    "path": "results/investigation-dryrun-v1/preflight_manifest.json",
+    "sha256": "b50c1c999028f642f3db634c731041a765921689d29a4d034a2e7df69d83f185"
+  },
+  "prior_candidate": {
+    "path": "configs/investigation_protocol.v1.development_candidate.json",
+    "sha256": "eb74e39a9c0182c4f7de7305a7161de51e31f43091ed345d177fe714b37d83f8"
+  },
+  "report": {
+    "path": "docs/investigation_protocol.v1.dryrun_report.r4.md",
+    "sha256": "179aa666a9424b88412e6445196b4388fd1f652fd929dc9a066ca60bc350ff4d"
+  },
+  "machine_report": {
+    "path": "results/investigation-dryrun-v1/final_conformance_report.json",
+    "sha256": "19030486a6a414f973d1f9c264468d6baae6eade1b3623ee5988bc9ef47db439"
+  },
+  "api_usage": {
+    "path": "results/investigation-dryrun-v1/api_usage_and_cost.json",
+    "sha256": "90c46970de4defa004a44df71fc3b00c2ce760623c53de44083948b6f91d3d49"
+  },
+  "prompt_manifest": {
+    "path": "prompts/investigation-v1-r4/manifest.v1.json",
+    "sha256": "e7915eaa03f2b41d2f3711998185a8eff3aaa6e4667cfb60f580958ae9461505"
+  },
+  "remaining_decisions": [
+    "Accept final conformance findings and model limitations",
+    "If actual max_output_tokens truncation exists, approve or reject a proposed 8192 candidate and any further development-only validation; current requests remain 4096",
+    "Verify external custody filesystem/account ACL and custodian access logging; application guard alone is not OS isolation",
+    "Explicitly approve exact final protocol inventory and formal freeze; 32-event evaluation requires separate authorization"
+  ]
+}

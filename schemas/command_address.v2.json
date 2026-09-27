@@ -1,0 +1,159 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^(?:a_[0-9a-f]{24})$"
+    },
+    "source_type": {
+      "const": "command_address_observation"
+    },
+    "view": {
+      "const": "N"
+    },
+    "parent_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(?:m_[0-9a-f]{24})$"
+      },
+      "minItems": 1,
+      "maxItems": 1
+    },
+    "asdu_type": {
+      "enum": [
+        45,
+        47,
+        50
+      ]
+    },
+    "cause_of_transmission": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 63
+    },
+    "object_index": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "observation_time": {
+      "type": "number",
+      "minimum": -60,
+      "exclusiveMaximum": 60
+    },
+    "mapped_control_point_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^(?:cp_[0-9a-f]{16})$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mapped_target_asset_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^(?:asset_[0-9a-f]{16})$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mapping_evidence_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^(?:meta_[0-9a-f]{24})$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mapping_status": {
+      "enum": [
+        "exact_static_match",
+        "unmapped",
+        "ambiguous",
+        "context_not_allowlisted",
+        "attribute_not_allowlisted",
+        "invalid_layout"
+      ]
+    },
+    "reason": {
+      "enum": [
+        "exact_allowlisted_static_mapping",
+        "address_missing",
+        "duplicate_address",
+        "context_not_allowlisted",
+        "attribute_not_allowlisted",
+        "invalid_address_layout"
+      ]
+    }
+  },
+  "required": [
+    "evidence_id",
+    "source_type",
+    "view",
+    "parent_ids",
+    "asdu_type",
+    "cause_of_transmission",
+    "object_index",
+    "observation_time",
+    "mapped_control_point_id",
+    "mapped_target_asset_id",
+    "mapping_evidence_id",
+    "mapping_status",
+    "reason"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "mapping_status": {
+            "const": "exact_static_match"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "mapped_control_point_id": {
+            "type": "string"
+          },
+          "mapped_target_asset_id": {
+            "type": "string"
+          },
+          "mapping_evidence_id": {
+            "type": "string"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "mapped_control_point_id": {
+            "type": "null"
+          },
+          "mapped_target_asset_id": {
+            "type": "null"
+          },
+          "mapping_evidence_id": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

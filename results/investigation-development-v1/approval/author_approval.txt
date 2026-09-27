@@ -1,0 +1,293 @@
+# Author Approval — Semantic Resolution and Final Development Configuration
+
+The semantic-resolution audit is accepted.
+
+Investigation Protocol v1 is still NOT frozen.
+
+Do not access evaluation results for tuning.
+Do not run the 32 evaluation events.
+Do not create or inspect evaluation gold for prompt/verifier refinement.
+
+## 1. Approve semantic resolution B
+
+Approve:
+
+`electrical_change` is a strict specialization of `reported_change`.
+
+Approve the proposed conditional canonical evaluation representation.
+
+Requirements:
+
+- preserve original raw claim types;
+- preserve original human gold byte-for-byte;
+- do not create additional gold aliases;
+- canonical matching is allowed only after raw claim support is validated;
+- require exact asset/channel identity;
+- require the same ordered before/after evidence pair;
+- require valid arithmetic;
+- require unit consistency;
+- require the approved electrical family gate;
+- normalization must never hide an incorrect numeric value, family, asset, channel, evidence pair, or stronger interpretation.
+
+The policy/source precedence documented in semantic-resolution r2 is approved.
+
+Integrate the r2 matching, metric, and verification semantics into the final protocol candidate.
+
+## 2. Numeric matching
+
+Approve:
+
+absolute tolerance = 0
+
+relative tolerance = 5e-8
+
+For presented Δt values:
+
+absolute tolerance = 5e-7 seconds
+
+Timestamp ordering itself remains exact.
+
+## 3. Q5 and Q6
+
+Approve the current conservative Q5 and Q6 definitions.
+
+Do not expand their semantics.
+
+## 4. Gold methodology
+
+Retain:
+
+single-reviewer gold
+
+Do not claim:
+
+- dual independent annotation;
+- adjudication;
+- inter-annotator agreement.
+
+Record this explicitly as a methodological limitation.
+
+## 5. Baseline matrix
+
+Retain exactly:
+
+B0 = deterministic EN structured baseline
+
+B1 = N-only LLM
+
+B2 = EN LLM
+
+B3 = EN LLM with required evidence citations
+
+B4 = deterministic verification of the identical stored B3 output
+
+B4 must not regenerate an LLM response.
+
+No primary model-comparison experiment.
+
+## 6. Generation configuration candidate
+
+Prepare the development implementation using:
+
+temperature = 0
+
+repetitions = 3
+
+Do not select the best repetition.
+
+All repetitions must be retained and scored.
+
+Retry only for:
+
+- provider/API transport failure;
+- timeout;
+- malformed provider delivery;
+- schema delivery failure where no valid experiment output was produced.
+
+Do NOT retry because:
+
+- the answer is incorrect;
+- evidence is missing from the answer;
+- the answer receives a low score;
+- the verifier rejects a claim.
+
+Document the exact retry policy.
+
+If the selected API/model does not support temperature or deterministic seeds, record that limitation rather than emulating unsupported controls.
+
+## 7. Model selection
+
+Do not implement a model leaderboard.
+
+Select one capable LLM for B1–B4.
+
+Before final model approval, return:
+
+- provider;
+- exact callable model identifier;
+- whether an immutable snapshot/version is available;
+- supported temperature controls;
+- supported seed controls;
+- tokenizer/token-counting method;
+- maximum context/output constraints;
+- API metadata that can be stored for reproducibility.
+
+Do not claim immutable model reproducibility unless the provider actually guarantees it.
+
+## 8. Evidence token-budget audit
+
+Do not choose an arbitrary token budget.
+
+Using ONLY development events and the already approved production retrieval/serialization rules:
+
+measure token counts for N and EN serialized evidence.
+
+Return:
+
+- minimum;
+- median;
+- p90;
+- p95;
+- maximum;
+- number exceeding candidate context budgets.
+
+Do not inspect model answers.
+
+Do not use evaluation events.
+
+Propose a fixed evidence token budget based on this development-only audit.
+
+Preserve the existing retrieval fairness principle between B1 and B2/B3.
+
+The token-budget proposal requires author approval before freeze.
+
+## 9. Prompt construction
+
+Create candidate prompts for B1, B2, and B3.
+
+B4 has no new generation prompt.
+
+Prompts must differ only where required by the baseline definition.
+
+Keep the investigation questions Q1–Q7 and claim ontology fixed.
+
+B1:
+network evidence only.
+
+B2:
+electrical/process + network evidence.
+
+B3:
+same EN investigation task as B2, but every substantive claim must provide approved evidence references.
+
+Do not add attack-family hints, malicious labels, gold descriptions, attack points, simulator truth, or evaluator-only information.
+
+Version and hash every prompt.
+
+Do not optimize prompts against evaluation events.
+
+## 10. Statistical plan
+
+Use event as the primary statistical unit.
+
+For each event × baseline/view:
+
+retain all three generation repetitions.
+
+Compute repetition-level results for stability analysis.
+
+For the primary event-level analysis, aggregate repetitions within event before aggregating across events.
+
+Report event-level macro results as primary.
+
+Report pooled micro results only as complementary diagnostics where applicable.
+
+For uncertainty:
+
+use 2,000 event-level bootstrap resamples;
+
+preserve scenario stratification where applicable;
+
+use fixed seed = 20270922.
+
+Do not treat:
+
+- repetitions;
+- claims;
+- packets;
+- evidence records
+
+as independent statistical units.
+
+Confidence intervals are conditional on the evaluated Sherlock events/scenarios and must not be described as uncertainty over real-world OT deployments.
+
+## 11. Evaluation isolation
+
+Prepare a formal evaluation custody/isolation manifest.
+
+Before protocol freeze, specify:
+
+- evaluation event IDs;
+- gold storage location;
+- authorized reviewer/custodian role;
+- files unavailable to generation/retrieval code;
+- files unavailable during prompt/verifier development;
+- hash/version procedure;
+- access logging procedure.
+
+After protocol freeze, evaluation observations may not be used to modify:
+
+- prompts;
+- retrieval;
+- evidence serialization;
+- verifier;
+- matching;
+- metrics;
+- tolerances;
+- claim ontology.
+
+Any such modification requires a new exploratory protocol version.
+
+## 12. Development-only implementation authorization
+
+After completing the configuration proposals above, implementation is authorized ONLY for the existing development set.
+
+Implement:
+
+- canonical numeric-fact projection;
+- matching adapter;
+- metric implementation;
+- B1/B2/B3 generation runner;
+- B4 replay/verifier runner;
+- retry/logging;
+- run manifests;
+- statistical aggregation;
+- protocol conformance tests.
+
+Do not run the 32 evaluation events.
+
+Do not freeze automatically.
+
+## 13. Required return
+
+Return:
+
+1. integrated semantic-resolution test results;
+2. selected-model capability report;
+3. development-only token-budget audit;
+4. proposed fixed evidence token budget;
+5. B1/B2/B3 prompt files and hashes;
+6. retry/repetition configuration;
+7. statistical-analysis configuration;
+8. evaluation isolation/custody manifest;
+9. development implementation test results;
+10. exact remaining decisions before protocol freeze;
+11. updated freeze inventory and hashes.
+
+If model selection requires author choice before implementation, STOP after presenting the model capability options.
+
+Do not choose a model based on evaluation performance.
+
+Do not run evaluation events.
+
+Do not freeze Investigation Protocol v1 without explicit author approval.

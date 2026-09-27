@@ -1,0 +1,44 @@
+{
+  "status": "AUTHOR_DECISION_REQUIRED_NOT_ACTIVE",
+  "existing_semantic_kind": "observation_channel_maps_to_asset",
+  "claim_type_remains": "asset_relationship",
+  "pilot_facts_affected": [
+    {
+      "event_id": "ev_0961f1c2da8a257e3ebc",
+      "gold_claim_id": "g_0020"
+    },
+    {
+      "event_id": "ev_21f18503563e6a677ae5",
+      "gold_claim_id": "g_0009"
+    },
+    {
+      "event_id": "ev_812f8057d7c974d9cf36",
+      "gold_claim_id": "g_0006"
+    },
+    {
+      "event_id": "ev_ab03f537915a04bff66c",
+      "gold_claim_id": "g_0005"
+    }
+  ],
+  "finding": "Already in signed gold/fact-key policy and B0 native output, absent from v2 typed asset relation enum. No source gold change or new type alias is permitted.",
+  "recommended_representation_fix": {
+    "add_existing_relation_to_typed_asset_enum": "observation_channel_maps_to_asset",
+    "record_ids": "exactly one e ID",
+    "mapping_ids": "exactly one approved channel meta ID",
+    "mapped_asset_id": "exact matching non-null asset",
+    "common_asset_ids": "exact singleton asset",
+    "common_channel_ids": "exact singleton observed channel",
+    "support": "valid E and exact channel M; preserves current reviewed fact key"
+  },
+  "files_requiring_a_versioned_compatibility_revision_if_approved": [
+    "schemas/investigation_claim.v2.json",
+    "schemas/investigation_verification.v2.json",
+    "src/investigation/schema_v2.py",
+    "src/investigation_dev/claims.py",
+    "prompts/investigation-v1/common.v1.txt",
+    "prompts/investigation-v1/B1.v1.txt",
+    "prompts/investigation-v1/B2.v1.txt",
+    "prompts/investigation-v1/B3.v1.txt"
+  ],
+  "implementation_now": "B0 native sidecar preserves fact; v2 generation/verifier do not accept an unapproved relation enum. No recall or alias compensation."
+}

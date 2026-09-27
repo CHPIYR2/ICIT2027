@@ -1,0 +1,215 @@
+{
+  "status": "PHASE1_AMENDMENT_COMPLETE_AWAITING_HUMAN_REVIEW",
+  "verification": {
+    "status": "PASS",
+    "stage": "PHASE1_B0_ONLY",
+    "tests": {
+      "command": ".venv/bin/python -m unittest discover -s tests -q",
+      "tests": 94,
+      "passed": 94,
+      "failures": 0,
+      "errors": 0,
+      "new_amendment_tests": 27,
+      "human_gold": 0
+    },
+    "counts": {
+      "conditions_checked": 144,
+      "N_command_observed": 49,
+      "N_asset_relationship": 49,
+      "EN_command_observed": 49,
+      "EN_asset_relationship": 49,
+      "EN_temporal_association": 44,
+      "address_children": 98,
+      "exact_mapped_children": 98,
+      "same_asset_valid_E_children": 88,
+      "same_asset_later_valid_E_children": 88,
+      "request_children": 49,
+      "same_asset_valid_E_requests": 44,
+      "same_asset_later_valid_E_requests": 44,
+      "pilot_packets_checked": 4
+    },
+    "checks": [
+      "old classification and Phase1 locks unchanged",
+      "all 144 canonical E/N projections identical to v1",
+      "all output hashes",
+      "retrieval and B0 deterministic replay",
+      "address/message/static mapping closure",
+      "namespace and cross-view checks",
+      "derived arithmetic and gap queries",
+      "both static asset edges and capture-time arithmetic",
+      "all four packet hashes and lineage closure"
+    ],
+    "llm_calls": 0,
+    "human_gold_events": 0,
+    "formal_protocol_frozen": false
+  },
+  "pilot_paths": [
+    "annotations/events-v2/ev_812f8057d7c974d9cf36",
+    "annotations/events-v2/ev_ab03f537915a04bff66c",
+    "annotations/events-v2/ev_0961f1c2da8a257e3ebc",
+    "annotations/events-v2/ev_21f18503563e6a677ae5"
+  ],
+  "inventory_counts": {
+    "network_activity": 569646,
+    "command_observed": 49,
+    "acknowledgement_observed": 426617,
+    "communication_gap": 48,
+    "reported_value": 630749,
+    "reported_change": 52736,
+    "reported_state_change": 0,
+    "electrical_change": 52736,
+    "temporal_association": 44,
+    "asset_relationship": 52827,
+    "security_indicator": 0,
+    "security_interpretation": 0,
+    "unknown": 336
+  },
+  "pilot_inventory_counts": {
+    "network_activity": 9873,
+    "command_observed": 5,
+    "acknowledgement_observed": 8051,
+    "communication_gap": 4,
+    "reported_value": 11852,
+    "reported_change": 996,
+    "reported_state_change": 0,
+    "electrical_change": 996,
+    "temporal_association": 5,
+    "asset_relationship": 1004,
+    "security_indicator": 0,
+    "security_interpretation": 0,
+    "unknown": 28
+  },
+  "supported_example": {
+    "status": "DRAFT_UNREVIEWED",
+    "event_id": "ev_0961f1c2da8a257e3ebc",
+    "B0_claim": {
+      "claim_id": "c_3",
+      "question_ids": [
+        "Q4",
+        "Q5"
+      ],
+      "claim_type": "temporal_association",
+      "claim_text": "A command request mapped to asset asset_5c5dca51985d37c3 was captured before a process observation associated with the same mapped asset. This is asset-linked temporal evidence; execution, causation and malicious intent are not established.",
+      "support_assertion": "asserted",
+      "evidence_ids": [
+        "m_81c335db83989561408ba943",
+        "a_201ac60a2dfa3237d1cef218",
+        "meta_70711efe18cc741b8c651f4b",
+        "e_8606b7842af56e3d54832106",
+        "meta_4d4540079d9a2a1c6b19fd04"
+      ],
+      "asset_ids": [
+        "asset_5c5dca51985d37c3"
+      ],
+      "channel_ids": [
+        "ch_139683601a10167d"
+      ],
+      "endpoint_ids": [],
+      "payload": {
+        "earlier_id": "a_201ac60a2dfa3237d1cef218",
+        "later_id": "e_8606b7842af56e3d54832106",
+        "relation": "precedes",
+        "delta_seconds": 0.24941706657409668,
+        "scope": "same_observed_asset",
+        "mapping_ids": [
+          "meta_70711efe18cc741b8c651f4b",
+          "meta_4d4540079d9a2a1c6b19fd04"
+        ],
+        "mapped_asset_id": "asset_5c5dca51985d37c3"
+      }
+    },
+    "command_message": {
+      "evidence_id": "m_81c335db83989561408ba943",
+      "view": "N",
+      "source_type": "message",
+      "observation_time": 0.022887229919433594,
+      "reported_time": null,
+      "asset_id": null,
+      "protocol": "IEC104",
+      "value": null,
+      "unit": null,
+      "quality_flags": [],
+      "fields": {
+        "apci_format": "I",
+        "asdu_type": 45,
+        "cause_of_transmission": 6
+      },
+      "lineage_ref": "lin_e86f0ebad54bd2525e8a80e3"
+    },
+    "command_address": {
+      "evidence_id": "a_201ac60a2dfa3237d1cef218",
+      "source_type": "command_address_observation",
+      "view": "N",
+      "parent_ids": [
+        "m_81c335db83989561408ba943"
+      ],
+      "asdu_type": 45,
+      "cause_of_transmission": 6,
+      "object_index": 0,
+      "observation_time": 0.022887229919433594,
+      "mapped_control_point_id": "cp_6c4f3c31996c2844",
+      "mapped_target_asset_id": "asset_5c5dca51985d37c3",
+      "mapping_evidence_id": "meta_70711efe18cc741b8c651f4b",
+      "mapping_status": "exact_static_match",
+      "reason": "exact_allowlisted_static_mapping"
+    },
+    "control_mapping": {
+      "evidence_id": "meta_70711efe18cc741b8c651f4b",
+      "control_point_id": "cp_6c4f3c31996c2844",
+      "asset_id": "asset_5c5dca51985d37c3",
+      "context": "CONFIGURATION",
+      "attribute": "closed"
+    },
+    "process_observation": {
+      "evidence_id": "e_8606b7842af56e3d54832106",
+      "view": "E",
+      "source_type": "process",
+      "observation_time": 0.2723042964935303,
+      "reported_time": null,
+      "asset_id": "asset_5c5dca51985d37c3",
+      "protocol": "IEC104",
+      "value": true,
+      "unit": "NONE",
+      "quality_flags": [],
+      "fields": {
+        "channel_id": "ch_139683601a10167d",
+        "family": "reported_state",
+        "attribute": "is_closed",
+        "context": "MEASUREMENT"
+      },
+      "lineage_ref": "lin_ecaa2434f46771a2aa2e2f9e"
+    },
+    "channel_mapping": {
+      "evidence_id": "meta_4d4540079d9a2a1c6b19fd04",
+      "asset_id": "asset_5c5dca51985d37c3",
+      "family": "reported_state",
+      "attribute": "is_closed",
+      "context": "MEASUREMENT",
+      "unit": "NONE",
+      "scale": "NONE"
+    }
+  },
+  "insufficient_example": {
+    "status": "DRAFT_UNREVIEWED",
+    "event_id": "ev_363ad64e92cfa74fd5f6",
+    "B0_insufficiency": {
+      "status": "INSUFFICIENT",
+      "subject": "same_observed_asset_temporal_association",
+      "evidence_ids": [
+        "m_d510c8e07fbdc266699b41dd",
+        "a_2fe8411aec7470ce9a8ddbcf",
+        "meta_8d284cd7ad34e0e646b74dfc",
+        "d_05c627ea5b03ca2bc7d93a64"
+      ],
+      "mapped_asset_id": "asset_6cfe2ffd19aa6fd8",
+      "reason": "no_valid_later_same_asset_E_in_allowed_window",
+      "does_not_imply": "execution failure, benignness, stability, or safety"
+    },
+    "complete_window_valid_same_asset_E_count": 0,
+    "interpretation": "The mapping is available, but no qualifying same-asset E observation supports the cross-source link; no conclusion about execution or safety."
+  },
+  "report": "docs/investigation_phase1_amendment_v2_results.md",
+  "llm_calls": 0,
+  "human_gold_events": 0,
+  "B1_B4_implemented": false
+}

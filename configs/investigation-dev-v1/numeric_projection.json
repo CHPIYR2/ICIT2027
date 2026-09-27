@@ -1,0 +1,80 @@
+{
+  "version": "numeric-fact-projection-v1-approved-development",
+  "status": "AUTHOR_APPROVED_DEVELOPMENT_ONLY_NOT_PROTOCOL_FREEZE",
+  "runtime_enabled": true,
+  "recommended_resolution": "B_STRICT_SPECIALIZATION",
+  "raw_claim_types": [
+    "reported_change",
+    "electrical_change"
+  ],
+  "preserve_raw_claim_type_and_payload": true,
+  "preserve_original_gold_keys_and_aliases": true,
+  "canonical_kind": "reported_numeric_change",
+  "exact_identity_fields": [
+    "projection_version",
+    "event_id",
+    "evidence_export_version",
+    "canonical_kind",
+    "before_e_id",
+    "after_e_id",
+    "asset_id",
+    "channel_id",
+    "family",
+    "source_unit",
+    "operation",
+    "result_unit"
+  ],
+  "checked_content_fields": [
+    "before_value",
+    "after_value",
+    "before_time",
+    "after_time",
+    "result",
+    "interpretation_strength"
+  ],
+  "support_provenance_fields": [
+    "source_file_or_output_sha256",
+    "source_claim_or_field_location",
+    "raw_claim_type",
+    "original_fact_key_if_any",
+    "metadata_evidence_id",
+    "actual_support_ids",
+    "view",
+    "bundle_sha256",
+    "receipt_sha256"
+  ],
+  "electrical_family_units": {
+    "current": "AMPERE",
+    "voltage": "PER_UNIT",
+    "active_power": "WATT",
+    "reactive_power": "VAR"
+  },
+  "cross_type_eligibility": "Both raw propositions must independently pass all common checks; both E records and approved M must prove identical family within the electrical allowlist. No equivalence from key or label alone.",
+  "family_gate_failure": "Reject unsupported specialization; no automatic generic relabeling or downgrade.",
+  "other_raw_types": "literal exact equality; no new normalization",
+  "operation_to_result_unit": {
+    "difference": "exact_source_unit",
+    "percent_change": "PERCENT"
+  },
+  "zero_baseline_percent": "INSUFFICIENT_NO_NUMERIC_ASSERTION",
+  "difference_percent_alias": false,
+  "new_human_gold_aliases": false,
+  "new_cross_pair_aliases": false,
+  "b0_adapter_status": "IMPLEMENTED_DEVELOPMENT_ONLY",
+  "b0_field_rules": {
+    "difference": "one arithmetic assertion with source result unit",
+    "percent_change": "non-null value is a separate arithmetic assertion with PERCENT result unit; preserve raw source unit separately",
+    "before_after_values": "checked payload components, not automatically additional value claims",
+    "citations": "retain actual citations; never synthesize e/M IDs in output"
+  },
+  "specification": {
+    "path": "docs/investigation_protocol.v1.semantic_resolution.r2.md",
+    "sha256": "9ee14ead4e35e2feb63f734d216f295e1274abe7ced7e62862345d97b911934c"
+  },
+  "numeric_metadata_context": "Validate accessible approved channel M; preserve reviewed two-E minimal support sets. Do not add citations or earn invented citation credit; separate mapping assertions retain explicit M roles.",
+  "runtime_scope": "development only",
+  "author_approval": {
+    "path": "results/investigation-development-v1/approval/author_approval.txt",
+    "sha256": "9df3065cbedaac2d5c585a9181485ab82f81b56ee09f3123513692e6c0071510"
+  }
+}

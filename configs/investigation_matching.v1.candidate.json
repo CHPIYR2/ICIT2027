@@ -1,0 +1,75 @@
+{
+  "version": "matching-v1-candidate-20260925",
+  "status": "NON_NUMERIC_RULES_READY_NUMERIC_APPROVAL_PENDING",
+  "exact_rules": {
+    "evidence_id": "exact",
+    "asset_id": "exact",
+    "channel_id": "exact",
+    "claim_type": "exact_literal",
+    "command_asdu_type": "exact",
+    "cause_of_transmission": "exact",
+    "state_boolean": "exact",
+    "unit": "exact",
+    "temporal_ordering": "exact_stored_capture_timestamps",
+    "temporal_scope": "exact"
+  },
+  "formula": "abs(pred-reference) <= max(atol, rtol * abs(reference))",
+  "active_numeric_profile": null,
+  "numeric_profiles": {
+    "A_recommended_typed_fidelity": {
+      "author_approval": "PENDING",
+      "atol": {
+        "AMPERE": 0,
+        "PER_UNIT": 0,
+        "WATT": 0,
+        "VAR": 0,
+        "PERCENT": 0
+      },
+      "rtol": {
+        "AMPERE": 5e-08,
+        "PER_UNIT": 5e-08,
+        "WATT": 5e-08,
+        "VAR": 5e-08,
+        "PERCENT": 5e-08
+      },
+      "rationale": "Eight-significant-digit rendering bound; exact zero avoids erasing tiny observed nonzero WATT/VAR values; not sensor uncertainty."
+    },
+    "B_six_decimal_compatibility": {
+      "author_approval": "PENDING",
+      "atol": {
+        "AMPERE": 5e-07,
+        "PER_UNIT": 5e-07,
+        "WATT": 5e-07,
+        "VAR": 5e-07,
+        "PERCENT": 5e-07
+      },
+      "rtol": {
+        "AMPERE": 5e-08,
+        "PER_UNIT": 5e-08,
+        "WATT": 5e-08,
+        "VAR": 5e-08,
+        "PERCENT": 5e-08
+      },
+      "rationale": "Half a unit at six decimal places; less strict for small quantities; retain zero/sign gates and scientific notation near zero."
+    }
+  },
+  "percent_unit": "percentage points; baseline zero unavailable; no inferred denominator floor",
+  "duration_rendering": {
+    "unit": "SECOND",
+    "atol_proposed": 5e-07,
+    "rtol_proposed": 0,
+    "author_approval": "PENDING",
+    "ordering_tolerance": 0
+  },
+  "unsupported_units": "PENDING_SEPARATE_APPROVAL_NO_FALLBACK",
+  "natural_language_similarity_is_correctness_metric": false,
+  "fact_key_dedup_does_not_override_type_mismatch": true,
+  "specification": {
+    "path": "docs/investigation_matching.v1.candidate.md",
+    "sha256": "1bf4b4914754d4a95c868328af01c07d32882afe8409d01bac12b13fcc67c21f"
+  },
+  "empirical_basis": {
+    "path": "results/investigation-freeze-v1/numeric_precision.pilots.json",
+    "sha256": "c9269a000ad4ea9594b128f5d6efcaef2652f51d19027a2e93185bd0f61ef260"
+  }
+}

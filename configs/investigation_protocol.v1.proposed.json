@@ -1,0 +1,337 @@
+{
+  "schema_version": "investigation-protocol-v1-proposed",
+  "status": "PROPOSED_NOT_FROZEN",
+  "formal_protocol_frozen": false,
+  "authorization_scope": "Phase2A human gold preparation only",
+  "llm_calls_authorized": false,
+  "B1_B4_implementation_authorized": false,
+  "artifacts": {
+    "claim_schema": {
+      "path": "schemas/investigation_claim.v2.json",
+      "current_artifact_sha256": "cdb83d8d745263a08ec70e95aeb7c20931c185f93a88ad442c8b68f41a9219f8",
+      "freeze_sha256": null,
+      "status": "PENDING_AUTHOR_REVIEW_AND_FINAL_FREEZE"
+    },
+    "verification_schema": {
+      "path": "schemas/investigation_verification.v2.json",
+      "current_artifact_sha256": "0ba923c26fb333b05390b746b148ca362b2f7242c51a12ee6e35c353c43e7ab4",
+      "freeze_sha256": null,
+      "status": "PENDING_AUTHOR_REVIEW_AND_FINAL_FREEZE"
+    },
+    "verification_policy": {
+      "path": "docs/claim_support_policy_v2.md",
+      "current_artifact_sha256": "954db23c204c4838f833335368244717c89c1884743d369cb32f80795a850abc",
+      "freeze_sha256": null,
+      "status": "PENDING_AUTHOR_REVIEW_AND_FINAL_FREEZE"
+    },
+    "event_selection": {
+      "path": "configs/investigation_events.v1.json",
+      "current_artifact_sha256": "cee7286d3acd4c70a9e21325ee566690cf3663684521a81f86549ae2f6f8dc2c",
+      "freeze_sha256": null,
+      "status": "EXISTING_EVENT_IDS_FROZEN_PROTOCOL_FREEZE_PENDING"
+    },
+    "event_selection_lock": {
+      "path": "configs/investigation_events.v1.lock.json",
+      "current_artifact_sha256": "bc0d978d77ff16f34185cc50fc9a8486f0c384cb77704ada20f91427579b88a6",
+      "freeze_sha256": null,
+      "status": "EXISTING_EVENT_SELECTION_LOCK"
+    },
+    "annotation_guideline": {
+      "path": "annotations/phase2a/REVIEWER_INSTRUCTIONS.md",
+      "current_artifact_sha256": "9f265faaf5407d3a7a3fe251dc12643a3106b0dba5d992c5c3bf11e46498d49c",
+      "freeze_sha256": null,
+      "status": "PENDING_AUTHOR_REVIEW_AND_FINAL_FREEZE"
+    },
+    "retrieval_configuration": {
+      "path": "configs/investigation.phase1.v2.json",
+      "current_artifact_sha256": "c98ef6e14ca9eac88230152a6ddb4c418720ab2c91509a4014c1b16beb9ba6e6",
+      "freeze_sha256": null,
+      "status": "PENDING_AUTHOR_REVIEW_AND_FINAL_FREEZE"
+    },
+    "matching_policy": {
+      "path": "docs/investigation_matching.phase2a.proposed.md",
+      "current_artifact_sha256": "4f43c132f71327a8098af2fb301af10da4cffea23af6e54d1548214e8cbd17e2",
+      "freeze_sha256": null,
+      "status": "PENDING_AUTHOR_REVIEW_AND_FINAL_FREEZE"
+    },
+    "fact_key_policy": {
+      "path": "docs/investigation_fact_keys.phase2a.proposed.md",
+      "current_artifact_sha256": "02dd9bce6cd39676b04c823eda5c049ccbe94ff3e7a14d9adde3b7926123a760",
+      "freeze_sha256": null,
+      "status": "PENDING_AUTHOR_REVIEW_AND_FINAL_FREEZE"
+    },
+    "gold_isolation_rule": {
+      "path": "docs/investigation_gold_isolation.phase2a.md",
+      "current_artifact_sha256": "67f200b57e9ca0fc7a402bf9ee0a4c4c0372df9d37108948d8296ca5d7bf9c2f",
+      "freeze_sha256": null,
+      "status": "PENDING_AUTHOR_REVIEW_AND_FINAL_FREEZE"
+    }
+  },
+  "questions": {
+    "Q1": {
+      "text": "What network activities, command requests and responses were observed?",
+      "minimum_support_rule": null,
+      "status": "QUESTION_TEXT_EXISTING_MINIMUM_SUPPORT_RULE_PENDING_AUTHOR_REVIEW"
+    },
+    "Q2": {
+      "text": "What process/electrical values and changes were reported?",
+      "minimum_support_rule": null,
+      "status": "QUESTION_TEXT_EXISTING_MINIMUM_SUPPORT_RULE_PENDING_AUTHOR_REVIEW"
+    },
+    "Q3": {
+      "text": "Which observed assets/channels/endpoints are involved and which mappings are unknown?",
+      "minimum_support_rule": null,
+      "status": "QUESTION_TEXT_EXISTING_MINIMUM_SUPPORT_RULE_PENDING_AUTHOR_REVIEW"
+    },
+    "Q4": {
+      "text": "What capture-time ordering is supported?",
+      "minimum_support_rule": null,
+      "status": "QUESTION_TEXT_EXISTING_MINIMUM_SUPPORT_RULE_PENDING_AUTHOR_REVIEW"
+    },
+    "Q5": {
+      "text": "What temporal associations between N/E are supported, without causality?",
+      "minimum_support_rule": null,
+      "status": "QUESTION_TEXT_EXISTING_MINIMUM_SUPPORT_RULE_PENDING_AUTHOR_REVIEW"
+    },
+    "Q6": {
+      "text": "Which security-relevant observations warrant investigation and what interpretation is supported?",
+      "minimum_support_rule": null,
+      "status": "QUESTION_TEXT_EXISTING_MINIMUM_SUPPORT_RULE_PENDING_AUTHOR_REVIEW"
+    },
+    "Q7": {
+      "text": "What cannot be concluded and what support is missing?",
+      "minimum_support_rule": null,
+      "status": "QUESTION_TEXT_EXISTING_MINIMUM_SUPPORT_RULE_PENDING_AUTHOR_REVIEW"
+    }
+  },
+  "optional_claim_types": [
+    "reported_state_change"
+  ],
+  "minimum_sufficiency_excludes": [
+    "reported_state_change"
+  ],
+  "baseline_matrix": [
+    {
+      "baseline": "B0",
+      "views": [
+        "E",
+        "N",
+        "EN"
+      ],
+      "llm": false,
+      "definition": "Existing deterministic v2 timeline",
+      "implementation_status": "COMPLETE_PHASE1"
+    },
+    {
+      "baseline": "B1",
+      "views": [
+        "E",
+        "N",
+        "EN"
+      ],
+      "llm": true,
+      "definition": "Structured generation; citations optional",
+      "implementation_status": "NOT_IMPLEMENTED_NOT_AUTHORIZED"
+    },
+    {
+      "baseline": "B2",
+      "views": [
+        "E",
+        "N",
+        "EN"
+      ],
+      "llm": true,
+      "definition": "Same fixed model; substantive claims require citations",
+      "implementation_status": "NOT_IMPLEMENTED_NOT_AUTHORIZED"
+    },
+    {
+      "baseline": "B3",
+      "views": [
+        "E",
+        "N",
+        "EN"
+      ],
+      "llm": false,
+      "definition": "Replay B2 through finite verifier and canonical publication rules",
+      "implementation_status": "NOT_IMPLEMENTED_NOT_AUTHORIZED"
+    },
+    {
+      "baseline": "B4",
+      "views": [
+        "E",
+        "N",
+        "EN"
+      ],
+      "llm": false,
+      "definition": "Replay B2/B3 with question-level sufficiency and qualify/withhold",
+      "implementation_status": "NOT_IMPLEMENTED_NOT_AUTHORIZED"
+    }
+  ],
+  "baseline_matrix_status": "EXISTING_DESIGN_PROPOSAL_PENDING_FINAL_APPROVAL",
+  "retrieval": {
+    "existing_entry_budgets": {
+      "E": {
+        "E": 64,
+        "N": 0
+      },
+      "N": {
+        "E": 0,
+        "N": 64
+      },
+      "EN": {
+        "E": 32,
+        "N": 32
+      }
+    },
+    "existing_serialized_byte_cap": 48000,
+    "selection": "N request-first atomic m+a; complete gap; N round-robin. EN nearest later valid same-asset E per retrieved request then E family round-robin. E-only family round-robin.",
+    "actual_token_cap": null,
+    "status": "V2_ARTIFACT_PRESERVED_FINAL_TOKEN_BUDGET_PENDING",
+    "comparison_rule": "Same event/view production bundle across B0-B4; do not compare different retrieval versions as an LLM effect"
+  },
+  "metric_definitions": [
+    {
+      "name": "Citation precision",
+      "definition": "實際支援其 claim 中指定角色、可見且存在的 (atomic claim, evidence ID) 對 / 所有聲稱的 citation 對",
+      "special_handling": "錯 ID、hidden、無關皆入分母；同 claim 重複 ID 去重；單 ID 不必單獨證明整條多證據 claim",
+      "status": "EXISTING_PROPOSAL_REQUIRES_FINAL_APPROVAL"
+    },
+    {
+      "name": "Complete-support rate（伴隨 citation 指標）",
+      "definition": "citation set 足以共同支持整個 atomic claim 的 asserted claims / 所有 asserted substantive claims",
+      "special_handling": "防止每個 ID 各有關係但合起來仍缺關鍵前提；B1 缺 citation 不能靠 evaluator 補引用得分",
+      "status": "EXISTING_PROPOSAL_REQUIRES_FINAL_APPROVAL"
+    },
+    {
+      "name": "Unsupported security-claim rate",
+      "definition": "未被可見證據支持的 asserted security-indicator/interpretation 與任何位置的安全／因果／意圖主張 / 所有 asserted substantive security claims",
+      "special_handling": "人審整個 raw/final 文本，防止改 claim_type 逃避；合理 unknown 不進分母；qualified 只評其實際保留的 assertion",
+      "status": "EXISTING_PROPOSAL_REQUIRES_FINAL_APPROVAL"
+    },
+    {
+      "name": "Numerical accuracy",
+      "definition": "值／差／比例與單位、pair、scope 均正確的 numeric assertions / 所有 numeric assertions",
+      "special_handling": "沒數字則 NA；物理未量測值或不合法百分比為錯誤",
+      "status": "EXISTING_PROPOSAL_REQUIRES_FINAL_APPROVAL"
+    },
+    {
+      "name": "Asset consistency",
+      "definition": "映射／endpoint role 正確的 asset relationship assertions / 全部這類 assertions",
+      "special_handling": "null asset 不是可任意匹配；M 的全場 asset 清單不算 involved",
+      "status": "EXISTING_PROPOSAL_REQUIRES_FINAL_APPROVAL"
+    },
+    {
+      "name": "Temporal consistency",
+      "definition": "支持其聲稱 order/equality/delta 的 temporal assertions / 全部 temporal assertions",
+      "special_handling": "同 capture time 不代表真實同時；無測量時間不得聲稱 actuation chronology",
+      "status": "EXISTING_PROPOSAL_REQUIRES_FINAL_APPROVAL"
+    },
+    {
+      "name": "Required withholding recall",
+      "definition": "gold 判應 qualify/withhold 且系統作出正確 action+reason 的固定機會 / 全部 gold insufficient/qualification opportunities",
+      "special_handling": "Q1–Q7+預定 guardrail opportunities；不是只評模型主動提到的項目",
+      "status": "EXISTING_PROPOSAL_REQUIRES_FINAL_APPROVAL"
+    },
+    {
+      "name": "Withholding precision",
+      "definition": "人審認為確實需要其 action 的 explicit qualify/withhold 決定 / 全部此類決定",
+      "special_handling": "有足夠證據卻全拒答會降低此值；reason 錯也不算對",
+      "status": "EXISTING_PROPOSAL_REQUIRES_FINAL_APPROVAL"
+    },
+    {
+      "name": "Action accuracy",
+      "definition": "在固定機會集合上正確 supported/qualified/withheld action / 全部固定機會",
+      "special_handling": "同時分層報 answerable、partial、unanswerable，不只總 accuracy",
+      "status": "EXISTING_PROPOSAL_REQUIRES_FINAL_APPROVAL"
+    },
+    {
+      "name": "Substantive question coverage",
+      "definition": "Q1–Q6 中至少一項正確、非空、滿足問題最低支持的 supported/qualified answer 數 / 6",
+      "special_handling": "一題最多一次；Q7 的 unknown 不當實質調查覆蓋；全拒答為 0",
+      "status": "EXISTING_PROPOSAL_REQUIRES_FINAL_APPROVAL"
+    },
+    {
+      "name": "Schema compliance",
+      "definition": "可解析且符合 schema+跨欄位 constraints 的 reports / 全部嘗試 reports",
+      "special_handling": "截斷/invalid 不丟棄；調查 coverage=0，失敗率另列；raw security statements 仍做人審風險評分",
+      "status": "EXISTING_PROPOSAL_REQUIRES_FINAL_APPROVAL"
+    },
+    {
+      "name": "Evidence completeness",
+      "definition": "Correctly recovered unique EN-gold facts / number of EN-gold facts; same denominator across views",
+      "status": "PROPOSED_PENDING_APPROVAL"
+    },
+    {
+      "name": "View-conditional completeness",
+      "definition": "Correctly recovered unique view-supportable gold facts / number of view-supportable gold facts",
+      "status": "PROPOSED_PENDING_APPROVAL"
+    },
+    {
+      "name": "Retrieval recall",
+      "definition": "View-supportable gold facts with at least one full minimal support set retrieved / number of view-supportable gold facts",
+      "status": "PROPOSED_PENDING_APPROVAL"
+    }
+  ],
+  "metrics_computed": false,
+  "zero_denominator_rule": {
+    "value": "NA with numerator/denominator counts",
+    "status": "EXISTING_PROPOSAL_PENDING_FINAL_APPROVAL"
+  },
+  "numerical_matching": {
+    "formula": "abs(pred-gold) <= max(abs_tolerance[unit], rel_tolerance[unit]*abs(gold))",
+    "abs_tolerance_by_unit": null,
+    "rel_tolerance_by_unit": null,
+    "timestamp_delta_tolerance": null,
+    "status": "PENDING_AUTHOR_APPROVAL_NO_SCORING"
+  },
+  "llm": {
+    "provider": null,
+    "model_snapshot": null,
+    "sampling_parameters": null,
+    "seed_support": null,
+    "context_token_limit": null,
+    "output_token_limit": null,
+    "prompt_hash": null,
+    "repetitions": null,
+    "transport_retry_policy": null,
+    "budget": null,
+    "status": "PENDING_NOT_AUTHORIZED"
+  },
+  "reviewer_policy": {
+    "reviewer_ids": null,
+    "reviewers_per_event": null,
+    "blinding_policy": null,
+    "adjudicator": null,
+    "disagreement_resolution": null,
+    "signoff_policy": null,
+    "status": "PENDING_AUTHOR_APPROVAL"
+  },
+  "gold": {
+    "version": null,
+    "development_hash": null,
+    "evaluation_hash": null,
+    "evaluation_custodian": null,
+    "evaluation_store": null,
+    "release_approval": null,
+    "status": "PENDING_HUMAN_ANNOTATION"
+  },
+  "isolation": {
+    "pilot_use": "Development/pilot gold may refine rules, prompts and verifier; Phase2A tools accept only frozen four pilot IDs",
+    "evaluation_rule": "Freeze the 32 evaluation events and full system protocol before final gold scoring; development must not inspect finalized evaluation gold",
+    "post_gold_change_rule": "Prompt/verifier/retrieval/policy changes informed by finalized evaluation gold errors require a new exploratory version, not the same frozen evaluation",
+    "access_controls_status": "PENDING_CUSTODIAN_AND_ACL_SETUP",
+    "untouched_test_claim_allowed": false
+  },
+  "pending_decisions": [
+    "reviewers and adjudication",
+    "gold salient-fact selection and alias decisions",
+    "Q1-Q7 minimum support rules, especially Q5/Q6",
+    "security_indicator/weak review_required semantics",
+    "numeric and time tolerances",
+    "final metric denominators and statistics plan",
+    "model, prompts, sampling, token budgets and cost authorization",
+    "evaluation gold custodian and isolation controls",
+    "gold signoff/version and final freeze hashes"
+  ],
+  "freeze_blocked_until": "All unresolved fields approved, pilot review/adjudication complete, gold finalized under isolation policy, and protocol artifacts sealed. No freeze performed by Phase2A."
+}

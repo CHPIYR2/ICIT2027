@@ -1,0 +1,406 @@
+AUTHOR APPROVAL:
+
+The r5 offline candidate package is approved for controlled DEVELOPMENT validation.
+
+You are authorized to execute ONLY the predeclared 64-position r5 validation manifest using `max_output_tokens=8192`, followed by the corresponding deterministic V1-EN replay where applicable.
+
+This is NOT protocol freeze and NOT final evaluation authorization.
+
+## 1. Pre-execution integrity gate
+
+Before the first model API call:
+
+1. Re-run the relevant local test suite.
+2. Require all tests to pass.
+3. Verify the r5 candidate inventory and hashes.
+4. Verify the predeclared 64-position validation manifest hash.
+5. Verify all protected r4/legacy/sealed-gold preservation hashes.
+6. Verify the model configuration is exactly the approved candidate:
+   - model: `gpt-4.1-2025-04-14`
+   - Responses API
+   - temperature = 0
+   - max_output_tokens = 8192
+   - no seed assumption
+7. Verify that:
+   - G0 uses EN citation-optional policy;
+   - G1-EN uses EN citation-required policy;
+   - G1-E uses E citation-required policy;
+   - G1-N uses N citation-required policy.
+8. Verify retrieval quotas remain:
+   - E = 64
+   - N = 64
+   - EN = 32N + 32E
+   - 48,000-byte policy unchanged.
+9. Verify the 16,384 INPUT EVIDENCE safety ceiling remains unchanged and is not confused with the 8,192 OUTPUT limit.
+10. Verify no evaluation event/evidence/gold/result is accessible through this development execution path.
+
+If ANY pre-execution integrity check fails:
+
+STOP BEFORE MODEL CALLS.
+
+Report the blocker to the author.
+
+Do not repair research semantics or silently regenerate the manifest.
+
+## 2. Authorized generation positions
+
+Execute exactly the already-predeclared 64 logical generation positions:
+
+Capacity validation:
+- G0: 19 positions corresponding to prior B2 `max_output_tokens=4096` truncations.
+- G1-EN: 21 positions corresponding to prior B3 `max_output_tokens=4096` truncations.
+
+New-condition smoke validation:
+- G1-E: 4 predeclared human-reviewed pilot development events × 3 repetitions = 12 positions.
+- G1-N: the same 4 predeclared pilot development events × 3 repetitions = 12 positions.
+
+Total:
+64 logical model-generation positions.
+
+Do NOT add positions.
+
+Do NOT rerun the historical 15 B1 truncations.
+
+Do NOT substitute another development event.
+
+Do NOT choose events based on model output quality.
+
+## 3. Capacity-test request identity
+
+For the 40 prior-truncation capacity positions, enforce the predeclared request-diff rule:
+
+The intended substantive change relative to the corresponding r4 request is ONLY:
+
+`max_output_tokens: 4096 -> 8192`
+
+All other applicable request/evidence/prompt/schema/model bindings must match the predeclared r5 validation manifest.
+
+Record and verify the request diff before execution.
+
+If an unexpected substantive diff is found:
+
+STOP before sending that position and report it.
+
+Do not silently reconcile it.
+
+## 4. Execution pacing
+
+Use a GLOBAL SINGLE-REQUEST scheduler.
+
+Never have more than one model request in flight.
+
+Base pacing:
+- at least 60 seconds between request starts.
+
+Additionally:
+
+- record available provider rate-limit headers;
+- respect `Retry-After` whenever present;
+- treat `Retry-After` as a minimum wait;
+- if rate-limit reset information requires a longer wait than the fixed interval, wait the longer duration;
+- do not increase concurrency to accelerate the run;
+- do not batch multiple experimental positions into one model request;
+- do not alter the research request to work around rate limits.
+
+Preserve provider request IDs, response IDs, HTTP status, timestamps, usage, cache usage, termination reason, and available rate-limit metadata.
+
+## 5. Retry policy
+
+For each logical position, allow at most 3 transport attempts under the approved r5 transport policy.
+
+Retry ONLY predeclared transport/delivery failures.
+
+Examples may include only those already authorized by the r5 transport policy, such as eligible temporary rate-limit/server/connection delivery failures.
+
+Never retry because of:
+
+- answer quality;
+- low score;
+- missing or weak citation;
+- unsupported claim;
+- schema content quality;
+- verifier disposition;
+- factual error;
+- undesirable security interpretation;
+- coverage;
+- withholding behavior;
+- `max_output_tokens` truncation.
+
+Preserve every attempt.
+
+Never overwrite an earlier attempt.
+
+If delivery status is genuinely unknown, record it as unknown and do not invent provider status, usage, or zero cost.
+
+Do not exceed the three-attempt limit without new author authorization.
+
+## 6. HARD capacity stop rule
+
+This rule has priority over completing all 64 positions.
+
+If ANY delivered 8192 response has:
+
+`status = incomplete`
+
+with:
+
+`incomplete_details.reason = max_output_tokens`
+
+then:
+
+1. preserve the response and all metadata;
+2. mark the 8192 capacity acceptance as FAILED / NOT ACCEPTED;
+3. stop scheduling NEW model-generation positions;
+4. do NOT retry that position;
+5. do NOT change output limit to 16384;
+6. do NOT shorten the prompt;
+7. do NOT reduce evidence;
+8. do NOT modify schema;
+9. do NOT modify retrieval;
+10. do NOT continue merely to obtain a complete 64-position matrix;
+11. report immediately to the author.
+
+Previously completed positions remain preserved.
+
+The purpose is to test the predeclared 8192 candidate, not to force it to pass.
+
+## 7. Other failures do not trigger semantic tuning
+
+A transport failure, refusal, schema failure, malformed content, unsupported claim, or other non-output-cap failure must be recorded under its correct category.
+
+Do not change:
+- prompt;
+- retrieval;
+- evidence bundle;
+- schema;
+- gold;
+- matching;
+- metrics;
+- verifier;
+- claim policy;
+- event selection;
+- repetitions;
+- output limit
+
+during the run.
+
+If a new implementation defect prevents trustworthy continuation, STOP and report it rather than patching mid-experiment.
+
+## 8. G1-E / G1-N smoke-test rules
+
+For G1-E:
+
+- expose only E evidence plus approved necessary metadata;
+- do not expose hidden N evidence;
+- verify citation/reference visibility against the E bundle;
+- do not permit network evidence to support a claim indirectly.
+
+For G1-N:
+
+- expose only N evidence plus approved necessary metadata;
+- do not expose hidden electrical/process values;
+- verify citation/reference visibility against the N bundle.
+
+For both:
+
+- use the same canonical citation-required investigation policy as G1-EN;
+- do not create cross-source relationships from a single-source view;
+- preserve Q1–Q7 and the frozen claim semantics.
+
+These smoke tests are for schema/conformance/view-isolation validation.
+
+Do NOT use their factual scores to tune prompts or policies.
+
+## 9. V1-EN replay
+
+For every newly delivered valid G1-EN output that is eligible under the existing V1-EN policy:
+
+- perform deterministic V1-EN replay;
+- make zero model calls;
+- verify exact-byte/hash identity of the G1-EN input to the verifier;
+- preserve raw and published/verifier outputs separately.
+
+If a G1-EN output is unavailable or ineligible for replay, record `REPLAY_UNAVAILABLE` or the existing exact r5 equivalent.
+
+Do not regenerate an answer to make replay possible.
+
+Do NOT add V1-E or V1-N.
+
+## 10. Evaluation isolation
+
+This run is DEVELOPMENT ONLY.
+
+Do NOT:
+
+- access evaluation evidence;
+- access evaluation gold;
+- access evaluation truth;
+- access evaluation review ledgers;
+- access evaluation results;
+- run an evaluation event;
+- provision or weaken custody;
+- use evaluation information to interpret development outputs.
+
+The existing evaluation guard must remain active.
+
+If any development execution path unexpectedly gains access to evaluation material:
+
+STOP immediately and report the custody breach/blocker.
+
+## 11. Gold preservation
+
+Do not modify human gold.
+
+Do not add aliases.
+
+Do not rewrite guardrails.
+
+Do not update annotations based on model outputs.
+
+Do not use model outputs as annotation suggestions.
+
+Verify sealed-gold preservation hashes again after the run.
+
+## 12. API usage and cost accounting
+
+For every provider response with usage, preserve:
+
+- input_tokens
+- cached_input_tokens
+- output_tokens
+- total_tokens where available
+
+Keep missing usage as missing.
+
+Do not infer zero usage for failed/unknown-delivery requests.
+
+At the end calculate:
+
+- total known input tokens;
+- total known cached input tokens;
+- total known output tokens;
+- known calculable API cost using the approved documented pricing formula;
+- count of attempts without provider usage.
+
+Clearly state that calculable cost is not necessarily the final provider invoice when usage is unavailable.
+
+## 13. Required validation results
+
+At completion, report separately:
+
+### Capacity validation
+
+For G0 and G1-EN prior-truncation positions:
+
+- planned positions
+- delivered positions
+- complete outputs
+- `max_output_tokens` truncations
+- schema-valid outputs
+- other failures
+- transport attempts
+- retry reasons
+
+### New-condition smoke validation
+
+For G1-E and G1-N:
+
+- planned positions
+- delivered positions
+- schema-valid outputs
+- view-isolation checks
+- citation/reference visibility checks
+- evidence-budget checks
+- other failures
+
+Do NOT present smoke-test factual performance as final research results.
+
+### Replay
+
+For V1-EN:
+
+- eligible G1-EN outputs
+- replayed
+- replay unavailable
+- exact input hash/byte identity result
+- model calls = 0
+
+## 14. 8192 acceptance decision
+
+8192 may be reported as passing THIS DEVELOPMENT CAPACITY VALIDATION only if:
+
+- all authorized positions that obtain a normal model delivery show zero `max_output_tokens` truncations;
+- the predeclared smoke-test conformance requirements pass;
+- no integrity violation invalidates the run.
+
+Do not claim this guarantees zero truncation in final evaluation.
+
+Do not freeze 8192 automatically.
+
+Even if validation passes, final protocol freeze still requires explicit author approval.
+
+## 15. Post-run integrity
+
+After the run:
+
+1. re-run relevant local tests;
+2. verify sealed human-gold hashes;
+3. verify protected r4 hashes;
+4. verify r5 pre-run candidate hashes;
+5. preserve all new validation artifacts in a new r5 validation result namespace;
+6. produce a post-validation manifest and hashes;
+7. do not overwrite the pre-run candidate manifest.
+
+If post-run integrity fails:
+
+do not freeze;
+report the exact discrepancy.
+
+## 16. Required final report
+
+Return:
+
+A. preflight integrity result
+
+B. executed logical positions and attempt counts
+
+C. per-cell completion/truncation/failure summary
+
+D. 8192 capacity acceptance result
+
+E. G1-E/G1-N conformance result
+
+F. V1-EN replay result
+
+G. transport/rate-limit events
+
+H. API token usage and calculable cost
+
+I. local test results before/after
+
+J. r4/r5/gold preservation verification
+
+K. post-validation artifact manifest/hash
+
+L. any protocol deviation
+
+M. remaining freeze blockers
+
+N. exact recommended next author action
+
+## HARD STOP AFTER VALIDATION
+
+Even if all 64 positions pass:
+
+DO NOT:
+- freeze the protocol;
+- run the 32 evaluation events;
+- provision evaluation custody without separate authorization;
+- change 8192 again;
+- modify prompts based on outputs;
+- tune retrieval;
+- tune verifier;
+- tune metrics;
+- alter human gold.
+
+Return the report and STOP for author review.

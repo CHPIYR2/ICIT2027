@@ -1,0 +1,61 @@
+{
+  "version": "investigation-phase1-v2",
+  "authorization": "results/investigation-v2/approval/author_approval.txt",
+  "status": "PHASE1_IMPLEMENTATION_ONLY_NOT_FINAL_PROTOCOL",
+  "llm_calls_authorized": false,
+  "command_target_amendment_enabled": true,
+  "event_manifest": "configs/investigation_events.v1.json",
+  "pilots": "configs/investigation_pilots.v1.json",
+  "views": [
+    "E",
+    "N",
+    "EN"
+  ],
+  "baseline": "B0",
+  "budget": {
+    "E": {
+      "E": 64,
+      "N": 0
+    },
+    "N": {
+      "E": 0,
+      "N": 64
+    },
+    "EN": {
+      "E": 32,
+      "N": 32
+    }
+  },
+  "serialized_bundle_max_bytes": 48000,
+  "token_budget_status": "Not applicable to B0; must fix tokenizer budget before LLM use",
+  "pair_policy": "earliest valid pre + latest valid post; if no pre/post, earliest/latest observed numeric pair; earliest unequal adjacent time-ordered state pair; no initial state",
+  "questions": {
+    "Q1": "What network activities, command requests and responses were observed?",
+    "Q2": "What process/electrical values and changes were reported?",
+    "Q3": "Which observed assets/channels/endpoints are involved and which mappings are unknown?",
+    "Q4": "What capture-time ordering is supported?",
+    "Q5": "What temporal associations between N/E are supported, without causality?",
+    "Q6": "Which security-relevant observations warrant investigation and what interpretation is supported?",
+    "Q7": "What cannot be concluded and what support is missing?"
+  },
+  "evidence_export_version": "investigation-export-v2",
+  "claim_schema": "schemas/investigation_claim.v2.json",
+  "verification_schema": "schemas/investigation_verification.v2.json",
+  "command_address_schema": "schemas/command_address.v2.json",
+  "audited_command_types": [
+    45,
+    47,
+    50
+  ],
+  "optional_claim_types": [
+    "reported_state_change"
+  ],
+  "minimum_question_sufficiency_excludes": [
+    "reported_state_change"
+  ],
+  "retrieval_version": "investigation-retrieval-v2",
+  "retrieval_selection": "N request-first atomic m+a; complete gap; N round-robin. EN nearest later valid same-asset E per retrieved request then E family round-robin. E-only family round-robin.",
+  "experimental_caveat": "EN retrieval changed as part of this amendment. Compare under v2 only; this is not measured fusion superiority or an LLM effect.",
+  "strongest_cross_domain_claim": "asset-linked capture-time temporal association",
+  "formal_protocol_frozen": false
+}

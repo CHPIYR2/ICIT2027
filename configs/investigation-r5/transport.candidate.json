@@ -1,0 +1,38 @@
+{
+  "status": "PROPOSED_FOR_AUTHOR_REVIEW_OFFLINE_ONLY",
+  "max_attempts_per_position": 3,
+  "max_retries": 2,
+  "timeout_seconds": 120,
+  "single_flight": true,
+  "minimum_start_spacing_seconds": 60,
+  "retry_http": [
+    408,
+    429,
+    "500-599"
+  ],
+  "retry_exception_classes": [
+    "ConnectionError (including ConnectionResetError, ConnectionAbortedError, BrokenPipeError, ConnectionRefusedError)",
+    "TimeoutError/socket.timeout",
+    "URLError only with an allowlisted underlying transport exception",
+    "RemoteDisconnected",
+    "IncompleteRead",
+    "OSError only errno ECONNRESET, ECONNABORTED, ECONNREFUSED, EPIPE, ETIMEDOUT, ENETUNREACH, EHOSTUNREACH"
+  ],
+  "retry_envelope": "malformed provider envelope or completed response without recoverable claims/questions experiment envelope",
+  "never_retry": [
+    "recoverable schema-invalid output",
+    "citation/visibility/support failure",
+    "answer quality",
+    "verifier outcome",
+    "refusal",
+    "max_output_tokens",
+    "other provider incomplete",
+    "nonretryable HTTP",
+    "local file/configuration failures",
+    "TLS certificate or unknown exceptions"
+  ],
+  "history": "create-once attempt records/raw response; no overwrite, no best-of; unknown delivery consumes one attempt",
+  "pacing": "max(60 seconds, provider Retry-After) between request starts; reset/timeout unknown delivery retains history; no automatic recovery after three attempts",
+  "rate_limit": "Account last observed at 30000 TPM. Single-flight; record input/schema estimate and output reservation separately. Local estimate is not provider TPM accounting. Before live authorization confirm account headroom; honor response Retry-After; three-attempt bound, no new recovery without approval.",
+  "acceptance": "output-cap incomplete stops capacity acceptance; never increase output cap automatically"
+}

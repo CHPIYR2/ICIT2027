@@ -1,0 +1,353 @@
+# Author Approval — Command-Target Amendment
+
+The command-target feasibility result is approved.
+
+The investigation-specific static command-address mapping may now be implemented under a new versioned evidence/export contract.
+
+The previous classification evidence contract, classifiers, features, models, and results must remain unchanged.
+
+## 1. Approved interpretation
+
+For the actually observed and audited Sherlock command types:
+
+```text id="2gkq76"
+45
+47
+50
+```
+
+the investigation system may parse command object addresses and map:
+
+```text id="lyzh95"
+CA + IOA
+→ static CONFIGURATION control point
+→ opaque mapped asset
+```
+
+using only the approved static mapping fields.
+
+Do not claim evaluated support for ASDU types 46/48/49/51 unless separately audited later.
+
+No need to expand to those types for the current paper.
+
+---
+
+# 2. Approved new evidence record
+
+Implement the proposed investigation-specific:
+
+```text id="5hnmcu"
+command_address_observation
+```
+
+with opaque public identifiers.
+
+Public fields may include:
+
+```text id="460iy5"
+evidence_id
+parent command message ID
+ASDU type
+COT
+object index
+observation time
+mapped control point ID
+mapped target asset ID
+mapping evidence ID
+mapping status
+```
+
+Raw CA/IOA and raw mapping identifiers remain private provenance.
+
+Do not expose:
+
+```text id="x8veh4"
+setpoint values
+initial values
+select/execute qualifier
+gold attack point
+family
+malicious label
+raw topology names
+```
+
+---
+
+# 3. Required schema correction
+
+Before implementation proceeds, update every relevant evidence-ID namespace to support:
+
+```text id="upwkeu"
+a_[0-9a-f]{24}
+```
+
+The current proposed investigation claim schema still excludes this namespace in several locations.
+
+Audit and update at minimum:
+
+```text id="1f5z6g"
+claim.evidence_ids
+command payload
+asset relationship record IDs
+temporal association earlier/later IDs
+verification schema
+retrieval schema
+visibility receipts
+cross-field validators
+tests
+```
+
+Do not merely broaden all IDs blindly.
+
+Only fields that may legitimately reference a command-address observation should accept `a_`.
+
+Add tests ensuring illegal evidence namespaces remain rejected.
+
+---
+
+# 4. Amend command_observed policy
+
+Support two strengths.
+
+## Without valid address mapping
+
+Allowed:
+
+> A command-type activation request was observed.
+
+Not allowed:
+
+```text id="9bxwh2"
+target asset
+execution
+physical success
+causation
+malicious intent
+```
+
+## With exact_static_match address evidence
+
+Allowed:
+
+> A command-type activation request addressed to a control point mapped to asset X was observed.
+
+Required evidence:
+
+```text id="1fy45p"
+command message evidence
+command-address evidence
+static mapping evidence
+```
+
+Still not allowed:
+
+```text id="zb74ca"
+asset X executed the command
+asset X changed because of the command
+the request was malicious
+the attack succeeded
+```
+
+---
+
+# 5. Amend asset_relationship
+
+Add:
+
+```text id="pbvw5q"
+command_address_maps_to_asset
+```
+
+This relation means only:
+
+> A captured command address maps, via approved static metadata, to a control point associated with asset X.
+
+It does not mean:
+
+```text id="acqztm"
+execution
+physical effect
+causation
+compromise
+```
+
+---
+
+# 6. Amend temporal_association
+
+Permit `same_observed_asset` only when the verifier can establish both:
+
+```text id="mzpnp5"
+command-address → asset X
+and
+E channel → asset X
+```
+
+using approved static metadata.
+
+Then the system may report capture-time ordering such as:
+
+> A command request mapped to asset X was captured before an electrical/process observation associated with the same mapped asset.
+
+The verifier must still prohibit causal language.
+
+---
+
+# 7. Preserve unmapped cases
+
+If:
+
+```text id="z9o2le"
+mapping missing
+mapping ambiguous
+context not allowlisted
+address layout invalid
+```
+
+then:
+
+```text id="f5qgrl"
+mapped_control_point_id = null
+mapped_target_asset_id = null
+```
+
+Do not guess.
+
+Record an explicit reason.
+
+---
+
+# 8. reported_state_change remains optional
+
+Keep `reported_state_change` in the ontology, but:
+
+- do not require it for event coverage;
+- do not include it in minimum question sufficiency;
+- do not manufacture before/after state from initial values;
+- create such a claim only when two valid same-channel ordered observations with unequal boolean values exist.
+
+A single observed state remains a `reported_value`, not a state change.
+
+---
+
+# 9. Continue Phase 1 implementation
+
+After schema/policy amendment, implement only:
+
+```text id="ufngjn"
+investigation export adapter
+command-address child evidence
+static opaque mapping
+structured retrieval
+retrieval receipts
+B0 deterministic timeline
+four pilot human-review evidence packets
+```
+
+Still do NOT call an LLM.
+
+---
+
+# 10. Required B0 demonstration
+
+Return one representative B0 case where possible showing:
+
+```text id="arvo23"
+command request
+→ mapped control point
+→ mapped asset
+
+electrical/process observation
+→ channel
+→ same mapped asset
+
+capture-time relationship
+```
+
+The B0 output must explicitly state that this is:
+
+```text id="hkhzu9"
+asset-linked temporal evidence
+```
+
+and NOT:
+
+```text id="yikv38"
+execution proof
+causal proof
+malicious-intent proof
+```
+
+Also return one case in which evidence is insufficient, for example:
+
+```text id="7kwf2o"
+mapped command but no same-asset E observation
+or
+event with no command request
+```
+
+This demonstrates that the pipeline can represent both support and insufficiency.
+
+---
+
+# 11. Pilot annotation
+
+Generate the four approved human-review packets.
+
+Automated candidate facts remain:
+
+```text id="1jwgjb"
+DRAFT_UNREVIEWED
+```
+
+Do not treat supportability inventory counts as gold.
+
+The human reviewer must review:
+
+```text id="p1kmhu"
+meaningful facts
+aliases / duplicate facts
+valid support sets
+unsupported stronger statements
+unknowns
+mechanical verifier feasibility
+```
+
+---
+
+# 12. Stop condition
+
+After completing:
+
+```text id="wcmsj8"
+schema amendment
+policy amendment
+tests
+B0
+four pilot evidence packets
+```
+
+STOP.
+
+Do not implement B1–B4.
+
+Do not make an LLM API call.
+
+Return:
+
+1. implemented evidence/schema version;
+2. test results;
+3. exact count of mapped command-address observations;
+4. exact count with same-asset E observations;
+5. one supported B0 cross-source example;
+6. one insufficient-evidence B0 example;
+7. four pilot packet summaries;
+8. revised claim-supportability inventory;
+9. any claim types that appear unusable;
+10. remaining decisions before freezing Investigation Protocol v1.
+
+# Research boundary
+
+The strongest cross-domain statement currently permitted is an asset-linked temporal association.
+
+It must never be automatically upgraded into execution, causation, attack success, malicious intent, or attribution.

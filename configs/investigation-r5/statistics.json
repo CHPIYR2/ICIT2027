@@ -1,0 +1,54 @@
+{
+  "version": "statistics-r5",
+  "primary_unit": "event",
+  "generation_repetitions": 3,
+  "within_event": "mean of defined repetition ratios; retain all three and disclose NA/failure slots",
+  "primary_aggregation": "equal-weight event macro",
+  "complementary_aggregation": "pooled micro with denominator counts",
+  "stability": [
+    "three repetition ratios",
+    "within-event range",
+    "within-event population standard deviation"
+  ],
+  "bootstrap": {
+    "resamples": 2000,
+    "seed": 20270922,
+    "confidence_level": 0.95,
+    "interval": "percentile, linear-interpolated 2.5th and 97.5th percentiles",
+    "unit": "event, all repetitions carried together",
+    "stratification": "resample the same number of events within each supplied predeclared scenario stratum; missing stratum is an error when stratification is requested",
+    "paired_contrasts": [
+      [
+        "G1-E",
+        "G1-EN"
+      ],
+      [
+        "G1-N",
+        "G1-EN"
+      ],
+      [
+        "G0",
+        "G1-EN"
+      ],
+      [
+        "G1-EN",
+        "V1-EN"
+      ]
+    ],
+    "singleton_stratum": "retained once per bootstrap sample; contributes no within-stratum resampling variation; disclose singleton counts"
+  },
+  "scenario_assignment": {
+    "path": "configs/investigation-r5/scenario_strata.custodian.json",
+    "sha256": "c7f0b75c219d1297e4c55ffe6ab9f94b221f8b534cb86e791329c73bc9ee66e5"
+  },
+  "scenario_map_finalized": true,
+  "CI_scope": "conditional on evaluated Sherlock events/scenarios, not real-world OT deployments",
+  "no_pseudoreplication": [
+    "repetitions",
+    "claims",
+    "packets",
+    "evidence records"
+  ],
+  "B0_micro_counts": "Count the one deterministic artifact once per event; aligned repetition slots must have identical results and do not triple B0 micro denominators.",
+  "RQ3": "paired trade-off reporting; no numerical non-inferiority margin"
+}

@@ -1,0 +1,680 @@
+{
+  "version": "B4-replay-development-v1",
+  "event_id": "ev_d04a24cd3fe039e0f7c1",
+  "baseline": "B4",
+  "repetition": 2,
+  "B3_run_id": "authorized-dev-v1-r4",
+  "B3_input_sha256": "049ea7f9db5253fd1580c07e6d2a71f5b12f443b567ea2a8040cd4590f721082",
+  "bundle_sha256": "fa92ff6ed24d257fb3de201b8460d3fc51bf28bfdaf1354d06705a1c8ce3c551",
+  "receipt_sha256": "0d9ddcced592557ca7ea0741a21c6889f5d22228b3a40cce56d92d03c8292a3a",
+  "verifier_implementation": [
+    {
+      "path": "src/investigation_dryrun/claims.py",
+      "sha256": "094fc6f6e01465c13341e0aa7dcda6f15fced70259f59504750d2969a0be5f3e"
+    },
+    {
+      "path": "src/investigation_dryrun/runner.py",
+      "sha256": "f136fdc13a17e0674d3e81d3e4628b4947f82efd5384b758ff586f0b92bde87b"
+    },
+    {
+      "path": "schemas/investigation_claim.v3.json",
+      "sha256": "33c2e19af5d5515ca43557a31748159e695aa3035514f1eb4487bbb377b16ac0"
+    },
+    {
+      "path": "prompts/investigation-v1-r4/canonical_text.v1.json",
+      "sha256": "36ccf53992b06a327433b25f43a072e6aac344753ca53612a75e13bd0ac8c8a4"
+    }
+  ],
+  "llm_calls": 0,
+  "new_generation_prompt": null,
+  "raw_B3_validation_errors": [],
+  "question_actions": [
+    {
+      "question_id": "Q1",
+      "action": "partial_or_withheld_replayed_answer",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    },
+    {
+      "question_id": "Q2",
+      "action": "retain_original_response",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    },
+    {
+      "question_id": "Q3",
+      "action": "retain_original_response",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    },
+    {
+      "question_id": "Q4",
+      "action": "partial_or_withheld_replayed_answer",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    },
+    {
+      "question_id": "Q5",
+      "action": "partial_or_withheld_replayed_answer",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    },
+    {
+      "question_id": "Q6",
+      "action": "retain_original_response",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    },
+    {
+      "question_id": "Q7",
+      "action": "partial_or_withheld_replayed_answer",
+      "reason": "Only checked B3 content is retained; missing checked claims do not prove full-view evidence absence.",
+      "full_view_diagnosis": "not_inferred_by_verifier"
+    }
+  ],
+  "dispositions": [
+    {
+      "claim_id": "c_0001",
+      "disposition": "INSUFFICIENT",
+      "reason": "endpoint_ids_mismatch",
+      "published_claim": null,
+      "checks": {
+        "status": "NOT_SUPPORTED_OR_NOT_CHECKABLE"
+      }
+    },
+    {
+      "claim_id": "c_0002",
+      "disposition": "INSUFFICIENT",
+      "reason": "endpoint_ids_mismatch",
+      "published_claim": null,
+      "checks": {
+        "status": "NOT_SUPPORTED_OR_NOT_CHECKABLE"
+      }
+    },
+    {
+      "claim_id": "c_0003",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [],
+        "channel_ids": [],
+        "claim_id": "c_0003",
+        "claim_text": "Within the approved captured TCP/2404 population, query d_4cdb8ef130336a17537b099b reports interval -11.185055017471313 to -10.2291259765625 s, duration 0.9559290409088135 SECOND, bounds p_05d1b6036b8edcf77589d17e and p_819489c68bc50ace79c82230. This does not establish outage, DoS or absence outside the covered scope.",
+        "claim_type": "communication_gap",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "d_4cdb8ef130336a17537b099b",
+          "p_05d1b6036b8edcf77589d17e",
+          "p_819489c68bc50ace79c82230"
+        ],
+        "payload": {
+          "coverage_id": "d_4cdb8ef130336a17537b099b",
+          "duration_seconds": 0.9559290409088135,
+          "end": -10.2291259765625,
+          "left_id": "p_05d1b6036b8edcf77589d17e",
+          "population": "observed_tcp_2404_packets",
+          "right_id": "p_819489c68bc50ace79c82230",
+          "start": -11.185055017471313
+        },
+        "question_ids": [
+          "Q1"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "communication_gap",
+        "raw_claim_sha256": "7cdf594f882bb315f41add0cda1916ccfa5efdb53f04c3bce91cc851eff65d8d",
+        "bundle_sha256": "fa92ff6ed24d257fb3de201b8460d3fc51bf28bfdaf1354d06705a1c8ce3c551",
+        "canonical_text": "Within the approved captured TCP/2404 population, query d_4cdb8ef130336a17537b099b reports interval -11.185055017471313 to -10.2291259765625 s, duration 0.9559290409088135 SECOND, bounds p_05d1b6036b8edcf77589d17e and p_819489c68bc50ace79c82230. This does not establish outage, DoS or absence outside the covered scope.",
+        "required_ids": [
+          "d_4cdb8ef130336a17537b099b",
+          "p_05d1b6036b8edcf77589d17e",
+          "p_819489c68bc50ace79c82230"
+        ],
+        "allowed_ids": [
+          "d_4cdb8ef130336a17537b099b",
+          "p_05d1b6036b8edcf77589d17e",
+          "p_819489c68bc50ace79c82230"
+        ],
+        "substantive": true,
+        "key_kind": "communication_gap",
+        "key_identity": {
+          "coverage_id": "d_4cdb8ef130336a17537b099b",
+          "population": "observed_tcp_2404_packets",
+          "start": -11.185055017471313,
+          "end": -10.2291259765625
+        },
+        "fact_key": "fk_a46baea86bcff1f2646b2208f4fe9e9fd77515e86b2bf6a18e37a74f65ec8ad1"
+      }
+    },
+    {
+      "claim_id": "c_0004",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [
+          "asset_e2ac935da817f983"
+        ],
+        "channel_ids": [
+          "ch_076a19f4adcfcfee"
+        ],
+        "claim_id": "c_0004",
+        "claim_text": "Reported voltage on channel ch_076a19f4adcfcfee mapped to asset asset_e2ac935da817f983: 0.9956738948822021 PER_UNIT at capture time -58.28585886955261 s (e_aac90d549a47ef8bb179fb98), then 0.9955257177352905 PER_UNIT at capture time 51.78484916687012 s (e_e081cc02c0d2af22ee9ab3bd); difference = -0.0001481771469116211 PER_UNIT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_aac90d549a47ef8bb179fb98",
+          "e_e081cc02c0d2af22ee9ab3bd",
+          "d_d7590370b62fddea009ae479",
+          "meta_cecfd900f23c20e8b0685a37"
+        ],
+        "payload": {
+          "after_id": "e_e081cc02c0d2af22ee9ab3bd",
+          "after_time": 51.78484916687012,
+          "after_value": 0.9955257177352905,
+          "before_id": "e_aac90d549a47ef8bb179fb98",
+          "before_time": -58.28585886955261,
+          "before_value": 0.9956738948822021,
+          "operation": "difference",
+          "result": -0.0001481771469116211,
+          "unit": "PER_UNIT"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "reported_change",
+        "raw_claim_sha256": "7b1eb448a6ee742023a4515fc8e5f58fc3cff8566201dec09eb643788dad5d04",
+        "bundle_sha256": "fa92ff6ed24d257fb3de201b8460d3fc51bf28bfdaf1354d06705a1c8ce3c551",
+        "canonical_identity": {
+          "projection_version": "numeric-fact-projection-v1",
+          "event_id": "ev_d04a24cd3fe039e0f7c1",
+          "evidence_export_version": "investigation-export-v2",
+          "canonical_kind": "reported_numeric_change",
+          "before_e_id": "e_aac90d549a47ef8bb179fb98",
+          "after_e_id": "e_e081cc02c0d2af22ee9ab3bd",
+          "asset_id": "asset_e2ac935da817f983",
+          "channel_id": "ch_076a19f4adcfcfee",
+          "family": "voltage",
+          "source_unit": "PER_UNIT",
+          "operation": "difference",
+          "result_unit": "PER_UNIT"
+        },
+        "canonical_text": "Reported voltage on channel ch_076a19f4adcfcfee mapped to asset asset_e2ac935da817f983: 0.9956738948822021 PER_UNIT at capture time -58.28585886955261 s (e_aac90d549a47ef8bb179fb98), then 0.9955257177352905 PER_UNIT at capture time 51.78484916687012 s (e_e081cc02c0d2af22ee9ab3bd); difference = -0.0001481771469116211 PER_UNIT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "required_ids": [
+          "e_aac90d549a47ef8bb179fb98",
+          "e_e081cc02c0d2af22ee9ab3bd"
+        ],
+        "allowed_ids": [
+          "d_d7590370b62fddea009ae479",
+          "e_aac90d549a47ef8bb179fb98",
+          "e_e081cc02c0d2af22ee9ab3bd",
+          "meta_cecfd900f23c20e8b0685a37"
+        ],
+        "substantive": true,
+        "key_kind": "reported_change",
+        "key_identity": {
+          "before_id": "e_aac90d549a47ef8bb179fb98",
+          "after_id": "e_e081cc02c0d2af22ee9ab3bd",
+          "quantity": "difference",
+          "unit": "PER_UNIT"
+        },
+        "fact_key": "fk_d0db7f574bbe57f2777fb406df9e3126f4ea8067ed50a6bbde23b65cebadfbbd"
+      }
+    },
+    {
+      "claim_id": "c_0005",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [
+          "asset_05f863fa83922ddb"
+        ],
+        "channel_ids": [
+          "ch_01e1fd95179ba1da"
+        ],
+        "claim_id": "c_0005",
+        "claim_text": "Reported current on channel ch_01e1fd95179ba1da mapped to asset asset_05f863fa83922ddb: 0.18397510051727295 AMPERE at capture time -51.75431680679321 s (e_1fb4292f889a36c6168003b7), then 0.17892378568649292 AMPERE at capture time 58.30185508728027 s (e_35c15b69d34d5a04bc82b0b4); difference = -0.005051314830780029 AMPERE. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_1fb4292f889a36c6168003b7",
+          "e_35c15b69d34d5a04bc82b0b4",
+          "d_9734d2456b53ae55db09b739",
+          "meta_935631e97fcb4884c0d00c39"
+        ],
+        "payload": {
+          "after_id": "e_35c15b69d34d5a04bc82b0b4",
+          "after_time": 58.30185508728027,
+          "after_value": 0.17892378568649292,
+          "before_id": "e_1fb4292f889a36c6168003b7",
+          "before_time": -51.75431680679321,
+          "before_value": 0.18397510051727295,
+          "operation": "difference",
+          "result": -0.005051314830780029,
+          "unit": "AMPERE"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "reported_change",
+        "raw_claim_sha256": "28964b2bbc840c354a6df99339f8ed07ad45516929536fdbc5789cadc75773b8",
+        "bundle_sha256": "fa92ff6ed24d257fb3de201b8460d3fc51bf28bfdaf1354d06705a1c8ce3c551",
+        "canonical_identity": {
+          "projection_version": "numeric-fact-projection-v1",
+          "event_id": "ev_d04a24cd3fe039e0f7c1",
+          "evidence_export_version": "investigation-export-v2",
+          "canonical_kind": "reported_numeric_change",
+          "before_e_id": "e_1fb4292f889a36c6168003b7",
+          "after_e_id": "e_35c15b69d34d5a04bc82b0b4",
+          "asset_id": "asset_05f863fa83922ddb",
+          "channel_id": "ch_01e1fd95179ba1da",
+          "family": "current",
+          "source_unit": "AMPERE",
+          "operation": "difference",
+          "result_unit": "AMPERE"
+        },
+        "canonical_text": "Reported current on channel ch_01e1fd95179ba1da mapped to asset asset_05f863fa83922ddb: 0.18397510051727295 AMPERE at capture time -51.75431680679321 s (e_1fb4292f889a36c6168003b7), then 0.17892378568649292 AMPERE at capture time 58.30185508728027 s (e_35c15b69d34d5a04bc82b0b4); difference = -0.005051314830780029 AMPERE. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "required_ids": [
+          "e_1fb4292f889a36c6168003b7",
+          "e_35c15b69d34d5a04bc82b0b4"
+        ],
+        "allowed_ids": [
+          "d_9734d2456b53ae55db09b739",
+          "e_1fb4292f889a36c6168003b7",
+          "e_35c15b69d34d5a04bc82b0b4",
+          "meta_935631e97fcb4884c0d00c39"
+        ],
+        "substantive": true,
+        "key_kind": "reported_change",
+        "key_identity": {
+          "before_id": "e_1fb4292f889a36c6168003b7",
+          "after_id": "e_35c15b69d34d5a04bc82b0b4",
+          "quantity": "difference",
+          "unit": "AMPERE"
+        },
+        "fact_key": "fk_b2cb725fb529e94f2ae4c822c7f270422580599f08862efbd1dea47835ccda4b"
+      }
+    },
+    {
+      "claim_id": "c_0006",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [
+          "asset_4d923a00ddbc2ebb"
+        ],
+        "channel_ids": [
+          "ch_001bab0aa0d8aca6"
+        ],
+        "claim_id": "c_0006",
+        "claim_text": "Reported active_power on channel ch_001bab0aa0d8aca6 mapped to asset asset_4d923a00ddbc2ebb: 0.0 WATT at capture time -57.256619930267334 s (e_872eb80c1f57caa717592eaf), then 0.0 WATT at capture time 52.813435077667236 s (e_af793224af0042ce55cc85e1); difference = 0.0 WATT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_872eb80c1f57caa717592eaf",
+          "e_af793224af0042ce55cc85e1",
+          "d_e38df7d592b5a8bb1ec78843",
+          "meta_ac6688d85c471f711f04c540"
+        ],
+        "payload": {
+          "after_id": "e_af793224af0042ce55cc85e1",
+          "after_time": 52.813435077667236,
+          "after_value": 0.0,
+          "before_id": "e_872eb80c1f57caa717592eaf",
+          "before_time": -57.256619930267334,
+          "before_value": 0.0,
+          "operation": "difference",
+          "result": 0.0,
+          "unit": "WATT"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "reported_change",
+        "raw_claim_sha256": "ac2fc3b470db916de8f67703de3896eb2cab671c329529d45aa55ad4f62b5271",
+        "bundle_sha256": "fa92ff6ed24d257fb3de201b8460d3fc51bf28bfdaf1354d06705a1c8ce3c551",
+        "canonical_identity": {
+          "projection_version": "numeric-fact-projection-v1",
+          "event_id": "ev_d04a24cd3fe039e0f7c1",
+          "evidence_export_version": "investigation-export-v2",
+          "canonical_kind": "reported_numeric_change",
+          "before_e_id": "e_872eb80c1f57caa717592eaf",
+          "after_e_id": "e_af793224af0042ce55cc85e1",
+          "asset_id": "asset_4d923a00ddbc2ebb",
+          "channel_id": "ch_001bab0aa0d8aca6",
+          "family": "active_power",
+          "source_unit": "WATT",
+          "operation": "difference",
+          "result_unit": "WATT"
+        },
+        "canonical_text": "Reported active_power on channel ch_001bab0aa0d8aca6 mapped to asset asset_4d923a00ddbc2ebb: 0.0 WATT at capture time -57.256619930267334 s (e_872eb80c1f57caa717592eaf), then 0.0 WATT at capture time 52.813435077667236 s (e_af793224af0042ce55cc85e1); difference = 0.0 WATT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "required_ids": [
+          "e_872eb80c1f57caa717592eaf",
+          "e_af793224af0042ce55cc85e1"
+        ],
+        "allowed_ids": [
+          "d_e38df7d592b5a8bb1ec78843",
+          "e_872eb80c1f57caa717592eaf",
+          "e_af793224af0042ce55cc85e1",
+          "meta_ac6688d85c471f711f04c540"
+        ],
+        "substantive": true,
+        "key_kind": "reported_change",
+        "key_identity": {
+          "before_id": "e_872eb80c1f57caa717592eaf",
+          "after_id": "e_af793224af0042ce55cc85e1",
+          "quantity": "difference",
+          "unit": "WATT"
+        },
+        "fact_key": "fk_0519b6f00946cbe7aaa8504c63f0fa259e205f295941a2cf9a6f42ce55666a00"
+      }
+    },
+    {
+      "claim_id": "c_0007",
+      "disposition": "SUPPORTED",
+      "reason": "finite_support_checks_passed",
+      "published_claim": {
+        "asset_ids": [
+          "asset_de9190407c63f4f6"
+        ],
+        "channel_ids": [
+          "ch_01b8d2ffcf69123e"
+        ],
+        "claim_id": "c_0007",
+        "claim_text": "Reported reactive_power on channel ch_01b8d2ffcf69123e mapped to asset asset_de9190407c63f4f6: 0.0 VAR at capture time -54.197551012039185 s (e_2284c057f66b501e93dbc65f), then 0.0 VAR at capture time 55.82676696777344 s (e_b71ef61cd4ae4f59840e0476); difference = 0.0 VAR. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_2284c057f66b501e93dbc65f",
+          "e_b71ef61cd4ae4f59840e0476",
+          "d_070ef890f1a86002f8bce110",
+          "meta_39d3e8b2939db28b62c3d4d2"
+        ],
+        "payload": {
+          "after_id": "e_b71ef61cd4ae4f59840e0476",
+          "after_time": 55.82676696777344,
+          "after_value": 0.0,
+          "before_id": "e_2284c057f66b501e93dbc65f",
+          "before_time": -54.197551012039185,
+          "before_value": 0.0,
+          "operation": "difference",
+          "result": 0.0,
+          "unit": "VAR"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      "checks": {
+        "raw_claim_type": "reported_change",
+        "raw_claim_sha256": "b8863ff7c54532850634b907f196515bf0dee2dbe17abdf17da37c64ca9925b1",
+        "bundle_sha256": "fa92ff6ed24d257fb3de201b8460d3fc51bf28bfdaf1354d06705a1c8ce3c551",
+        "canonical_identity": {
+          "projection_version": "numeric-fact-projection-v1",
+          "event_id": "ev_d04a24cd3fe039e0f7c1",
+          "evidence_export_version": "investigation-export-v2",
+          "canonical_kind": "reported_numeric_change",
+          "before_e_id": "e_2284c057f66b501e93dbc65f",
+          "after_e_id": "e_b71ef61cd4ae4f59840e0476",
+          "asset_id": "asset_de9190407c63f4f6",
+          "channel_id": "ch_01b8d2ffcf69123e",
+          "family": "reactive_power",
+          "source_unit": "VAR",
+          "operation": "difference",
+          "result_unit": "VAR"
+        },
+        "canonical_text": "Reported reactive_power on channel ch_01b8d2ffcf69123e mapped to asset asset_de9190407c63f4f6: 0.0 VAR at capture time -54.197551012039185 s (e_2284c057f66b501e93dbc65f), then 0.0 VAR at capture time 55.82676696777344 s (e_b71ef61cd4ae4f59840e0476); difference = 0.0 VAR. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "required_ids": [
+          "e_2284c057f66b501e93dbc65f",
+          "e_b71ef61cd4ae4f59840e0476"
+        ],
+        "allowed_ids": [
+          "d_070ef890f1a86002f8bce110",
+          "e_2284c057f66b501e93dbc65f",
+          "e_b71ef61cd4ae4f59840e0476",
+          "meta_39d3e8b2939db28b62c3d4d2"
+        ],
+        "substantive": true,
+        "key_kind": "reported_change",
+        "key_identity": {
+          "before_id": "e_2284c057f66b501e93dbc65f",
+          "after_id": "e_b71ef61cd4ae4f59840e0476",
+          "quantity": "difference",
+          "unit": "VAR"
+        },
+        "fact_key": "fk_30e5bd1e107281acb675fd452ae63846458ff4dece7bfbffdd886b3853d6628f"
+      }
+    }
+  ],
+  "published_report": {
+    "schema_version": "investigation-claim-v3",
+    "event_id": "ev_d04a24cd3fe039e0f7c1",
+    "evidence_view": "EN",
+    "citation_mode": "required",
+    "claims": [
+      {
+        "asset_ids": [],
+        "channel_ids": [],
+        "claim_id": "c_0003",
+        "claim_text": "Within the approved captured TCP/2404 population, query d_4cdb8ef130336a17537b099b reports interval -11.185055017471313 to -10.2291259765625 s, duration 0.9559290409088135 SECOND, bounds p_05d1b6036b8edcf77589d17e and p_819489c68bc50ace79c82230. This does not establish outage, DoS or absence outside the covered scope.",
+        "claim_type": "communication_gap",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "d_4cdb8ef130336a17537b099b",
+          "p_05d1b6036b8edcf77589d17e",
+          "p_819489c68bc50ace79c82230"
+        ],
+        "payload": {
+          "coverage_id": "d_4cdb8ef130336a17537b099b",
+          "duration_seconds": 0.9559290409088135,
+          "end": -10.2291259765625,
+          "left_id": "p_05d1b6036b8edcf77589d17e",
+          "population": "observed_tcp_2404_packets",
+          "right_id": "p_819489c68bc50ace79c82230",
+          "start": -11.185055017471313
+        },
+        "question_ids": [
+          "Q1"
+        ],
+        "support_assertion": "asserted"
+      },
+      {
+        "asset_ids": [
+          "asset_e2ac935da817f983"
+        ],
+        "channel_ids": [
+          "ch_076a19f4adcfcfee"
+        ],
+        "claim_id": "c_0004",
+        "claim_text": "Reported voltage on channel ch_076a19f4adcfcfee mapped to asset asset_e2ac935da817f983: 0.9956738948822021 PER_UNIT at capture time -58.28585886955261 s (e_aac90d549a47ef8bb179fb98), then 0.9955257177352905 PER_UNIT at capture time 51.78484916687012 s (e_e081cc02c0d2af22ee9ab3bd); difference = -0.0001481771469116211 PER_UNIT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_aac90d549a47ef8bb179fb98",
+          "e_e081cc02c0d2af22ee9ab3bd",
+          "d_d7590370b62fddea009ae479",
+          "meta_cecfd900f23c20e8b0685a37"
+        ],
+        "payload": {
+          "after_id": "e_e081cc02c0d2af22ee9ab3bd",
+          "after_time": 51.78484916687012,
+          "after_value": 0.9955257177352905,
+          "before_id": "e_aac90d549a47ef8bb179fb98",
+          "before_time": -58.28585886955261,
+          "before_value": 0.9956738948822021,
+          "operation": "difference",
+          "result": -0.0001481771469116211,
+          "unit": "PER_UNIT"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      {
+        "asset_ids": [
+          "asset_05f863fa83922ddb"
+        ],
+        "channel_ids": [
+          "ch_01e1fd95179ba1da"
+        ],
+        "claim_id": "c_0005",
+        "claim_text": "Reported current on channel ch_01e1fd95179ba1da mapped to asset asset_05f863fa83922ddb: 0.18397510051727295 AMPERE at capture time -51.75431680679321 s (e_1fb4292f889a36c6168003b7), then 0.17892378568649292 AMPERE at capture time 58.30185508728027 s (e_35c15b69d34d5a04bc82b0b4); difference = -0.005051314830780029 AMPERE. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_1fb4292f889a36c6168003b7",
+          "e_35c15b69d34d5a04bc82b0b4",
+          "d_9734d2456b53ae55db09b739",
+          "meta_935631e97fcb4884c0d00c39"
+        ],
+        "payload": {
+          "after_id": "e_35c15b69d34d5a04bc82b0b4",
+          "after_time": 58.30185508728027,
+          "after_value": 0.17892378568649292,
+          "before_id": "e_1fb4292f889a36c6168003b7",
+          "before_time": -51.75431680679321,
+          "before_value": 0.18397510051727295,
+          "operation": "difference",
+          "result": -0.005051314830780029,
+          "unit": "AMPERE"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      {
+        "asset_ids": [
+          "asset_4d923a00ddbc2ebb"
+        ],
+        "channel_ids": [
+          "ch_001bab0aa0d8aca6"
+        ],
+        "claim_id": "c_0006",
+        "claim_text": "Reported active_power on channel ch_001bab0aa0d8aca6 mapped to asset asset_4d923a00ddbc2ebb: 0.0 WATT at capture time -57.256619930267334 s (e_872eb80c1f57caa717592eaf), then 0.0 WATT at capture time 52.813435077667236 s (e_af793224af0042ce55cc85e1); difference = 0.0 WATT. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_872eb80c1f57caa717592eaf",
+          "e_af793224af0042ce55cc85e1",
+          "d_e38df7d592b5a8bb1ec78843",
+          "meta_ac6688d85c471f711f04c540"
+        ],
+        "payload": {
+          "after_id": "e_af793224af0042ce55cc85e1",
+          "after_time": 52.813435077667236,
+          "after_value": 0.0,
+          "before_id": "e_872eb80c1f57caa717592eaf",
+          "before_time": -57.256619930267334,
+          "before_value": 0.0,
+          "operation": "difference",
+          "result": 0.0,
+          "unit": "WATT"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      },
+      {
+        "asset_ids": [
+          "asset_de9190407c63f4f6"
+        ],
+        "channel_ids": [
+          "ch_01b8d2ffcf69123e"
+        ],
+        "claim_id": "c_0007",
+        "claim_text": "Reported reactive_power on channel ch_01b8d2ffcf69123e mapped to asset asset_de9190407c63f4f6: 0.0 VAR at capture time -54.197551012039185 s (e_2284c057f66b501e93dbc65f), then 0.0 VAR at capture time 55.82676696777344 s (e_b71ef61cd4ae4f59840e0476); difference = 0.0 VAR. This is a reported difference, not evidence of physical execution, causation or malicious intent.",
+        "claim_type": "reported_change",
+        "endpoint_ids": [],
+        "evidence_ids": [
+          "e_2284c057f66b501e93dbc65f",
+          "e_b71ef61cd4ae4f59840e0476",
+          "d_070ef890f1a86002f8bce110",
+          "meta_39d3e8b2939db28b62c3d4d2"
+        ],
+        "payload": {
+          "after_id": "e_b71ef61cd4ae4f59840e0476",
+          "after_time": 55.82676696777344,
+          "after_value": 0.0,
+          "before_id": "e_2284c057f66b501e93dbc65f",
+          "before_time": -54.197551012039185,
+          "before_value": 0.0,
+          "operation": "difference",
+          "result": 0.0,
+          "unit": "VAR"
+        },
+        "question_ids": [
+          "Q2"
+        ],
+        "support_assertion": "asserted"
+      }
+    ],
+    "questions": [
+      {
+        "question_id": "Q1",
+        "claim_ids": [
+          "c_0003"
+        ],
+        "response": "insufficient"
+      },
+      {
+        "question_id": "Q2",
+        "claim_ids": [
+          "c_0004",
+          "c_0005",
+          "c_0006",
+          "c_0007"
+        ],
+        "response": "substantive"
+      },
+      {
+        "question_id": "Q3",
+        "claim_ids": [
+          "c_0004",
+          "c_0005",
+          "c_0006",
+          "c_0007"
+        ],
+        "response": "substantive"
+      },
+      {
+        "question_id": "Q4",
+        "claim_ids": [],
+        "response": "insufficient"
+      },
+      {
+        "question_id": "Q5",
+        "claim_ids": [],
+        "response": "insufficient"
+      },
+      {
+        "question_id": "Q6",
+        "claim_ids": [
+          "c_0003",
+          "c_0004",
+          "c_0005"
+        ],
+        "response": "substantive"
+      },
+      {
+        "question_id": "Q7",
+        "claim_ids": [],
+        "response": "insufficient"
+      }
+    ]
+  },
+  "question_action_limit": "Question links are retained; independent human scoring decides substantive minimum and correct insufficiency reason. No answerability inferred from claim count.",
+  "status": "REPLAYED"
+}

@@ -1,0 +1,975 @@
+{
+  "schema_version": "human-review-phase2a-proposed-v1",
+  "event_id": "ev_ab03f537915a04bff66c",
+  "partition": "development_pilot",
+  "review_status": "HUMAN_REVIEWED",
+  "reviewer_id": "R1",
+  "signoff": {
+    "reviewer_id": "R1",
+    "reviewed_at": "2026-09-25T00:20:57+08:00",
+    "notes": "The reviewer explicitly approved the complete event annotation after reviewing the final Q1-Q7 table, six positive facts, six guardrails, retained exclusions, and passed source/consistency checks. The mapped command and COT7 observations do not establish execution or completion of a specific request. Numerical differences and capture-time ordering do not establish physical causation or malicious intent. Q5 supports only EN-visible same-mapped-asset capture-time ordering. Q6 remains insufficient in all views and does not establish safety. Excluded gap, voltage, and reactive-power candidates remain excluded, without implying normal values or absence of change. This completes single-reviewer development-pilot annotation only; it does not claim second-reviewer adjudication, evaluation-gold publication, or research performance assessment."
+  },
+  "source_packet": "annotations/events-v2/ev_ab03f537915a04bff66c",
+  "source_packet_manifest_sha256": "71db70d6e2276f78692445ff53b3cd6bc8bca559347e5a67e95170721b3ab35c",
+  "full_universe_path": "annotations/events-v2/ev_ab03f537915a04bff66c/complete_allowed_evidence.json.gz",
+  "full_universe_sha256": "6973fda02281fb47b11a55e8c111c1d1db8b6b045a8c6255ac17b805908021da",
+  "production_retrieval_paths": {
+    "E": "results/investigation-v2/B0/ev_ab03f537915a04bff66c/E/retrieved.json",
+    "N": "results/investigation-v2/B0/ev_ab03f537915a04bff66c/N/retrieved.json",
+    "EN": "results/investigation-v2/B0/ev_ab03f537915a04bff66c/EN/retrieved.json"
+  },
+  "instructions": "Copy blank_fact_template into facts for each atomic human judgment. Do not edit the blank template. Candidates are separate, not gold.",
+  "blank_fact_template": {
+    "gold_claim_id": null,
+    "event_id": "ev_ab03f537915a04bff66c",
+    "question_ids": [],
+    "claim_type": null,
+    "epistemic_category": null,
+    "atomic_statement": null,
+    "fact_key": null,
+    "proposed_fact_key": null,
+    "key_kind": null,
+    "key_identity": null,
+    "key_override_reason": null,
+    "minimal_support_sets": {
+      "E": [],
+      "N": [],
+      "EN": []
+    },
+    "E_answerability": null,
+    "N_answerability": null,
+    "EN_answerability": null,
+    "acceptable_action": {
+      "E": null,
+      "N": null,
+      "EN": null
+    },
+    "prohibited_stronger_interpretation": [],
+    "ambiguity_notes": null,
+    "reviewer_id": null,
+    "review_status": "UNREVIEWED",
+    "checkability": null,
+    "alias_of": null,
+    "alias_decision": null,
+    "alias_rationale": null,
+    "view_accounting": {
+      "E": {
+        "eligible_in_view": null,
+        "retrieved_in_production_bundle": null,
+        "recovered_by_system": null
+      },
+      "N": {
+        "eligible_in_view": null,
+        "retrieved_in_production_bundle": null,
+        "recovered_by_system": null
+      },
+      "EN": {
+        "eligible_in_view": null,
+        "retrieved_in_production_bundle": null,
+        "recovered_by_system": null
+      }
+    }
+  },
+  "facts": [
+    {
+      "gold_claim_id": "g_0001",
+      "event_id": "ev_ab03f537915a04bff66c",
+      "question_ids": [
+        "Q1",
+        "Q3",
+        "Q4"
+      ],
+      "claim_type": "command_observed",
+      "epistemic_category": "observation",
+      "atomic_statement": "A command-type activation request with ASDU type 50 and cause_of_transmission 6 was captured at +0.0302581787109375 s; its observed address statically maps to control point cp_ee3cf78b5b406be4 associated with asset asset_bcbc4250923deb05.",
+      "fact_key": "fk_3eac81dfe8b3a50b2bc8f57f0606023017b642363b57d407d580ef365ea69c56",
+      "proposed_fact_key": "fk_3eac81dfe8b3a50b2bc8f57f0606023017b642363b57d407d580ef365ea69c56",
+      "key_kind": "mapped_command_observed",
+      "key_identity": {
+        "message_id": "m_dd5ac24ec9c1aba6348f03a6",
+        "address_id": "a_2d0553a21445d2a30af75215",
+        "mapping_id": "meta_32a63aa90f817bf572de5f7b",
+        "asset_id": "asset_bcbc4250923deb05",
+        "control_point_id": "cp_ee3cf78b5b406be4"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [],
+        "N": [
+          [
+            "m_dd5ac24ec9c1aba6348f03a6",
+            "a_2d0553a21445d2a30af75215",
+            "meta_32a63aa90f817bf572de5f7b"
+          ]
+        ],
+        "EN": [
+          [
+            "m_dd5ac24ec9c1aba6348f03a6",
+            "a_2d0553a21445d2a30af75215",
+            "meta_32a63aa90f817bf572de5f7b"
+          ]
+        ]
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "supported",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "assert",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The mapped asset executed or successfully completed the command.",
+        "The command caused an electrical or physical change.",
+        "The captured request demonstrates malicious intent or successful compromise.",
+        "A later COT7 message confirms completion of this specific request without a supported correlation key.",
+        "Static configuration mapping establishes an observed physical state or command payload value."
+      ],
+      "ambiguity_notes": "Human-selected mapped command-type activation request. The message, child address record, and approved static mapping agree on ASDU 50/COT6, capture time, control point, and mapped asset; address status is exact_static_match and ancestry is verified. This establishes captured addressed activity only. No command payload, actual action time, execution, intent, or causation is inferred. The weak request-only candidate candidate_001744 describes the same message at a different strength and is not separately selected; no automatic alias merge is performed. E-only cannot obtain N protocol/address fields through lineage. Q1 was independently human-reviewed as E insufficient and N/EN supported. Q3 was independently human-reviewed as supported in E/N/EN; this fact supplies the N/EN mapping evidence, while g_0005 supplies the E/EN mapping evidence. Q4 was independently human-reviewed as supported in E/N/EN, with each view restricted to its visible capture-time evidence. Production retrieval and system recovery remain unevaluated.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "The human selected the complete mapped-request proposition as one representative fact. The weak request-only form is an unselected alternative strength, not a second request or an automatically merged alias.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": true,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": true,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0002",
+      "event_id": "ev_ab03f537915a04bff66c",
+      "question_ids": [
+        "Q1",
+        "Q4"
+      ],
+      "claim_type": "acknowledgement_observed",
+      "epistemic_category": "observation",
+      "atomic_statement": "An IEC104 activation-confirmation-type message with ASDU type 50 and cause_of_transmission 7 was captured at +0.06835317611694336 s.",
+      "fact_key": "fk_5af0504b3ee5e4982239bd818d8a14bc0749390215a062521d52a6100e738e44",
+      "proposed_fact_key": "fk_5af0504b3ee5e4982239bd818d8a14bc0749390215a062521d52a6100e738e44",
+      "key_kind": "acknowledgement_observed",
+      "key_identity": {
+        "record_id": "m_1475b9261696f16631493e45",
+        "kind": "iec_activation_confirmation"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [],
+        "N": [
+          [
+            "m_1475b9261696f16631493e45"
+          ]
+        ],
+        "EN": [
+          [
+            "m_1475b9261696f16631493e45"
+          ]
+        ]
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "supported",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "assert",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The COT7 observation establishes a positive-success or negative-confirmation outcome despite missing COT high-bit details.",
+        "The message proves completion or acceptance of a particular request without a supported correlation key.",
+        "The confirmation proves command execution, physical actuation, or causation.",
+        "The confirmation demonstrates malicious intent or successful compromise."
+      ],
+      "ambiguity_notes": "Human-selected IEC104 activation-confirmation-type observation with ASDU 50 and COT7. The observed subtype is distinct from TCP ACK bits and IEC S-format frames. Allowed fields omit the COT high-bit details needed for a positive/negative interpretation, and no adequate correlation key establishes completion of a particular request. Capture order, reversed endpoints, and static address mapping do not establish successful completion or physical execution. E-only cannot obtain N message fields through lineage. Q1 was independently human-reviewed as E insufficient and N/EN supported. Q4 was independently human-reviewed as supported in E/N/EN, with each view restricted to its visible capture-time evidence. Production retrieval and system recovery remain unevaluated.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "Distinct observed COT7 protocol-confirmation message, separate from the retained COT6 mapped request; no transaction completion or execution inferred.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": true,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": true,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0003",
+      "event_id": "ev_ab03f537915a04bff66c",
+      "question_ids": [
+        "Q2",
+        "Q4"
+      ],
+      "claim_type": "electrical_change",
+      "epistemic_category": "derived_observation",
+      "atomic_statement": "On current channel ch_1462c7778709192e, the reported current changed from 42.76383590698242 AMPERE at capture time -50.40701484680176 s to 19.570575714111328 AMPERE at +59.69812035560608 s, a difference of -23.193260192871094 AMPERE.",
+      "fact_key": "fk_fee18654acd09b52e6a67b4ffba2327a10a4526edd393e55f170dfbb5cf425dc",
+      "proposed_fact_key": "fk_fee18654acd09b52e6a67b4ffba2327a10a4526edd393e55f170dfbb5cf425dc",
+      "key_kind": "electrical_change",
+      "key_identity": {
+        "before_id": "e_e2d1174c12f2ab1431e3f3aa",
+        "after_id": "e_e727f60a6cef93b0fc58efd9",
+        "quantity": "difference",
+        "unit": "AMPERE"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [
+          [
+            "e_e2d1174c12f2ab1431e3f3aa",
+            "e_e727f60a6cef93b0fc58efd9"
+          ]
+        ],
+        "N": [],
+        "EN": [
+          [
+            "e_e2d1174c12f2ab1431e3f3aa",
+            "e_e727f60a6cef93b0fc58efd9"
+          ]
+        ]
+      },
+      "E_answerability": "supported",
+      "N_answerability": "insufficient",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "assert",
+        "N": "withhold",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The reported difference locates the exact time or trajectory of the change.",
+        "The supplied event or captured command caused the difference.",
+        "The magnitude or percentage proves abnormality, malicious activity, or successful compromise.",
+        "Capture timestamps establish actual measurement or device-action times."
+      ],
+      "ambiguity_notes": "The reviewer selected this as the sole current-family representative from the three largest absolute-difference candidates. Both records have the same channel and unit, strictly ordered capture times, and empty quality flags; subtraction matches the candidate. The displayed approximately -54.236 percent is an arithmetic rendering of this same pair, not an additional selected fact. No causal connection to the mapped command, abnormality, or security meaning is inferred. Q2 was independently human-reviewed as E/EN supported and N insufficient. Q4 was independently human-reviewed as supported in E/N/EN, with each view restricted to its visible capture-time evidence. Production retrieval and system recovery remain unevaluated.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "One canonical electrical_change fact for this before/after pair and difference quantity. The reported_change form of the same pair is not counted separately. Other current-family candidates are not selected as representatives.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": true,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": true,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0004",
+      "event_id": "ev_ab03f537915a04bff66c",
+      "question_ids": [
+        "Q2",
+        "Q4"
+      ],
+      "claim_type": "electrical_change",
+      "epistemic_category": "derived_observation",
+      "atomic_statement": "On active-power channel ch_2120309e10c31474, the reported active power changed from 7111963 WATT at capture time -53.20666265487671 s to 7956896.5 WATT at +56.90317416191101 s, a difference of +844933.5 WATT.",
+      "fact_key": "fk_af699ad99844e6611e650be49d00215dfd8551f5e6bdd344e4b14c47499d3443",
+      "proposed_fact_key": "fk_af699ad99844e6611e650be49d00215dfd8551f5e6bdd344e4b14c47499d3443",
+      "key_kind": "electrical_change",
+      "key_identity": {
+        "before_id": "e_ec657a80ebac2f63d68fbec7",
+        "after_id": "e_7a0ce6e7dcfa19f3985a7b5e",
+        "quantity": "difference",
+        "unit": "WATT"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [
+          [
+            "e_ec657a80ebac2f63d68fbec7",
+            "e_7a0ce6e7dcfa19f3985a7b5e"
+          ]
+        ],
+        "N": [],
+        "EN": [
+          [
+            "e_ec657a80ebac2f63d68fbec7",
+            "e_7a0ce6e7dcfa19f3985a7b5e"
+          ]
+        ]
+      },
+      "E_answerability": "supported",
+      "N_answerability": "insufficient",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "assert",
+        "N": "withhold",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The reported difference locates the exact time or trajectory of the change.",
+        "The supplied event or captured command caused the difference.",
+        "The magnitude or percentage proves abnormality, malicious activity, or successful compromise.",
+        "Capture timestamps establish actual measurement or device-action times."
+      ],
+      "ambiguity_notes": "The reviewer selected this as the sole active-power-family representative from the three largest absolute-difference candidates. Both records have the same channel and unit, strictly ordered capture times, and empty quality flags; subtraction matches the candidate. The displayed approximately +11.880 percent and +844.9335 kW are arithmetic renderings of the same difference, not additional selected facts. No causal connection to the mapped command, abnormality, or security meaning is inferred. Q2 was independently human-reviewed as E/EN supported and N insufficient. Q4 was independently human-reviewed as supported in E/N/EN, with each view restricted to its visible capture-time evidence. Production retrieval and system recovery remain unevaluated.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "One canonical electrical_change fact for this before/after pair and difference quantity. The reported_change form of the same pair is not counted separately. Other active-power-family candidates are not selected as representatives.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": false,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": false,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0005",
+      "event_id": "ev_ab03f537915a04bff66c",
+      "question_ids": [
+        "Q3"
+      ],
+      "claim_type": "asset_relationship",
+      "epistemic_category": "static_relationship",
+      "atomic_statement": "Observation e_c5e5bf6955139908dc3d3f53 is associated with channel ch_2abba3c3db5e0166, which statically maps to asset asset_bcbc4250923deb05.",
+      "fact_key": "fk_924104d9b289c3b0398371fccc6440f69d7789ae542fa352031235952a1fa1b8",
+      "proposed_fact_key": "fk_924104d9b289c3b0398371fccc6440f69d7789ae542fa352031235952a1fa1b8",
+      "key_kind": "observation_channel_maps_to_asset",
+      "key_identity": {
+        "record_id": "e_c5e5bf6955139908dc3d3f53",
+        "mapping_id": "meta_523ca2fe08855c1749dc9ce7",
+        "channel_id": "ch_2abba3c3db5e0166",
+        "asset_id": "asset_bcbc4250923deb05"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [
+          [
+            "e_c5e5bf6955139908dc3d3f53",
+            "meta_523ca2fe08855c1749dc9ce7"
+          ]
+        ],
+        "N": [],
+        "EN": [
+          [
+            "e_c5e5bf6955139908dc3d3f53",
+            "meta_523ca2fe08855c1749dc9ce7"
+          ]
+        ]
+      },
+      "E_answerability": "supported",
+      "N_answerability": "insufficient",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "assert",
+        "N": "withhold",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The static mapping establishes a physical state of the asset.",
+        "A matching asset identifier proves that the captured command executed or acted on the asset.",
+        "The mapping establishes physical causation, malicious intent, or successful compromise."
+      ],
+      "ambiguity_notes": "Human-selected observation-channel-to-asset static relationship. Support requires both the E observation and approved channel metadata; metadata alone does not establish event involvement. The asset ID matches the static command target of g_0001, but no command action or causal relationship is inferred. The same-asset capture-time relation was separately human-reviewed as g_0006; neither proposition establishes execution or causation. Q3 was independently human-reviewed as supported in E/N/EN; this fact supplies the E/EN mapping evidence, while g_0001 supplies the N/EN mapping evidence. Production retrieval and system recovery remain unevaluated.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "E-side observation-to-asset mapping, distinct from the mapped N request and a cross-domain temporal relation.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": false,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": true,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0006",
+      "event_id": "ev_ab03f537915a04bff66c",
+      "question_ids": [
+        "Q4",
+        "Q5"
+      ],
+      "claim_type": "temporal_association",
+      "epistemic_category": "temporal_association",
+      "atomic_statement": "The captured command-type activation request at +0.0302581787109375 s precedes process observation e_c5e5bf6955139908dc3d3f53 at +3.511972188949585 s by 3.4817140102386475 s; their approved static mappings identify the same asset asset_bcbc4250923deb05.",
+      "fact_key": "fk_e7bc1124b97c154617c20de3875fed8f4fd5bdfb61554ab0c45d4cbbede7c11f",
+      "proposed_fact_key": "fk_e7bc1124b97c154617c20de3875fed8f4fd5bdfb61554ab0c45d4cbbede7c11f",
+      "key_kind": "temporal_association",
+      "key_identity": {
+        "earlier_id": "a_2d0553a21445d2a30af75215",
+        "later_id": "e_c5e5bf6955139908dc3d3f53",
+        "relation": "precedes",
+        "scope": "same_observed_asset",
+        "mapping_ids": [
+          "meta_32a63aa90f817bf572de5f7b",
+          "meta_523ca2fe08855c1749dc9ce7"
+        ],
+        "asset_id": "asset_bcbc4250923deb05"
+      },
+      "key_override_reason": null,
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": [
+          [
+            "m_dd5ac24ec9c1aba6348f03a6",
+            "a_2d0553a21445d2a30af75215",
+            "meta_32a63aa90f817bf572de5f7b",
+            "e_c5e5bf6955139908dc3d3f53",
+            "meta_523ca2fe08855c1749dc9ce7"
+          ]
+        ]
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "supported",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "assert"
+      },
+      "prohibited_stronger_interpretation": [
+        "The mapped asset executed or completed the command.",
+        "The command caused the later reported value or an electrical change.",
+        "Capture-time ordering establishes actual physical measurement or device-action chronology.",
+        "The temporal association proves malicious intent, successful compromise, or independent sensor corroboration."
+      ],
+      "ambiguity_notes": "Human-selected same-observed-asset capture-time relation. Complete support includes the request message, child address record, approved control mapping, quality-valid E observation, and channel mapping. Both static mappings identify asset_bcbc4250923deb05 and the capture-time difference is 3.4817140102386475 s. This does not establish that the E value changed in response to the command or determine its execution or causal effect. EN is required for both domains and mappings. E and N evidence in this export must not be treated as independent sensors merely because their record types differ. Q4 was independently human-reviewed as supported in E/N/EN; this cross-domain relation contributes only to the EN timeline. Q5 was independently human-reviewed as E/N insufficient and EN supported, citing this relation. Production retrieval and system recovery remain unevaluated.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "mechanically_checkable",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "Cross-domain same-mapped-asset temporal proposition, distinct from the captured mapped request, standalone E mapping, and numerical differences.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": true,
+          "retrieved_in_production_bundle": true,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0007",
+      "event_id": "ev_ab03f537915a04bff66c",
+      "question_ids": [
+        "Q7"
+      ],
+      "claim_type": "unknown",
+      "epistemic_category": "guardrail_insufficiency",
+      "atomic_statement": "The available evidence for this event demonstrates that a device executed a command.",
+      "fact_key": "fk_c65e36b598d79742887c2d262ba33521fa19962f191932c7ba790ffa651e0b42",
+      "proposed_fact_key": null,
+      "key_kind": null,
+      "key_identity": null,
+      "key_override_reason": "Human-reviewed execution guardrail; the approved evidence does not establish physical command execution. Administrative key assigned during user-requested field completion to this already human-reviewed distinct row. Identity is event_id plus gold_claim_id under human-reviewed-row-key-v1; it is not a mechanical evidence recipe, a text hash, or a semantic equivalence/merge decision.",
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": []
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "insufficient",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "withhold"
+      },
+      "prohibited_stronger_interpretation": [
+        "A captured mapped command request proves that the device executed it.",
+        "A COT7 protocol-confirmation observation proves physical execution or completion of a specific request.",
+        "The later same-mapped-asset observation or electrical differences prove command execution.",
+        "Insufficient execution evidence proves that no command was executed."
+      ],
+      "ambiguity_notes": "The reviewer explicitly accepted E/N/EN insufficient with withhold for the execution proposition. The mapped request, generic COT7 confirmation observation, current/active-power differences, and same-mapped-asset capture-time relation of approximately 3.481714 s do not establish physical execution. COT high-bit details and a sufficient transaction correlation key are not available for a positive-success or specific-request-completion claim. This is an unsupported proposition, not a positive fact or proof of non-execution. Empty positive support sets are not affirmative absence evidence. Question-level Q7 was independently human-reviewed as supported in E, N, and EN: each view can identify the limits of its own visible evidence; the stronger proposition itself remains insufficient.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "both",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "Independent execution-insufficiency guardrail, distinct from causation, intent, compromise, identity, and benign/safe-from-absence.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0008",
+      "event_id": "ev_ab03f537915a04bff66c",
+      "question_ids": [
+        "Q7"
+      ],
+      "claim_type": "unknown",
+      "epistemic_category": "guardrail_insufficiency",
+      "atomic_statement": "The commands captured in this event caused the subsequent electrical/process observations or changes.",
+      "fact_key": "fk_aacd172a6eaae28743166882e5e55232e8cf9a1ae220decc8ef8e47f7e2301e7",
+      "proposed_fact_key": null,
+      "key_kind": null,
+      "key_identity": null,
+      "key_override_reason": "Human-reviewed physical-causation guardrail; the approved evidence does not establish that a captured command caused an electrical/process observation or change. Administrative key assigned during user-requested field completion to this already human-reviewed distinct row. Identity is event_id plus gold_claim_id under human-reviewed-row-key-v1; it is not a mechanical evidence recipe, a text hash, or a semantic equivalence/merge decision.",
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": []
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "insufficient",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "withhold"
+      },
+      "prohibited_stronger_interpretation": [
+        "A captured command followed by an electrical/process observation proves physical causation.",
+        "A COT7 protocol-confirmation observation establishes a causal physical effect.",
+        "Static mapping to the same asset or electrical value differences prove a command caused those differences.",
+        "Insufficient causal evidence proves that no causal relationship exists."
+      ],
+      "ambiguity_notes": "The reviewer explicitly accepted E/N/EN insufficient with withhold for this physical-causation proposition. The mapped command observation, generic COT7 observation, current/active-power value differences, and approximately 3.481714 s same-mapped-asset capture-time ordering do not establish causation. Static mapping and temporal order do not establish execution, a physical effect, or a causal mechanism. This is an unsupported proposition, not a positive fact or proof of non-causation. Empty positive support sets are not affirmative absence evidence. Question-level Q7 was independently human-reviewed as supported in E, N, and EN: each view can identify the limits of its own visible evidence; the stronger proposition itself remains insufficient.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "both",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "Independent physical-causation-insufficiency guardrail, distinct from execution, intent, compromise, identity, and benign/safe-from-absence.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0009",
+      "event_id": "ev_ab03f537915a04bff66c",
+      "question_ids": [
+        "Q7"
+      ],
+      "claim_type": "unknown",
+      "epistemic_category": "guardrail_insufficiency",
+      "atomic_statement": "The activity observed in this event had malicious intent.",
+      "fact_key": "fk_269a95f46907d708047f8bbfe32d98ed996796bde646d1ffd401541915d17538",
+      "proposed_fact_key": null,
+      "key_kind": null,
+      "key_identity": null,
+      "key_override_reason": "Human-reviewed malicious-intent guardrail; the approved evidence does not establish malicious intent. Administrative key assigned during user-requested field completion to this already human-reviewed distinct row. Identity is event_id plus gold_claim_id under human-reviewed-row-key-v1; it is not a mechanical evidence recipe, a text hash, or a semantic equivalence/merge decision.",
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": []
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "insufficient",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "withhold"
+      },
+      "prohibited_stronger_interpretation": [
+        "A captured command request or COT7 observation proves malicious intent.",
+        "Electrical value differences, static asset mapping, or temporal associations establish malicious intent.",
+        "Insufficient evidence of malicious intent proves that the activity was benign."
+      ],
+      "ambiguity_notes": "The reviewer explicitly accepted E/N/EN insufficient with withhold for the malicious-intent proposition. The retained command observation, generic COT7 observation, electrical value differences, static mappings, and capture-time relationship do not establish malicious intent. This is an unsupported proposition, not a positive fact or proof of benign intent. Empty positive support sets are not affirmative absence evidence. Question-level Q7 was independently human-reviewed as supported in E, N, and EN: each view can identify the limits of its own visible evidence; the stronger proposition itself remains insufficient.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "both",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "Independent malicious-intent-insufficiency guardrail, distinct from execution, physical causation, compromise, identity, and benign/safe-from-absence.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0010",
+      "event_id": "ev_ab03f537915a04bff66c",
+      "question_ids": [
+        "Q7"
+      ],
+      "claim_type": "unknown",
+      "epistemic_category": "guardrail_insufficiency",
+      "atomic_statement": "The available evidence for this event demonstrates that the system was successfully compromised.",
+      "fact_key": "fk_b042ba0c58891fa9be3c72e1304c5d47d8a26b8d442c1facecf9eebdbd8abd09",
+      "proposed_fact_key": null,
+      "key_kind": null,
+      "key_identity": null,
+      "key_override_reason": "Human-reviewed successful-compromise guardrail; the approved evidence does not establish successful compromise. Administrative key assigned during user-requested field completion to this already human-reviewed distinct row. Identity is event_id plus gold_claim_id under human-reviewed-row-key-v1; it is not a mechanical evidence recipe, a text hash, or a semantic equivalence/merge decision.",
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": []
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "insufficient",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "withhold"
+      },
+      "prohibited_stronger_interpretation": [
+        "A captured command request or COT7 protocol-confirmation observation proves successful compromise.",
+        "Electrical value differences, static asset mapping, or temporal associations establish successful compromise.",
+        "Insufficient evidence of successful compromise proves that no compromise occurred."
+      ],
+      "ambiguity_notes": "The reviewer explicitly accepted E/N/EN insufficient with withhold for the successful-compromise proposition. The retained command observation, generic COT7 observation, electrical value differences, static mappings, and capture-time relationship do not establish successful compromise. This is an unsupported proposition, not a positive fact or proof that the system was not compromised. Empty positive support sets are not affirmative absence evidence. Question-level Q7 was independently human-reviewed as supported in E, N, and EN: each view can identify the limits of its own visible evidence; the stronger proposition itself remains insufficient.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "both",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "Independent successful-compromise-insufficiency guardrail, distinct from execution, physical causation, malicious intent, identity, and benign/safe-from-absence.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0011",
+      "event_id": "ev_ab03f537915a04bff66c",
+      "question_ids": [
+        "Q7"
+      ],
+      "claim_type": "unknown",
+      "epistemic_category": "guardrail_insufficiency",
+      "atomic_statement": "The available evidence for this event identifies the attacker.",
+      "fact_key": "fk_0cdb5ec5530377793ab0ee56399e443f359c4482e9a8f5466a92c1d09103c5ae",
+      "proposed_fact_key": null,
+      "key_kind": null,
+      "key_identity": null,
+      "key_override_reason": "Human-reviewed attacker-identity guardrail; the approved evidence does not establish attacker identity. Administrative key assigned during user-requested field completion to this already human-reviewed distinct row. Identity is event_id plus gold_claim_id under human-reviewed-row-key-v1; it is not a mechanical evidence recipe, a text hash, or a semantic equivalence/merge decision.",
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": []
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "insufficient",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "withhold"
+      },
+      "prohibited_stronger_interpretation": [
+        "An observed communication endpoint or command source identifies an attacker.",
+        "A static asset mapping attributes observed activity to an attacker or identifies the person or organization behind it.",
+        "Insufficient attacker-identity evidence proves that no attacker was involved."
+      ],
+      "ambiguity_notes": "The reviewer explicitly accepted E/N/EN insufficient with withhold for the attacker-identity proposition. Observed communication endpoints, command sources, and static asset mappings describe observed entities but do not establish their status as attackers or identify a responsible person or organization. This is an unsupported proposition, not a positive fact or proof that no attacker was involved. Empty positive support sets are not affirmative absence evidence. Question-level Q7 was independently human-reviewed as supported in E, N, and EN: each view can identify the limits of its own visible evidence; the stronger proposition itself remains insufficient.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "both",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "Independent attacker-identity-insufficiency guardrail, distinct from execution, physical causation, malicious intent, successful compromise, and benign/safe-from-absence.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    },
+    {
+      "gold_claim_id": "g_0012",
+      "event_id": "ev_ab03f537915a04bff66c",
+      "question_ids": [
+        "Q7"
+      ],
+      "claim_type": "unknown",
+      "epistemic_category": "guardrail_insufficiency",
+      "atomic_statement": "The event is benign or safe because the available evidence is insufficient to establish malicious activity or successful compromise.",
+      "fact_key": "fk_1a1ed339f8f6a3b501e7bcf608392d1ec64fb4c5ae9ad213be6f30eb1734b1c1",
+      "proposed_fact_key": null,
+      "key_kind": null,
+      "key_identity": null,
+      "key_override_reason": "Human-reviewed benign/safe-from-absence guardrail; insufficient evidence of malicious activity or successful compromise does not establish that the event is benign or safe. Administrative key assigned during user-requested field completion to this already human-reviewed distinct row. Identity is event_id plus gold_claim_id under human-reviewed-row-key-v1; it is not a mechanical evidence recipe, a text hash, or a semantic equivalence/merge decision.",
+      "minimal_support_sets": {
+        "E": [],
+        "N": [],
+        "EN": []
+      },
+      "E_answerability": "insufficient",
+      "N_answerability": "insufficient",
+      "EN_answerability": "insufficient",
+      "acceptable_action": {
+        "E": "withhold",
+        "N": "withhold",
+        "EN": "withhold"
+      },
+      "prohibited_stronger_interpretation": [
+        "Insufficient evidence of malicious activity or successful compromise proves that the event is benign or safe.",
+        "Excluding numerical-change candidates from salient gold proves that the corresponding measurements were normal or unchanged.",
+        "Empty positive support sets establish the absence of harmful activity."
+      ],
+      "ambiguity_notes": "The reviewer explicitly accepted E/N/EN insufficient with withhold for the benign/safe-from-absence proposition. Failure to establish malicious activity or successful compromise does not establish benign intent or safety. Decisions not to retain salient numerical-change facts do not establish normal values or absence of changes. This is an unsupported proposition, not a positive fact and not proof of either safety or harm. Empty positive support sets are not affirmative absence evidence. Question-level Q7 was independently human-reviewed as supported in E, N, and EN: each view can identify the limits of its own visible evidence; the stronger proposition itself remains insufficient.",
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "checkability": "both",
+      "alias_of": null,
+      "alias_decision": "distinct",
+      "alias_rationale": "Independent benign/safe-from-absence-insufficiency guardrail, distinct from execution, physical causation, malicious intent, successful compromise, and attacker identity.",
+      "view_accounting": {
+        "E": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "N": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        },
+        "EN": {
+          "eligible_in_view": false,
+          "retrieved_in_production_bundle": null,
+          "recovered_by_system": null
+        }
+      }
+    }
+  ],
+  "question_review": [
+    {
+      "question_id": "Q1",
+      "answerability": {
+        "E": "insufficient",
+        "N": "supported",
+        "EN": "supported"
+      },
+      "gold_claim_ids": [
+        "g_0001",
+        "g_0002"
+      ],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "The reviewer explicitly accepted Q1 as insufficient in E and supported in N and EN, citing g_0001 and g_0002. N-visible evidence supports the captured ASDU 50/COT6 command-type activation request and the ASDU 50/COT7 activation-confirmation-type message; EN also contains that evidence. E alone does not support these network observations. The COT7 observation does not establish completion of a specific request, a successful outcome, or physical execution. This is an independently human-reviewed question-level judgment."
+    },
+    {
+      "question_id": "Q2",
+      "answerability": {
+        "E": "supported",
+        "N": "insufficient",
+        "EN": "supported"
+      },
+      "gold_claim_ids": [
+        "g_0003",
+        "g_0004"
+      ],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "The reviewer explicitly accepted Q2 as supported in E and EN and insufficient in N, citing g_0003 and g_0004. E-visible same-channel pairs support the current difference from 42.76383590698242 to 19.570575714111328 AMPERE and the active-power difference from 7111963 to 7956896.5 WATT; EN also contains this evidence. These are differences between two captured reported values, not a continuous trajectory or evidence of command-caused change. N alone is insufficient. This is an independently human-reviewed question-level judgment."
+    },
+    {
+      "question_id": "Q3",
+      "answerability": {
+        "E": "supported",
+        "N": "supported",
+        "EN": "supported"
+      },
+      "gold_claim_ids": [
+        "g_0001",
+        "g_0005"
+      ],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "The reviewer explicitly accepted Q3 as supported in E, N, and EN, citing g_0001 and g_0005. E uses g_0005 and its visible observation plus approved channel metadata to support the observation-to-channel-to-asset static relationship. N uses g_0001 and its captured command message, child address record, and approved control metadata to support the address-to-control-point-to-asset static relationship. EN can use both. Both mappings identify asset_bcbc4250923deb05, but this does not establish command execution or physical causation. Each single-view answer is restricted to its own visible evidence and permitted mappings. This is an independently human-reviewed question-level judgment."
+    },
+    {
+      "question_id": "Q4",
+      "answerability": {
+        "E": "supported",
+        "N": "supported",
+        "EN": "supported"
+      },
+      "gold_claim_ids": [
+        "g_0001",
+        "g_0002",
+        "g_0003",
+        "g_0004",
+        "g_0006"
+      ],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "The reviewer explicitly accepted Q4 as supported in E, N, and EN. E uses the distinct capture times in the current pair g_0003 (-50.40701484680176 to +59.69812035560608 s) and active-power pair g_0004 (-53.20666265487671 to +56.90317416191101 s). N uses the command-type request g_0001 (+0.0302581787109375 s) and COT7 message g_0002 (+0.06835317611694336 s). EN can combine these observations and the cross-domain capture-time relation g_0006. Each view has at least two distinct visible capture times; single-view answers must not import the other view. This supports an observation timeline only, not actual action times, completion of a particular request, or physical causation. This is an independently human-reviewed question-level judgment."
+    },
+    {
+      "question_id": "Q5",
+      "answerability": {
+        "E": "insufficient",
+        "N": "insufficient",
+        "EN": "supported"
+      },
+      "gold_claim_ids": [
+        "g_0006"
+      ],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "The reviewer explicitly accepted Q5 as insufficient in E and N and supported in EN, citing g_0006. The captured command-type activation request at +0.0302581787109375 s precedes process observation e_c5e5bf6955139908dc3d3f53 at +3.511972188949585 s by 3.4817140102386475 s. Both approved static mappings identify asset_bcbc4250923deb05. EN is required to support both domains and the mappings; neither E nor N alone supports this cross-domain relation. Capture-time ordering and common static asset mapping do not establish command execution, command-caused value changes, or physical causation. This is an independently human-reviewed question-level judgment."
+    },
+    {
+      "question_id": "Q6",
+      "answerability": {
+        "E": "insufficient",
+        "N": "insufficient",
+        "EN": "insufficient"
+      },
+      "gold_claim_ids": [],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "The reviewer explicitly judged the retained command observation, generic COT7 observation, current and active-power value differences, and same-mapped-asset capture-time ordering insufficient to support a positive security-review interpretation (review_required) in E, N, or EN. These observations remain useful event-reconstruction facts, but the available context does not establish their security significance. This question-level judgment was independently human-reviewed, not inferred from guardrail insufficiency or fact counts. No positive Q6 gold claim is retained, and Q7 guardrails are not substituted for one. Insufficient support for review_required does not establish that the event is benign or safe."
+    },
+    {
+      "question_id": "Q7",
+      "answerability": {
+        "E": "supported",
+        "N": "supported",
+        "EN": "supported"
+      },
+      "gold_claim_ids": [
+        "g_0007",
+        "g_0008",
+        "g_0009",
+        "g_0010",
+        "g_0011",
+        "g_0012"
+      ],
+      "reviewer_id": "R1",
+      "review_status": "HUMAN_REVIEWED",
+      "notes": "The reviewer explicitly accepted Q7 as supported in E, N, and EN, citing g_0007–g_0012. Each view can identify the limits of its own visible evidence concerning command execution, physical causation, malicious intent, successful compromise, attacker identity, and benign/safe conclusions from insufficient evidence. Single-view answers must remain within that view and must not import observations from the other view. Question-level support means these limitations and missing support can be explained; it does not support the stronger propositions, which remain insufficient with withhold. This question-level decision was explicitly human-reviewed rather than inferred from the number of guardrails."
+    }
+  ]
+}

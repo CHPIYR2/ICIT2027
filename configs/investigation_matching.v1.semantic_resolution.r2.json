@@ -1,0 +1,87 @@
+{
+  "version": "matching-v1-semantic-resolution-r2",
+  "status": "CANDIDATE_AUTHOR_DECISIONS_RECORDED_SEMANTIC_APPROVAL_PENDING",
+  "exact_rules": {
+    "evidence_id": "exact",
+    "asset_id": "exact",
+    "channel_id": "exact",
+    "claim_type": "literal_exact_except_pending_specialization_projection",
+    "command_asdu_type": "exact",
+    "cause_of_transmission": "exact",
+    "state_boolean": "exact",
+    "unit": "exact",
+    "temporal_ordering": "exact_stored_capture_timestamps",
+    "temporal_scope": "exact"
+  },
+  "formula": "abs(pred-reference) <= max(atol, rtol * abs(reference))",
+  "active_numeric_profile": "A_recommended_typed_fidelity",
+  "numeric_profiles": {
+    "A_recommended_typed_fidelity": {
+      "author_approval": "ACCEPTED_IN_PRINCIPLE",
+      "atol": {
+        "AMPERE": 0,
+        "PER_UNIT": 0,
+        "WATT": 0,
+        "VAR": 0,
+        "PERCENT": 0
+      },
+      "rtol": {
+        "AMPERE": 5e-08,
+        "PER_UNIT": 5e-08,
+        "WATT": 5e-08,
+        "VAR": 5e-08,
+        "PERCENT": 5e-08
+      },
+      "rationale": "Eight-significant-digit rendering bound; exact zero avoids erasing tiny observed nonzero WATT/VAR values; not sensor uncertainty."
+    },
+    "B_six_decimal_compatibility": {
+      "author_approval": "NOT_SELECTED",
+      "atol": {
+        "AMPERE": 5e-07,
+        "PER_UNIT": 5e-07,
+        "WATT": 5e-07,
+        "VAR": 5e-07,
+        "PERCENT": 5e-07
+      },
+      "rtol": {
+        "AMPERE": 5e-08,
+        "PER_UNIT": 5e-08,
+        "WATT": 5e-08,
+        "VAR": 5e-08,
+        "PERCENT": 5e-08
+      },
+      "rationale": "Half a unit at six decimal places; less strict for small quantities; retain zero/sign gates and scientific notation near zero."
+    }
+  },
+  "percent_unit": "percentage points; baseline zero unavailable; no inferred denominator floor",
+  "duration_rendering": {
+    "unit": "SECOND",
+    "atol": 5e-07,
+    "rtol": 0,
+    "author_approval": "ACCEPTED_IN_PRINCIPLE",
+    "ordering_tolerance": 0,
+    "timestamp_equality_tolerance": 0
+  },
+  "unsupported_units": "PENDING_SEPARATE_APPROVAL_NO_FALLBACK",
+  "natural_language_similarity_is_correctness_metric": false,
+  "fact_key_dedup_does_not_override_type_mismatch": true,
+  "specification": {
+    "path": "docs/investigation_protocol.v1.semantic_resolution.r2.md",
+    "sha256": "9ee14ead4e35e2feb63f734d216f295e1274abe7ced7e62862345d97b911934c"
+  },
+  "empirical_basis": {
+    "path": "results/investigation-freeze-v1/numeric_precision.pilots.json",
+    "sha256": "c9269a000ad4ea9594b128f5d6efcaef2652f51d19027a2e93185bd0f61ef260"
+  },
+  "runtime_enabled": false,
+  "profile_selection_scope": "candidate specification only; not an activated evaluator",
+  "type_exception": {
+    "path": "configs/investigation_numeric_fact_projection.v1.candidate.json",
+    "sha256": "37643978c070a2750152387e339404d7dbdacde25374970383770815189ef133"
+  },
+  "supersedes": {
+    "path": "configs/investigation_matching.v1.candidate.json",
+    "sha256": "d1ce681ef012654dce472ef137bb1c9874d6082e5eb45e18746bf77c9677ce16"
+  },
+  "minimum_numeric_serialization": "eight significant digits or round-trip; preserve zero and sign"
+}

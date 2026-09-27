@@ -1,0 +1,47 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "investigation-visibility-v2"
+    },
+    "event_id": {
+      "type": "string",
+      "pattern": "^ev_[0-9a-f]{20}$"
+    },
+    "view": {
+      "enum": [
+        "E",
+        "N",
+        "EN"
+      ]
+    },
+    "visible_record_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(?:p_[0-9a-f]{24}|m_[0-9a-f]{24}|e_[0-9a-f]{24}|a_[0-9a-f]{24})$"
+      },
+      "uniqueItems": true
+    },
+    "address_parents": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^(?:m_[0-9a-f]{24})$"
+      },
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^(?:a_[0-9a-f]{24})$"
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "event_id",
+    "view",
+    "visible_record_ids",
+    "address_parents"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
