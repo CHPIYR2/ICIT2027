@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "event_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "scenario_stratum": {
+        "type": "string",
+        "minLength": 1
+      },
+      "condition": {
+        "enum": [
+          "G0",
+          "G1-E",
+          "G1-N",
+          "G1-EN",
+          "V1-EN"
+        ]
+      },
+      "coverage": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "uscr": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "uscr_defined": {
+        "type": "boolean"
+      },
+      "security_assertion_count": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "coverage_defined_repetitions": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "uscr_defined_repetitions": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "required": [
+      "event_id",
+      "scenario_stratum",
+      "condition",
+      "coverage",
+      "uscr",
+      "uscr_defined",
+      "security_assertion_count",
+      "coverage_defined_repetitions",
+      "uscr_defined_repetitions"
+    ],
+    "additionalProperties": false
+  },
+  "minItems": 0,
+  "uniqueItems": false
+}

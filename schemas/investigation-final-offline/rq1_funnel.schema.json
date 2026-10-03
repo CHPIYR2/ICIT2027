@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "event_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "view": {
+        "enum": [
+          "E",
+          "N",
+          "EN"
+        ]
+      },
+      "full_gold_count": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "supportable_in_view_count": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "complete_support_retrieved_count": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "correctly_reconstructed_count": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "reconstructed_by_repetition": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "minItems": 0,
+        "uniqueItems": false
+      },
+      "n_defined_repetitions": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "unavailable_in_view": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "available_not_retrieved": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "retrieved_not_reconstructed": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    },
+    "required": [
+      "event_id",
+      "view",
+      "full_gold_count",
+      "supportable_in_view_count",
+      "complete_support_retrieved_count",
+      "correctly_reconstructed_count",
+      "reconstructed_by_repetition",
+      "n_defined_repetitions",
+      "unavailable_in_view",
+      "available_not_retrieved",
+      "retrieved_not_reconstructed"
+    ],
+    "additionalProperties": false
+  },
+  "minItems": 0,
+  "uniqueItems": false
+}

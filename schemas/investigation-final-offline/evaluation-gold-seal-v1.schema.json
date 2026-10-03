@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "evaluation-gold-seal-v1",
+  "description": "Packaging commitment for the finalized pre-generation evaluation gold corpus. It does not change annotation semantics, matching, retrieval, or scoring.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "seal_version",
+    "annotation_version",
+    "event_count",
+    "reviewer_id",
+    "committed_before_output_review",
+    "no_final_model_output_at_seal_time",
+    "matching_support_policy_sha256",
+    "events",
+    "seal_sha256"
+  ],
+  "properties": {
+    "seal_version": {"const": "evaluation-gold-seal-v1"},
+    "annotation_version": {"const": "annotation-v1"},
+    "event_count": {"const": 32},
+    "reviewer_id": {"const": "R1"},
+    "committed_before_output_review": {"const": true},
+    "no_final_model_output_at_seal_time": {"const": true},
+    "matching_support_policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "events": {
+      "type": "array",
+      "minItems": 32,
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event_id", "commitment_sha256", "bundle_sha256"],
+        "properties": {
+          "event_id": {"type": "string", "minLength": 1},
+          "commitment_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "bundle_sha256": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["E", "N", "EN"],
+            "properties": {
+              "E": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "N": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "EN": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          }
+        }
+      }
+    },
+    "seal_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

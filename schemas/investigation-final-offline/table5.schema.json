@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "metric": {
+        "enum": [
+          "citation_precision",
+          "complete_support_rate",
+          "unsupported_security_claim_rate",
+          "evidence_completeness",
+          "q1_q6_substantive_coverage",
+          "numerical_consistency",
+          "asset_consistency",
+          "temporal_consistency"
+        ]
+      },
+      "interpretation": {
+        "type": "string",
+        "minLength": 1
+      },
+      "conditions": {
+        "type": "object",
+        "properties": {
+          "G0": {
+            "type": "object",
+            "properties": {
+              "mean": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "defined_event_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "undefined_event_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 0,
+                "uniqueItems": true
+              },
+              "population_event_count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "mean",
+              "defined_event_count",
+              "undefined_event_ids",
+              "population_event_count"
+            ],
+            "additionalProperties": false
+          },
+          "G1-EN": {
+            "type": "object",
+            "properties": {
+              "mean": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "defined_event_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "undefined_event_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 0,
+                "uniqueItems": true
+              },
+              "population_event_count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "mean",
+              "defined_event_count",
+              "undefined_event_ids",
+              "population_event_count"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "G0",
+          "G1-EN"
+        ],
+        "additionalProperties": false
+      },
+      "contrasts": {
+        "type": "object",
+        "properties": {
+          "EN_minus_G0": {
+            "type": "object",
+            "properties": {
+              "direction": {
+                "type": "string",
+                "minLength": 1
+              },
+              "mean_difference": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ci95": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "minItems": 0,
+                "uniqueItems": false
+              },
+              "paired_event_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "omitted_event_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 0,
+                "uniqueItems": true
+              },
+              "stratum_counts": {
+                "type": "object"
+              },
+              "singleton_strata": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 0,
+                "uniqueItems": true
+              },
+              "structural_not_applicable": {
+                "type": "boolean"
+              },
+              "display": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "direction",
+              "mean_difference",
+              "ci95",
+              "paired_event_count",
+              "omitted_event_ids",
+              "stratum_counts",
+              "singleton_strata",
+              "structural_not_applicable",
+              "display"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "EN_minus_G0"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "metric",
+      "interpretation",
+      "conditions",
+      "contrasts"
+    ],
+    "additionalProperties": false
+  },
+  "minItems": 8,
+  "uniqueItems": false
+}

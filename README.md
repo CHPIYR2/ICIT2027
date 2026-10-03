@@ -13,8 +13,7 @@ training and fixed network post-event visibility of 60/45/30/15 seconds.
 Electrical evidence improves some restricted-network baselines, with non-monotonic
 gains and event-family tradeoffs. E-only nevertheless exceeds E+N in all 12 new
 transport/model conditions. See [full results](docs/network_observability_results_v2.md),
-[family analysis](docs/observability_family_results_v2.md), and
-[execution record](docs/protocol_v2_execution.md). All 48 tests passed; final artifact
+[family analysis](docs/observability_family_results_v2.md). All 48 tests passed; final artifact
 verification is recorded in `results/exploratory-v2/verification.json`.
 
 The first cross-scenario held-out evaluation is preserved below.
@@ -26,8 +25,7 @@ pre-evaluation SHA256 lock, including command-group ablation and paired bootstra
 Main N and EN binary predictions are identical for each model: RF/GB score Macro
 F1 1.000, LR scores 0.243 and misses all 57 cyber events. A command-presence rule
 also scores 1.000; the main experiment does not demonstrate an EN advantage over N.
-See `docs/heldout_results.md` for full results and limits, and
-`docs/pre_evaluation_notes.md` for pre-score fixes and diagnostic choices.
+See `docs/heldout_results.md` for full results and limits.
 37 tests passed at that original stage. No LLM or full verifier is implemented.
 
 The held-out results are now exposed: changes motivated by these scores are
@@ -70,7 +68,9 @@ python3 -m unittest discover -s tests -v
 
 The audit scripts use only Python's standard library; the complete test suite also needs the pinned ML environment. The content scan is a full
 offline scan and can take several minutes. See `data/README.md` for the
-pinned data source and integrity policy. Phase 1 findings belong in
+pinned data source and integrity policy. Phase 1 findings are in
 `docs/sherlock_audit.md`; candidate field permissions belong in
 `docs/evidence_contract.md`. Do not ingest
 `data/evaluator/` or audit reports into model features, retrieval, or LLM prompts.
+
+Some preserved execution/provenance artifacts contain environment-specific absolute paths from the original run. These paths are non-secret provenance metadata and are not required for reproduction; reproduction instructions use repository-relative paths.

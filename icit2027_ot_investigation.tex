@@ -1,0 +1,171 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{url}
+\usepackage{placeins}
+\newcommand{\NA}{\textsc{NA}}
+\newcommand{\E}{\textsc{E}}
+\newcommand{\N}{\textsc{N}}
+\newcommand{\EN}{\textsc{EN}}
+
+\begin{document}
+\title{Verifiable OT Incident Investigation with Electrical and Network Evidence}
+\author{\IEEEauthorblockN{AUTHOR NAME}
+\IEEEauthorblockA{AFFILIATION\\CITY, COUNTRY\\EMAIL}}
+\maketitle
+
+\begin{abstract}
+Operational technology (OT) incident investigation must distinguish observed network and electrical/process behavior from unsupported execution, causal, and security conclusions. We study event-conditioned investigation after an external source supplies an event scope; the system does not perform continuous intrusion detection. A language model (LLM) generates evidence-linked claims from complementary electrical/process and network views, and a deterministic verifier checks references, values, units, assets, timing, lineage, and claim-specific support. On 32 Sherlock v3 power-grid events, combined evidence yields a Complete-Support Rate (CSR) of 0.9261, versus 0.7500 for electrical-only and 0.7406 for network-only, while exact gold-fact reconstruction remains 0.0000 in every view. Citation-required generation raises CSR from 0.8723 to 0.9261. Exact replay through verification raises Citation Precision from 0.9949 to 1.0000 and CSR from 0.9261 to 1.0000, while Q1--Q6 coverage falls from 0.7760 to 0.5278. The main result is a support--coverage trade-off: mechanical evidence consistency improves in the published claim set while useful investigation coverage declines.
+\end{abstract}
+\begin{IEEEkeywords}
+operational technology, industrial control systems, incident investigation, evidence grounding, large language models, deterministic verification
+\end{IEEEkeywords}
+
+\section{Introduction}
+OT monitoring is often framed as classification: given traffic or process measurements, determine whether behavior is anomalous or malicious. Once an event has been selected, however, investigation asks what was observed, which assets are implicated, how network activity and reported process behavior relate in time, and which conclusions remain unresolved. A control command observed in traffic does not establish execution; an acknowledgement does not establish physical completion; and a subsequent electrical/process change does not establish network causation, malicious intent, compromise, or attribution.
+
+LLMs can organize heterogeneous observations into readable accounts, but fluent synthesis can cite irrelevant records, omit necessary support, misstate values or relationships, or promote temporal association into causation. We therefore study \emph{event-conditioned OT incident investigation}: an upstream mechanism supplies event scope and $t_0$, and the investigator analyzes only the evidence visible within that scope. The task is not continuous intrusion detection or unknown-onset discovery. Evaluator-only labels and simulator truth are excluded from retrieval and generation.
+
+The system normalizes electrical/process (\E) and network (\N) observations into traceable records, retrieves within a fixed view and budget, generates typed claims with evidence identifiers, and applies deterministic evidence-consistency and support checks before publication. The two evidence views are complementary representations, not independent sensors. The verifier is not a truth oracle or causal inference system.
+
+We address three questions: RQ1, how do \E, \N, and combined \EN views affect reconstruction, retrieval, coverage, and support? RQ2, what changes when substantive claims must cite evidence? RQ3, what changes when raw \EN output is exactly replayed through deterministic verification? Contributions are (1) a provenance-preserving representation for heterogeneous observations, (2) an event-conditioned structured claim formulation with explicit semantic boundaries, and (3) an evaluation of deterministic support verification jointly with retained coverage.
+
+\section{Background and Related Work}
+\subsection{OT/ICS Intrusion Detection and Process-Aware Security}
+Process-aware monitoring uses knowledge of physical dynamics, invariants, or specifications to expose behavior that network features alone may not characterize; surveys review this research direction and specification-based systems encode safety constraints as security requirements \cite{rehman2024processaware,hotellier2024specification}. Cross-domain alert correlation likewise combines cyber-domain and physical-process detector outputs to construct richer scenarios \cite{koucham2022crossdomain}. Sherlock was introduced as a process-aware power-grid IDS dataset and provides co-simulated network and process material \cite{wagner2025sherlock}. Here, those sources are evidence views for an already scoped event, not independent sensors or inputs to a new detector.
+
+\subsection{Incident Investigation and Explainable Detection}
+ICS response frameworks address uncertainty, coordination, and response planning \cite{smith2021air4ics,staves2022incidentresponse}. Explainable IDS work evaluates explanations of model decisions, including black-box explanation properties for network intrusion detection \cite{arreche2024exai}. Such explanations differ from evidence-supported incident claims: feature attribution can explain a classifier output without proving a physical action, command execution, or causal link. Our unit of analysis is the claim and the records required to support its wording.
+
+\subsection{LLMs for Cybersecurity Investigation}
+Surveys document LLM use across cybersecurity tasks \cite{xu2024llmcyber}. Evidence-linked narratives are a related direction for security operations, but citation presence alone cannot ensure that cited records entail the full assertion. Hallucination research documents the broader risk of generated statements that are unsupported by the source context \cite{ji2023hallucination}. We pair synthesis with finite deterministic checks and evaluate support together with the useful content retained.
+
+\section{Problem Formulation and System Design}
+\subsection{Event-Conditioned Investigation and Evidence Views}
+For event $e$, an external source supplies scope $W_e$ and anchor $t_0$. The visible bundle is $B_e^v=E_e^v\cup N_e^v\cup M_e^v$, where $M$ contains sanitized static mappings and $v\in\{\E,\N,\EN\}$. Ground truth $G$ is evaluator-only and excluded from $B_e^v$. The investigator returns observations, temporal and asset relationships, bounded interpretations, and explicit unknowns. This is a scoped reconstruction task, not continuous detection.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.88\textwidth]{figures/figure1_system_architecture.pdf}
+\caption{Event-conditioned investigation, visibility boundary, deterministic verification, and evaluation flow.}
+\label{fig:architecture}
+\end{figure*}
+
+\subsection{Claim Semantics and Evidence Representation}
+Evidence records retain stable identifiers, timestamps, assets, units, source fields, and transformation lineage. Claim semantics constrain wording to the observation: a network record may support that a command-type request was observed; approved address metadata may support that it targeted a control point mapped to asset $x$. Neither proves asset execution. A response supports that an acknowledgement was observed, not physical completion. Electrical/process records support reported values and changes, not hidden physical truth or network causation. Timestamp ordering supports temporal association, not causality. Claims of intent, successful compromise, and attribution require support beyond these observations.
+
+Table~\ref{tab:claims} gives representative boundaries. The LLM produces structured claims and evidence identifiers from retrieved records; it does not receive evaluator labels. A fixed view and evidence budget constrain retrieval. Citation-required output is compared with citation-optional output under otherwise fixed conditions.
+
+\begin{table*}[t]
+\caption{Representative claim-support boundaries}
+\label{tab:claims}
+\centering\footnotesize
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\toprule
+Claim type & Evidence sufficient for bounded wording & Unsupported promotion\\
+\midrule
+Network command & Command-type request observed; mapping permits ``addressed to a control point mapped to $x$'' & Command executed; asset physically acted\\
+Acknowledgement & Protocol response observed & Physical operation completed\\
+Reported value/change & Electrical/process observation(s), compatible units, supported arithmetic & Hidden physical truth; network activity caused change\\
+Asset/time relation & Approved mapping and timestamps establish relation/order & Compromise; temporal association implies causation\\
+Security conclusion & Only a claim-specific policy with sufficient visible support & Intent, successful compromise, or attribution from observation alone\\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\subsection{Evidence-Grounded LLM Investigation}
+For each event and view, retrieval selects records within the externally supplied scope and the frozen input limits. The LLM structures observable facts, relationships, qualified interpretations, and unresolved questions. Substantive claims may cite evidence IDs; an ID must have been visible at generation time. Gold facts, attack labels, scenario descriptions, and hidden simulator state are inaccessible.
+
+\subsection{Deterministic Verification and Evidence Sufficiency}
+The verifier checks visible references, numerical values and units, asset mappings, time ordering, transformation lineage, and predefined claim-specific support requirements. It assigns supported, qualified, or insufficient dispositions. It does not establish universal truth, malicious intent, attack success, attribution, or causal effects. A zero denominator for a claim-conditioned metric is \,\NA, not zero; absence of support is not evidence of a benign event.
+
+\section{Experimental Methodology}
+\subsection{Dataset and Event Set}
+The study uses Sherlock v3, a Wattson power-grid co-simulation dataset with IEC 60870-5-104 traffic and electrical/process observations \cite{wagner2025sherlock,sherlockv3}. Sixteen events were reserved for development and 32 preselected events for final evaluation. The final set is scored against reviewed event facts and unresolved-conclusion opportunities; evaluator-only material is separated from model input.
+
+\subsection{Experimental Conditions}
+Table~\ref{tab:conditions} summarizes the cells. All generative cells use one fixed model snapshot (gpt-4.1-2025-04-14), frozen prompt/schema and decoding settings, and three planned repetitions per event. RQ1 holds the total retrieval budget at 64 records: 64 E, 64 N, or a 32 E + 32 N allocation for EN, with serialized-input limits also fixed. G1-E has three provider-incomplete repetitions (93 valid deliveries of 96); these are repetition-level NA and all 32 events remain defined. V1-EN is exact replay of raw G1-EN: no additional LLM generation.
+
+\begin{table}[!ht]
+\caption{Experimental condition summary}
+\label{tab:conditions}
+\centering\footnotesize
+\begin{tabularx}{\columnwidth}{@{}l l X@{}}
+\toprule
+Cell & View & Role / policy\\
+\midrule
+D0 & EN & Deterministic reference; descriptive only\\
+G0 & EN & LLM; citations optional (RQ2)\\
+G1-E & E & LLM; citations required (RQ1)\\
+G1-N & N & LLM; citations required (RQ1)\\
+G1-EN & EN & LLM; citations required (RQ1--RQ3)\\
+V1-EN & EN & Exact G1-EN replay; verifier (RQ3)\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Human Review and Metrics}
+A single R1 reviewer completed 477 corrected human-review items; no dual-review or inter-annotator-agreement claim is made. Metrics are first computed per repetition, averaged within event, then macro-averaged across events. We report exact Evidence Completeness, Retrieval Recall, Q1--Q6 Coverage, Citation Precision, CSR (complete cited support among supported substantive claims), Unsupported Security-Claim Rate (USCR), and withholding metrics. D0 is descriptive and excluded from primary RQ comparisons. For claim-conditioned metrics, a zero denominator is \,\NA.
+
+\subsection{Statistical Analysis}
+Contrasts are paired at the event level. Confidence intervals are 95\% percentile intervals from 2,000 scenario-stratified bootstrap resamples, seed 20270922. All final conditions have 32 evaluation events; generative conditions have three planned repetitions per event. We preserve the fixed matching criterion and do not treat claims or repetitions as independent samples.
+
+\FloatBarrier
+\section{Results}
+Primary outcomes are summarized in Table~\ref{tab:results}. Entries are event-level macro means; contrast intervals are paired 95\% CIs. Exact Evidence Completeness and view-conditional completeness are 0.0000 in every RQ1 view. The compact funnel is: full gold facts = 14 per event; mean supportable facts are E=9.0, N=3.5, EN=14.0; complete support retrieved is E=1.0, N=1.0, EN=3.125; reconstructed facts = 0.0 in every view.
+
+\begin{table*}[!t]
+\caption{Primary results (event-level macro means; paired contrasts with 95\% bootstrap CIs)}
+\label{tab:results}
+\centering\scriptsize
+\begin{tabularx}{\textwidth}{@{}l l X X@{}}
+\toprule
+RQ & Metric & Condition means & Primary paired contrast / denominator note\\
+\midrule
+1 & Evidence Completeness & E 0.0000; N 0.0000; EN 0.0000 & EN$-$E 0.0000 [0.0000, 0.0000]; EN$-$N 0.0000 [0.0000, 0.0000]\\
+1 & View-Conditional Completeness & All 0.0000 & No view reconstructs a frozen gold fact\\
+1 & Retrieval Recall & E 0.1111; N 0.3500; EN 0.2188 & EN$-$E +0.1076 [0.0920, 0.1207]; EN$-$N $-$0.1313 [$-$0.1938, $-$0.0714]\\
+1 & Q1--Q6 Coverage & E 0.7691; N 0.5972; EN 0.7760 & EN$-$E +0.0069 [$-$0.0686, 0.0747]; EN$-$N +0.1788 [0.0885, 0.2674]\\
+1 & Citation Precision & E 0.9901; N 0.9589; EN 0.9949 & EN$-$E +0.0048 [$-$0.0048, 0.0192]; EN$-$N +0.0360 [0.0186, 0.0565]\\
+1 & Complete-Support Rate & E 0.7500; N 0.7406; EN 0.9261 & EN$-$E +0.1761 [0.1449, 0.2030]; EN$-$N +0.1856 [0.1480, 0.2208]\\
+2 & Citation Precision; CSR; coverage & G0 0.9907; 0.8723; 0.7465. G1-EN 0.9949; 0.9261; 0.7760 & CSR: +0.0539 [0.0287, 0.0794]. Citation precision: +0.0042 [$-$0.0027, 0.0121]; coverage: +0.0295 [$-$0.0313, 0.0903]\\
+2 & USCR & G0 0.0000; G1-EN 0.0000 when defined & Sparse: G0 13 defined/19 NA events; G1-EN 15/17; paired denominator 7. No decrease established\\
+3 & Citation Precision; CSR & G1-EN 0.9949; 0.9261. V1-EN 1.0000; 1.0000 & V1$-$G1: +0.0051 [0.0015, 0.0092]; +0.0739 [0.0504, 0.0970]\\
+3 & Q1--Q6 Coverage & G1-EN 0.7760; V1-EN 0.5278 & $-$0.2483 [$-$0.2934, $-$0.1979]\\
+3 & Withholding; USCR & V1 recall 0.3344; precision 1.0000 on defined events & Precision defined on 27 events (5 NA); raw USCR defined on 15 events, V1 USCR = \NA on all 32\\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.96\textwidth]{figures/figure2_coverage_uscr.pdf}
+\caption{Coverage and USCR by condition. For V1-EN, all 32 security-sensitive assertion denominators are zero; its USCR coordinate is \NA, not zero. The NA strips in the source figure retain undefined positions.}
+\label{fig:coverage}
+\end{figure*}
+
+\subsection{RQ1---Electrical and Network Evidence}
+All evidence-view conditions have zero exact completeness, including view-conditional completeness; combined evidence does not improve exact reconstruction. EN improves CSR over both single views and coverage relative to N, while E and EN coverage differ by an interval including zero. Network-only has the highest retrieval recall. Thus support, coverage, retrieval, and exact reconstruction separate: EN yields stronger complete support and broader coverage than N, but does not dominate retrieval.
+
+\subsection{RQ2---Evidence-Grounded Generation}
+Requiring citations raises CSR from 0.8723 to 0.9261 (paired $\Delta=+0.0539$, 95\% CI [0.0287, 0.0794]). Citation Precision and coverage differences have intervals that include zero. USCR is 0.0000 in both where defined, but sparse denominators (13 G0 and 15 G1-EN defined events; seven jointly defined) do not establish a decrease. G0 is citation-optional, not citation-free.
+
+\subsection{RQ3---Deterministic Verification}
+Exact replay raises Citation Precision from 0.9949 to 1.0000 and CSR from 0.9261 to 1.0000, while coverage falls from 0.7760 to 0.5278 ($\Delta=-0.2483$, 95\% CI [$-0.2934$, $-0.1979$]). Required Withholding Recall is 0.3344; Withholding Precision is 1.0000 on defined events. V1 publishes zero security-sensitive substantive assertions, so its USCR is \NA, not zero. Verification therefore yields a narrower supported report with a substantial support--coverage trade-off.
+
+\FloatBarrier
+\section{Discussion and Limitations}
+The findings support a bounded interpretation. Combining the two evidence representations improves complete evidential support over either single view and coverage relative to N, while N retains higher Retrieval Recall. The RQ1 funnel separates view supportability, retrieval, and exact matching: EN makes all 14 event-equivalent gold facts supportable and retrieves complete support for 3.125 on average, yet reconstructs zero under the frozen criterion. This locates failure after evidence availability and, in some cases, after retrieval. Supported observations may still differ from the exact proposition required by the gold matcher; these results show that support and exact reconstruction measure different properties, not that the matching criterion is invalid. Requiring citations improves support completeness, but no measured benefit is established for citation precision, coverage, or USCR. Numeric, asset, and temporal consistency are already 1.0000 where defined in G0 and G1-EN. Deterministic verification makes every scored published claim fully cited and supported, at the cost of lower substantive coverage and incomplete expression of required withholding.
+
+These results are limited to 32 preselected events from one power-grid co-simulation dataset, one fixed model snapshot, and one R1 reviewer. The single-reviewer design provides no inter-annotator-agreement estimate. Event-conditioned scope is supplied externally, so results do not measure continuous detection, unknown-onset discovery, or incident selection. The zero exact completeness limits claims about reconstruction even though coverage and support are measurable. The verifier covers finite evidence rules and cannot adjudicate real-world physical truth, causal effects, intent, successful compromise, or attribution. The lack of a defined V1 USCR prevents pre/post USCR comparison; other metrics also have condition-specific sparse or undefined denominators. Electrical/process values are reported observations rather than guaranteed physical truth, and E and N may share packet ancestry. Exact replay and frozen inputs strengthen within-study comparisons, but model behavior, structured output, retrieval, and the single-reviewer policy constrain generalization. Three provider-incomplete G1-E repetitions remain repetition-level NA. No analyst study was conducted; workload reduction or autonomous SOC readiness is not established. The experiment does not compare alternative verifier designs, so retaining more qualified content remains future work.
+
+\section{Conclusion}
+We evaluated event-conditioned OT investigation using traceable electrical/process and network evidence, structured LLM claims, and deterministic claim-support verification. Combined evidence improves complete evidential support over both single views and coverage over network-only evidence, but exact gold-fact reconstruction remains zero. Citation-required generation improves CSR. Verification raises citation precision and CSR to 1.0000 but reduces coverage to 0.5278; V1 USCR is undefined because it publishes no security-sensitive substantive assertions. The principal finding is a support--coverage trade-off. Future work should test how verification can retain more qualified content and evaluate additional OT settings and reviewer/model configurations.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

@@ -1,6 +1,6 @@
 {
-  "version": "matching-v1-approved-development",
-  "status": "AUTHOR_APPROVED_DEVELOPMENT_ONLY_NOT_PROTOCOL_FREEZE",
+  "version": "matching-v1-frozen-support-forms",
+  "status": "AUTHOR_FROZEN_FINAL_EVALUATION_INPUT",
   "exact_rules": {
     "evidence_id": "exact",
     "asset_id": "exact",
@@ -84,7 +84,24 @@
     "sha256": "d1ce681ef012654dce472ef137bb1c9874d6082e5eb45e18746bf77c9677ce16"
   },
   "minimum_numeric_serialization": "eight significant digits or round-trip; preserve zero and sign",
-  "runtime_scope": "development only",
+  "runtime_scope": "final evaluation input",
+  "support_matching": {
+    "adopted_during_event_id": "ev_eda32c84a9cf2952b292",
+    "adopted_before_annotation_of_events": "2-32",
+    "retrospective_additional_facts": false,
+    "proposition_change": false,
+    "final_model_output_generated_or_reviewed": false,
+    "forms": ["EXACT", "EXISTENTIAL", "ROLE_BASED"],
+    "declaration": "fields.support_form; a missing form means EXACT",
+    "exact": "A fact is retrieval-supported only when at least one acceptable support set is contained in the visible evidence.",
+    "existential": "A fact is retrieval-supported when at least one visible record matches fields.support_predicate. Stored acceptable support sets are reviewed witnesses and are not an exhaustive enumeration.",
+    "role_based": "A fact is retrieval-supported when every fields.support_roles predicate matches at least one record visible in the same scored view. Stored acceptable support sets are reviewed witnesses and are not an exhaustive enumeration.",
+    "predicate_keys": ["source_type", "protocol", "context", "quality_flags", "observation_time"],
+    "observation_time_operators": ["gte", "gt", "lt", "lte"],
+    "quality_valid": "quality_flags compared by exact equality; an empty list is the quality-valid measurement condition when the fact stores no other quality value",
+    "unchanged": ["citation_precision", "complete_support_rate"],
+    "rule": "Retrieval support is evaluated according to the semantic support form of the gold proposition: exact-support facts require an accepted exact support set; existential facts require at least one visible record satisfying the accepted proposition predicate; role-based facts require at least one visible record for every required role. Concrete support sets retained on existential or role-based facts are reviewed witnesses and are not exhaustive enumerations."
+  },
   "author_approval": {
     "path": "results/investigation-development-v1/approval/author_approval.txt",
     "sha256": "9df3065cbedaac2d5c585a9181485ab82f81b56ee09f3123513692e6c0071510"

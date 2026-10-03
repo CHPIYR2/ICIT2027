@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "condition": {
+        "enum": [
+          "G0",
+          "G1-E",
+          "G1-N",
+          "G1-EN",
+          "V1-EN"
+        ]
+      },
+      "security_sensitive_assertions": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "citation_pairs": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "numerical_assertions": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "asset_assertions": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "temporal_assertions": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "required_withholding_opportunities": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "explicit_qualify_withhold_actions": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "defined_uscr_denominators": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "defined_numerical_denominators": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "defined_withholding_precision_denominators": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "planned_runs": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "valid_delivery_runs": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "invalid_delivery_runs": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "defined_event_counts": {
+        "type": "object",
+        "properties": {
+          "uscr": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "numerical": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "withholding_precision": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "uscr",
+          "numerical",
+          "withholding_precision"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "condition",
+      "security_sensitive_assertions",
+      "citation_pairs",
+      "numerical_assertions",
+      "asset_assertions",
+      "temporal_assertions",
+      "required_withholding_opportunities",
+      "explicit_qualify_withhold_actions",
+      "defined_uscr_denominators",
+      "defined_numerical_denominators",
+      "defined_withholding_precision_denominators",
+      "planned_runs",
+      "valid_delivery_runs",
+      "invalid_delivery_runs",
+      "defined_event_counts"
+    ],
+    "additionalProperties": false
+  },
+  "minItems": 5,
+  "uniqueItems": false
+}
