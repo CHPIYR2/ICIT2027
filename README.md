@@ -74,3 +74,53 @@ pinned data source and integrity policy. Phase 1 findings are in
 `data/evaluator/` or audit reports into model features, retrieval, or LLM prompts.
 
 Some preserved execution/provenance artifacts contain environment-specific absolute paths from the original run. These paths are non-secret provenance metadata and are not required for reproduction; reproduction instructions use repository-relative paths.
+
+## ICIT 2027 final investigation experiment
+
+The current manuscript is a draft: [paper source](icit2027_ot_investigation.tex),
+[compiled PDF](icit2027_ot_investigation.pdf), and [build/status notes](BUILD_NOTES.md).
+The final experiment methodology and results interpretation are in
+[the experimental methodology](docs/final_experimental_methodology.md) and
+[the final scoring results](docs/final_scoring_results.md). The frozen matching
+policy is `configs/investigation-r5/matching.json`; final review-ledger and
+report schemas are under `schemas/investigation-final-offline/`.
+
+### Reproduce final scoring
+
+Requirements: Python 3.11 or later and the repository checkout. The scoring
+validator and scorer use the Python standard library; no API key, provider
+account, network access, or model call is used.
+
+From the repository root, run:
+
+```sh
+python3 scripts/reproduce_final_scoring.py
+```
+
+This verifies the portable public input archive against its manifest, checks
+the frozen input commitment, matching-policy hash, scoring authorization,
+scope-correction seal, completed R1 ledger hashes, output hashes, frozen schema
+and scorer hashes, and committed per-run scores, then reruns scoring and
+compares the resulting tables and result seal. The D0 diagnostic block is
+carried through from the sealed result because D0 is a descriptive reference,
+not part of the R1 subjective score matrix. The expected frozen scoring-input commitment is
+`706fbbb5e8561981d3d0b2fc7f31aa139449bfc1a911b98801a456965fc8b1ad`; the
+portable public archive has commitment
+`14c24e47dfba2f9b8e0581ad02ebe3fdc94b90ebcbb8bf14afc442db7631ea87`. The
+expected final result seal is
+`17a86e07f16a8f4871de57e367bf61aeaf5ed95662ff86e3a1188db4c69c9e96`.
+
+Expected headline results: Evidence Completeness is 0.0000 for E/N/EN;
+G1-EN Complete-Support Rate is 0.9261; G0 Complete-Support Rate is 0.8723;
+V1 Citation Precision and Complete-Support Rate are both 1.0000; V1 Q1–Q6
+Coverage is 0.5278; V1 Required Withholding Recall is 0.3344; and V1 USCR is
+NA because its denominator is zero.
+
+The public archive contains the 477 completed R1 ledgers, three frozen
+provider-incomplete delivery receipts, final generation outputs, V1 replay
+outputs, event/view gold, scorer-visible evidence records, and the final
+scope-context mapping needed by the scoring adapter. It omits API request and
+provider response envelopes; rescoring uses the frozen final generation
+outputs and R1 judgments, so those envelopes are unnecessary. D0 remains a
+descriptive deterministic reference and is excluded from the subjective R1
+score matrix.
