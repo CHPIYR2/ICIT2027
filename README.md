@@ -1,7 +1,20 @@
-# OT Security Event Triage
+# Evidence-Bounded Post-Alert OT Investigation
 
-Research target: IEEE ICIT 2027. Primary question: whether electrical/process and
-network evidence improve event-conditioned OT security triage when combined.
+Research target: IEEE ICIT 2027. The current paper is a post-alert,
+event-conditioned measurement study: under a fixed evidence budget and a frozen
+support policy, it compares electrical/process-only, network-only, and equal-split
+combined configurations, then measures how selective publication changes claim
+support and substantive question coverage. It does not evaluate anomaly-detection accuracy or
+independently verify incident truth. For production use, the evidence interface
+must also accommodate organization-controlled, on-premises, or disconnected data
+paths; hosted-versus-local inference is an explicit deployment question, not an
+evaluated factor in the present public-data experiment.
+
+Current artifacts: [paper source](icit2027_ot_investigation.tex),
+[compiled PDF](icit2027_ot_investigation.pdf), and
+[build/status notes](BUILD_NOTES.md).
+
+## Historical precursor experiments
 
 The research specification is `Codex_OT_Security_Research_Brief_v2.md`.
 
@@ -26,7 +39,9 @@ Main N and EN binary predictions are identical for each model: RF/GB score Macro
 F1 1.000, LR scores 0.243 and misses all 57 cyber events. A command-presence rule
 also scores 1.000; the main experiment does not demonstrate an EN advantage over N.
 See `docs/heldout_results.md` for full results and limits.
-37 tests passed at that original stage. No LLM or full verifier is implemented.
+At that precursor stage, 37 tests passed and no LLM or full verifier had yet been
+implemented. The final investigation experiment documented below supersedes that
+implementation-status statement.
 
 The held-out results are now exposed: changes motivated by these scores are
 exploratory and must not be described as a new unseen test on the same events.
@@ -77,8 +92,7 @@ Some preserved execution/provenance artifacts contain environment-specific absol
 
 ## ICIT 2027 final investigation experiment
 
-The current manuscript is a draft: [paper source](icit2027_ot_investigation.tex),
-[compiled PDF](icit2027_ot_investigation.pdf), and [build/status notes](BUILD_NOTES.md).
+The current manuscript remains a draft pending author approval.
 The final experiment methodology and results interpretation are in
 [the experimental methodology](docs/final_experimental_methodology.md) and
 [the final scoring results](docs/final_scoring_results.md). The frozen matching
@@ -110,10 +124,10 @@ portable public archive has commitment
 expected final result seal is
 `17a86e07f16a8f4871de57e367bf61aeaf5ed95662ff86e3a1188db4c69c9e96`.
 
-Expected headline results: Evidence Completeness is 0.0000 for E/N/EN;
+Expected headline results: Protocol-Exact Fact Recall is 0.0000 for E/N/EN;
 G1-EN Complete-Support Rate is 0.9261; G0 Complete-Support Rate is 0.8723;
 V1 Citation Precision and Complete-Support Rate are both 1.0000; V1 Q1–Q6
-Coverage is 0.5278; V1 Required Withholding Recall is 0.3344; and V1 USCR is
+Substantive Coverage is 0.5278; V1 Required Withholding Recall is 0.3344; and V1 USCR is
 NA because its denominator is zero.
 
 The public archive contains the 477 completed R1 ledgers, three frozen
