@@ -32,7 +32,7 @@ sh.chang@ntut.edu.tw}
 \maketitle
 
 \begin{abstract}
-Process-aware operational technology (OT) detectors identify anomalous intervals, but records grouped within an alerted event do not necessarily describe the same operational action. Temporal proximity between a network command and an electrical telemetry change does not establish execution, physical completion, or causation. We introduce the Evidence-Bounded Cross-Modal Relation Ledger (EBRL), an event-conditioned investigation method that converts network transactions and telemetry changes into fixed candidate pairs, assigns every pair a link, supported non-link, or insufficient-evidence disposition, records typed evidence paths, and limits each relation to the strongest wording warranted by the visible evidence. A deterministic publication verifier may retain, downgrade, or suppress a proposed relation but cannot access evaluator-only labels. We specify a pair-level Sherlock v3 benchmark against temporal, asset-aware, semantic-rule, direct-LLM, and evidence-ID-grounded baselines. Evaluation separates warranted-link recovery from unsupported linkage, semantic overpromotion, event-level false-link incidence, evidence-path completeness, and appropriate abstention. Reference relations are constructed automatically from evaluator-only simulator or scenario provenance where available; unresolved cases are not silently treated as negatives. \TBD{final event, episode, candidate, and reference-class counts} \TBD{principal baseline and ablation results} The study concerns evidence-bounded association within supplied event scopes, not anomaly detection, event segmentation, or unrestricted causal inference.
+Process-aware operational technology (OT) detectors identify anomalous intervals, but records grouped within an alerted event do not necessarily describe the same operational action. Temporal proximity between a network command and an electrical telemetry change does not establish execution, physical completion, or causation. We introduce the Evidence-Bounded Cross-Modal Relation Ledger (EBRL), an event-conditioned investigation method that converts network transactions and telemetry changes into fixed candidate pairs, assigns every pair a link, supported non-link, or insufficient-evidence disposition, records typed evidence paths, and limits each relation to the strongest wording warranted by the visible evidence. A deterministic publication verifier may retain, downgrade, or suppress a proposed relation but cannot access evaluator-only labels. We specify a pair-level Sherlock v3 benchmark against temporal, asset-aware, semantic-rule, direct-LLM, and evidence-ID-grounded baselines. Evaluation separates warranted-link recovery from unsupported linkage, semantic overpromotion, event-level false-link incidence, evidence-path completeness, and appropriate abstention. Reference relations are constructed automatically from evaluator-only simulator or scenario provenance where available; unresolved cases are not silently treated as negatives. A local audit of the saved Sherlock~v3 inventories did not confirm an independent command-to-effect join, so operational precision and recall remain \NA{}. Raw captures were not mounted for this revision, so Sherlock episode and candidate counts were not computed. The study concerns evidence-bounded association within supplied event scopes, not anomaly detection, event segmentation, or unrestricted causal inference.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -60,7 +60,7 @@ The study asks the following questions:
     \item \textbf{RQ3---Method components:} How does deterministic publication verification change false-link incidence, semantic overpromotion, evidence-path completeness, and warranted-link recall?
 \end{itemize}
 
-Our contributions are: (1) a pair-level EBRL method that represents links, supported non-links, and insufficient evidence without converting co-occurrence into causation; (2) an automatically scored benchmark-construction protocol that separates supported, unsupported, and indeterminate command--telemetry candidates; (3) a baseline ladder and complementary relation-quality, restraint, and event-risk metrics that cannot be satisfied by abstaining on every pair; and (4) \TBD{a concise statement of the final empirical and error-analysis contributions after rerunning all methods}. We do not claim to be the first system to use evidence grounding or deterministic verification; the contribution is their operationalization for fixed-candidate, cross-modal OT relation analysis.
+Our contributions are: (1) a pair-level EBRL method that represents links, supported non-links, and insufficient evidence without converting co-occurrence into causation; (2) an automatically scored benchmark-construction protocol that separates supported, unsupported, and indeterminate command--telemetry candidates; (3) a baseline ladder and complementary relation-quality, restraint, and event-risk metrics that cannot be satisfied by abstaining on every pair; and (4) a separated publication verifier and scorer, with operational metrics held at \NA{} until an independent command-to-effect join is confirmed. We do not claim to be the first system to use evidence grounding or deterministic verification; the contribution is their operationalization for fixed-candidate, cross-modal OT relation analysis.
 
 \section{Background and Related Work}
 
@@ -120,7 +120,7 @@ Before any method is run, a deterministic, high-recall enumerator produces
 \end{equation}
 Candidate generation may use a development-set time bound and mappings in $B_e^M$, but it does not decide whether a pair is related. The same $\mathcal{C}_e$ is supplied to every method. Candidate availability and enumeration recall are measured against an evaluator-only reference universe defined in Section~V so that EBRL does not receive credit for retrieval omissions or for removing difficult pairs from its denominator.
 
-\TBD{transaction grouping, retransmission and select-before-operate handling, process change-point/deadband rule, clock-skew allowance, candidate window $\tau_{\max}$, candidate cap, deterministic sampling hash, and stratum quotas}
+The pre-specified contract \texttt{ebrl.contract.v1} sets $\tau_{\max}=30$\,s, a clock-skew allowance of $1$\,s, a transaction gap of $5$\,s, and a precondition freshness gap of $5$\,s. Retransmissions collapse into the same transaction; a select followed by an operate is one episode, while select without operate cannot support a link. A process episode is a categorical transition or a numerical step beyond a unit deadband. These values were not tuned on development events. No candidate cap is applied. If a future cap is required, retained pairs are chosen by frozen stratum quotas and SHA-256 of the event, episode, and stratum identifiers.
 
 \subsection{Relation Semantics}
 
@@ -157,7 +157,7 @@ Q_e=g_N(B_e^N;\theta_N),\qquad P'_e=g_P(B_e^P;\theta_P).
 \end{equation}
 The network function groups packets using flow, ASDU type, common address, information-object address, cause of transmission, and a bounded transaction interval. The process function identifies a state transition or change segment and records its precondition, postcondition, magnitude, direction, and interval. Neither function receives attack labels or reference links. The resulting episode IDs, source-record IDs, and transformations are included in the case trace.
 
-\TBD{complete values for $\theta_N$ and $\theta_P$, duplicate policy, numerical tolerances, and worked normalization examples}
+$\theta_N$ groups records by flow, common address, information-object address, and type within the transaction gap, and it stores activation confirmations as protocol lineage rather than execution. $\theta_P$ emits a change only when the value is present and the step exceeds the configured deadband; missing values are not replaced by zero. Identical flow-sequence retransmissions are not independent observations. A worked synthetic example is an IEC-104 single command to open a breaker, followed by a reported closed-to-open transition: the ledger may state a bounded association and may not state execution.
 
 \subsection{Permissive Candidate Construction}
 
@@ -198,7 +198,7 @@ Confidence & Optional selective-publication score & Used only if prespecified an
 
 The relation proposer evaluates temporal order, asset compatibility, command--variable semantics, change direction or target, and competing explanations. It uses $\mathsf{N}$ only when a visible contradiction supports rejection; otherwise an unsupported candidate receives $\mathsf{U}$. A proposed $R_2$ link must cite both modalities and the applicable mapping. Higher levels additionally require independent operational evidence. The implementation may be rule based, LLM based, or hybrid, but it must emit the same complete ledger schema.
 
-\TBD{the EBRL proposer prompt or rule set, controlled reason vocabulary, semantic compatibility ontology, confidence production, and pseudocode}
+The implemented rule proposer uses a versioned compatibility table. Open-breaker commands are compatible with reported switch state and, as a bounded association only, with a decrease in the mapped current; they are incompatible with tap position. Agreement of that table with a silver reference built from the same predicates is a policy replay, not operational truth. Confidence is emitted as null because it has not been calibrated. The controlled reason codes include sufficient temporal link, bounded association, operational response, action-effect provenance, asset contradiction, semantic incompatibility, direction contradiction, time-order contradiction, competing command, alias collision, select without operate, stale or bad quality, and insufficient evidence.
 
 \subsection{Publication Verifier and Scorer Separation}
 
@@ -206,7 +206,7 @@ The visible-only publication verifier $V_{\mathrm{pub}}$ checks schema validity,
 
 A separate scorer $S_{\mathrm{eval}}$ compares raw and published ledgers with frozen references. The reference builder, $V_{\mathrm{pub}}$, and $S_{\mathrm{eval}}$ are implemented and versioned separately. Metrics derived from the same visible predicates used by $V_{\mathrm{pub}}$ are labeled policy-consistency metrics. Primary claims of relation accuracy require evaluator-only operational provenance or counterfactual labels not available to $V_{\mathrm{pub}}$. This design directly addresses verifier--scorer circularity: a retained-set value of 1.0 cannot be interpreted as independent factual validation merely because the same policy filtered and scored the output.
 
-\TBD{the complete verifier rule table, downgrade precedence, treatment of multiple failures, and independent unit/challenge tests}
+The ordered verifier findings are schema or candidate mismatch, invisible or wrong-role evidence, a non-link without a contradiction predicate, acknowledgement used as execution, missing evidence for execution, completion, or security flags, and a level above the visible ceiling. The first matching failure that invalidates the row yields no disposition credit. Otherwise the verifier applies the strongest of suppress, downgrade, and retain. It cannot rewrite $\mathsf{U}$ as $\mathsf{N}$ or $\mathsf{N}$ as $\mathsf{L}$. Challenge tests cover acknowledgement-to-completion proposals, hallucinated identifiers, and competition losers.
 
 \subsection{Controlled Report Synthesis}
 
@@ -216,16 +216,16 @@ The final report is rendered only from admitted ledger rows using controlled tem
 
 Episode formation is linear in the visible records. A naive candidate enumerator is $O(|Q_e||P'_e|)$, while time indexing and asset partitions reduce the number of evaluated pairs in practice. The complete experiment records versions of the episode builder, mapping, candidate manifest, proposer, verifier, templates, model configuration, and scorer.
 
-\TBD{candidate-builder complexity after indexing, observed candidates per event, wall-clock time, token consumption, and artifact hashes}
+Sherlock wall-clock time, token use, and per-event candidate counts were not measured because the raw archives were not mounted. The candidate builder is linear in the episode pairs admitted by the time or asset predicate. A synthetic replay records its own artifact hash and is not a Sherlock measurement.
 
 \FloatBarrier
 \section{Benchmark and Automatic Reference Construction}
 
 \subsection{Dataset and Split}
 
-The study uses Sherlock v3, a Wattson power-grid co-simulation dataset containing IEC~60870-5-104 traffic and electrical/process observations \cite{wagner2025sherlock,sherlockv3}. The current split contains 16 development events from 01-Basic and 32 evaluation events: 18 Semiurban and 14 Rural events, balanced across 16 cyber and 16 benign cases. The dataset and these events were previously inspected; the revised study is therefore a constructed benchmark, not an untouched confirmation sample or an estimate of operational prevalence. All EBRL outputs, automatic references, baselines, and scores will be regenerated under the present pair-level protocol. Development events are used to freeze thresholds, ontology entries, prompts, and candidate rules; evaluation events are not used for tuning.
+The study uses Sherlock v3, a Wattson power-grid co-simulation dataset containing IEC~60870-5-104 traffic and electrical/process observations \cite{wagner2025sherlock,sherlockv3}. The evaluator catalog contains 119 events: 35 in 01-Basic, 48 in 02-Semiurban, and 36 in 03-Rural. An earlier plan to use 16 Basic development events and 32 balanced evaluation events is not a frozen manifest; no rule selecting those 16 events is recorded. The events were previously inspected, so any future benchmark is a constructed sample, not an untouched confirmation set or an estimate of operational prevalence. Development events, once frozen, are the only place to tune thresholds. The thresholds in \texttt{ebrl.contract.v1} are pre-specified and were not tuned.
 
-\TBD{confirm the final event manifest and report per-scenario episode and candidate counts}
+The 16/32 event manifest, episode counts, and candidate counts are not frozen. Raw archives were not available when this revision was prepared.
 
 \subsection{Evaluator-Only Relation References}
 
@@ -242,7 +242,7 @@ Visible time, mapping, and semantic rules can establish an $R_2$ evidence ceilin
 
 Let $\mathcal U_e^{\mathrm{op}}$ be the evaluator-only universe of all independently provenance-linked command--effect pairs inside $W_e$, constructed before applying the evidence budget, and let $\mathcal U_e^{\mathrm{vis}}$ be the subset whose two episodes are representable from $B_e$. Evidence-availability recall is $|\mathcal U_e^{\mathrm{vis}}|/|\mathcal U_e^{\mathrm{op}}|$, while candidate-enumeration recall is $|\mathcal C_e\cap\mathcal U_e^{\mathrm{vis}}|/|\mathcal U_e^{\mathrm{vis}}|$. These diagnostics distinguish retrieval loss from candidate-builder loss. They are defined only if the operational universe is independently observable.
 
-\TBD{identify the exact Sherlock fields, completeness assumptions, and joins used for positive and negative operational provenance; define $\mathcal U_e^{\mathrm{op}}$ and episode matching; otherwise freeze the study at $R_0$--$R_2$ and characterize it as policy/silver-label evaluation}
+Saved content-audit samples do not confirm that join. Physical snapshots expose timestamped grid values, control-center samples include connection notifications, and device logs begin as service startup records. No saved sample provides a command identifier joined to an operational response and a physical effect. Because the raw archives were not mounted, this is not a full-text proof that no such field exists. Until that join is demonstrated, $g_c=0$ for natural Sherlock pairs, operational precision and recall are \NA{}, and $R_3$/$R_4$ factual accuracy is not claimed. Visible-policy agreement may still be computed, but only as a silver-label replay when it uses the same predicates as B3 or the verifier.
 
 \begin{table*}[t]
 \caption{Planned automatic reference sources and the claims they permit.}
@@ -253,7 +253,7 @@ Let $\mathcal U_e^{\mathrm{op}}$ be the evaluator-only universe of all independe
 Reference source & Automatically evaluated property & Limitation\\
 \midrule
 Visible timestamps, mappings, and semantics & $v_c^*$, $\lambda_c^{\mathrm{vis}}$, and permitted wording & Policy consistency, not operational truth\\
-Evaluator-only action/state provenance & $o_c^*$ and $g_c$ for operational links and, only if complete, non-links & \TBD{confirm availability, completeness, and independence}\\
+Evaluator-only action/state provenance & $o_c^*$ and $g_c$ for operational links and, only if complete, non-links & Not confirmed in the saved audit samples; natural Sherlock metrics remain \NA{}\\
 Matched counterfactual construction & Operational non-link by construction plus visible contradiction class & Robustness challenge, not natural prevalence\\
 Gold-unresolved natural candidate & $g_c=0$; no factual score & May still support visible-policy evaluation\\
 \bottomrule
@@ -264,13 +264,13 @@ Gold-unresolved natural candidate & $g_c=0$; no factual score & May still suppor
 
 Natural evaluation is supplemented, but not mixed, with matched challenge pairs. A deterministic transformation retains the original event and lag stratum while swapping the asset, changing command semantics or direction, reversing admissible order, pairing an acknowledgement without compatible telemetry, or crossing competing commands. These cases test whether a method resists plausible but incorrect links. Constructed negatives are reported separately because their designed frequency does not estimate natural false-link prevalence.
 
-\TBD{counterfactual operators, validity checks, matching variables, number per stratum, random seed, and leakage audit}
+The implemented operators, used only on synthetic fixtures, swap the asset, reverse admissible order, substitute an incompatible variable, retain an acknowledgement without a compatible change, and cross competing commands. A pair outside $\tau_{\max}$ with no asset-neighborhood relation is withheld by the enumerator so that enumeration recall can be distinguished from relation recall. Sherlock hard-negative counts were not produced.
 
 \subsection{Human Validation Policy}
 
 Primary scoring is designed to be automatic and does not require experts to review every report. Human labeling is unnecessary only if independent provenance supports the operational reference and the final narrative is a deterministic rendering of the ledger. If provenance is incomplete, expert review becomes necessary for reference validity, not for repeatedly grading each method's prose. In that contingency, two OT reviewers will independently and blindly audit a prespecified stratified sample of supported links, supported non-links, unresolved cases, hard negatives, builder conflicts, and all proposed $R_3/R_4$ references. Disagreements will be adjudicated and class-specific agreement will be reported. A sampled audit estimates reference error but does not turn unreviewed silver labels into complete factual gold; factual metrics require either independent provenance or expert labeling of the entire evaluable set.
 
-\TBD{choose one path: document why a fully automatic reference is sufficient, or specify reviewer identities/qualifications, sample size, sampling seed, blinding, adjudication, agreement statistic, and label-change rate}
+No expert review was performed for this revision. If one is later required, two reviewers with operational power-system experience will independently label a stratified sample of links, non-links, unresolved pairs, hard negatives, and every proposed $R_3$/$R_4$ row, blinded to method identity. Agreement will be reported with a class-specific chance-corrected statistic, disagreements will be adjudicated, and the label-change rate will be recorded. Unreviewed pairs will remain unresolved. No agreement statistic is invented here.
 
 If no independent expert audit is performed, all conclusions will be described as conditional on the frozen automatic reference contract rather than domain-validated factual correctness or analyst utility.
 
@@ -310,7 +310,7 @@ The principal comparison uses the combined \EN{} evidence view because a cross-m
 
 The deterministic baselines and B4 are run once after freezing. Generative conditions use the same model snapshot, decoding parameters, token limit, and planned repetition count. All conditions contain the same output fields, although B5 does not require nonempty evidence sets. This permits operational pair identity to be scored independently from grounding. Missing candidate rows, invalid identifiers, and malformed outputs remain $h_c=0$ failures rather than being repaired or credited as abstentions. Candidate availability and enumeration recall are reported separately from relation-decision quality.
 
-\TBD{combined-view record or token budget, model snapshot, prompts, decoding parameters, schema, repetition count, threshold-selection procedure, run dates, and missing-run policy}
+Deterministic methods use contract \texttt{ebrl.contract.v1}, ontology \texttt{ebrl.ontology.v1}, and verifier \texttt{ebrl.verifier.v1}, with confidence left uncalibrated. LLM conditions B5 and B6 are specified to use one frozen local model through a loopback Ollama adapter, with temperature 0, JSON output, and no cloud fallback. No local model service was available, so those conditions were not run and no cloud output was substituted. The event-level bootstrap, if a Sherlock run is later scored, uses 2000 event resamples, seed 20261013, and a 95\% percentile interval. Malformed rows receive no disposition credit.
 
 \FloatBarrier
 \section{Evaluation Metrics and Statistical Analysis}
@@ -360,14 +360,14 @@ For generative methods, numerator and denominator sufficient statistics are firs
 
 Uncertainty is summarized with a scenario- and attack-family-stratified bootstrap that resamples events and recomputes each pooled ratio. Candidate pairs and repetitions are never treated as independent samples. Paired contrasts reuse the same resampled events for both methods rather than dropping events with undefined per-event precision. The primary predeclared contrasts are P1--B3, P1--B6, and P1--P0. The first tests full EBRL beyond deterministic semantic correlation, the second tests relation boundaries beyond citation, and the third isolates publication-verifier effects.
 
-\TBD{bootstrap resamples and seed, confidence level, multiplicity policy, minimum defined-event count, and handling of malformed/provider-incomplete runs}
+The pre-specified event bootstrap uses 2000 resamples, seed 20261013, and a 95\% percentile interval. The resampling unit is the event. Paired contrasts reuse the same event indexes. A contrast is left undefined when fewer than 80\% of resamples have a nonzero denominator. Malformed and missing ledger rows receive no link, non-link, or abstention credit. No multiplicity adjustment is claimed. This bootstrap was not applied to Sherlock events, because that scoring run did not occur.
 
 \section{Results}
 
-At this revision stage, the pair-level reference constructor, baseline reruns, and EBRL ablations are not complete. The earlier claim-support and protocol-exact reconstruction measurements are intentionally not carried into this section because they answer a different task and do not provide a valid relation-level baseline. No numerical EBRL performance claim is made until the frozen candidate manifest, independent reference path, and scorer are complete.
+No Sherlock pair-level scores are reported. Operational link precision, recall, unsupported-link rate, and event false-relation incidence are \NA{} because the saved inventories do not confirm an independent command-to-effect join. Policy-consistency cells are also unfilled: the raw captures were not mounted, so episodes and frozen candidates were not built for the 119 catalogued events. Earlier claim-support and protocol-exact reconstruction numbers are omitted because they answer a different task. A synthetic challenge suite was used to test the implementation; its scores are not estimates of Sherlock performance and are not entered in the tables below. On that suite, publication verification removed acknowledgement overpromotion but did not convert a deceptive co-occurrence into an operational non-link. That separation is the reason policy agreement is not treated as factual accuracy.
 
 \begin{table*}[t]
-\caption{Composition of the frozen pair-level benchmark.}
+\caption{Planned pair-level benchmark. The manifest is not frozen, so counts are not reported.}
 \label{tab:composition}
 \centering\scriptsize
 \begin{tabular}{lrrrrrrrrr}
@@ -375,7 +375,7 @@ At this revision stage, the pair-level reference constructor, baseline reruns, a
 Split & Events & Net. ep. & Proc. ep. & Candidates & Op. $\mathsf{L}$ & Op. $\mathsf{N}$ & Op. unresolved & Vis. $\mathsf{U}$ & Hard neg.\\
 \midrule
 Development & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\\
-Evaluation & 32 & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\\
+Evaluation & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -388,15 +388,15 @@ Evaluation & 32 & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\
 \toprule
 Method & OLP$\uparrow$ & OLR$\uparrow$ & UOLR$\downarrow$ & EFRI$\downarrow$ & Link coverage\\
 \midrule
-B0 Abstain-all & \NA & \TBDv & \TBDv & \TBDv & \TBDv\\
-B1 Nearest-after & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\\
-B2 Asset+Time & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\\
-B3 Asset+Time+Semantic & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\\
-B4 Shallow classifier & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\\
-B5 Direct LLM & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\\
-B6 ID-grounded LLM & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\\
-P0 EBRL w/o verifier & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\\
-P1 Full EBRL & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\\
+B0 Abstain-all & \NA & \NA & \NA & \NA & \TBDv\\
+B1 Nearest-after & \NA & \NA & \NA & \NA & \TBDv\\
+B2 Asset+Time & \NA & \NA & \NA & \NA & \TBDv\\
+B3 Asset+Time+Semantic & \NA & \NA & \NA & \NA & \TBDv\\
+B4 Shallow classifier & \NA & \NA & \NA & \NA & \TBDv\\
+B5 Direct LLM & \NA & \NA & \NA & \NA & \TBDv\\
+B6 ID-grounded LLM & \NA & \NA & \NA & \NA & \TBDv\\
+P0 EBRL w/o verifier & \NA & \NA & \NA & \NA & \TBDv\\
+P1 Full EBRL & \NA & \NA & \NA & \NA & \TBDv\\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -424,15 +424,15 @@ P1 Full EBRL & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\\
 
 \subsection{RQ1---Relation Quality}
 
-\TBD{report P1 against B1--B4 on OLP, OLR, UOLR, and EFRI; distinguish natural candidates from constructed hard negatives; include paired event-bootstrap contrasts and coverage}
+Operational metrics on natural Sherlock pairs are \NA{}. The synthetic challenge is not a substitute result: its independent labels are constructed, and its policy scores replay the visible rules. B4 is not applicable because no independently labeled development pairs are available. B5 and B6 were not run; the local model service was absent, and cloud inference was not used as a replacement.
 
 \subsection{RQ2---Semantic Restraint}
 
-\TBD{report P1 against B5 and B6 on factual relation metrics where available and on EAP, V-WLR, SOR, IAR, NLR, and promotion-flag errors; determine whether evidence IDs alone prevent unsupported linkage}
+B5 and B6 were not executed. Evidence-identifier requirements and the publication verifier are implemented and tested, but no local-model comparison is available. Identifier grounding alone is therefore not claimed to reduce unsupported linkage.
 
 \subsection{RQ3---Verifier Contribution and Ablations}
 
-\TBD{report P1--P0 factual relation changes separately from mechanical policy-compliance changes, then ablate three-way disposition, semantic ceilings, role-typed evidence paths, competition handling, and publication verification}
+On the deterministic proposer, adding the publication verifier does not change the published disposition, because that proposer already stays inside the visible ceiling. The verifier's measured effect is on hostile proposals: an acknowledgement promoted to completion is downgraded, and a hallucinated evidence identifier invalidates the row instead of becoming abstention. Those checks do not decide whether a policy-admissible link is operationally true. Component ablations on Sherlock events were not run.
 
 \begin{table}[t]
 \caption{Planned component ablations.}
@@ -453,7 +453,7 @@ Untyped evidence IDs & \TBDv & \TBDv & \TBDv & \TBDv & \TBDv\\
 
 \subsection{Error and Qualitative Analysis}
 
-\TBD{counts and representative cases for wrong asset, wrong order, incompatible semantics, acknowledgement-to-completion promotion, competing commands, indirect propagation, missing mapping, and malformed evidence paths}
+Sherlock error counts are not available. The implementation tests cover wrong asset, reversed order, incompatible command semantics, acknowledgement promoted to completion, competing commands, indirect propagation, missing mappings, alias collisions between configuration and measurement names, stale values, and malformed evidence identifiers. Representative outputs are retained with the synthetic run, not as Sherlock case studies.
 
 The qualitative appendix will include one correctly supported link, one correctly unresolved pair, and one false link from the strongest baseline. Each case will show the two episodes, visible evidence path, reference source, predicted and maximum levels, and the reason for the disposition. Examples will be selected by a frozen rule rather than only for rhetorical convenience.
 
@@ -484,7 +484,7 @@ Pairs within an event and repeated model outputs are dependent, which is why inf
 
 \section{Conclusion}
 
-This work reframes post-alert OT investigation as fixed-candidate, evidence-bounded cross-modal relation analysis. EBRL requires every command--telemetry candidate to receive a link, supported non-link, or insufficient-evidence disposition together with a semantic ceiling, typed evidence path, and reason. It separates visible-only publication verification from evaluator-only reference construction and evaluates both recovery and restraint against temporal, asset-aware, semantic, and LLM baselines. \TBD{insert one sentence summarizing the principal numerical result after the revised experiment is complete} The resulting claims will remain conditional on supplied event scopes and the validated reference source; they will not be presented as end-to-end anomaly detection, unrestricted causal inference, or production analyst utility.
+This work reframes post-alert OT investigation as fixed-candidate, evidence-bounded cross-modal relation analysis. EBRL requires every command--telemetry candidate to receive a link, supported non-link, or insufficient-evidence disposition together with a semantic ceiling, typed evidence path, and reason. It separates visible-only publication verification from evaluator-only reference construction and evaluates both recovery and restraint against temporal, asset-aware, semantic, and LLM baselines. No Sherlock pair-level performance number is available in this revision: operational metrics are \NA{} because an independent command-to-effect join was not confirmed, and the raw captures required for policy scoring were not mounted. The resulting claims remain conditional on supplied event scopes and the validated reference source; they are not end-to-end anomaly detection, unrestricted causal inference, or production analyst utility.
 
 \bibliographystyle{IEEEtran}
 \IfFileExists{references.bib}{\bibliography{references}}{}

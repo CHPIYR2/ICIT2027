@@ -1,0 +1,26 @@
+{
+  "ontology_id": "ebrl.ontology.v1",
+  "note": "Compatibility supports a bounded association ceiling of R2. It does not establish execution, physical completion, or causation.",
+  "entries": [
+    {"command": "open_breaker", "variable": "closed", "relation": "compatible", "expected": "to_false", "scope": "sherlock_attributes"},
+    {"command": "open_breaker", "variable": "is_closed", "relation": "compatible", "expected": "to_false", "scope": "sherlock_attributes"},
+    {"command": "open_breaker", "variable": "current_from", "relation": "compatible", "expected": "decrease", "scope": "sherlock_attributes"},
+    {"command": "open_breaker", "variable": "current_to", "relation": "compatible", "expected": "decrease", "scope": "sherlock_attributes"},
+    {"command": "open_breaker", "variable": "current_hv", "relation": "compatible", "expected": "decrease", "scope": "sherlock_attributes"},
+    {"command": "open_breaker", "variable": "current_lv", "relation": "compatible", "expected": "decrease", "scope": "sherlock_attributes"},
+    {"command": "close_breaker", "variable": "closed", "relation": "compatible", "expected": "to_true", "scope": "sherlock_attributes"},
+    {"command": "close_breaker", "variable": "is_closed", "relation": "compatible", "expected": "to_true", "scope": "sherlock_attributes"},
+    {"command": "open_breaker", "variable": "tap_position", "relation": "incompatible", "expected": null, "scope": "sherlock_attributes"},
+    {"command": "open_breaker", "variable": "target_active_power", "relation": "incompatible", "expected": null, "scope": "sherlock_attributes"},
+    {"command": "open_breaker", "variable": "voltage", "relation": "unknown", "expected": null, "scope": "sherlock_attributes"},
+    {"command": "open_breaker", "variable": "active_power", "relation": "unknown", "expected": null, "scope": "sherlock_attributes"},
+    {"command": "raise_tap", "variable": "tap_position", "relation": "compatible", "expected": "increase", "scope": "sherlock_attributes"},
+    {"command": "lower_tap", "variable": "tap_position", "relation": "compatible", "expected": "decrease", "scope": "sherlock_attributes"},
+    {"command": "raise_tap", "variable": "closed", "relation": "incompatible", "expected": null, "scope": "sherlock_attributes"},
+    {"command": "set_target_active_power", "variable": "target_active_power", "relation": "compatible", "expected": null, "scope": "sherlock_attributes"},
+    {"command": "set_target_active_power", "variable": "active_power", "relation": "unknown", "expected": null, "scope": "sherlock_attributes"},
+    {"command": "set_target_active_power", "variable": "closed", "relation": "incompatible", "expected": null, "scope": "sherlock_attributes"},
+    {"command": "stop_pump", "variable": "flow_rate", "relation": "compatible", "expected": "decrease", "scope": "synthetic_portability_only"},
+    {"command": "stop_pump", "variable": "valve_state", "relation": "incompatible", "expected": null, "scope": "synthetic_portability_only"}
+  ]
+}

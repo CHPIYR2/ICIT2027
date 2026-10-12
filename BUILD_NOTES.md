@@ -1,5 +1,17 @@
 # Paper build and audit notes
 
+## 2026-10-13 EBRL revision
+
+The source `icit2027_ot_investigation.tex` now states that operational Sherlock
+metrics are NA and that the 16/32 event split is not frozen. This Windows
+session had no `tectonic` or `pdflatex`, so `output/pdf/icit2027_ot_investigation.pdf`
+and the root PDF were not rebuilt. The historical notes below describe the
+earlier 8-page build; the handoff recorded a later 12-page IEEEtran build at
+commit `0c02db4`. Do not treat either PDF as the EBRL revision until it is
+recompiled from the current source.
+
+## Earlier build record
+
 **Status: DRAFT pending author approval.** The author block lists PoTing Lu and
 Eric Mao (corresponding author) under AvocadoAI, and Shih-Hao Chang under National
 Taipei University of Technology. The paper is framed as a post-alert,

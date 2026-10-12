@@ -1,18 +1,18 @@
 # Evidence-Bounded Post-Alert OT Investigation
 
-Research target: IEEE ICIT 2027. The current paper is a post-alert,
-event-conditioned measurement study: under a fixed evidence budget and a frozen
-support policy, it compares electrical/process-only, network-only, and equal-split
-combined configurations, then measures how selective publication changes claim
-support and substantive question coverage. It does not evaluate anomaly-detection accuracy or
-independently verify incident truth. For production use, the evidence interface
-must also accommodate organization-controlled, on-premises, or disconnected data
-paths; hosted-versus-local inference is an explicit deployment question, not an
-evaluated factor in the present public-data experiment.
+Research target: IEEE ICIT 2027. The current paper studies post-alert
+cross-modal relation decisions. The EBRL implementation added on branch
+`ebrl-implementation` is documented in `docs/EBRL_IMPLEMENTATION_STATUS.md`.
+Operational Sherlock metrics are NA until an independent command-to-effect join
+is confirmed. The sections below this note preserve earlier claim-support,
+observability, and held-out experiments. Their scores are not EBRL pair-level
+results.
 
 Current artifacts: [paper source](icit2027_ot_investigation.tex),
 [compiled PDF](icit2027_ot_investigation.pdf), and
-[build/status notes](BUILD_NOTES.md).
+[build/status notes](BUILD_NOTES.md). The root PDF predates the EBRL revision
+and was not rebuilt in the 2026-10-13 Windows session because no LaTeX
+compiler was installed.
 
 ## Historical precursor experiments
 

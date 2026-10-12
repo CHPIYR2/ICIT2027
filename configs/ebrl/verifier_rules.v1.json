@@ -1,0 +1,29 @@
+{
+  "verifier_id": "ebrl.verifier.v1",
+  "actions": ["retain", "downgrade", "suppress", "invalid"],
+  "precedence": [
+    "SCHEMA_OR_CANDIDATE_MISMATCH",
+    "HALLUCINATED_OR_INVISIBLE_EVIDENCE",
+    "EVIDENCE_ROLE_MISMATCH",
+    "NONLINK_WITHOUT_CONTRADICTION",
+    "CONTRADICTION_PREDICATE_FAILED",
+    "ACK_USED_AS_EXECUTION",
+    "EXECUTION_WITHOUT_OPERATIONAL_RESPONSE",
+    "COMPLETION_WITHOUT_ACTION_EFFECT",
+    "SECURITY_FLAG_NOT_WARRANTED",
+    "LINK_NOT_WARRANTED",
+    "LEVEL_ABOVE_VISIBLE_CEILING",
+    "R4_WITHOUT_ACTION_EFFECT",
+    "R3_WITHOUT_OPERATIONAL_RESPONSE",
+    "R1_PATH_INCOMPLETE"
+  ],
+  "invariants": [
+    "Never delete a candidate row.",
+    "Never rewrite U to N or L.",
+    "Never rewrite N to L.",
+    "L may be downgraded or suppressed to U.",
+    "Protocol acknowledgement cannot set execution or completion.",
+    "R2 cannot carry execution, completion, causal, or security flags.",
+    "Evaluator-only labels are not inputs."
+  ]
+}

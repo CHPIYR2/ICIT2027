@@ -1,0 +1,45 @@
+{
+  "contract_id": "ebrl.contract.v1",
+  "status": "PRE_SPECIFIED_NOT_TUNED_ON_SHERLOCK",
+  "tuning_note": "Thresholds are pre-specified from the manuscript and the 2026-09-20 Sherlock content audit. They were not optimized on development events because the raw archives are not in this workspace.",
+  "tau_max_s": 30.0,
+  "clock_skew_s": 1.0,
+  "transaction_gap_s": 5.0,
+  "process_hold_s": 2.0,
+  "stale_gap_s": 5.0,
+  "candidate_cap": 0,
+  "stratum_quotas": {
+    "reverse_time": 0,
+    "near_time_wrong_asset": 0,
+    "competing_command": 0,
+    "mapped_incompatible": 0,
+    "mapped_compatible": 0,
+    "indirect_or_unmapped": 0
+  },
+  "sampling_seed": "ebrl-v1-20261013",
+  "confidence_policy": "not_calibrated_emitted_as_null",
+  "bootstrap": {
+    "resamples": 2000,
+    "seed": 20261013,
+    "confidence": 0.95,
+    "min_events": 2,
+    "unit": "event",
+    "multiplicity": "primary contrasts are descriptive; no family-wise error rate is claimed"
+  },
+  "deadband": {
+    "AMPERE": {"abs": 0.5, "rel": 0.02},
+    "WATT": {"abs": 1000.0, "rel": 0.02},
+    "VAR": {"abs": 1000.0, "rel": 0.02},
+    "PER_UNIT": {"abs": 0.005, "rel": 0.0},
+    "DEGREE": {"abs": 0.2, "rel": 0.0},
+    "PERCENT": {"abs": 0.5, "rel": 0.0},
+    "WATT_HOUR": {"abs": 1.0, "rel": 0.0},
+    "NONE": {"abs": 0.0, "rel": 0.0},
+    "FLOW": {"abs": 0.1, "rel": 0.0}
+  },
+  "flow_unit_note": "FLOW is a synthetic portability-fixture unit. It is not a Sherlock measurement unit.",
+  "temporal_link_definition": "Disposition L at R1 is a temporal co-occurrence link only. It is not an operational link.",
+  "operational_link_in_scorer": "The manuscript defines p_c as any valid disposition L, including R1. Factual OLP/OLR/UOLR follow that definition.",
+  "r2_requirement": "R2 requires command-before-effect beyond clock skew, same mapped asset, semantic compatibility, consistent direction, acceptable quality, and no context-alias collision.",
+  "nonlink_requirement": "N requires a visible contradiction. Missing evidence, competition, indirect propagation, alias collision, and select-without-operate are U."
+}

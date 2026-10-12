@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ebrl.ledger.v1",
+  "type": "object",
+  "required": [
+    "event_id",
+    "candidate_id",
+    "command_episode_id",
+    "process_episode_id",
+    "raw_disposition",
+    "raw_level",
+    "raw_flags",
+    "reason_code",
+    "network_evidence_ids",
+    "process_evidence_ids",
+    "mapping_evidence_ids",
+    "row_valid",
+    "published_disposition",
+    "published_level",
+    "verifier_action"
+  ],
+  "properties": {
+    "raw_disposition": {"enum": ["L", "N", "U"]},
+    "raw_level": {"enum": ["R0", "R1", "R2", "R3", "R4"]},
+    "published_disposition": {"enum": ["L", "N", "U", null]},
+    "published_level": {"enum": ["R0", "R1", "R2", "R3", "R4", null]},
+    "verifier_action": {"enum": ["retain", "downgrade", "suppress", "invalid", "not_applied"]}
+  }
+}
