@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mirage-ot"
+version = "0.1.0"
+description = "Self-supervised multimodal event relation graphs for post-alert OT investigation"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24", "torch>=2.2", "networkx>=3.0"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+mirage-ot = "mirage_ot.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
