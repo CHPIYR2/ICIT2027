@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import numpy as np
 from .types import Observation, Node
+from .semantics import collapse_aliases, reject_evaluator_fields
 
 F = 8
 FEATURE_NAMES = {
@@ -34,11 +35,25 @@ def _node_id(modality: str, entity: str) -> str:
     return modality[0].upper() + '-' + hashlib.sha256(entity.encode()).hexdigest()[:12]
 
 
+def _source_ids(seq: list[Observation]) -> list[str]:
+    found = []
+    for obs in seq:
+        found.append(obs.source_id)
+        found.extend((obs.attrs or {}).get('alias_source_ids') or [])
+    return list(dict.fromkeys(found))
+
+
 def build_matrix(observations: list[Observation], *, bin_seconds: float = 10.0,
                  max_network_nodes: int = 30, max_physical_nodes: int = 30,
-                 start: float | None = None, end: float | None = None) -> Matrix:
+                 start: float | None = None, end: float | None = None,
+                 collapse_duplicate_aliases: bool = True) -> Matrix:
     if not observations:
         raise ValueError('Cannot build matrix from empty observations')
+    reject_evaluator_fields(observations)
+    raw_count = len(observations)
+    alias_report = {'collapsed_aliases': [], 'alias_disagreements': []}
+    if collapse_duplicate_aliases:
+        observations, alias_report = collapse_aliases(observations)
     if bin_seconds <= 0:
         raise ValueError('bin_seconds must be positive')
     beginning = math.floor((min(x.timestamp for x in observations) if start is None else start) / bin_seconds) * bin_seconds
@@ -67,11 +82,13 @@ def build_matrix(observations: list[Observation], *, bin_seconds: float = 10.0,
             t = int((o.timestamp - beginning) // bin_seconds)
             if 0 <= t < nbin:
                 buckets[t].append(o)
-        # Distinct provenance: keep a bounded, explicit sample and its count.
-        source_ids = list(dict.fromkeys(o.source_id for o in seq))
+        source_ids = _source_ids(seq)
         sample = source_ids[:12] + (source_ids[-4:] if len(source_ids) > 16 else [])
-        nodes.append(Node(_node_id(modality, entity), modality, entity, entity,
-                          tuple(dict.fromkeys(sample))))
+        contexts = {(obs.attrs or {}).get('ipal_context', '') for obs in seq}
+        context = next(iter(contexts)) if len(contexts) == 1 else 'AMBIGUOUS'
+        description = entity if not context else f'{entity} [{context}]'
+        nodes.append(Node(_node_id(modality, entity), modality, entity, description,
+                          tuple(dict.fromkeys(sample)), context))
         previous = None
         for t, obs in sorted(buckets.items()):
             if modality == 'physical':
@@ -93,6 +110,7 @@ def build_matrix(observations: list[Observation], *, bin_seconds: float = 10.0,
                 data[t, j] = np.log1p([count, total_bytes, arp, tcp, udp, payload, iec, syn])
     return Matrix(data, nodes, beginning, bin_seconds,
                   {'schema_version': 1, 'observation_count': len(observations),
+                   'raw_observation_count': raw_count, **alias_report,
                    'node_counts': dict(collections.Counter(n.modality for n in nodes)),
                    'feature_names': FEATURE_NAMES,
                    'dropped_channel_counts': {
@@ -100,12 +118,13 @@ def build_matrix(observations: list[Observation], *, bin_seconds: float = 10.0,
                        for m, cap in [('network', max_network_nodes),
                                       ('physical', max_physical_nodes)]},
                    'source_counts_by_node': {
-                       _node_id(*k): len(set(o.source_id for o in seq))
+                       _node_id(*k): len(set(_source_ids(seq)))
                        for k, seq in channels},
                    'note': 'physical features are network-reported, not simulator ground truth'})
 
 
 def save_matrix(matrix: Matrix, path: Path) -> None:
+    path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(path, data=matrix.data)
     path.with_suffix('.json').write_text(json.dumps({
@@ -115,11 +134,12 @@ def save_matrix(matrix: Matrix, path: Path) -> None:
 
 
 def load_matrix(path: Path) -> Matrix:
+    path = Path(path)
     with np.load(path, allow_pickle=False) as arr:
         data = arr['data'].astype(np.float32)
     meta = json.loads(path.with_suffix('.json').read_text(encoding='utf-8'))
     nodes = [Node(v['id'], v['modality'], v['entity'], v['description'],
-                  tuple(v['source_ids'])) for v in meta['nodes']]
+                  tuple(v['source_ids']), v.get('context', '')) for v in meta['nodes']]
     if data.ndim != 3 or data.shape[1] != len(nodes) or data.shape[2] != F:
         raise ValueError(f'Invalid matrix schema in {path}')
     return Matrix(data, nodes, meta['start'], meta['bin_seconds'], meta['metadata'])

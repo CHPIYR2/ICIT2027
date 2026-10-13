@@ -12,6 +12,9 @@ from .model import (train_model, save_checkpoint, load_checkpoint,
 from .graph import graph_dict, save_graph
 from .ipal import unix_seconds
 from .report import explain_graph
+from .semantics import apply_contexts, contexts_from_point_map
+from .study import run_study
+from .transcribe import check_archive_window
 from .types import Observation
 
 
@@ -44,6 +47,8 @@ def main(argv=None):
     prep.add_argument('--max-physical-nodes', type=int, default=24)
     prep.add_argument('--max-state-rows', type=int)
     prep.add_argument('--max-packets', type=int)
+    prep.add_argument('--point-map-member', help='data-point-map.json member; not an event file')
+    prep.add_argument('--keep-alias-duplicates', action='store_true')
     prep.add_argument('--out', type=Path, required=True)
     fit = cmd.add_parser('fit', help='Train on TRAIN data only; no labels used')
     fit.add_argument('--train', type=Path, required=True)
@@ -51,12 +56,43 @@ def main(argv=None):
     fit.add_argument('--epochs', type=int, default=6)
     fit.add_argument('--window', type=int, default=12)
     fit.add_argument('--hidden', type=int, default=48)
+    fit.add_argument('--rank', type=int, default=8)
+    fit.add_argument('--sparsity', type=float, default=1e-3)
     fit.add_argument('--max-steps', type=int, default=128)
+    fit.add_argument('--seed', type=int, default=20261014)
+    fit.add_argument('--association', choices=['sparse', 'softmax'], default='sparse')
     fit.add_argument('--no-graph', action='store_true')
+    fit.add_argument('--freeze-association', action='store_true',
+                     help='Random-graph control: freeze low-rank gates')
     fit.add_argument('--device', choices=['cpu','mps'])
     evaluate = cmd.add_parser('evaluate')
     evaluate.add_argument('--checkpoint', type=Path, required=True)
     evaluate.add_argument('--data', type=Path, required=True)
+    evaluate.add_argument('--shuffle-seed', type=int,
+                          help='Score a column-permuted copy of the learned gates')
+    study = cmd.add_parser('study', help='Disjoint-window forecast comparison')
+    study.add_argument('--train', type=Path, required=True)
+    study.add_argument('--eval', type=Path, required=True)
+    study.add_argument('--seeds', default='1,2,3')
+    study.add_argument('--epochs', type=int, default=8)
+    study.add_argument('--hidden', type=int, default=32)
+    study.add_argument('--rank', type=int, default=8)
+    study.add_argument('--window', type=int, default=12)
+    study.add_argument('--max-steps', type=int, default=32)
+    study.add_argument('--sparsity', type=float, default=1e-3)
+    study.add_argument('--min-std', type=float,
+                       help='Keep train channels whose features vary by more than this')
+    study.add_argument('--device', choices=['cpu', 'mps'], default='cpu')
+    study.add_argument('--out', type=Path, required=True)
+    check = cmd.add_parser('transcribe-check', help='Official IPAL IEC-104 check, no event labels')
+    check.add_argument('--archive', type=Path, required=True)
+    check.add_argument('--pcap-member', required=True)
+    check.add_argument('--rules-member', required=True)
+    check.add_argument('--state-member', required=True)
+    check.add_argument('--start', required=True)
+    check.add_argument('--end', required=True)
+    check.add_argument('--work', type=Path, required=True)
+    check.add_argument('--out', type=Path, required=True)
     plot = cmd.add_parser('graph')
     plot.add_argument('--checkpoint', type=Path, required=True)
     plot.add_argument('--data', type=Path, required=True)
@@ -87,11 +123,19 @@ def main(argv=None):
                          max_packets=args.max_packets))
         else:
             obs = list(_jsonl(args.jsonl))
+        if args.point_map_member:
+            if not args.archive:
+                p.error('--point-map-member requires --archive')
+            import zipfile
+            with zipfile.ZipFile(args.archive) as zf:
+                raw_map = json.loads(zf.read(args.point_map_member))
+            obs = apply_contexts(obs, contexts_from_point_map(raw_map))
         matrix = build_matrix(obs, bin_seconds=args.bin_seconds,
                   max_network_nodes=args.max_network_nodes,
                   max_physical_nodes=args.max_physical_nodes,
                   start=unix_seconds(args.start) if args.start else None,
-                  end=unix_seconds(args.end) if args.end else None)
+                  end=unix_seconds(args.end) if args.end else None,
+                  collapse_duplicate_aliases=not args.keep_alias_duplicates)
         matrix.metadata['input_type'] = 'sherlock_zip' if args.archive else 'synthetic_jsonl'
         if args.max_state_rows or args.max_packets:
             matrix.metadata['CAPPED_INPUT_EXPLORATORY_ONLY'] = True
@@ -102,6 +146,9 @@ def main(argv=None):
         data = load_matrix(args.train)
         model, meta = train_model(data, epochs=args.epochs, length=args.window,
                                  hidden=args.hidden, use_graph=not args.no_graph,
+                                 association=args.association, rank=args.rank,
+                                 sparsity=args.sparsity, seed=args.seed,
+                                 freeze_association=args.freeze_association,
                                  max_steps_per_epoch=args.max_steps, device=args.device)
         meta['trained_on_path'] = str(args.train)
         meta['trained_on_input_type'] = data.metadata.get('input_type', 'unknown')
@@ -110,11 +157,31 @@ def main(argv=None):
                           'warning': 'No attack labels or edge ground truth used.'}, indent=2))
     elif args.command == 'evaluate':
         model, meta = load_checkpoint(args.checkpoint)
-        print(json.dumps(evaluate_forecast(model, load_matrix(args.data), meta), indent=2))
+        print(json.dumps(evaluate_forecast(model, load_matrix(args.data), meta,
+                                           shuffle_seed=args.shuffle_seed), indent=2))
+    elif args.command == 'study':
+        seeds = [int(part) for part in args.seeds.split(',') if part]
+        report = run_study(load_matrix(args.train), load_matrix(args.eval), seeds=seeds,
+                           epochs=args.epochs, hidden=args.hidden, rank=args.rank,
+                           window=args.window, max_steps=args.max_steps,
+                           sparsity=args.sparsity, device=args.device, min_std=args.min_std)
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(report, indent=2), encoding='utf-8')
+        print(json.dumps({'out': str(args.out), 'claim': report['predictive_claim']}, indent=2))
+    elif args.command == 'transcribe-check':
+        report = check_archive_window(
+            archive=args.archive, pcap_member=args.pcap_member, rules_member=args.rules_member,
+            state_member=args.state_member, start=unix_seconds(args.start),
+            end=unix_seconds(args.end), work=args.work)
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(report, indent=2), encoding='utf-8')
+        print(json.dumps({k: report[k] for k in (
+            'messages', 'compared_points', 'matched_points', 'unmatched_points', 'match_rate',
+            'events_json_passed', 'malicious_flag_passed')}, indent=2))
     elif args.command == 'graph':
         model, meta = load_checkpoint(args.checkpoint)
         matrix = load_matrix(args.data)
-        adjacency, predictions = infer_graph(model, matrix, meta)
+        adjacency, _kinds = infer_graph(model, matrix, meta)
         meta_slim = {k: meta[k] for k in ('seed','length','hidden','use_graph')}
         bundle, g = graph_dict(matrix, adjacency, top_k=args.top_k, model_metadata=meta_slim)
         save_graph(bundle, g, args.out)

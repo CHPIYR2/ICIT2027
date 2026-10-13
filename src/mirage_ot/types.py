@@ -24,6 +24,7 @@ class Node:
     entity: str
     description: str
     source_ids: tuple[str, ...]
+    context: str = ''
 
     def to_json(self) -> dict[str, Any]:
         return asdict(self)

@@ -27,9 +27,12 @@ def unix_seconds(v) -> float:
     raise TypeError(f'Unsupported timestamp {v!r}')
 
 
+_IGNORED_FIELDS = ('malicious', 'description', 'attack_point', 'label', 'labels', 'recovery')
+
+
 def iter_state(handle, *, source: str, start: float | None = None,
-               end: float | None = None, max_rows: int | None = None
-               ) -> Iterator[Observation]:
+               end: float | None = None, max_rows: int | None = None,
+               audit: dict | None = None) -> Iterator[Observation]:
     """Works on a binary `.gz` stream or a plain binary JSON/JSONL stream.
 
     Only numeric/bool values are emitted. Context and measurement/setpoint identity
@@ -49,10 +52,18 @@ def iter_state(handle, *, source: str, start: float | None = None,
             continue
         if end is not None and t >= end:
             continue
+        if audit is not None:
+            for field in _IGNORED_FIELDS:
+                if field in row:
+                    audit[field] = audit.get(field, 0) + 1
+            if row.get('malicious') not in (None, False):
+                audit['malicious_true'] = audit.get('malicious_true', 0) + 1
         values = row.get('values', row.get('state'))
         if not isinstance(values, dict):
             raise ValueError(f'No state/values dictionary at {source} row {index}')
         for key, value in values.items():
+            if str(key) in _IGNORED_FIELDS:
+                continue
             if isinstance(value, dict):
                 v = value.get('value')
             else:
@@ -63,7 +74,7 @@ def iter_state(handle, *, source: str, start: float | None = None,
                 continue
             yield Observation(t, 'physical', str(key), 'observed_telemetry', float(v),
                               f'{source}#row={index};key={key}',
-                              {'trust': 'network-reported', 'context': str(key)})
+                              {'trust': 'network-reported'})
 
 
 def read_state(path: Path, **kwargs) -> Iterator[Observation]:

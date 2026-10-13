@@ -9,24 +9,42 @@ from .features import Matrix
 
 
 def _attention_diagnostic(adjacency: np.ndarray, top_k: int) -> dict:
-    """Describe whether displayed edges are just a slice of a flat softmax."""
+    """Separate a flat softmax from independent sparse gates."""
     n = adjacency.shape[0]
     if n < 2:
         return {'attention_is_near_uniform': False, 'reason': 'fewer than 2 nodes'}
-    clipped = np.clip(adjacency, 1e-12, 1.0)
-    entropy = -(clipped * np.log(clipped)).sum(axis=1)
-    uniform = math.log(n - 1)
+    off = ~np.eye(n, dtype=bool)
+    row_sum = float(np.median(adjacency.sum(axis=1)))
     top = np.sort(adjacency, axis=1)[:, -top_k:].sum(axis=1)
-    ratio = float(np.median(entropy) / uniform)
+    if row_sum > 0.5:
+        clipped = np.clip(adjacency, 1e-12, 1.0)
+        entropy = -(clipped * np.log(clipped)).sum(axis=1)
+        uniform = math.log(n - 1)
+        ratio = float(np.median(entropy) / uniform)
+        return {
+            'parameterization': 'row_softmax',
+            'attention_entropy_median': float(np.median(entropy)),
+            'uniform_entropy': float(uniform),
+            'entropy_over_uniform': ratio,
+            'display_topk_mass_median': float(np.median(top)),
+            'attention_is_near_uniform': ratio > 0.98,
+            'interpretation': (
+                'Row-softmax attention. Near-uniform rows mean the displayed top-k '
+                'edges are not a sparse relation estimate.'
+            ),
+        }
+    gates = adjacency[off]
     return {
-        'attention_entropy_median': float(np.median(entropy)),
-        'uniform_entropy': float(uniform),
-        'entropy_over_uniform': ratio,
+        'parameterization': 'independent_gates',
+        'row_sum_median': row_sum,
+        'gate_median': float(np.median(gates)),
+        'gate_frac_gt_0.2': float((gates > 0.2).mean()),
         'display_topk_mass_median': float(np.median(top)),
-        'attention_is_near_uniform': ratio > 0.98,
+        'attention_is_near_uniform': False,
         'interpretation': (
-            'Row-softmax attention. Near-uniform rows mean the displayed top-k '
-            'edges are not a sparse relation estimate.'
+            'Independent sigmoid gates. A displayed edge is only a large gate, '
+            'not a calibrated or causal relation. Cross-modal gates are allowed '
+            'to stay closed.'
         ),
     }
 
