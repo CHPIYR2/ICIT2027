@@ -69,7 +69,17 @@ def main(argv=None) -> None:
     pb.add_argument("--endpoint", default="http://127.0.0.1:11434")
     pilot = commands.add_parser("pilot-pool")
     pilot.add_argument("--out", type=Path, required=True)
+    peval = commands.add_parser("pilot-eval")
+    peval.add_argument("--pilot-dir", type=Path, default=Path("runs/etgi/t3-pilot-pool-20261015"))
+    peval.add_argument("--out", type=Path, required=True)
+    peval.add_argument("--endpoint", default="http://127.0.0.1:11434")
     args = parser.parse_args(argv)
+    if args.command == "pilot-eval":
+        from .postalert.author_pilot_eval import run_author_validated_pilot_evaluation
+        summary = run_author_validated_pilot_evaluation(args.pilot_dir, args.out, endpoint=args.endpoint)
+        print(json.dumps({"out": str(args.out), "code_sha256": summary["code_sha256"],
+                          "failure_cases": summary["failure_case_count"]}, indent=2))
+        return
     if args.command == "position-bias":
         from .postalert.position_bias import run_position_bias_suite
         cases = [

@@ -678,3 +678,42 @@ def test_pilot_package_deidentifies_and_excludes_scores_and_llm_outputs(tmp_path
         assert "timeline_id" not in unit
         assert unit["blind_unit_id"].startswith("U")
 
+
+def test_partial_label_full_pool_marks_recall_and_unlabeled_precision_not_estimable():
+    from mirage_ot.etgi.postalert.eval_t3 import score_full_pool_with_partial_labels
+
+    gains = {"u1": 2, "u2": 1, "u3": 0}
+    # Top-2 all labeled, but total pool has 100 units (97 unlabeled)
+    fully_covered_top = score_full_pool_with_partial_labels(["u1", "u2"], gains, total_pool_size=100, ks=(2,))
+    assert fully_covered_top["labeled_coverage@2"] == 1.0
+    assert fully_covered_top["unlabeled_undetermined_count@2"] == 0
+    assert fully_covered_top["P@2"] == 1.0
+    assert fully_covered_top["full_pool_R@2"] == "NOT_ESTIMABLE"
+
+    # Top-2 contains an unlabeled unit u_unknown
+    partially_covered_top = score_full_pool_with_partial_labels(["u1", "u_unknown"], gains, total_pool_size=100, ks=(2,))
+    assert partially_covered_top["labeled_coverage@2"] == 0.5
+    assert partially_covered_top["unlabeled_undetermined_count@2"] == 1
+    assert partially_covered_top["P@2"] == "NOT_ESTIMABLE"
+    assert partially_covered_top["full_pool_R@2"] == "NOT_ESTIMABLE"
+    assert partially_covered_top["P_among_labeled_subset@2"] == 1.0
+
+
+def test_author_validated_44_labels_unmap_cleanly_and_invariantly():
+    from mirage_ot.etgi.postalert.author_pilot_eval import load_and_verify_author_labels
+
+    pilot_dir = Path("runs/etgi/t3-pilot-pool-20261015")
+    if not pilot_dir.exists():
+        return
+    res = load_and_verify_author_labels(pilot_dir)
+    assert res["validation_status"] == "VERIFIED_44_UNITS"
+    assert res["total_validated_units"] == 44
+    for wid in ("PILOT-W01", "PILOT-W02"):
+        w = res["windows"][wid]
+        assert w["unit_count"] == 22
+        assert w["unique_blind_ids"] == 22
+        assert w["unique_canonical_unit_ids"] == 22
+        assert w["annotator_pack_permutation_invariant"] is True
+        assert w["annotator_pack_orders_differ"] is True
+
+
