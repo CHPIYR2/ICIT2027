@@ -2,6 +2,8 @@
 
 Rejected claims stay in `verification.json` and `rejected_claims.json` for
 audit. They are never rendered into `report.md` as public report prose.
+B0–B3 are unverified baselines: their raw claims are recorded in
+`unverified_model_claims` and rendered under an explicit unverified heading.
 """
 from __future__ import annotations
 import hashlib
@@ -23,8 +25,7 @@ def prepare(db, start: float, end: float, *, background_start: float | None = No
     )
     timeline, lineage = build_timeline_with_lineage(selection)
     discovered = discover_relations(timeline)
-    exposed_timeline = expose_timeline(timeline, limit=10)
-    exposed_relations = expose_relations(discovered["relations"], exposed_timeline, limit=8)
+    exposed_timeline, exposed_relations = _expose_connected(timeline, discovered["relations"], card_limit=10, relation_limit=8)
     earliest = []
     for event in exposed_timeline[:8]:
         earliest.append({
@@ -45,13 +46,20 @@ def prepare(db, start: float, end: float, *, background_start: float | None = No
         "graph": discovered["graph"],
         "exposed_timeline": exposed_timeline,
         "exposed_relations": exposed_relations,
-        "coverage": _coverage_summary(selection, timeline, exposed_timeline, []),
+        "coverage": _coverage_summary(selection, timeline, exposed_timeline, [], lineage=lineage),
         "fixed_summary": {
             "timeline_events": len(timeline),
             "excluded_by_reason": selection["excluded_by_reason"],
             "earliest_events": earliest,
         },
     }
+
+
+def _expose_connected(timeline: list[dict], relations: list[dict], *, card_limit: int = 10,
+                      relation_limit: int = 8) -> tuple[list[dict], list[dict]]:
+    cards = expose_timeline(timeline, limit=card_limit)
+    rels = expose_relations(relations, cards, limit=relation_limit)
+    return cards, rels
 
 
 def run_explanation(db, llm, prepared: dict, *, level: str = "B4", claim_mode: str = "typed_refs",
@@ -61,19 +69,37 @@ def run_explanation(db, llm, prepared: dict, *, level: str = "B4", claim_mode: s
         llm, prepared, level=level, claim_mode=claim_mode,
         allow_salvage=allow_salvage, num_predict=num_predict, num_ctx=num_ctx, seed=seed,
     )
+    lineage = prepared.get("lineage") or {}
     if level == "B4":
-        checked = verify_claims(db, model["claims"], prepared["relations"], prepared["timeline"])
+        checked = verify_claims(db, model["claims"], prepared["relations"], prepared["timeline"], lineage=lineage)
+        published = checked["verified"]
+        unverified = []
     else:
-        checked = {"verified": [], "rejected": [], "unverified_model_claims": model["claims"]}
-    published = checked["verified"] if level == "B4" else model["claims"]
-    coverage = _coverage_summary(prepared["selection"], prepared["timeline"], prepared["exposed_timeline"], published)
-    inferred = [claim for claim in published if claim.get("claim_level") in ("supported_inference", "observed_fact")]
-    minimum = level == "B4" and not inferred
-    report = _report(prepared, model, checked, published, coverage=coverage, minimum=minimum, level=level)
+        audited = verify_claims(db, model["claims"], prepared["relations"], prepared["timeline"], lineage=lineage)
+        checked = {
+            "verified": [],
+            "rejected": [],
+            "unverified_model_claims": model["claims"],
+            "offline_audit_verified": audited["verified"],
+            "offline_audit_rejected": audited["rejected"],
+        }
+        published = []
+        unverified = model["claims"]
+    coverage = _coverage_summary(
+        prepared["selection"], prepared["timeline"], prepared["exposed_timeline"],
+        published if level == "B4" else unverified, lineage=lineage,
+    )
+    has_verified_claim = bool(published)
+    minimum = level == "B4" and not has_verified_claim
+    report = _report(
+        prepared, model, checked, published, unverified=unverified,
+        coverage=coverage, minimum=minimum, level=level,
+    )
     return {
         "model": model,
         "verification": checked,
         "published_claims": published,
+        "unverified_model_claims": unverified,
         "coverage": coverage,
         "report": report,
         "minimum": minimum,
@@ -121,6 +147,8 @@ def write_run(db, llm, prepared: dict, out: Path, *, level: str = "B4", claim_mo
         "claims": len(result["model"].get("claims") or []),
         "verified": len(result["verification"].get("verified") or []),
         "rejected": len(result["verification"].get("rejected") or []),
+        "published_verified": len(result["published_claims"]),
+        "unverified_raw_claims": len(result["unverified_model_claims"]),
         "code_sha256": manifest["code_sha256"],
     }
     (out / "trace.json").write_text(json.dumps(trace, indent=2), encoding="utf-8")
@@ -180,20 +208,31 @@ def _git_state(cwd: Path) -> tuple[str, str]:
         return "unknown", "unknown"
 
 
-def _coverage_summary(selection: dict, timeline: list[dict], exposed: list[dict], published: list[dict]) -> dict:
+def _coverage_summary(selection: dict, timeline: list[dict], exposed: list[dict],
+                      claims: list[dict], *, lineage: dict[str, list[str]] | None = None) -> dict:
     selected_mod = _count_event_modalities(timeline)
     selected_roles = _count_event_roles(timeline)
     exposed_mod = _count_card_modalities(exposed)
     exposed_roles = _count_event_roles(exposed)
-    timeline_by_ev = {}
+    ev_to_mod: dict[str, str] = {}
+    ev_to_fact: dict[str, str] = {}
     for event in timeline:
-        for ev_id in event.get("evidence_ids") or []:
-            timeline_by_ev[ev_id] = (event.get("source") or {}).get("modality") or event.get("modality")
-    cited_mod: dict[str, int] = {}
-    for claim in published:
+        tid = event["timeline_id"]
+        mod = (event.get("source") or {}).get("modality") or event.get("modality") or "unknown"
+        ids = (lineage or {}).get(tid) or event.get("evidence_ids") or []
+        for ev_id in ids:
+            ev_to_mod[ev_id] = mod
+            ev_to_fact[ev_id] = tid
+    mention_mod: dict[str, int] = {}
+    unique_ids_by_mod: dict[str, set[str]] = {}
+    unique_facts_by_mod: dict[str, set[str]] = {}
+    for claim in claims:
         for ev_id in claim.get("evidence_ids") or []:
-            mod = timeline_by_ev.get(ev_id, "unknown")
-            cited_mod[mod] = cited_mod.get(mod, 0) + 1
+            mod = ev_to_mod.get(ev_id, "unknown")
+            mention_mod[mod] = mention_mod.get(mod, 0) + 1
+            unique_ids_by_mod.setdefault(mod, set()).add(ev_id)
+            if ev_id in ev_to_fact:
+                unique_facts_by_mod.setdefault(mod, set()).add(ev_to_fact[ev_id])
     return {
         "available_by_modality": selection.get("available_by_modality") or {},
         "available_by_kind": selection.get("available_by_kind") or {},
@@ -201,7 +240,10 @@ def _coverage_summary(selection: dict, timeline: list[dict], exposed: list[dict]
         "selected_by_role": selected_roles,
         "exposed_by_modality": exposed_mod,
         "exposed_by_role": exposed_roles,
-        "cited_by_modality": cited_mod,
+        "cited_unique_evidence_by_modality": {k: len(v) for k, v in unique_ids_by_mod.items()},
+        "cited_unique_facts_by_modality": {k: len(v) for k, v in unique_facts_by_mod.items()},
+        "cited_mentions_by_modality": mention_mod,
+        "cited_by_modality": {k: len(v) for k, v in unique_ids_by_mod.items()},
     }
 
 
@@ -229,7 +271,8 @@ def _count_event_roles(events: list[dict]) -> dict[str, int]:
     return counts
 
 
-def _report(prepared, model, checked, published, *, coverage: dict, minimum: bool, level: str) -> dict:
+def _report(prepared, model, checked, published, *, unverified: list[dict], coverage: dict,
+            minimum: bool, level: str) -> dict:
     observations = [{
         "timeline_id": event["timeline_id"],
         "time": event["time"],
@@ -244,25 +287,35 @@ def _report(prepared, model, checked, published, *, coverage: dict, minimum: boo
         relation for relation in prepared["relations"]
         if relation.get("claim_level") == "observed_fact" and relation.get("verification_status") == "supported"
     ]
-    text = _minimum_text(observations, confirmed) if minimum or not published else _claim_text(published)
+    confirmed_inferred = [
+        claim for claim in published
+        if claim.get("canonical_origin") == "inferred"
+        and claim.get("canonical_claim_level") == "supported_inference"
+        and claim.get("canonical_status") == "supported"
+    ]
+    if level == "B4":
+        text = _minimum_text(observations, confirmed) if minimum or not published else _verified_claim_text(published)
+    else:
+        text = _unverified_claim_text(unverified) if unverified else "No model claims were emitted."
     return {
         "level": level,
         "claim_mode": model.get("claim_mode"),
+        "verified_mode": level == "B4",
         "incident_start": prepared["incident_start"],
         "incident_end": prepared["incident_end"],
         "observations": observations,
         "confirmed_record_links": confirmed,
+        "confirmed_inferred_relations": confirmed_inferred,
         "published_claims": published,
+        "unverified_model_claims": unverified,
         "rejected_claim_count": len(checked.get("rejected") or []),
         "rejected_claims_audit_file": "rejected_claims.json",
         "model_abstained": model.get("abstain"),
         "partial_output": bool(model.get("partial_output")),
-        "minimum_report": minimum or not published,
+        "minimum_report": minimum,
         "coverage": coverage,
         "text": text,
-        "no_confirmed_inferred_relation": not any(
-            claim.get("claim_level") == "supported_inference" for claim in published
-        ),
+        "no_confirmed_inferred_relation": len(confirmed_inferred) == 0,
     }
 
 
@@ -284,15 +337,22 @@ def _minimum_text(observations, confirmed) -> str:
     return "\n".join(lines)
 
 
-def _claim_text(claims: list[dict]) -> str:
+def _verified_claim_text(claims: list[dict]) -> str:
     lines = ["Verified claims:"]
     for claim in claims:
         rendered = claim.get("rendered_text") or claim.get("verified_prose")
         if rendered:
             lines.append(f"- {rendered}")
-        else:
-            ids = ", ".join(str(item) for item in (claim.get("evidence_ids") or [])[:4])
-            lines.append(f"- [unverified] {claim.get('statement')} ({ids}).")
+    return "\n".join(lines)
+
+
+def _unverified_claim_text(claims: list[dict]) -> str:
+    lines = ["Unverified raw model claims (baseline output, not checked by verifier):"]
+    for claim in claims:
+        anchor = claim.get("fact_id") or claim.get("edge_id") or claim.get("statement") or claim.get("claim_type")
+        ids = ", ".join(str(item) for item in (claim.get("evidence_ids") or [])[:4])
+        suffix = f" ({ids})" if ids else ""
+        lines.append(f"- [unverified] {anchor} level={claim.get('claim_level')}{suffix}.")
     return "\n".join(lines)
 
 

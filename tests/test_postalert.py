@@ -327,3 +327,100 @@ def test_public_report_does_not_include_rejected_claim_text(tmp_path):
     rejected_audit = (out / "rejected_claims.json").read_text()
     assert "HALLUCINATED_STORAGE_SOC_100" not in report_md
     assert "HALLUCINATED_STORAGE_SOC_100" in rejected_audit
+
+
+def test_observed_edge_upgraded_to_supported_inference_is_rejected(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    comm = next(r for r in prepared["relations"] if r["relation_type"] == "communication")
+    upgraded = json.dumps({"abstain": False, "hypotheses": [], "claims": [{
+        "claim_type": "relation_claim",
+        "edge_id": comm["edge_id"],
+        "relation_type": "communication",
+        "claim_level": "supported_inference",
+    }]})
+    result = run_explanation(db, Scripted(upgraded), prepared, level="B4", claim_mode="typed_refs")
+    assert result["published_claims"] == []
+    assert "observed_link_cannot_be_upgraded_to_inference" in result["verification"]["rejected"][0]["reasons"]
+    assert result["report"]["no_confirmed_inferred_relation"] is True
+    assert result["report"]["confirmed_inferred_relations"] == []
+
+
+def test_canonical_fact_and_edge_binding_rejects_mismatched_fields(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    comm = next(r for r in prepared["relations"] if r["relation_type"] == "communication")
+    tl_first = prepared["timeline"][0]
+    tl_other = next(e for e in prepared["timeline"] if e["timeline_id"] != tl_first["timeline_id"])
+    counterexamples = [
+        {
+            "claim_type": "relation_claim",
+            "edge_id": comm["edge_id"],
+            "relation_type": "firmware_installation",
+            "claim_level": "observed_fact",
+        },
+        {
+            "claim_type": "relation_claim",
+            "edge_id": comm["edge_id"],
+            "relation_type": "communication",
+            "source_entity": "bus.0:voltage",
+            "target_entity": "sgen.0:active_power",
+            "evidence_ids": ["EV-eeeeeeeeeeeeeeee", "EV-ffffffffffffffff"],
+            "claim_level": "observed_fact",
+        },
+        {
+            "claim_type": "observation_claim",
+            "fact_id": tl_first["timeline_id"],
+            "entity": tl_other["entity"],
+            "time": tl_other["time"],
+            "evidence_ids": tl_other["evidence_ids"],
+            "claim_level": "observed_fact",
+        },
+    ]
+    checked = verify_claims(db, counterexamples, prepared["relations"], prepared["timeline"], lineage=prepared["lineage"])
+    assert checked["verified"] == []
+    assert len(checked["rejected"]) == 3
+    all_reasons = {r for item in checked["rejected"] for r in item["reasons"]}
+    assert "edge_relation_type_mismatch" in all_reasons
+    assert "edge_endpoint_mismatch" in all_reasons
+    assert "fact_id_entity_mismatch" in all_reasons or "fact_id_evidence_mismatch" in all_reasons
+
+
+def test_baseline_reports_do_not_label_raw_claims_as_verified(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    tl_first = prepared["timeline"][0]
+    raw_claim = json.dumps({"abstain": False, "hypotheses": [], "claims": [{
+        "claim_type": "observation_claim",
+        "fact_id": tl_first["timeline_id"],
+        "claim_level": "observed_fact",
+    }]})
+    b1 = run_explanation(db, Scripted(raw_claim), prepared, level="B1", claim_mode="typed_refs")
+    assert b1["published_claims"] == []
+    assert len(b1["unverified_model_claims"]) == 1
+    assert "Verified claims:" not in b1["report"]["text"]
+    assert "Unverified raw model claims" in b1["report"]["text"]
+
+
+def test_absence_claim_rejects_range_outside_indexed_window(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    outside = {
+        "claim_type": "absence_claim",
+        "absent_kind": "arp_packet",
+        "start_time": 900.0,
+        "end_time": 950.0,
+        "claim_level": "observed_fact",
+    }
+    inside = {
+        "claim_type": "absence_claim",
+        "absent_kind": "arp_packet",
+        "start_time": 1000.0,
+        "end_time": 1010.0,
+        "claim_level": "observed_fact",
+    }
+    checked = verify_claims(db, [outside, inside], prepared["relations"], prepared["timeline"], lineage=prepared["lineage"])
+    assert len(checked["verified"]) == 1
+    assert len(checked["rejected"]) == 1
+    assert "absence_range_outside_indexed_incident_window" in checked["rejected"][0]["reasons"]
+

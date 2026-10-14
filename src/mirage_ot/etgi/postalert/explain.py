@@ -24,9 +24,10 @@ If the records are not enough, set abstain to true and leave claims empty.
 SYSTEM_TYPED_REFS = """You explain one supplied time window from the JSON only.
 Return one JSON object with keys abstain, hypotheses, and claims.
 Do not rewrite timestamps, IP addresses, CA/IOA strings, or measurement numbers.
-Instead, reference the supplied anchors:
+Instead, reference the supplied anchors and keep their canonical claim_level:
 - For a single timeline fact: {"claim_type": "observation_claim" or "measurement_claim", "fact_id": "TL...", "claim_level": "observed_fact"}
-- For a candidate relation: {"claim_type": "relation_claim", "edge_id": "R...", "relation_type": "...", "claim_level": "observed_fact" or "temporal_cooccurrence" or "supported_inference" or "unresolved" or "disputed"}
+- For a candidate relation: {"claim_type": "relation_claim", "edge_id": "R...", "relation_type": "<exact edge relation_type>", "claim_level": "<exact edge claim_level>"}
+Do not upgrade an observed_fact record link (communication, same_device, shared_source) or a temporal_cooccurrence to supported_inference.
 Keep at most 6 claims. Time proximity is not a supported inference. Do not state a cause. Do not name an attack class.
 If the records are not enough, set abstain to true and leave claims empty.
 """
@@ -119,15 +120,18 @@ def expose_timeline(timeline: list[dict], *, limit: int = 10) -> list[dict]:
 
 
 def expose_relations(relations: list[dict], exposed_timeline: list[dict], *, limit: int = 8) -> list[dict]:
+    exposed_entities = {event.get("entity") for event in exposed_timeline if event.get("entity")}
     exposed_ids = {evidence_id for event in exposed_timeline for evidence_id in event.get("evidence_ids") or []}
-    prioritized = sorted(
-        relations,
-        key=lambda rel: (
-            0 if set(rel.get("evidence_ids") or []) & exposed_ids else 1,
-            0 if rel.get("claim_level") == "observed_fact" else 1,
-            rel.get("edge_id") or "",
-        ),
-    )
+
+    def _rank(rel: dict) -> tuple:
+        both_endpoints = int(
+            rel.get("source_entity") in exposed_entities and rel.get("target_entity") in exposed_entities
+        )
+        any_id = int(bool(set(rel.get("evidence_ids") or []) & exposed_ids))
+        is_supported = int(rel.get("claim_level") == "observed_fact" and rel.get("verification_status") == "supported")
+        return (-both_endpoints, -is_supported, -any_id, rel.get("edge_id") or "")
+
+    prioritized = sorted(relations, key=_rank)
     return prioritized[:limit]
 
 

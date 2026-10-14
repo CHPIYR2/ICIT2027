@@ -4,6 +4,15 @@ Four claim kinds are accepted: observation_claim, measurement_claim,
 relation_claim, and absence_claim. Free prose in `statement` is not trusted as
 a verified fact. When a claim passes, `rendered_text` is built from the bound
 rows and endpoints.
+
+Canonical anchor binding:
+- When `fact_id` (`timeline_id`) or `edge_id` is supplied, it acts as the
+  primary key into the trusted timeline or relation table.
+- Any explicitly supplied field (`entity`, `source_entity`, `target_entity`,
+  `relation_type`, `claim_level`, `evidence_ids`) must match the canonical
+  anchor and its lineage; conflicting fields or level upgrades (such as
+  promoting an `observed_fact` record link to `supported_inference`) are
+  rejected.
 """
 from __future__ import annotations
 
@@ -12,18 +21,20 @@ _CAUSAL = (" cause", " caused", " because of the attack", " triggered by ")
 _CLAIM_KINDS = ("observation_claim", "measurement_claim", "relation_claim", "absence_claim")
 
 
-def verify_claims(db, claims: list[dict], relations: list[dict], timeline: list[dict] | None = None) -> dict:
+def verify_claims(db, claims: list[dict], relations: list[dict], timeline: list[dict] | None = None,
+                  lineage: dict[str, list[str]] | None = None) -> dict:
     verified = []
     rejected = []
     timeline_by_id = {event["timeline_id"]: event for event in (timeline or []) if event.get("timeline_id")}
     edge_by_id = {relation["edge_id"]: relation for relation in relations if relation.get("edge_id")}
+    lineage_map = _build_lineage_map(timeline_by_id, lineage)
     for index, raw in enumerate(claims):
         if not isinstance(raw, dict):
             rejected.append({"claim_index": index, "reasons": ["claim_not_an_object"]})
             continue
-        claim = _normalize(raw, timeline_by_id, edge_by_id)
-        reasons, rendered = _check(db, claim, relations, timeline_by_id, edge_by_id)
-        record = {"claim_index": index, **claim, "reasons": reasons}
+        claim = _normalize(raw, timeline_by_id, edge_by_id, lineage_map)
+        reasons, rendered, meta = _check(db, claim, raw, relations, timeline_by_id, edge_by_id, lineage_map)
+        record = {"claim_index": index, **claim, **meta, "reasons": reasons}
         if reasons:
             rejected.append(record)
         else:
@@ -35,16 +46,28 @@ def verify_claims(db, claims: list[dict], relations: list[dict], timeline: list[
     return {"verified": verified, "rejected": rejected}
 
 
-def _normalize(raw: dict, timeline_by_id: dict, edge_by_id: dict) -> dict:
+def _build_lineage_map(timeline_by_id: dict[str, dict], lineage: dict[str, list[str]] | None) -> dict[str, set[str]]:
+    out: dict[str, set[str]] = {}
+    for tid, event in timeline_by_id.items():
+        ids = set(event.get("evidence_ids") or []) | set(event.get("lineage") or [])
+        if lineage and tid in lineage:
+            ids |= set(lineage[tid] or [])
+        out[tid] = ids
+    return out
+
+
+def _normalize(raw: dict, timeline_by_id: dict, edge_by_id: dict, lineage_map: dict[str, set[str]]) -> dict:
     claim = dict(raw)
     if claim.get("claim_type") not in _CLAIM_KINDS:
         claim["claim_type"] = _infer_kind(claim, timeline_by_id, edge_by_id)
     fact_id = claim.get("fact_id") or claim.get("timeline_id")
     if fact_id in timeline_by_id:
         event = timeline_by_id[fact_id]
-        claim.setdefault("evidence_ids", list(event.get("evidence_ids") or []))
-        claim.setdefault("entity", event.get("entity"))
-        if claim.get("time") is None and claim.get("start_time") is None:
+        if not claim.get("evidence_ids"):
+            claim["evidence_ids"] = list(event.get("evidence_ids") or [])
+        if not claim.get("entity"):
+            claim["entity"] = event.get("entity")
+        if claim.get("time") is None and claim.get("start_time") is None and claim.get("end_time") is None:
             if event.get("time") == event.get("time_end"):
                 claim["time"] = event.get("time")
             else:
@@ -55,11 +78,16 @@ def _normalize(raw: dict, timeline_by_id: dict, edge_by_id: dict) -> dict:
     edge_id = claim.get("edge_id")
     if edge_id in edge_by_id:
         edge = edge_by_id[edge_id]
-        claim.setdefault("relation_type", edge.get("relation_type"))
-        claim.setdefault("source_entity", edge.get("source_entity"))
-        claim.setdefault("target_entity", edge.get("target_entity"))
-        claim.setdefault("evidence_ids", list(edge.get("evidence_ids") or []))
-        claim.setdefault("claim_level", edge.get("claim_level"))
+        if not claim.get("relation_type"):
+            claim["relation_type"] = edge.get("relation_type")
+        if not claim.get("source_entity"):
+            claim["source_entity"] = edge.get("source_entity")
+        if not claim.get("target_entity"):
+            claim["target_entity"] = edge.get("target_entity")
+        if not claim.get("evidence_ids"):
+            claim["evidence_ids"] = list(edge.get("evidence_ids") or [])
+        if not claim.get("claim_level"):
+            claim["claim_level"] = edge.get("claim_level")
     time_value = claim.get("time")
     if isinstance(time_value, dict):
         claim.setdefault("start_time", time_value.get("start"))
@@ -83,7 +111,8 @@ def _infer_kind(claim: dict, timeline_by_id: dict, edge_by_id: dict) -> str:
     return "observation_claim"
 
 
-def _check(db, claim: dict, relations: list[dict], timeline_by_id: dict, edge_by_id: dict) -> tuple[list[str], str]:
+def _check(db, claim: dict, raw: dict, relations: list[dict], timeline_by_id: dict,
+           edge_by_id: dict, lineage_map: dict[str, set[str]]) -> tuple[list[str], str, dict]:
     reasons = []
     statement = str(claim.get("statement") or "").lower()
     if any(token in f" {statement} " for token in _CAUSAL):
@@ -93,36 +122,78 @@ def _check(db, claim: dict, relations: list[dict], timeline_by_id: dict, edge_by
         reasons.append("unknown_claim_level")
     kind = claim.get("claim_type")
     if kind == "absence_claim":
-        return _check_absence(db, claim, reasons)
+        out_reasons, text = _check_absence(db, claim, reasons)
+        return out_reasons, text, {"canonical_claim_level": "observed_fact", "canonical_origin": "observed"}
     ids = [str(item) for item in claim.get("evidence_ids") or [] if str(item).startswith("EV-")]
     if not ids:
         reasons.append("missing_evidence_ids")
-        return reasons, ""
+        return reasons, "", {}
     rows = db.get(ids)["rows"]
     found = {row["evidence_id"]: row for row in rows}
     missing = [item for item in ids if item not in found]
     if missing:
         reasons.append("evidence_id_not_in_database:" + ",".join(missing[:6]))
     if not rows:
-        return reasons, ""
+        return reasons, "", {}
     if kind == "observation_claim":
-        return _check_observation(claim, rows, timeline_by_id, reasons)
+        out_reasons, text = _check_observation(claim, raw, rows, timeline_by_id, lineage_map, reasons)
+        return out_reasons, text, {"canonical_claim_level": "observed_fact", "canonical_origin": "observed"}
     if kind == "measurement_claim":
-        return _check_measurement(claim, rows, timeline_by_id, reasons)
+        out_reasons, text = _check_measurement(claim, raw, rows, timeline_by_id, lineage_map, reasons)
+        return out_reasons, text, {"canonical_claim_level": "observed_fact", "canonical_origin": "observed"}
     if kind == "relation_claim":
-        return _check_relation(claim, rows, relations, edge_by_id, reasons)
+        return _check_relation(claim, raw, rows, relations, timeline_by_id, edge_by_id, lineage_map, reasons)
     reasons.append("unknown_claim_type")
-    return reasons, ""
+    return reasons, "", {}
 
 
-def _check_observation(claim: dict, rows: list[dict], timeline_by_id: dict, reasons: list[str]) -> tuple[list[str], str]:
+def _check_fact_anchor(raw: dict, claim: dict, timeline_by_id: dict, lineage_map: dict[str, set[str]],
+                       reasons: list[str]) -> dict | None:
+    fact_id = claim.get("fact_id") or claim.get("timeline_id")
+    if not fact_id:
+        return None
+    if fact_id not in timeline_by_id:
+        reasons.append("unknown_fact_id")
+        return None
+    event = timeline_by_id[fact_id]
+    if raw.get("entity") and raw.get("entity") not in (event.get("entity"), event.get("ca_ioa")):
+        reasons.append("fact_id_entity_mismatch")
+    allowed = lineage_map.get(fact_id) or set(event.get("evidence_ids") or [])
+    if raw.get("evidence_ids"):
+        supplied = {str(item) for item in raw["evidence_ids"] if str(item).startswith("EV-")}
+        if not supplied or not (supplied <= allowed):
+            reasons.append("fact_id_evidence_mismatch")
+    if raw.get("time") is not None or raw.get("start_time") is not None or raw.get("end_time") is not None:
+        if not _event_time_matches_claim(claim, event):
+            reasons.append("fact_id_time_mismatch")
+    if raw.get("claim_level") and raw.get("claim_level") not in ("observed_fact", "unresolved"):
+        reasons.append("fact_claim_level_mismatch")
+    return event
+
+
+def _event_time_matches_claim(claim: dict, event: dict) -> bool:
+    if not _time_parseable(claim):
+        return False
+    low = float(event["time"])
+    high = float(event.get("time_end", event["time"]))
+    if claim.get("time") is not None:
+        stamp = float(claim["time"])
+        return low - 1.0 <= stamp <= high + 1.0
+    start = low if claim.get("start_time") is None else float(claim["start_time"])
+    end = high if claim.get("end_time") is None else float(claim["end_time"])
+    if end < start:
+        return False
+    return start <= high + 1.0 and end >= low - 1.0
+
+
+def _check_observation(claim: dict, raw: dict, rows: list[dict], timeline_by_id: dict,
+                       lineage_map: dict[str, set[str]], reasons: list[str]) -> tuple[list[str], str]:
     fact_id = claim.get("fact_id") or claim.get("timeline_id")
     entity = claim.get("entity")
     if not fact_id and not entity:
         reasons.append("missing_observation_anchor")
         return reasons, ""
-    if fact_id and fact_id not in timeline_by_id:
-        reasons.append("unknown_fact_id")
+    _check_fact_anchor(raw, claim, timeline_by_id, lineage_map, reasons)
     value = claim.get("value")
     if value is not None and not isinstance(value, bool):
         if not any(row["kind"] == "tcp_packet" and _same_number(row.get("value"), value) for row in rows):
@@ -140,10 +211,9 @@ def _check_observation(claim: dict, rows: list[dict], timeline_by_id: dict, reas
     return [], f"Observed {first['kind']} on {first['entity']} at {span} ({ids})."
 
 
-def _check_measurement(claim: dict, rows: list[dict], timeline_by_id: dict, reasons: list[str]) -> tuple[list[str], str]:
-    fact_id = claim.get("fact_id") or claim.get("timeline_id")
-    if fact_id and fact_id not in timeline_by_id:
-        reasons.append("unknown_fact_id")
+def _check_measurement(claim: dict, raw: dict, rows: list[dict], timeline_by_id: dict,
+                       lineage_map: dict[str, set[str]], reasons: list[str]) -> tuple[list[str], str]:
+    _check_fact_anchor(raw, claim, timeline_by_id, lineage_map, reasons)
     entity = claim.get("entity")
     value = claim.get("value")
     if not entity:
@@ -191,15 +261,34 @@ def _check_measurement(claim: dict, rows: list[dict], timeline_by_id: dict, reas
     )
 
 
-def _check_relation(claim: dict, rows: list[dict], relations: list[dict], edge_by_id: dict,
-                    reasons: list[str]) -> tuple[list[str], str]:
-    edge = edge_by_id.get(claim.get("edge_id"))
-    source = claim.get("source_entity") or (edge or {}).get("source_entity")
-    target = claim.get("target_entity") or (edge or {}).get("target_entity")
-    rel_type = claim.get("relation_type") or (edge or {}).get("relation_type")
+def _check_relation(claim: dict, raw: dict, rows: list[dict], relations: list[dict],
+                    timeline_by_id: dict, edge_by_id: dict, lineage_map: dict[str, set[str]],
+                    reasons: list[str]) -> tuple[list[str], str, dict]:
+    edge_id = claim.get("edge_id")
+    edge = edge_by_id.get(edge_id) if edge_id else None
+    if edge_id and edge is None:
+        reasons.append("unknown_edge_id")
+        return reasons, "", {}
+    if edge is not None:
+        if raw.get("relation_type") and raw.get("relation_type") != edge.get("relation_type"):
+            reasons.append("edge_relation_type_mismatch")
+        if raw.get("source_entity") or raw.get("target_entity"):
+            claimed_pair = {raw.get("source_entity") or edge.get("source_entity"),
+                            raw.get("target_entity") or edge.get("target_entity")}
+            canonical_pair = {edge.get("source_entity"), edge.get("target_entity")}
+            if claimed_pair != canonical_pair:
+                reasons.append("edge_endpoint_mismatch")
+        allowed_ids = _edge_allowed_ids(edge, timeline_by_id, lineage_map)
+        if raw.get("evidence_ids"):
+            supplied = {str(item) for item in raw["evidence_ids"] if str(item).startswith("EV-")}
+            if not supplied or not (supplied <= allowed_ids):
+                reasons.append("edge_evidence_not_in_edge_provenance")
+    source = edge.get("source_entity") if edge else claim.get("source_entity")
+    target = edge.get("target_entity") if edge else claim.get("target_entity")
+    rel_type = edge.get("relation_type") if edge else claim.get("relation_type")
     if not source or not target or not rel_type:
         reasons.append("relation_missing_endpoints_or_type")
-        return reasons, ""
+        return reasons, "", {}
     if edge is None:
         edge = next((
             item for item in relations
@@ -208,31 +297,46 @@ def _check_relation(claim: dict, rows: list[dict], relations: list[dict], edge_b
         ), None)
     if edge is None:
         reasons.append("relation_not_supported_by_timeline")
-        return reasons, ""
+        return reasons, "", {}
     left_rows = [row for row in rows if _entity_matches(row, source)]
     right_rows = [row for row in rows if _entity_matches(row, target)]
     if not left_rows or not right_rows:
         reasons.append("relation_missing_endpoint_evidence")
-        return reasons, ""
+        return reasons, "", {}
     if _same_underlying_source(left_rows, right_rows) and rel_type not in ("shared_source", "same_frame"):
         reasons.append("same_source_counted_as_independent_evidence")
-    level = claim.get("claim_level") or edge.get("claim_level")
     edge_level = edge.get("claim_level")
-    if level == "supported_inference" and edge_level == "temporal_cooccurrence":
+    claimed_level = raw.get("claim_level") or claim.get("claim_level") or edge_level
+    if claimed_level == "supported_inference" and edge_level == "temporal_cooccurrence":
         reasons.append("time_proximity_is_not_supported_inference")
-    if level == "observed_fact" and edge_level != "observed_fact":
-        reasons.append("claim_level_exceeds_relation_check")
-    if level == "supported_inference" and edge_level not in ("observed_fact", "supported_inference"):
-        reasons.append("claim_level_exceeds_relation_check")
-    if edge.get("status") == "disputed" and level in ("observed_fact", "supported_inference"):
+    elif claimed_level == "supported_inference" and edge_level == "observed_fact":
+        reasons.append("observed_link_cannot_be_upgraded_to_inference")
+    elif claimed_level != edge_level:
+        reasons.append("claim_level_does_not_match_canonical_edge")
+    if edge.get("status") == "disputed" and claimed_level in ("observed_fact", "supported_inference"):
         reasons.append("relation_is_disputed")
+    canonical_origin = "inferred" if edge_level in ("supported_inference", "temporal_cooccurrence") else "observed"
+    meta = {
+        "canonical_claim_level": edge_level,
+        "canonical_origin": canonical_origin,
+        "canonical_status": edge.get("verification_status") or edge.get("status"),
+    }
     if reasons:
-        return reasons, ""
+        return reasons, "", meta
     ids = ", ".join(dict.fromkeys([left_rows[0]["evidence_id"], right_rows[0]["evidence_id"]]))
     return [], (
-        f"Relation {rel_type} between {source} and {target} has claim_level={edge.get('claim_level')} "
+        f"Relation {rel_type} between {source} and {target} has claim_level={edge_level} "
         f"and status={edge.get('status')} ({ids}). Causal status: not_established."
-    )
+    ), meta
+
+
+def _edge_allowed_ids(edge: dict, timeline_by_id: dict, lineage_map: dict[str, set[str]]) -> set[str]:
+    allowed = set(edge.get("evidence_ids") or [])
+    endpoints = {edge.get("source_entity"), edge.get("target_entity")}
+    for tid, event in timeline_by_id.items():
+        if event.get("entity") in endpoints:
+            allowed |= lineage_map.get(tid, set(event.get("evidence_ids") or []))
+    return allowed
 
 
 def _check_absence(db, claim: dict, reasons: list[str]) -> tuple[list[str], str]:
@@ -240,8 +344,21 @@ def _check_absence(db, claim: dict, reasons: list[str]) -> tuple[list[str], str]
     if kind not in ("arp_packet", "iec104_control"):
         reasons.append("unsupported_absence_claim")
         return reasons, ""
-    start = db.incident_start if claim.get("start_time") is None else float(claim["start_time"])
-    end = db.incident_end if claim.get("end_time") is None else float(claim["end_time"])
+    if db.incident_start is None or db.incident_end is None:
+        reasons.append("absence_window_not_indexed")
+        return reasons, ""
+    start = float(db.incident_start) if claim.get("start_time") is None else float(claim["start_time"])
+    end = float(db.incident_end) if claim.get("end_time") is None else float(claim["end_time"])
+    if end <= start or start < float(db.incident_start) - 1e-6 or end > float(db.incident_end) + 1e-6:
+        reasons.append("absence_range_outside_indexed_incident_window")
+        return reasons, ""
+    total_rows = db.conn.execute(
+        "SELECT COUNT(*) FROM evidence WHERE timestamp >= ? AND timestamp < ?",
+        ( float(db.incident_start), float(db.incident_end) ),
+    ).fetchone()[0]
+    if total_rows == 0:
+        reasons.append("absence_window_has_no_indexed_observations")
+        return reasons, ""
     if kind == "arp_packet":
         count = db.conn.execute(
             "SELECT COUNT(*) FROM evidence WHERE kind = 'arp_packet' AND timestamp >= ? AND timestamp < ?",
