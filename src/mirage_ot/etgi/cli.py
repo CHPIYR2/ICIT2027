@@ -51,6 +51,14 @@ def main(argv=None) -> None:
     suite.add_argument("--max-llm-calls", type=int)
     suite.add_argument("--necessity-repeats", type=int)
     suite.add_argument("--max-necessity-relations", type=int)
+    post = commands.add_parser("postalert")
+    post.add_argument("--db", type=Path, required=True)
+    post.add_argument("--out", type=Path, required=True)
+    post.add_argument("--model", default="qwen3.5:9b-q4_K_M")
+    post.add_argument("--endpoint", default="http://127.0.0.1:11434")
+    post.add_argument("--methods", default="B4")
+    post.add_argument("--num-predict", type=int, default=512)
+    post.add_argument("--num-ctx", type=int, default=8192)
     args = parser.parse_args(argv)
     if args.command == "index":
         meta = index_window(
@@ -59,6 +67,9 @@ def main(argv=None) -> None:
         )
         print(json.dumps({"out": str(args.out), "counts": meta["counts"], "cross_check": meta["cross_check"],
                           "limitations": meta["limitations"]}, indent=2))
+        return
+    if args.command == "postalert":
+        _postalert(args)
         return
     conn, meta = open_indexed(args.db)
     db = EvidenceDB(conn, modality=args.modality, incident_start=meta["incident_start"], incident_end=meta["incident_end"])
@@ -97,6 +108,29 @@ def main(argv=None) -> None:
                           "unsupported_relation_rate": summary["graph"]["unsupported_relation_rate"]}, indent=2),
               flush=True)
     (args.out / "suite.json").write_text(json.dumps(summaries, indent=2), encoding="utf-8")
+
+
+def _postalert(args) -> None:
+    from .postalert.evaluate import gold_facts, score_run
+    from .postalert.pipeline import prepare, write_run
+    conn, meta = open_indexed(args.db)
+    start = float(meta["incident_start"])
+    end = float(meta["incident_end"])
+    db = EvidenceDB(conn, incident_start=start, incident_end=end)
+    background_start = start - float(meta.get("context_seconds") or 0)
+    prepared = prepare(db, start, end, background_start=background_start, background_end=start)
+    gold = gold_facts(db, start, end)
+    llm = OllamaClient(args.model, endpoint=args.endpoint)
+    rows = []
+    for level in [part.strip() for part in args.methods.split(",") if part.strip()]:
+        result = write_run(
+            db, llm, prepared, args.out / level, level=level,
+            num_predict=args.num_predict, num_ctx=args.num_ctx, seed=1,
+        )
+        scored = score_run(prepared, result, gold)
+        rows.append({"level": level, **scored, **result["trace"]})
+        print(json.dumps(rows[-1], default=str), flush=True)
+    (args.out / "comparison.json").write_text(json.dumps({"gold": gold, "rows": rows}, indent=2, default=str), encoding="utf-8")
 
 
 def _apply_budget(flags: Flags, args) -> None:
