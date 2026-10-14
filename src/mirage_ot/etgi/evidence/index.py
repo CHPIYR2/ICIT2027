@@ -327,6 +327,13 @@ def _index_iec104(conn, archive, members, by_ioa, packet_index, start, end, coun
                         "type_id": obj["type_id"],
                         "alignment": obj["alignment"],
                         "apci_type": obj["apci_type"],
+                        "apci_tx": obj.get("apci_tx"),
+                        "apci_rx": obj.get("apci_rx"),
+                        "cot_negative": obj.get("cot_negative"),
+                        "cot_test": obj.get("cot_test"),
+                        "sq": obj.get("sq"),
+                        "select_execute": obj.get("select_execute"),
+                        "quality_invalid": obj.get("quality_invalid"),
                         "packet_match": "unique" if parent else "unmatched_or_ambiguous",
                     },
                 })

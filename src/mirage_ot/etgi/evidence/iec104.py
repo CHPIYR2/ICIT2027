@@ -77,11 +77,30 @@ def slice_pcap_stream(handle, dest: Path, start: float, end: float) -> int:
 
 
 _FIELDS = [
-    "frame.time_epoch", "ip.src", "ip.dst", "tcp.srcport", "tcp.dstport",
-    "iec60870_104.type", "iec60870_asdu.typeid", "iec60870_asdu.addr",
-    "iec60870_asdu.causetx", "iec60870_asdu.ioa", "iec60870_asdu.float",
-    "iec60870_asdu.normval", "iec60870_asdu.scalval", "iec60870_asdu.siq.spi",
+    "frame.time_epoch",
+    "ip.src",
+    "ip.dst",
+    "tcp.srcport",
+    "tcp.dstport",
+    "iec60870_104.type",
+    "iec60870_104.tx",
+    "iec60870_104.rx",
+    "iec60870_asdu.typeid",
+    "iec60870_asdu.addr",
+    "iec60870_asdu.causetx",
+    "iec60870_asdu.nega",
+    "iec60870_asdu.test",
+    "iec60870_asdu.sq",
+    "iec60870_asdu.ioa",
+    "iec60870_asdu.float",
+    "iec60870_asdu.normval",
+    "iec60870_asdu.scalval",
+    "iec60870_asdu.siq.spi",
+    "iec60870_asdu.siq.iv",
+    "iec60870_asdu.qds.iv",
     "iec60870_asdu.sco.on",
+    "iec60870_asdu.sco.se",
+    "iec60870_asdu.qos.se",
 ]
 
 
@@ -116,6 +135,14 @@ def split_fields(row: dict) -> list[dict]:
     type_ids = _cells(row.get("iec60870_asdu.typeid"))
     causes = _cells(row.get("iec60870_asdu.causetx"))
     addresses = _cells(row.get("iec60870_asdu.addr"))
+    negas = _cells(row.get("iec60870_asdu.nega"))
+    tests = _cells(row.get("iec60870_asdu.test"))
+    sqs = _cells(row.get("iec60870_asdu.sq"))
+    siq_ivs = _cells(row.get("iec60870_asdu.siq.iv"))
+    qds_ivs = _cells(row.get("iec60870_asdu.qds.iv"))
+    sco_ses = _cells(row.get("iec60870_asdu.sco.se"))
+    qos_ses = _cells(row.get("iec60870_asdu.qos.se"))
+
     value_sets = {
         "float": _cells(row.get("iec60870_asdu.float")),
         "normval": _cells(row.get("iec60870_asdu.normval")),
@@ -124,12 +151,27 @@ def split_fields(row: dict) -> list[dict]:
         "sco": _cells(row.get("iec60870_asdu.sco.on")),
     }
     if not ioas:
-        return [_header(row, ioa=None, type_id=_first_int(type_ids), cause=_first(causes),
-                        address=_first(addresses), value=None, value_present=False,
-                        alignment="no_ioa")]
+        return [_header(
+            row, ioa=None, type_id=_first_int(type_ids), cause=_first(causes),
+            address=_first(addresses), value=None, value_present=False,
+            alignment="no_ioa", cot_negative=_bool(_first(negas)),
+            cot_test=_bool(_first(tests)), sq=_bool(_first(sqs)),
+            select_execute=None, quality_invalid=None,
+        )]
     objects = []
     for index, ioa in enumerate(ioas):
         type_id = _at_int(type_ids, index)
+        cot_neg = _bool(_at(negas, index))
+        cot_tst = _bool(_at(tests, index))
+        sq_flag = _bool(_at(sqs, index))
+        se_flag = _bool(_at(sco_ses, index))
+        if se_flag is None:
+            se_flag = _bool(_at(qos_ses, index))
+        se_mode = None if se_flag is None else ("select" if se_flag else "execute")
+        q_inv = _bool(_at(siq_ivs, index))
+        if q_inv is None:
+            q_inv = _bool(_at(qds_ivs, index))
+
         choices = []
         for name, cells in value_sets.items():
             if not cells:
@@ -143,19 +185,38 @@ def split_fields(row: dict) -> list[dict]:
                 row, ioa=ioa, type_id=type_id, cause=_at(causes, index),
                 address=_at(addresses, index), value=None, value_present=False,
                 alignment="identifier_without_aligned_value",
+                cot_negative=cot_neg, cot_test=cot_tst, sq=sq_flag,
+                select_execute=se_mode, quality_invalid=q_inv,
             ))
             continue
         name, text = choices[0]
-        number = _float(text)
+        number = _parse_value(name, text)
         objects.append(_header(
             row, ioa=ioa, type_id=type_id, cause=_at(causes, index),
             address=_at(addresses, index), value=number, value_present=number is not None,
             alignment=name if number is not None else "unparsed_value",
+            cot_negative=cot_neg, cot_test=cot_tst, sq=sq_flag,
+            select_execute=se_mode, quality_invalid=q_inv,
         ))
     return objects
 
 
-def _header(row, *, ioa, type_id, cause, address, value, value_present, alignment) -> dict:
+def _header(
+    row,
+    *,
+    ioa,
+    type_id,
+    cause,
+    address,
+    value,
+    value_present,
+    alignment,
+    cot_negative: bool | None = None,
+    cot_test: bool | None = None,
+    sq: bool | None = None,
+    select_execute: str | None = None,
+    quality_invalid: bool | None = None,
+) -> dict:
     ca = address
     ca_ioa = None
     if ca not in (None, "") and ioa not in (None, ""):
@@ -167,9 +228,16 @@ def _header(row, *, ioa, type_id, cause, address, value, value_present, alignmen
         "src_port": _int(row.get("tcp.srcport")),
         "dst_port": _int(row.get("tcp.dstport")),
         "apci_type": row.get("iec60870_104.type") or None,
+        "apci_tx": _int(_first(_cells(row.get("iec60870_104.tx")))),
+        "apci_rx": _int(_first(_cells(row.get("iec60870_104.rx")))),
         "type_id": type_id,
         "protocol_class": asdu_class(type_id),
         "cause": cause,
+        "cot_negative": cot_negative,
+        "cot_test": cot_test,
+        "sq": sq,
+        "select_execute": select_execute,
+        "quality_invalid": quality_invalid,
         "ca": None if ca in (None, "") else _int_text(ca),
         "ioa": None if ioa in (None, "") else _int_text(ioa),
         "ca_ioa": ca_ioa,
@@ -215,6 +283,28 @@ def _first_int(cells: list[str]) -> int | None:
 
 def _at_int(cells: list[str], index: int) -> int | None:
     return _int(_at(cells, index))
+
+
+def _bool(text) -> bool | None:
+    if text is None or text == "":
+        return None
+    low = str(text).strip().lower()
+    if low in ("true", "1", "0x01", "0x1", "yes"):
+        return True
+    if low in ("false", "0", "0x00", "0x0", "no"):
+        return False
+    return None
+
+
+def _parse_value(name: str, text: str | None) -> float | None:
+    num = _float(text)
+    if num is not None:
+        return num
+    if name in ("spi", "sco"):
+        b = _bool(text)
+        if b is not None:
+            return 1.0 if b else 0.0
+    return None
 
 
 def _float(text) -> float | None:

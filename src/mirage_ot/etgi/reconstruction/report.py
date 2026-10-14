@@ -1,14 +1,20 @@
-"""Phase 4: Evidence-Grounded Investigation Explanation & Report Renderer.
+"""Phase 4: Evidence-Grounded Investigation Explanation & Report Renderer (Reliability-Hardened).
 
-Uses Typed References and the Deterministic Verifier (`verify_claims`) over the
-reconstructed transactions, temporal event graph, and storylines.
-- The LLM selects structured anchors (`selected_transaction_ids`,
-  `selected_storyline_ids`, and typed `claims` referencing `fact_id` / `edge_id`).
-- The LLM never regenerates raw timestamps, IP addresses, CA/IOA strings, or
-  measurement numbers in public report prose.
-- Every prose line in `investigation_report.md` is rendered deterministically
-  from verified claims and trusted reconstruction records. Unconfirmed cross-entity
-  links are presented strictly as unresolved hypotheses.
+Key guarantees:
+1. Epistemic separation in report sections:
+   - `protocol_observation`: observed IEC-104 messages (`COT=6`, `COT=7`, `COT=3`),
+     with explicit `COT=7` P/N bit status (`accepted_by_rtu`,
+     `rejected_negative_confirmation`, or `confirmation_observed_acceptance_unknown`).
+   - `verified_state_or_measurement_transition`: ONLY transitions that passed the
+     pre/post baseline & target consistency gate (e.g., `sgen.6` and `sgen.10`).
+   - `state_report_observed_unverified_transition`: `COT=3` state reports whose
+     boolean value was undecoded or lacked a pre-command baseline (never listed
+     under confirmed state changes).
+   - `supported_noncausal_inference` vs. `candidate_unresolved_association`:
+     graph consistency-gate status is reported separately from LLM claim verification.
+2. Complete endpoint provenance in rendered prose:
+   - Every rendered step and cross-entity co-occurrence explicitly prints both
+     `src_ev=[...]` and `dst_ev=[...]`.
 """
 from __future__ import annotations
 import json
@@ -28,7 +34,7 @@ Return one JSON object with keys:
 Strict rules for claims:
 - For a single timeline fact: {"claim_type": "observation_claim" or "measurement_claim", "fact_id": "<exact fact_id>", "claim_level": "observed_fact"}
 - For a graph edge: {"claim_type": "relation_claim", "edge_id": "<exact edge_id>", "relation_type": "<exact edge relation_type>", "claim_level": "<exact edge claim_level>"}
-- Never upgrade an observed_fact or temporal_cooccurrence edge to supported_inference.
+- Never upgrade an observed_fact, temporal_cooccurrence, or unresolved edge to supported_inference.
 - Keep at most 8 claims. Do not state a physical cause or attack label.
 """
 
@@ -137,7 +143,6 @@ def build_investigation_report(
     rejected_claims = explanation["verification"].get("rejected") or []
     nodes_by_id = {n["fact_id"]: n for n in event_graph["nodes"]}
 
-    # 1. Incident Sequence & Protocol Transactions (Trusted Data Only)
     tx_summaries = []
     for tx in tx_result["transactions"]:
         tx_summaries.append({
@@ -152,12 +157,12 @@ def build_investigation_report(
             "vantages": tx["command_activation"]["vantages"],
             "command_acceptance_status": tx["command_acceptance_status"],
             "device_state_change_status": tx["device_state_change_status"],
+            "state_verification_reason": tx.get("state_verification_reason"),
             "transaction_completeness": tx["transaction_completeness"],
             "missing_stages": tx["missing_stages"],
             "evidence_ids": tx["all_evidence_ids"][:6],
         })
 
-    # 2. Key Findings & Reconstructed Storylines
     storyline_summaries = []
     for sl in storyline_result["storylines"]:
         steps_rendered = []
@@ -165,66 +170,99 @@ def build_investigation_report(
             s_node = nodes_by_id[st["source_fact_id"]]
             t_node = nodes_by_id[st["target_fact_id"]]
             indep_tag = "independent_evidence" if st["independent_support"] else "shared_source_not_double_counted"
+            src_ev = ", ".join(st.get("source_evidence_ids") or st["evidence_ids"][:2])
+            dst_ev = ", ".join(st.get("target_evidence_ids") or st["evidence_ids"][-2:])
             steps_rendered.append(
                 f"Step {st['step_index']} [{st['edge_id']} | {st['modality_pair']} | {st['relation_type']} | "
-                f"level={st['claim_level']} | {indep_tag}]: "
+                f"level={st['claim_level']} | gate={st.get('graph_consistency_gate_status')} | {indep_tag}]: "
                 f"{st['source_fact_id']} ({s_node['entity']} @ {round(s_node['time'], 4)}) -> "
                 f"{st['target_fact_id']} ({t_node['entity']} @ {round(t_node['time'], 4)}) "
-                f"[{', '.join(st['evidence_ids'][:4])}]"
+                f"[src_ev={src_ev}; dst_ev={dst_ev}]"
+            )
+        supporting_rendered = []
+        for se in sl.get("supporting_evidence_edges") or []:
+            s_node = nodes_by_id[se["source_fact_id"]]
+            t_node = nodes_by_id[se["target_fact_id"]]
+            src_ev = ", ".join(se.get("source_evidence_ids") or se["evidence_ids"][:2])
+            dst_ev = ", ".join(se.get("target_evidence_ids") or se["evidence_ids"][-2:])
+            supporting_rendered.append(
+                f"Supporting Edge [{se['edge_id']} | {se['modality_pair']} | {se['relation_type']} | "
+                f"level={se['claim_level']}]: {se['source_fact_id']} ({s_node['entity']}={s_node.get('value')} "
+                f"@ {round(s_node['time'], 4)}) -> {se['target_fact_id']} ({t_node['entity']}={t_node.get('value')} "
+                f"@ {round(t_node['time'], 4)}) [src_ev={src_ev}; dst_ev={dst_ev}]"
             )
         storyline_summaries.append({
             "storyline_id": sl["storyline_id"],
             "transaction_id": sl["transaction_id"],
             "anchor_entity": sl["anchor_entity"],
             "completeness_status": sl["completeness_status"],
+            "spine_is_contiguous_directed_path": sl["spine_is_contiguous_directed_path"],
             "spine_fact_ids": sl["spine_fact_ids"],
+            "vantage_capture_count": sl["vantage_capture_count"],
+            "logical_observation_count": sl["logical_observation_count"],
             "independent_source_container_count": sl["independent_source_container_count"],
             "independent_support_edge_count": sl["independent_support_edge_count"],
             "steps_rendered": steps_rendered,
+            "supporting_edges_rendered": supporting_rendered,
             "evidence_gaps": sl["evidence_gaps"],
         })
 
-    # 3. Potential Impact (Confirmed Device Transitions vs Unresolved Cross-Entity Co-occurrence)
-    confirmed_impacts = []
+    # Separate verified transitions from unverified state report observations
+    verified_transitions = []
+    unverified_state_reports = []
     for tx in tx_result["transactions"]:
-        if tx["device_state_change_status"] == "state_change_observed":
+        status = tx["device_state_change_status"]
+        if status in ("verified_state_transition", "verified_measurement_transition"):
+            if tx["measurement_transition"]:
+                mt = tx["measurement_transition"]
+                verified_transitions.append(
+                    f"[{tx['transaction_id']} | verified_measurement_transition] Controlled point "
+                    f"{mt['measurement_entity']} (CA/IOA={mt['ca_ioa']}) shifted from pre-command baseline "
+                    f"{mt['pre_command_value']} (@ {round(float(mt['pre_command_time']), 4)}, "
+                    f"pre_ev={', '.join(mt['pre_command_evidence_ids'][:2])}) to {mt['post_command_value']} "
+                    f"(@ {round(float(mt['post_command_time']), 4)}, "
+                    f"post_ev={', '.join(mt['post_command_evidence_ids'][:2])}), matching commanded setpoint "
+                    f"{mt['commanded_setpoint']}. Non-causal protocol/measurement alignment."
+                )
+            elif tx["protocol_state_feedback"]:
+                fb = tx["protocol_state_feedback"][0]
+                verified_transitions.append(
+                    f"[{tx['transaction_id']} | verified_state_transition] Point {fb['entity']} "
+                    f"(CA/IOA={fb['ca_ioa']}) shifted from pre-command state {fb.get('pre_state_value')} "
+                    f"to {fb['value']} (@ {round(fb['timestamp'], 4)}, ev={', '.join(fb['evidence_ids'][:2])})."
+                )
+        elif status.startswith("state_report_observed") or status == "measurement_observed_transition_unverified":
             if tx["protocol_state_feedback"]:
                 fb = tx["protocol_state_feedback"][0]
                 ipal_vals = [u["value"] for u in tx["ipal_state_updates"] if u["entity"] == tx["entity"]]
-                confirmed_impacts.append(
-                    f"[{tx['transaction_id']}] Device {tx['device_stem']} reported spontaneous state feedback "
-                    f"{fb['entity']} (CA/IOA={fb['ca_ioa']}, COT=3) at {round(fb['timestamp'], 4)} "
-                    f"(IPAL state value={ipal_vals[0] if ipal_vals else 'n/a'}, network-reported) "
-                    f"[{', '.join(fb['evidence_ids'][:2])}]."
-                )
-            if tx["measurement_transition"]:
-                mt = tx["measurement_transition"]
-                confirmed_impacts.append(
-                    f"[{tx['transaction_id']}] Controlled generator point {mt['measurement_entity']} "
-                    f"(CA/IOA={mt['ca_ioa']}) shifted from {mt['pre_command_value']} "
-                    f"(@ {round(float(mt['pre_command_time']), 4)}) to {mt['post_command_value']} "
-                    f"(@ {round(float(mt['post_command_time']), 4)}), matching commanded setpoint "
-                    f"{mt['commanded_setpoint']} [{', '.join(mt['post_command_evidence_ids'][:2])}]."
+                unverified_state_reports.append(
+                    f"[{tx['transaction_id']} | {status}] Observed subsequent M_SP_NA_1 (COT=3) state report "
+                    f"message on {fb['entity']} (CA/IOA={fb['ca_ioa']}, value_present={fb['value_present']}, "
+                    f"value={fb['value']}) at {round(fb['timestamp'], 4)} [ev={', '.join(fb['evidence_ids'][:2])}]; "
+                    f"nearby IPAL state table row has value={ipal_vals[0] if ipal_vals else 'n/a'} (network-derived). "
+                    f"Reason transition is NOT confirmed: {tx.get('state_verification_reason')}."
                 )
 
     unresolved_impacts = []
     for sl in storyline_result["storylines"]:
         for br in sl["unresolved_cooccurrence_branches"][:4]:
+            src_ev = ", ".join(br.get("source_evidence_ids") or br["evidence_ids"][:1])
+            dst_ev = ", ".join(br.get("target_evidence_ids") or br["evidence_ids"][-1:])
             unresolved_impacts.append(
-                f"[{sl['storyline_id']} / {br['edge_id']}] Unresolved temporal co-occurrence "
-                f"(level={br['claim_level']}, status={br['verification_status']}, causal_status=not_established): "
-                f"{br['candidate_entity']} ({br['candidate_fact_id']}) changed at {round(br['candidate_time'], 4)} "
-                f"({br['temporal_condition']}) [{', '.join(br['evidence_ids'][:2])}]."
+                f"[{sl['storyline_id']} / {br['edge_id']} | {br['relation_type']}] "
+                f"(level={br['claim_level']}, status={br['verification_status']}, "
+                f"gate={br.get('graph_consistency_gate_status')}, causal_status=not_established): "
+                f"{br['candidate_entity']} ({br['candidate_fact_id']}) at {round(br['candidate_time'], 4)} "
+                f"after {br['from_spine_fact_id']} ({br['temporal_condition']}) "
+                f"[src_ev={src_ev}; dst_ev={dst_ev}]."
             )
 
-    # 4. Alternative Explanations & Competing Hypotheses
     competing_hypotheses = [
         {"storyline_id": sl["storyline_id"], **comp}
         for sl in storyline_result["storylines"]
         for comp in sl["competing_hypotheses"]
     ]
 
-    # 5. Unresolved Questions, Evidence Gaps & Unconnected Observations
     evidence_gaps = []
     for tx in tx_result["transactions"]:
         if tx["missing_stages"]:
@@ -237,6 +275,11 @@ def build_investigation_report(
         evidence_gaps.append({
             "scope": "unpaired_protocol_messages",
             "count": len(tx_result["unpaired_protocol_messages"]),
+        })
+    if tx_result.get("cross_vantage_conflicts"):
+        evidence_gaps.append({
+            "scope": "cross_vantage_payload_conflicts",
+            "count": len(tx_result["cross_vantage_conflicts"]),
         })
 
     report = {
@@ -256,7 +299,8 @@ def build_investigation_report(
             for c in verified_claims
         ],
         "withheld_rejected_llm_claim_count": len(rejected_claims),
-        "confirmed_device_impacts": confirmed_impacts,
+        "verified_device_transitions": verified_transitions,
+        "unverified_protocol_state_reports": unverified_state_reports,
         "unresolved_cooccurring_changes": unresolved_impacts,
         "competing_hypotheses": competing_hypotheses,
         "evidence_gaps": evidence_gaps,
@@ -273,8 +317,10 @@ def render_investigation_markdown(report: dict) -> str:
         f"- **Incident Window**: `{report['incident_start']}` to `{report['incident_end']}`",
         f"- **Reconstructed IEC-104 Transactions**: `{len(report['transaction_summaries'])}`",
         f"- **Reconstructed Event Storylines**: `{len(report['storyline_summaries'])}`",
-        f"- **Verified LLM Claims Published**: `{len(report['verified_llm_claims'])}` "
-        f"(withheld unverified claims: `{report['withheld_rejected_llm_claim_count']}`)",
+        f"- **Verified Same-Device Transitions (Consistency Gate Passed)**: `{len(report['verified_device_transitions'])}`",
+        f"- **Unverified Protocol State Reports (Value Undecoded or No Pre-Baseline)**: `{len(report['unverified_protocol_state_reports'])}`",
+        f"- **LLM Claim Verifier Output (Separate from Graph Gate)**: `{len(report['verified_llm_claims'])}` verified, "
+        f"`{report['withheld_rejected_llm_claim_count']}` withheld",
         "",
         "## 1. Incident Sequence & Protocol Transactions",
     ]
@@ -285,41 +331,55 @@ def render_investigation_markdown(report: dict) -> str:
             f"- **{tx['transaction_id']}** (`{tx['start_time']:.4f}`–`{tx['end_time']:.4f}`): "
             f"`{tx['type_name']}` on `{tx['entity']}` (`CA/IOA={tx['ca_ioa']}`, value=`{tx['commanded_value']}`) "
             f"over `{tx['session']}` at vantages `{tx['vantages']}`. "
-            f"**Command Acceptance**: `{tx['command_acceptance_status']}`; "
-            f"**Device State Change**: `{tx['device_state_change_status']}`; "
+            f"**Command Acceptance (`COT=7` P/N)**: `{tx['command_acceptance_status']}`; "
+            f"**Device State Verification**: `{tx['device_state_change_status']}` "
+            f"(reason=`{tx['state_verification_reason']}`); "
             f"**Completeness**: `{tx['transaction_completeness']}`; "
-            f"**Missing Stages**: `{tx['missing_stages']}` "
+            f"**Missing/Unverified Stages**: `{tx['missing_stages']}` "
             f"(`{', '.join(tx['evidence_ids'][:4])}`)."
         )
 
-    lines.extend(["", "## 2. Key Findings & Reconstructed Storylines"])
+    lines.extend(["", "## 2. Key Findings & Reconstructed Storylines (Contiguous Directed Spines)"])
     for sl in report["storyline_summaries"]:
         lines.append(
             f"### {sl['storyline_id']} — Anchor `{sl['anchor_entity']}` "
             f"(tx=`{sl['transaction_id']}`, status=`{sl['completeness_status']}`, "
-            f"independent_containers=`{sl['independent_source_container_count']}`, "
-            f"independent_edges=`{sl['independent_support_edge_count']}`)"
+            f"contiguous_path=`{sl['spine_is_contiguous_directed_path']}`, "
+            f"logical_nodes=`{sl['logical_observation_count']}`, "
+            f"independent_sources=`{sl['independent_source_container_count']}`, "
+            f"independent_edges=`{sl['independent_support_edge_count']}`, "
+            f"vantage_captures=`{sl['vantage_capture_count']}`)"
         )
         for step_str in sl["steps_rendered"]:
             lines.append(f"- {step_str}")
+        for sup_str in sl["supporting_edges_rendered"]:
+            lines.append(f"- {sup_str}")
         if sl["evidence_gaps"]:
             lines.append(f"- **Evidence Gaps**: `{sl['evidence_gaps']}`")
 
     if report["verified_llm_claims"]:
-        lines.extend(["", "### Verified LLM Claims (Checked by Deterministic Verifier)"])
+        lines.extend(["", "### LLM Selected Claims (Checked by Deterministic Claim Verifier)"])
         for vc in report["verified_llm_claims"]:
             lines.append(f"- {vc['rendered_text']}")
 
-    lines.extend(["", "## 3. Observed Network & Electrical Impact"])
-    lines.append("### 3.1 Confirmed Same-Device State & Measurement Transitions")
-    if report["confirmed_device_impacts"]:
-        for item in report["confirmed_device_impacts"]:
+    lines.extend(["", "## 3. Observed Network & Electrical Impact (Epistemically Stratified)"])
+    lines.append("### 3.1 Verified Same-Device Measurement/State Transitions (Consistency Gate Passed)")
+    if report["verified_device_transitions"]:
+        for item in report["verified_device_transitions"]:
             lines.append(f"- {item}")
     else:
-        lines.append("- No confirmed post-command device state transition was observed.")
+        lines.append("- No post-command device transition passed all pre/post and target consistency checks.")
 
     lines.append("")
-    lines.append("### 3.2 Candidate Cross-Entity Co-occurring Changes (Unresolved Hypotheses, Not Causal Proof)")
+    lines.append("### 3.2 Protocol State Reports Observed Without Verified Transition (Value Undecoded or No Pre-Baseline)")
+    if report["unverified_protocol_state_reports"]:
+        for item in report["unverified_protocol_state_reports"]:
+            lines.append(f"- {item}")
+    else:
+        lines.append("- None.")
+
+    lines.append("")
+    lines.append("### 3.3 Candidate Cross-Entity Co-occurring Changes (Unresolved Hypotheses, Not Causal Proof)")
     if report["unresolved_cooccurring_changes"]:
         for item in report["unresolved_cooccurring_changes"]:
             lines.append(f"- {item}")
@@ -410,6 +470,6 @@ def _compact_prompt_payload(
                 "verification_status": e["verification_status"],
             }
             for e in event_graph["edges"]
-            if e["relation_category"] != "temporal_cooccurrence"
+            if e["relation_category"] != "temporal_cooccurrence" and e.get("verification_status") == "supported"
         ][:12],
     }

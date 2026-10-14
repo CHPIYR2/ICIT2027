@@ -1,28 +1,40 @@
-"""Phase 1: IEC-104 Protocol Transaction Reconstruction.
-
-Pairs IEC-104 control commands with their protocol-level confirmations,
-terminations, and subsequent device state/measurement feedback using strict
-protocol invariants rather than time proximity or CA/IOA alone.
+"""Phase 1: IEC-104 Protocol Transaction Reconstruction (Reliability-Hardened).
 
 Invariants enforced:
-1. Multi-vantage deduplication: identical Ethernet frames (`fingerprint`) seen
-   at multiple mirror ports (`n302`, `n318`) are collapsed into one logical
-   protocol message while retaining all vantages and parent packet lineage.
-2. Strict session & ASDU pairing: `COT=7` (Activation Confirmation) and `COT=10`
-   (Activation Termination) must match the reverse TCP 5-tuple
-   (`rtu_ip:2404 -> master_ip:ephemeral_port`), the exact ASDU `type_id`, the
-   exact `CA/IOA` and `entity`, and (when present) the commanded numeric value.
-   Time proximity + same `CA/IOA` on a different TCP session is rejected.
-3. Duplicate commands vs repeated operations: a second `COT=6` on the same
-   5-tuple and `CA/IOA` with a distinct frame fingerprint before confirmation
-   within `retransmit_window_sec` (0.5s) is recorded as a duplicate/retransmitted
-   command on the same transaction; a `COT=6` after confirmation or outside the
-   retransmit window starts a new transaction.
-4. Separation of command acceptance (`command_acceptance_status`) from actual
-   device state change (`device_state_change_status`).
+1. Multi-vantage deduplication with payload-conflict detection:
+   - Captures at different mirror ports (`n302`, `n318`) sharing `(5-tuple, tcp_seq,
+     entity, ca_ioa, type_id, cot)` are merged into one logical message ONLY IF
+     their decoded values and control flags (`value_present`, `value`, `cot_negative`,
+     `select_execute`) agree.
+   - If two vantages report conflicting values/flags on the same `tcp_seq`, they are
+     NEVER silently merged; both observations are preserved and flagged in
+     `cross_vantage_conflicts` (`cross_vantage_payload_conflict`).
+   - Each logical message receives a single `canonical_source_id` (`SRC-MSG-...`)
+     so multi-vantage mirror captures never inflate independent source counts.
+2. Strict TCP retransmission vs. new application command:
+   - An unconfirmed `COT=6` on the same 5-tuple and `CA/IOA` is attached as a
+     `tcp_retransmission` ONLY when `tcp_seq` is present and identical to the open
+     command (and `apci_tx` agrees when present) with the same value.
+   - If `tcp_seq` or `apci_tx` differs, it is a distinct application-layer command
+     and starts a new transaction even within 0.5s.
+3. Explicit `COT=7` P/N bit (positive vs. negative confirmation) semantics:
+   - `cot_negative is False` -> `command_acceptance_status = "accepted_by_rtu"`
+   - `cot_negative is True`  -> `command_acceptance_status = "rejected_negative_confirmation"`
+   - `cot_negative is None`  -> `command_acceptance_status = "confirmation_observed_acceptance_unknown"`
+     (never claims `accepted_by_rtu` when the P/N bit was not decoded).
+4. Strict separation of `state_report_observed` vs. `verified_state_transition`:
+   - Mere presence of a `COT=3` (`M_SP_NA_1`) message or an IPAL `new` row NEVER
+     sets `state_change_observed`.
+   - When `COT=3` has `value_present=False` (`unparsed_value`), status is
+     `"state_report_observed_value_unknown"`.
+   - When `COT=3` has a decoded value but lacks a pre-command IEC-104 baseline
+     proving $v_{\\text{pre}} \\neq v_{\\text{post}}$, status is
+     `"state_report_observed_no_pre_baseline"`.
+   - Only when a valid pre-command baseline and post-command observation both exist,
+     shift in the commanded direction, and match the commanded target does the
+     transaction reach `"verified_state_transition"` / `"verified_measurement_transition"`.
 """
 from __future__ import annotations
-import json
 from ..evidence.store import public_row
 
 TYPE_NAMES = {
@@ -61,7 +73,9 @@ def reconstruct_transactions(
         r for r in raw_rows
         if r["kind"] == "iec104_asdu" and start <= r["timestamp"] < end + post_feedback_sec
     ]
-    logical_msgs = collapse_multi_vantage_messages(incident_iec, tcp_seq_by_id=tcp_seq_by_id)
+    logical_msgs, conflicts = collapse_multi_vantage_messages(
+        incident_iec, tcp_seq_by_id=tcp_seq_by_id, return_conflicts=True,
+    )
 
     control_msgs = [
         m for m in logical_msgs
@@ -86,10 +100,12 @@ def reconstruct_transactions(
     for msg in control_msgs:
         cot = msg["cot"]
         if cot == 6:
-            # Check if this is an unconfirmed retransmission of an open transaction
             retrans_tx = _find_retransmit_target(transactions, msg, retransmit_window_sec)
             if retrans_tx is not None:
-                retrans_tx["duplicate_command_messages"].append(msg)
+                retrans_tx["duplicate_command_messages"].append({
+                    **msg,
+                    "duplicate_classification": "tcp_retransmission",
+                })
                 retrans_tx["all_evidence_ids"] = list(dict.fromkeys([
                     *retrans_tx["all_evidence_ids"], *msg["evidence_ids"], *msg["parent_evidence_ids"],
                 ]))
@@ -117,7 +133,6 @@ def reconstruct_transactions(
                 "candidate_rejection_reasons": [],
             })
 
-    # Attach post-command protocol feedback (COT=3 / monitor shift) and IPAL state updates
     for index, tx in enumerate(transactions):
         next_same_device_cmd_time = _next_command_time_for_device(transactions, index)
         _finalize_transaction(
@@ -133,14 +148,34 @@ def reconstruct_transactions(
         "incident_end": end,
         "transaction_count": len(transactions),
         "accepted_count": sum(1 for t in transactions if t["command_acceptance_status"] == "accepted_by_rtu"),
-        "unconfirmed_count": sum(1 for t in transactions if t["command_acceptance_status"] != "accepted_by_rtu"),
-        "state_change_observed_count": sum(
-            1 for t in transactions if t["device_state_change_status"] == "state_change_observed"
+        "confirmation_unknown_acceptance_count": sum(
+            1 for t in transactions if t["command_acceptance_status"] == "confirmation_observed_acceptance_unknown"
+        ),
+        "rejected_negative_ack_count": sum(
+            1 for t in transactions if t["command_acceptance_status"] == "rejected_negative_confirmation"
+        ),
+        "unconfirmed_count": sum(
+            1 for t in transactions if t["command_acceptance_status"] == "unconfirmed_missing_cot7"
+        ),
+        "verified_state_or_measurement_transition_count": sum(
+            1 for t in transactions
+            if t["device_state_change_status"] in ("verified_state_transition", "verified_measurement_transition")
+        ),
+        "state_report_observed_unverified_count": sum(
+            1 for t in transactions
+            if t["device_state_change_status"] in (
+                "state_report_observed_value_unknown",
+                "state_report_observed_no_pre_baseline",
+                "state_report_observed_target_mismatch",
+                "measurement_observed_transition_unverified",
+            )
         ),
         "no_state_change_count": sum(
             1 for t in transactions if t["device_state_change_status"] == "no_state_change_observed"
         ),
         "unpaired_control_message_count": len(unpaired_messages),
+        "cross_vantage_conflict_count": len(conflicts),
+        "cross_vantage_conflicts": conflicts,
         "transactions": transactions,
         "unpaired_protocol_messages": unpaired_messages,
     }
@@ -162,22 +197,14 @@ def collapse_multi_vantage_messages(
     *,
     tcp_seq_by_id: dict[str, int] | None = None,
     cross_vantage_transit_sec: float = 0.05,
-) -> list[dict]:
-    """Collapse captures of the same TCP segment / Ethernet frame and (entity, CA/IOA) across vantages.
-
-    When a packet traverses a routed hop between mirror ports `n302` and `n318`,
-    its L2 frame hash (`fingerprint`) changes due to MAC/TTL rewrite while its
-    TCP 5-tuple and `tcp_seq` remain identical. We group by:
-      1. Exact `(5-tuple, tcp_seq, entity, ca_ioa, type_id, cot)` when parent `tcp_seq` is known, or
-      2. Exact `(fingerprint, entity, ca_ioa)`, or
-      3. Distinct-vantage capture within `cross_vantage_transit_sec` (50ms) sharing
-         `(5-tuple, entity, ca_ioa, type_id, cot, value)`.
-    Same-vantage repeats with different `fingerprint`/`tcp_seq` are NEVER collapsed
-    here; they remain separate messages so duplicate commands are detected.
-    """
+    return_conflicts: bool = False,
+) -> list[dict] | tuple[list[dict], list[dict]]:
+    """Collapse multi-vantage mirror captures while refusing to merge conflicting payloads."""
     seq_lookup = tcp_seq_by_id or {}
     sorted_rows = sorted(rows, key=lambda r: (r["timestamp"], r["evidence_id"]))
     buckets: list[list[dict]] = []
+    conflicts: list[dict] = []
+    conflicted_row_ids: set[str] = set()
 
     for row in sorted_rows:
         payload = row.get("payload") if isinstance(row.get("payload"), dict) else {}
@@ -215,11 +242,25 @@ def collapse_multi_vantage_messages(
                 tcp_seq is None and f_seq is None
                 and vantage is not None and vantage not in bucket_vantages
                 and abs(row["timestamp"] - first["timestamp"]) <= cross_vantage_transit_sec
-                and _same_val(first.get("value") if first.get("value_present") else None,
-                              row.get("value") if row.get("value_present") else None)
             )
             if same_l2_frame or same_tcp_seq_diff_vantage or transit_diff_vantage:
-                matched_bucket = bucket
+                if _rows_payload_consistent(first, row):
+                    matched_bucket = bucket
+                else:
+                    conflicts.append({
+                        "conflict_type": "cross_vantage_payload_conflict",
+                        "entity": row.get("entity"),
+                        "ca_ioa": row.get("ca_ioa"),
+                        "tcp_seq": tcp_seq,
+                        "first_evidence_id": first["evidence_id"],
+                        "first_vantage": first.get("vantage"),
+                        "first_value": first.get("value") if first.get("value_present") else None,
+                        "second_evidence_id": row["evidence_id"],
+                        "second_vantage": vantage,
+                        "second_value": row.get("value") if row.get("value_present") else None,
+                    })
+                    conflicted_row_ids.add(first["evidence_id"])
+                    conflicted_row_ids.add(row["evidence_id"])
                 break
 
         if matched_bucket is not None:
@@ -241,9 +282,17 @@ def collapse_multi_vantage_messages(
         parent_ids = list(dict.fromkeys(r["parent_evidence_id"] for r in members if r.get("parent_evidence_id")))
         fps = list(dict.fromkeys(r.get("fingerprint") or r["evidence_id"] for r in members))
         tcp_seq = next((seq_lookup[p] for p in parent_ids if p in seq_lookup), None)
-        direction = _direction(first)
+        msg_id = f"MSG-{ev_ids[0][3:11]}"
+        cot_neg = payload.get("cot_negative") if isinstance(payload.get("cot_negative"), bool) else None
+        cot_tst = payload.get("cot_test") if isinstance(payload.get("cot_test"), bool) else None
+        se_mode = payload.get("select_execute")
+        q_inv = payload.get("quality_invalid") if isinstance(payload.get("quality_invalid"), bool) else None
+        apci_tx = _int_or_none(payload.get("apci_tx"))
+        apci_rx = _int_or_none(payload.get("apci_rx"))
+
         messages.append({
-            "message_id": f"MSG-{ev_ids[0][3:11]}",
+            "message_id": msg_id,
+            "canonical_source_id": f"SRC-{msg_id}",
             "timestamp": first["timestamp"],
             "timestamp_end": members[-1]["timestamp"],
             "entity": first.get("entity"),
@@ -257,7 +306,13 @@ def collapse_multi_vantage_messages(
             "type_name": TYPE_NAMES.get(type_id, f"type_{type_id}"),
             "cot": cot,
             "cot_name": COT_NAMES.get(cot, f"cot_{cot}"),
-            "direction": direction,
+            "cot_negative": cot_neg,
+            "cot_test": cot_tst,
+            "select_execute": se_mode,
+            "quality_invalid": q_inv,
+            "apci_tx": apci_tx,
+            "apci_rx": apci_rx,
+            "direction": _direction(first),
             "src_ip": first.get("src_ip"),
             "src_port": first.get("src_port"),
             "dst_ip": first.get("dst_ip"),
@@ -265,15 +320,34 @@ def collapse_multi_vantage_messages(
             "tcp_seq": tcp_seq,
             "value_present": bool(first.get("value_present")),
             "value": first.get("value") if first.get("value_present") else None,
+            "alignment": payload.get("alignment"),
             "fingerprint": fps[0],
             "all_fingerprints": fps,
             "vantages": vantages,
             "vantage_capture_count": len(members),
+            "cross_vantage_conflict": any(eid in conflicted_row_ids for eid in ev_ids),
             "evidence_ids": ev_ids,
             "parent_evidence_ids": parent_ids,
         })
     messages.sort(key=lambda m: (m["timestamp"], m["message_id"]))
+    if return_conflicts:
+        return messages, conflicts
     return messages
+
+
+def _rows_payload_consistent(r1: dict, r2: dict) -> bool:
+    if bool(r1.get("value_present")) != bool(r2.get("value_present")):
+        return False
+    v1 = r1.get("value") if r1.get("value_present") else None
+    v2 = r2.get("value") if r2.get("value_present") else None
+    if not _same_val(v1, v2):
+        return False
+    p1 = r1.get("payload") if isinstance(r1.get("payload"), dict) else {}
+    p2 = r2.get("payload") if isinstance(r2.get("payload"), dict) else {}
+    for key in ("cot_negative", "cot_test", "select_execute", "quality_invalid", "apci_tx"):
+        if p1.get(key) is not None and p2.get(key) is not None and p1.get(key) != p2.get(key):
+            return False
+    return True
 
 
 def _new_transaction(tx_id: str, cmd: dict) -> dict:
@@ -288,6 +362,7 @@ def _new_transaction(tx_id: str, cmd: dict) -> dict:
         "type_name": cmd["type_name"],
         "commanded_value": cmd["value"],
         "value_present": cmd["value_present"],
+        "select_execute": cmd.get("select_execute"),
         "master_ip": cmd["src_ip"],
         "master_port": cmd["src_port"],
         "rtu_ip": cmd["dst_ip"],
@@ -304,18 +379,21 @@ def _new_transaction(tx_id: str, cmd: dict) -> dict:
         "ipal_state_updates": [],
         "command_acceptance_status": "unconfirmed_missing_cot7",
         "device_state_change_status": "no_state_change_observed",
+        "state_verification_reason": "no_post_command_feedback_observed",
         "transaction_completeness": "incomplete",
         "missing_stages": [],
         "all_evidence_ids": list(dict.fromkeys([*cmd["evidence_ids"], *cmd["parent_evidence_ids"]])),
-        "independent_source_containers": [cmd["fingerprint"]],
+        "canonical_source_ids": [cmd["canonical_source_id"]],
         "notes": [],
     }
 
 
 def _find_retransmit_target(transactions: list[dict], msg: dict, retransmit_window_sec: float) -> dict | None:
+    """Attach as a TCP retransmission ONLY when tcp_seq (and apci_tx if present) matches an unconfirmed command."""
     for tx in reversed(transactions):
         if tx["activation_confirmation"] is not None:
             continue
+        cmd = tx["command_activation"]
         if (tx["master_ip"], tx["master_port"], tx["rtu_ip"], tx["rtu_port"]) != (
             msg["src_ip"], msg["src_port"], msg["dst_ip"], msg["dst_port"]
         ):
@@ -324,7 +402,12 @@ def _find_retransmit_target(transactions: list[dict], msg: dict, retransmit_wind
             continue
         if tx["value_present"] != msg["value_present"] or not _same_val(tx["commanded_value"], msg["value"]):
             continue
-        dt = msg["timestamp"] - tx["command_activation"]["timestamp"]
+        # Require identical TCP sequence number to classify as a TCP retransmission
+        if cmd.get("tcp_seq") is None or msg.get("tcp_seq") is None or cmd["tcp_seq"] != msg["tcp_seq"]:
+            continue
+        if cmd.get("apci_tx") is not None and msg.get("apci_tx") is not None and cmd["apci_tx"] != msg["apci_tx"]:
+            continue
+        dt = msg["timestamp"] - cmd["timestamp"]
         if 0.0 <= dt <= retransmit_window_sec:
             return tx
     return None
@@ -372,15 +455,92 @@ def _attach_control_reply(tx: dict, msg: dict, cot: int) -> None:
     tx["all_evidence_ids"] = list(dict.fromkeys([
         *tx["all_evidence_ids"], *msg["evidence_ids"], *msg["parent_evidence_ids"],
     ]))
-    if msg["fingerprint"] not in tx["independent_source_containers"]:
-        tx["independent_source_containers"].append(msg["fingerprint"])
+    if msg["canonical_source_id"] not in tx["canonical_source_ids"]:
+        tx["canonical_source_ids"].append(msg["canonical_source_id"])
     if cot == 7:
         tx["activation_confirmation"] = msg
-        tx["command_acceptance_status"] = "accepted_by_rtu"
+        cot_neg = msg.get("cot_negative")
+        if cot_neg is True:
+            tx["command_acceptance_status"] = "rejected_negative_confirmation"
+        elif cot_neg is False:
+            tx["command_acceptance_status"] = "accepted_by_rtu"
+        else:
+            tx["command_acceptance_status"] = "confirmation_observed_acceptance_unknown"
     elif cot == 10:
         tx["activation_termination"] = msg
     else:
         tx["deactivation_messages"].append(msg)
+
+
+def evaluate_command_effect_inference(
+    *,
+    command_acceptance_status: str | None,
+    command_value_present: bool,
+    commanded_value: float | None,
+    pre_value_present: bool,
+    pre_command_value: float | None,
+    post_value_present: bool,
+    post_command_value: float | None,
+    post_quality_invalid: bool | None = None,
+    same_rtu_and_ca: bool = True,
+    same_device_stem: bool = True,
+) -> dict:
+    """Testable consistency gate for upgrading a command-to-state transition to `supported_inference`."""
+    failed = []
+    if not same_rtu_and_ca:
+        failed.append("rtu_or_ca_mismatch")
+    if not same_device_stem:
+        failed.append("device_stem_mismatch")
+    if command_acceptance_status == "rejected_negative_confirmation":
+        failed.append("command_rejected_by_negative_confirmation")
+    elif command_acceptance_status == "unconfirmed_missing_cot7":
+        failed.append("command_missing_cot7_confirmation")
+    if not command_value_present or commanded_value is None:
+        failed.append("command_value_unknown")
+    if not pre_value_present or pre_command_value is None:
+        failed.append("missing_pre_command_baseline")
+    if not post_value_present or post_command_value is None:
+        failed.append("post_state_or_measurement_value_unknown")
+    if post_quality_invalid is True:
+        failed.append("post_value_quality_invalid")
+
+    shifted = False
+    direction_ok = False
+    matches_target = False
+    if (
+        pre_value_present and pre_command_value is not None
+        and post_value_present and post_command_value is not None
+    ):
+        pre_f = float(pre_command_value)
+        post_f = float(post_command_value)
+        delta = post_f - pre_f
+        shifted = abs(delta) > max(abs(pre_f) * 0.01, 1e-3)
+        if not shifted:
+            failed.append("not_shifted_from_pre_baseline")
+        if command_value_present and commanded_value is not None:
+            cmd_f = float(commanded_value)
+            target_delta = cmd_f - pre_f
+            tol = max(abs(cmd_f) * 0.02, 1.0 if abs(cmd_f) > 1.0 else 1e-3)
+            matches_target = abs(post_f - cmd_f) <= tol
+            if abs(target_delta) > 1e-6:
+                direction_ok = (delta * target_delta > 0) and (abs(post_f - cmd_f) < abs(pre_f - cmd_f))
+            else:
+                direction_ok = False
+            if not direction_ok:
+                failed.append("shift_direction_does_not_approach_target")
+            if not matches_target:
+                failed.append("post_value_outside_target_tolerance")
+
+    passed = len(failed) == 0
+    return {
+        "gate_passed": passed,
+        "shifted_from_pre_baseline": shifted,
+        "direction_matches_target": direction_ok,
+        "matches_commanded_setpoint": matches_target,
+        "failed_conditions": failed,
+        "recommended_claim_level": "supported_inference" if passed else "unresolved",
+        "recommended_verification_status": "supported" if passed else "unresolved",
+    }
 
 
 def _finalize_transaction(
@@ -394,22 +554,44 @@ def _finalize_transaction(
     cmd_time = tx["command_activation"]["timestamp"]
     feedback_horizon = min(cmd_time + 15.0, window_end)
 
-    # 1. Spontaneous single-point state feedback (e.g., switch.23:is_closed, M_SP_NA_1, COT=3)
+    # 1. Spontaneous single-point state reports (`COT == 3` only, same RTU IP, same CA, same device_stem)
     for m in monitor_msgs:
         if not (cmd_time <= m["timestamp"] <= feedback_horizon):
             continue
         if m["src_ip"] != tx["rtu_ip"] or m["ca"] != tx["ca"] or m["device_stem"] != tx["device_stem"]:
             continue
-        if m["cot"] == 3 or m["type_id"] == 1:
-            tx["protocol_state_feedback"].append(m)
+        if m["cot"] == 3:
+            pre_sp = [
+                pm for pm in all_iec_with_pre
+                if pm["entity"] == m["entity"] and pm["src_ip"] == tx["rtu_ip"]
+                and pm["value_present"] and (cmd_time - 15.0) <= pm["timestamp"] < cmd_time
+            ]
+            pre_val = pre_sp[-1]["value"] if pre_sp else None
+            gate = evaluate_command_effect_inference(
+                command_acceptance_status=tx["command_acceptance_status"],
+                command_value_present=tx["value_present"],
+                commanded_value=tx["commanded_value"],
+                pre_value_present=bool(pre_sp),
+                pre_command_value=pre_val,
+                post_value_present=m["value_present"],
+                post_command_value=m["value"],
+                post_quality_invalid=m.get("quality_invalid"),
+                same_rtu_and_ca=True,
+                same_device_stem=True,
+            )
+            tx["protocol_state_feedback"].append({
+                **m,
+                "pre_state_value": pre_val,
+                "consistency_gate": gate,
+            })
             tx["end_time"] = max(tx["end_time"], m["timestamp_end"])
             tx["all_evidence_ids"] = list(dict.fromkeys([
                 *tx["all_evidence_ids"], *m["evidence_ids"], *m["parent_evidence_ids"],
             ]))
-            if m["fingerprint"] not in tx["independent_source_containers"]:
-                tx["independent_source_containers"].append(m["fingerprint"])
+            if m["canonical_source_id"] not in tx["canonical_source_ids"]:
+                tx["canonical_source_ids"].append(m["canonical_source_id"])
 
-    # 2. Setpoint -> actual measurement transition on the same device & RTU (e.g., sgen.6:target_active_power -> sgen.6:active_power)
+    # 2. Setpoint -> actual measurement transition on the same device & RTU
     target_attr = _controlled_measurement_attribute(tx["entity"])
     if target_attr:
         meas_entity = f"{tx['device_stem']}:{target_attr}"
@@ -428,10 +610,17 @@ def _finalize_transaction(
             pre_val = pre_msgs[-1]["value"] if pre_msgs else None
             post_val = first_post["value"]
             cmd_val = tx["commanded_value"]
-            shifted = (pre_val is not None and abs(float(post_val) - float(pre_val)) > max(abs(float(pre_val)) * 0.01, 1e-3))
-            matches_setpoint = (
-                cmd_val is not None
-                and abs(float(post_val) - float(cmd_val)) <= max(abs(float(cmd_val)) * 0.02, 1.0)
+            gate = evaluate_command_effect_inference(
+                command_acceptance_status=tx["command_acceptance_status"],
+                command_value_present=tx["value_present"],
+                commanded_value=cmd_val,
+                pre_value_present=bool(pre_msgs),
+                pre_command_value=pre_val,
+                post_value_present=first_post["value_present"],
+                post_command_value=post_val,
+                post_quality_invalid=first_post.get("quality_invalid"),
+                same_rtu_and_ca=(first_post["src_ip"] == tx["rtu_ip"] and first_post["ca"] == tx["ca"]),
+                same_device_stem=(first_post["device_stem"] == tx["device_stem"]),
             )
             tx["measurement_transition"] = {
                 "measurement_entity": meas_entity,
@@ -439,27 +628,33 @@ def _finalize_transaction(
                 "pre_command_value": pre_val,
                 "pre_command_time": pre_msgs[-1]["timestamp"] if pre_msgs else None,
                 "pre_command_time_end": pre_msgs[-1]["timestamp_end"] if pre_msgs else None,
+                "pre_command_canonical_source_id": pre_msgs[-1]["canonical_source_id"] if pre_msgs else None,
                 "pre_command_evidence_ids": (
                     [*pre_msgs[-1]["evidence_ids"], *pre_msgs[-1]["parent_evidence_ids"]] if pre_msgs else []
                 ),
                 "post_command_value": post_val,
                 "post_command_time": first_post["timestamp"],
                 "post_command_time_end": first_post["timestamp_end"],
+                "post_command_canonical_source_id": first_post["canonical_source_id"],
                 "post_command_evidence_ids": first_post["evidence_ids"],
                 "post_command_parent_evidence_ids": first_post["parent_evidence_ids"],
                 "commanded_setpoint": cmd_val,
-                "shifted_from_pre_baseline": bool(shifted),
-                "matches_commanded_setpoint": bool(matches_setpoint),
+                "shifted_from_pre_baseline": gate["shifted_from_pre_baseline"],
+                "direction_matches_target": gate["direction_matches_target"],
+                "matches_commanded_setpoint": gate["matches_commanded_setpoint"],
+                "consistency_gate": gate,
             }
             tx["end_time"] = max(tx["end_time"], first_post["timestamp_end"])
             tx["all_evidence_ids"] = list(dict.fromkeys([
                 *tx["all_evidence_ids"],
-                *(pre_msgs[-1]["evidence_ids"] if pre_msgs else []),
+                *(tx["measurement_transition"]["pre_command_evidence_ids"]),
                 *first_post["evidence_ids"],
                 *first_post["parent_evidence_ids"],
             ]))
-            if first_post["fingerprint"] not in tx["independent_source_containers"]:
-                tx["independent_source_containers"].append(first_post["fingerprint"])
+            if pre_msgs and pre_msgs[-1]["canonical_source_id"] not in tx["canonical_source_ids"]:
+                tx["canonical_source_ids"].append(pre_msgs[-1]["canonical_source_id"])
+            if first_post["canonical_source_id"] not in tx["canonical_source_ids"]:
+                tx["canonical_source_ids"].append(first_post["canonical_source_id"])
 
     # 3. IPAL state table updates (`electrical_update`) on the same entity or controlled measurement entity
     watched_entities = {tx["entity"]}
@@ -474,47 +669,75 @@ def _finalize_transaction(
                 "ca_ioa": row.get("ca_ioa"),
                 "value": row.get("value") if row.get("value_present") else None,
                 "shared_network_source": True,
-                "note": "IPAL state update derived from network telemetry; not an independent physical sensor.",
+                "note": "IPAL state update derived from network telemetry; not an independent physical sensor and cannot alone prove state transition without decoded protocol values and a pre-command baseline.",
             })
             tx["all_evidence_ids"] = list(dict.fromkeys([*tx["all_evidence_ids"], row["evidence_id"]]))
 
-    # Determine device_state_change_status and missing stages
-    has_spontaneous = len(tx["protocol_state_feedback"]) > 0
-    has_meas_shift = bool(
-        tx["measurement_transition"]
-        and (tx["measurement_transition"]["shifted_from_pre_baseline"]
-             or tx["measurement_transition"]["matches_commanded_setpoint"])
-    )
-    has_direct_switch_ipal = any(
-        u["entity"] == tx["entity"] and tx["entity"].endswith(":closed") for u in tx["ipal_state_updates"]
-    )
+    # 4. Determine strict `device_state_change_status` (P0-1 & P0-2)
+    mt = tx["measurement_transition"]
+    fb_list = tx["protocol_state_feedback"]
 
-    if has_spontaneous or has_meas_shift or has_direct_switch_ipal:
-        tx["device_state_change_status"] = "state_change_observed"
+    if mt is not None:
+        mt_gate = mt["consistency_gate"]
+        if mt_gate["gate_passed"]:
+            tx["device_state_change_status"] = "verified_measurement_transition"
+            tx["state_verification_reason"] = "pre_to_post_shift_and_setpoint_match_verified"
+        else:
+            tx["device_state_change_status"] = "measurement_observed_transition_unverified"
+            tx["state_verification_reason"] = ",".join(mt_gate["failed_conditions"])
+    elif fb_list:
+        first_fb = fb_list[0]
+        fb_gate = first_fb["consistency_gate"]
+        if fb_gate["gate_passed"]:
+            tx["device_state_change_status"] = "verified_state_transition"
+            tx["state_verification_reason"] = "decoded_spontaneous_state_shift_verified"
+        elif not first_fb["value_present"]:
+            tx["device_state_change_status"] = "state_report_observed_value_unknown"
+            tx["state_verification_reason"] = ",".join(fb_gate["failed_conditions"])
+        elif first_fb.get("pre_state_value") is None:
+            tx["device_state_change_status"] = "state_report_observed_no_pre_baseline"
+            tx["state_verification_reason"] = ",".join(fb_gate["failed_conditions"])
+        else:
+            tx["device_state_change_status"] = "state_report_observed_target_mismatch"
+            tx["state_verification_reason"] = ",".join(fb_gate["failed_conditions"])
     else:
         tx["device_state_change_status"] = "no_state_change_observed"
+        tx["state_verification_reason"] = "no_post_command_feedback_observed"
 
     if tx["activation_confirmation"] is None:
         tx["missing_stages"].append("activation_confirmation_cot7")
+    elif tx["command_acceptance_status"] == "confirmation_observed_acceptance_unknown":
+        tx["missing_stages"].append("cot7_positive_negative_bit_undecoded")
     if tx["activation_termination"] is None:
         tx["missing_stages"].append("activation_termination_cot10")
     if tx["device_state_change_status"] == "no_state_change_observed":
         tx["missing_stages"].append("post_command_state_or_measurement_change")
+    elif tx["device_state_change_status"] in (
+        "state_report_observed_value_unknown",
+        "state_report_observed_no_pre_baseline",
+        "state_report_observed_target_mismatch",
+        "measurement_observed_transition_unverified",
+    ):
+        tx["missing_stages"].append(f"unverified_state_transition:{tx['state_verification_reason']}")
 
-    if tx["activation_confirmation"] is not None and tx["device_state_change_status"] == "state_change_observed":
+    if tx["device_state_change_status"] in ("verified_state_transition", "verified_measurement_transition"):
         tx["transaction_completeness"] = (
-            "complete_with_state_feedback"
+            "complete_with_verified_transition"
             if tx["activation_termination"] is not None
-            else "partial_no_cot10_but_state_feedback_observed"
+            else "partial_no_cot10_but_verified_measurement_transition"
         )
+    elif tx["device_state_change_status"].startswith("state_report_observed") or (
+        tx["device_state_change_status"] == "measurement_observed_transition_unverified"
+    ):
+        tx["transaction_completeness"] = "partial_state_report_observed_transition_unverified"
     elif tx["activation_confirmation"] is not None:
-        tx["transaction_completeness"] = "command_accepted_only_no_state_change"
+        tx["transaction_completeness"] = "confirmation_observed_only_no_state_report"
     else:
         tx["transaction_completeness"] = "unconfirmed_command"
 
     tx["notes"].append(
-        "COT=7 confirms RTU reception/acceptance of the command only; "
-        "actual state change is tracked separately in device_state_change_status."
+        "COT=7 confirms RTU protocol reply only (positive acceptance requires P/N bit=0); "
+        "actual state transition requires decoded values and a pre-command baseline comparison."
     )
 
 
