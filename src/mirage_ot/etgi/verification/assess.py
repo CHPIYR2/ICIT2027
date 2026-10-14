@@ -138,8 +138,10 @@ def _value_disagreements(rows: list[dict]) -> list[dict]:
     for index, left in enumerate(rows):
         if not left.get("value_present"):
             continue
+        if left["kind"] not in ("electrical_update", "electrical_initial", "electrical_hold_summary", "iec104_asdu"):
+            continue
         for right in rows[index + 1:]:
-            if not right.get("value_present"):
+            if right["kind"] != left["kind"] or not right.get("value_present"):
                 continue
             if left["entity"] != right["entity"] or left.get("ca_ioa") != right.get("ca_ioa"):
                 continue

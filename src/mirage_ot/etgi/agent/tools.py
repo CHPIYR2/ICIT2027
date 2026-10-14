@@ -23,7 +23,7 @@ SPECS = [
 ]
 
 
-def schemas() -> list[dict]:
+def schemas(names: tuple[str, ...] | None = None) -> list[dict]:
     parameters = {
         "type": "object",
         "properties": {
@@ -51,7 +51,7 @@ def schemas() -> list[dict]:
     return [{
         "type": "function",
         "function": {"name": name, "description": description, "parameters": parameters},
-    } for name, description in SPECS]
+    } for name, description in SPECS if names is None or name in names]
 
 
 def dispatch(db: EvidenceDB, name: str, arguments: dict, *, incident_start: float, incident_end: float) -> dict:

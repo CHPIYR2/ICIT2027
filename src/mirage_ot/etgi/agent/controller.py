@@ -113,16 +113,11 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
             _context_cards(db, state, graph, flags.context), default=str)})
     stopped = False
     while not stopped and not _over(state, flags):
-        turn = _chat(llm, messages, tools=schemas() if flags.active_retrieval else None, state=state, flags=flags)
+        turn = _chat(llm, messages, tools=schemas() if flags.active_retrieval else None, state=state, flags=flags,
+                     require_tool=flags.active_retrieval)
         _trace(trace_path, {"type": "llm", "content": turn.content, "tool_calls": turn.tool_calls,
                             "prompt_tokens": turn.prompt_tokens, "completion_tokens": turn.completion_tokens})
         actions = _actions(turn)
-        if not actions and flags.active_retrieval and not _over(state, flags):
-            retry = _chat(llm, [*messages, {"role": "user", "content": "Reply with a tool call or one JSON action."}],
-                          tools=schemas(), state=state, flags=flags)
-            _trace(trace_path, {"type": "llm_format_retry", "content": retry.content, "tool_calls": retry.tool_calls})
-            actions = _actions(retry)
-            turn = retry
         if not actions:
             fallback = _next_gap(state, graph) if flags.active_retrieval else None
             if fallback is None:
@@ -162,7 +157,15 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
                 duplicate = True
                 break
         if duplicate:
-            break
+            fallback = _next_gap(state, graph)
+            if fallback is None or _over(state, flags):
+                break
+            name, arguments = fallback
+            state.gap_fallbacks += 1
+            result = _execute(db, graph, state, name, arguments, trace_path, selected_by="controller_gap")
+            messages.append({"role": "tool", "name": name, "content": json.dumps(result, default=str)[:12000]})
+            _checkpoint(out, state, graph, flags)
+            continue
         messages.append({"role": "user", "content": _compact_state(state, graph)})
         if len(messages) > 16:
             messages = messages[:2] + messages[-6:]
@@ -171,8 +174,9 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
     if not inferred and state.llm_calls < flags.max_llm_calls and not (time.time() - state.started > flags.max_seconds):
         closing = _chat(
             llm,
-            [*messages, {"role": "user", "content": "Tool retrieval is paused. Propose relations from the evidence already retrieved, or stop."}],
-            tools=schemas(), state=state, flags=flags,
+            [*messages, {"role": "user", "content": "Tool retrieval is paused. Call propose_relations or stop_investigation."}],
+            tools=schemas(("propose_relations", "stop_investigation")), state=state, flags=flags,
+            require_tool=True,
         )
         _trace(trace_path, {"type": "llm_closing", "content": closing.content, "tool_calls": closing.tool_calls})
         for action in _actions(closing)[:3]:
@@ -391,9 +395,9 @@ def _context_cards(db, state, graph, context: str) -> dict:
     return {"fixed_evidence_cards": cards, "note": note}
 
 
-def _chat(llm, messages, *, tools, state, flags):
+def _chat(llm, messages, *, tools, state, flags, require_tool: bool = False):
     turn = llm.chat(messages, tools=tools, temperature=flags.temperature, seed=flags.seed + state.llm_calls,
-                    num_predict=flags.num_predict)
+                    num_predict=flags.num_predict, require_tool=require_tool)
     state.llm_calls += 1
     state.prompt_tokens += turn.prompt_tokens
     state.completion_tokens += turn.completion_tokens

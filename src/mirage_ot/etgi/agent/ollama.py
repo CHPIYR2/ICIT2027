@@ -24,7 +24,7 @@ class OllamaClient:
         self.timeout = timeout
 
     def chat(self, messages: list[dict], *, tools=None, temperature: float = 0.0,
-             seed: int = 1, num_predict: int = 700) -> LLMTurn:
+             seed: int = 1, num_predict: int = 700, require_tool: bool = False) -> LLMTurn:
         payload = {
             "model": self.model,
             "messages": messages,
@@ -34,6 +34,8 @@ class OllamaClient:
         }
         if tools:
             payload["tools"] = tools
+            if require_tool:
+                payload["tool_choice"] = "required"
         try:
             body = self._post(payload)
         except urllib.error.HTTPError as exc:

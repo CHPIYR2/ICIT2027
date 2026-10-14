@@ -144,6 +144,10 @@ def test_communication_and_revision_history(tmp_path):
     from mirage_ot.etgi.verification.assess import apply_assessment
     status = apply_assessment(graph, edge["edge_id"], verify_edge(db, edge), revise=True)
     assert status == "supported"
+    db.conn.execute("UPDATE evidence SET value = 90 WHERE evidence_id = 'EV-aaaaaaaaaaaaaaaa'")
+    fresh = graph.add_edge(source=a["node_id"], target=b["node_id"], relation_type="communication",
+                           origin="observed", evidence_ids=["EV-aaaaaaaaaaaaaaaa", "EV-bbbbbbbbbbbbbbbb"])
+    assert verify_edge(db, fresh)["status"] == "supported"
     assert [item["operation"] for item in graph.edges[edge["edge_id"]]["history"]] == ["relation_proposed", "relation_revised"]
     graph.remove(edge["edge_id"], reason="test removal keeps the record")
     assert edge["edge_id"] in graph.removed
