@@ -154,6 +154,8 @@ def _compact_card(event: dict) -> dict:
         card["value_semantics"] = event.get("value_semantics")
     elif event.get("packet_count") is not None:
         card["packet_count"] = event.get("packet_count")
+    elif event.get("source_frame_count") is not None:
+        card["source_frame_count"] = event.get("source_frame_count")
     return card
 
 

@@ -63,7 +63,46 @@ def main(argv=None) -> None:
     protocol.add_argument("--protocol", type=Path, required=True)
     protocol.add_argument("--out", type=Path, required=True)
     protocol.add_argument("--endpoint", default="http://127.0.0.1:11434")
+    pb = commands.add_parser("position-bias")
+    pb.add_argument("--out", type=Path, required=True)
+    pb.add_argument("--model", default="qwen3.5:9b-q4_K_M")
+    pb.add_argument("--endpoint", default="http://127.0.0.1:11434")
+    pilot = commands.add_parser("pilot-pool")
+    pilot.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
+    if args.command == "position-bias":
+        from .postalert.position_bias import run_position_bias_suite
+        cases = [
+            {"name": "supplied-ev0961", "db": "runs/etgi/basic-ev0961/evidence.sqlite"},
+            {"name": "preceding-ev0961", "db": "runs/etgi/basic-ev0961/evidence.sqlite", "window": "preceding", "preceding_seconds": 15},
+            {"name": "supplied-ev12", "db": "runs/etgi/memory-comparison-20261014/ev_12dcd56b2f5e78144cfb/evidence.sqlite"},
+        ]
+        summary = run_position_bias_suite(cases, args.out, model=args.model, endpoint=args.endpoint)
+        print(json.dumps({"out": str(args.out), "code_sha256": summary["code_sha256"]}, indent=2))
+        return
+    if args.command == "pilot-pool":
+        from .postalert.pilot_pool import build_pilot_package
+        windows = [
+            {
+                "episode_id": "ev_3e4d36008b29595ef246",
+                "scenario": "01-Basic",
+                "recording": "test",
+                "start": 1742959890.1894352,
+                "end": 1742959950.3827677,
+                "db": "runs/etgi/memory-comparison-20261014/ev_3e4d36008b29595ef246/evidence.sqlite",
+            },
+            {
+                "episode_id": "ev_3e4d36008b29595ef246_post15s",
+                "scenario": "01-Basic",
+                "recording": "test",
+                "start": 1742959950.3827677,
+                "end": 1742959965.3827677,
+                "db": "runs/etgi/memory-comparison-20261014/ev_3e4d36008b29595ef246/evidence.sqlite",
+            },
+        ]
+        summary = build_pilot_package(windows, args.out)
+        print(json.dumps(summary, indent=2, default=str))
+        return
     if args.command == "postalert-protocol":
         from .postalert.runner import run_protocol
         summary = run_protocol(args.protocol, args.out, endpoint=args.endpoint)

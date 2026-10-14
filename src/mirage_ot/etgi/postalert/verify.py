@@ -160,6 +160,14 @@ def _check(db, claim: dict, raw: dict, relations: list[dict], timeline_by_id: di
     if kind == "absence_claim":
         out_reasons, text = _check_absence(db, claim, reasons)
         return out_reasons, text, {"canonical_claim_level": "observed_fact", "canonical_origin": "observed"}
+    fact_id = claim.get("fact_id") or claim.get("timeline_id")
+    if fact_id and fact_id not in timeline_by_id:
+        reasons.append("unknown_fact_id")
+        return reasons, "", {}
+    edge_id = claim.get("edge_id")
+    if edge_id and edge_id not in edge_by_id:
+        reasons.append("unknown_edge_id")
+        return reasons, "", {}
     ids = [str(item) for item in claim.get("evidence_ids") or [] if str(item).startswith("EV-")]
     if not ids:
         reasons.append("missing_evidence_ids")

@@ -137,3 +137,10 @@ Three windows from two development events are too few to claim any method is bet
 - `test_edge_provenance_excludes_same_entity_at_another_time`
 - `test_flat_or_missing_background_gives_bounded_labeled_scores`
 - `test_claim_records_model_choices_separately_from_system_resolution`
+- `test_unknown_edge_id_and_unknown_fact_id_reported_before_missing_evidence`
+- `test_control_command_without_numeric_value_scores_by_frame_occurrence`
+- `test_position_bias_permutations_preserve_content_and_invert_cleanly`
+- `test_two_stage_evaluation_metrics_and_awaiting_human_gold_guard`
+- `test_pilot_package_deidentifies_and_excludes_scores_and_llm_outputs`
+
+Total offline tests passing: **62** (`34` in `tests/test_postalert.py`, `28` in `tests/test_etgi.py`). See `docs/T3_READINESS_AND_POSITION_BIAS.md` for the full Position Bias diagnostic (`runs/etgi/position-bias-20261015/`), the de-identified Pilot Candidate Pool (`runs/etgi/t3-pilot-pool-20261015/`), and the two-stage evaluation harness (`eval_t3.py`).

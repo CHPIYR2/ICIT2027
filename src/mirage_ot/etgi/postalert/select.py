@@ -55,7 +55,7 @@ def select_evidence(db, start: float, end: float, *, background_start: float | N
     ranked.sort(key=lambda item: (-item["score"], item["group"]["time"]))
     selected = []
     selected_keys = set()
-    for kind, quota in (("tcp", 8), ("packet_control", 3), ("packet", 5), ("electrical", 8)):
+    for kind, quota in (("tcp", 8), ("packet_control", 4), ("packet", 4), ("electrical", 8)):
         kept = 0
         for item in ranked:
             if item["key"][0] != kind or item["key"] in selected_keys:
@@ -191,6 +191,29 @@ def _score(key, group, background, *, incident_seconds: float, background_second
             "frames_per_second": round(incident_rate, 4),
             "background_frames_per_second": None if background_rate is None else round(background_rate, 4),
             "mapped": mapped == 1.0,
+        }
+    if key[0] == "packet_control":
+        frames = len({row.get("fingerprint") or row["evidence_id"] for row in rows})
+        base_frames = len({row.get("fingerprint") or row["evidence_id"] for row in background["rows"]}) if background else 0
+        excess_frames = max(frames - base_frames, 0)
+        values = _numeric(rows)
+        background_values = _numeric(background["rows"]) if background else []
+        z_val, val_basis = _robust_change(values, background_values)
+        z = max(float(excess_frames), z_val)
+        basis = val_basis if z_val > float(excess_frames) else (
+            "control_frames_minus_background" if background is not None else "control_frame_occurrence"
+        )
+        mapped = 1.0 if any(row.get("ca_ioa") or ":" in str(row.get("entity") or "") for row in rows) else 0.6
+        score = min(math.log1p(z), SCORE_CAP) * mapped
+        return score, {
+            "basis": basis,
+            "z": round(z, 4),
+            "distinct_frames": frames,
+            "background_distinct_frames": base_frames,
+            "value_present": bool(values),
+            "samples": len(values),
+            "mapped": mapped == 1.0,
+            "iec_class": "control",
         }
     values = _numeric(rows)
     background_values = _numeric(background["rows"]) if background else []

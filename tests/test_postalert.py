@@ -576,3 +576,105 @@ def test_claim_records_model_choices_separately_from_system_resolution(tmp_path)
     assert first["time_match"] == "inherited_from_anchor"
     assert second["time_match"] == "tolerance_aligned"
     assert second["time_tolerance_seconds"] == 1.0
+
+
+def test_unknown_edge_id_and_unknown_fact_id_reported_before_missing_evidence(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    bad_claims = [
+        {"claim_type": "relation_claim", "edge_id": "R_TL001-TL003", "claim_level": "observed_fact"},
+        {"claim_type": "observation_claim", "fact_id": "TL999", "claim_level": "observed_fact"},
+    ]
+    checked = verify_claims(db, bad_claims, prepared["relations"], prepared["timeline"], lineage=prepared["lineage"])
+    assert len(checked["rejected"]) == 2
+    assert checked["rejected"][0]["reasons"] == ["unknown_edge_id"]
+    assert checked["rejected"][1]["reasons"] == ["unknown_fact_id"]
+
+
+def test_control_command_without_numeric_value_scores_by_frame_occurrence(tmp_path):
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    insert_evidence(conn, _row("EV-cmdp100000000000", 1002.0, "network",
+                               "10.0.0.1:2404->10.0.0.2:50000/TCP", "tcp_packet", 68,
+                               fingerprint="frame-cmd-1", vantage="n302", src="10.0.0.1", dst="10.0.0.2",
+                               sport=2404, dport=50000))
+    insert_evidence(conn, _row("EV-cmda100000000000", 1002.0, "network",
+                               "switch.23:closed", "iec104_asdu", None, value_present=False,
+                               fingerprint="frame-cmd-1", vantage="n302", ca_ioa="110.10130",
+                               protocol_class="control", parent_evidence_id="EV-cmdp100000000000"))
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000, incident_end=1010)
+    prepared = prepare(db, 1000, 1010, background_start=985, background_end=1000)
+    cmd = next(e for e in prepared["timeline"] if e["role"] == "command")
+    assert cmd["entity"] == "switch.23:closed"
+    assert cmd["score"] > 0.0
+    exposed_cmd = next(c for c in prepared["exposed_timeline"] if c["role"] == "command")
+    assert exposed_cmd["source_frame_count"] == 1
+
+
+def test_position_bias_permutations_preserve_content_and_invert_cleanly(tmp_path):
+    from mirage_ot.etgi.postalert.position_bias import PERMUTATIONS, permute_exposed, unmap_claims
+
+    db = _multi_point_db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    orig_cards = prepared["exposed_timeline"]
+    orig_rels = prepared["exposed_relations"]
+    orig_entities = {c["entity"] for c in orig_cards}
+
+    for mode in PERMUTATIONS:
+        cards, rels, mapping = permute_exposed(orig_cards, orig_rels, mode, shuffle_seed=42)
+        assert len(cards) == len(orig_cards)
+        assert {c["entity"] for c in cards} == orig_entities
+        shown_first = cards[0]["timeline_id"]
+        raw_claims = [{"claim_type": "observation_claim", "fact_id": shown_first, "claim_level": "observed_fact"}]
+        canon_claims = unmap_claims(raw_claims, mapping)
+        checked = verify_claims(db, canon_claims, prepared["relations"], prepared["timeline"], lineage=prepared["lineage"])
+        assert len(checked["verified"]) == 1
+        assert checked["verified"][0]["fact_id"] == mapping["inverse_fact_map"][shown_first]
+
+
+def test_two_stage_evaluation_metrics_and_awaiting_human_gold_guard(tmp_path):
+    from mirage_ot.etgi.postalert.eval_t3 import (
+        build_full_candidate_pool, evaluate_with_gold, ndcg_at_k, precision_at_k, recall_at_k,
+        stage1_baselines, stage2_selection,
+    )
+
+    db = _multi_point_db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    pool = build_full_candidate_pool(db, 1000, 1010, background_start=1000, background_end=1000)
+    s1 = stage1_baselines(pool, prepared["exposed_timeline"], k=10, seeds=5)
+    s2 = stage2_selection(prepared["exposed_timeline"], prepared["timeline"], prepared["relations"], [], {"verified": [], "rejected": []})
+    no_gold = evaluate_with_gold(s1, s2, gold_labels=None)
+    assert no_gold["status"] == "AWAITING_HUMAN_GOLD"
+
+    gains = {"u1": 2, "u2": 1, "u3": 0}
+    assert precision_at_k(["u1", "u3"], gains, 2) == 0.5
+    assert recall_at_k(["u1", "u3"], gains, 2) == 0.5
+    assert round(ndcg_at_k(["u1", "u2"], gains, 2), 4) == 1.0
+
+
+def test_pilot_package_deidentifies_and_excludes_scores_and_llm_outputs(tmp_path):
+    from mirage_ot.etgi.postalert.pilot_pool import build_pilot_package
+    from mirage_ot.etgi.evidence.store import set_meta
+
+    db = _multi_point_db(tmp_path)
+    set_meta(db.conn, "incident_start", 1000.0)
+    set_meta(db.conn, "incident_end", 1010.0)
+    set_meta(db.conn, "indexed_start", 1000.0)
+    set_meta(db.conn, "indexed_end", 1010.0)
+    set_meta(db.conn, "context_seconds", 0.0)
+    db_file = tmp_path / "evidence.sqlite"
+
+    out_dir = tmp_path / "pilot_out"
+    summary = build_pilot_package(
+        [{"episode_id": "ev_syn_pilot", "start": 1000.0, "end": 1010.0, "db": str(db_file)}],
+        out_dir,
+    )
+    assert summary["status"] == "READY_FOR_HUMAN_ANNOTATION"
+    assert summary["gold_included"] is False
+    pack_a = json.loads((out_dir / "annotator_pack" / "PILOT-W01_annotator_A.json").read_text())
+    for unit in pack_a["units"]:
+        assert "score" not in unit
+        assert "timeline_id" not in unit
+        assert unit["blind_unit_id"].startswith("U")
+
