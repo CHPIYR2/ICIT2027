@@ -89,6 +89,9 @@ def run_explanation(db, llm, prepared: dict, *, level: str = "B4", claim_mode: s
         prepared["selection"], prepared["timeline"], prepared["exposed_timeline"],
         published if level == "B4" else unverified, lineage=lineage,
     )
+    coverage["stages"] = stage_coverage(
+        prepared, chosen=model["claims"], published=published,
+    )
     has_verified_claim = bool(published)
     minimum = level == "B4" and not has_verified_claim
     report = _report(
@@ -245,6 +248,111 @@ def _coverage_summary(selection: dict, timeline: list[dict], exposed: list[dict]
         "cited_mentions_by_modality": mention_mod,
         "cited_by_modality": {k: len(v) for k, v in unique_ids_by_mod.items()},
     }
+
+
+def stage_coverage(prepared: dict, *, chosen: list[dict], published: list[dict]) -> dict:
+    """Modality and role counts at available, selected, exposed, chosen, and published.
+
+    `chosen` counts the fact and edge ids the model itself named; ids the system
+    resolved from an anchor are not counted as model choices.
+    """
+    timeline = {event["timeline_id"]: event for event in prepared["timeline"]}
+    edges = {edge["edge_id"]: edge for edge in prepared["relations"]}
+
+    def facts_of(claims: list[dict]) -> tuple[list[str], list[str]]:
+        fact_ids, edge_ids = [], []
+        for claim in claims:
+            if not isinstance(claim, dict):
+                continue
+            fact = claim.get("fact_id") or claim.get("timeline_id")
+            if fact in timeline:
+                fact_ids.append(fact)
+            edge = claim.get("edge_id")
+            if edge in edges:
+                edge_ids.append(edge)
+                fact_ids.extend(item for item in (edges[edge].get("source_fact_id"), edges[edge].get("target_fact_id"))
+                                if item in timeline)
+        return list(dict.fromkeys(fact_ids)), list(dict.fromkeys(edge_ids))
+
+    def summarize(fact_ids: list[str], edge_ids: list[str] | None = None) -> dict:
+        events = [timeline[tid] for tid in fact_ids]
+        out = {
+            "facts": len(events),
+            "by_modality": _count_event_modalities(events),
+            "by_role": _count_event_roles(events),
+        }
+        if edge_ids is not None:
+            out["edges"] = len(edge_ids)
+            out["edges_by_level"] = _count_by(edges[item].get("claim_level") for item in edge_ids)
+        return out
+
+    chosen_facts, chosen_edges = facts_of(chosen)
+    published_facts, published_edges = facts_of(published)
+    selection = prepared["selection"]
+    return {
+        "available": {
+            "rows": sum((selection.get("available_by_modality") or {}).values()),
+            "by_modality": selection.get("available_by_modality") or {},
+            "by_kind": selection.get("available_by_kind") or {},
+            "candidate_groups_by_kind": selection.get("candidate_groups_by_kind") or {},
+        },
+        "selected": summarize(list(timeline), list(edges)),
+        "exposed": summarize(
+            [card["timeline_id"] for card in prepared["exposed_timeline"] if card.get("timeline_id") in timeline],
+            [edge["edge_id"] for edge in prepared["exposed_relations"] if edge.get("edge_id") in edges],
+        ),
+        "chosen_by_model": summarize(chosen_facts, chosen_edges),
+        "published_verified": summarize(published_facts, published_edges),
+    }
+
+
+def export_lineage_bundle(db, timeline: list[dict], lineage: dict[str, list[str]], *, chunk: int = 100) -> dict:
+    """Every lineage row plus parents, fetched in chunks below the query cap, with per-row checks."""
+    requested = list(dict.fromkeys(item for ids in lineage.values() for item in ids))
+    rows: dict[str, dict] = {}
+    pending = list(requested)
+    while pending:
+        batch, pending = pending[:chunk], pending[chunk:]
+        for row in db.get(batch)["rows"]:
+            rows[row["evidence_id"]] = row
+        parents = [row["parent_evidence_id"] for row in rows.values()
+                   if row.get("parent_evidence_id") and row["parent_evidence_id"] not in rows
+                   and row["parent_evidence_id"] not in pending]
+        pending.extend(dict.fromkeys(parents))
+    expected = set(requested) | {row["parent_evidence_id"] for row in rows.values() if row.get("parent_evidence_id")}
+    missing = sorted(expected - set(rows))
+    failures = []
+    for event in timeline:
+        tid = event["timeline_id"]
+        members = [rows[item] for item in lineage.get(tid, []) if item in rows]
+        parent_ids = {row["parent_evidence_id"] for row in members if row.get("parent_evidence_id")}
+        kind = (event.get("source") or {}).get("kind")
+        for row in members:
+            if row["evidence_id"] in parent_ids and row["kind"] != kind:
+                continue
+            if row.get("entity") != event.get("entity"):
+                failures.append({"timeline_id": tid, "evidence_id": row["evidence_id"], "reason": "entity_differs_from_fact"})
+            if kind == "iec104_asdu" and row.get("ca_ioa") != event.get("ca_ioa"):
+                failures.append({"timeline_id": tid, "evidence_id": row["evidence_id"], "reason": "ca_ioa_differs_from_fact"})
+            if not (float(event["time"]) - 1e-9 <= row["timestamp"] <= float(event["time_end"]) + 1e-9):
+                failures.append({"timeline_id": tid, "evidence_id": row["evidence_id"], "reason": "time_outside_fact_span"})
+    return {
+        "db_fingerprint": _db_fingerprint(db),
+        "requested_count": len(requested),
+        "expected_with_parents": len(expected),
+        "exported_count": len(rows),
+        "missing_ids": missing,
+        "row_check_failures": failures,
+        "rows": sorted(rows.values(), key=lambda row: (row["timestamp"], row["evidence_id"])),
+    }
+
+
+def _count_by(values) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for value in values:
+        key = str(value)
+        counts[key] = counts.get(key, 0) + 1
+    return counts
 
 
 def _count_event_modalities(events: list[dict]) -> dict[str, int]:

@@ -59,7 +59,17 @@ def main(argv=None) -> None:
     post.add_argument("--methods", default="B4")
     post.add_argument("--num-predict", type=int, default=512)
     post.add_argument("--num-ctx", type=int, default=8192)
+    protocol = commands.add_parser("postalert-protocol")
+    protocol.add_argument("--protocol", type=Path, required=True)
+    protocol.add_argument("--out", type=Path, required=True)
+    protocol.add_argument("--endpoint", default="http://127.0.0.1:11434")
     args = parser.parse_args(argv)
+    if args.command == "postalert-protocol":
+        from .postalert.runner import run_protocol
+        summary = run_protocol(args.protocol, args.out, endpoint=args.endpoint)
+        print(json.dumps({"out": str(args.out), "code_sha256": summary["code_sha256"],
+                          "bundles": summary["bundles"]}, indent=2, default=str))
+        return
     if args.command == "index":
         meta = index_window(
             args.archive, scenario=args.scenario, recording=args.recording, start=args.start,

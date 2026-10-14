@@ -111,6 +111,9 @@ def open_indexed(path: Path):
     return conn, {
         "incident_start": get_meta(conn, "incident_start"),
         "incident_end": get_meta(conn, "incident_end"),
+        "indexed_start": get_meta(conn, "indexed_start"),
+        "indexed_end": get_meta(conn, "indexed_end"),
+        "context_seconds": get_meta(conn, "context_seconds"),
         "counts": get_meta(conn, "counts"),
         "limitations": get_meta(conn, "limitations"),
         "cross_check": get_meta(conn, "cross_check"),

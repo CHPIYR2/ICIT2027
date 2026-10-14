@@ -1,7 +1,8 @@
 """Candidate relations from the timeline.
 
-A shared TCP direction, frame, CA/IOA point, or device prefix is an observed
-fact. A gap of at most two seconds with no other shared identifier stays
+A shared TCP direction, IEC-104 frame, CA/IOA point, or device prefix is an
+observed record link. Edge provenance is the lineage of `source_fact_id` and
+`target_fact_id` only. A gap of at most two seconds with no other shared identifier stays
 temporal co-occurrence. It is not a supported inference and not a cause.
 Candidate kind (`candidate_level`) is kept separate from `verification_status`.
 """
@@ -26,10 +27,14 @@ def discover_relations(timeline: list[dict]) -> dict:
     _communications(graph, timeline, nodes, linked)
     _same_device(graph, timeline, nodes, linked)
     _shared_source(graph, timeline, nodes, linked)
+    _same_frame(graph, timeline, nodes, linked)
     _cooccurrence(graph, timeline, nodes, linked)
     _disputes(graph, timeline, nodes)
+    node_to_fact = {node["node_id"]: tid for tid, node in nodes.items()}
     for edge in graph.edges.values():
         edge["causal_status"] = "not_established"
+        edge["source_fact_id"] = node_to_fact.get(edge["source"])
+        edge["target_fact_id"] = node_to_fact.get(edge["target"])
     return {"graph": graph, "relations": [_public(edge) for edge in graph.edges.values()]}
 
 
@@ -90,6 +95,26 @@ def _shared_source(graph, timeline, nodes, linked) -> None:
         )
         _mark(edge, "observed_fact", "supported", "One mapped point. Not a second modality and not a cause.")
         linked.add((event["timeline_id"], other["timeline_id"]))
+
+
+def _same_frame(graph, timeline, nodes, linked) -> None:
+    """Information objects carried by one IEC-104 frame share a source container."""
+    points = [event for event in timeline if event["source"]["kind"] == "iec104_asdu" and event.get("lineage")]
+    for index, left in enumerate(points):
+        for right in points[index + 1:]:
+            if _already(linked, left, right):
+                continue
+            shared = [item for item in left["lineage"] if item in set(right["lineage"])]
+            if not shared:
+                continue
+            edge = graph.add_edge(
+                source=nodes[left["timeline_id"]]["node_id"], target=nodes[right["timeline_id"]]["node_id"],
+                relation_type="same_frame", origin="observed", evidence_ids=shared[:4],
+                rationale="Both information objects were carried by the same IEC-104 frame. One source container, not independent evidence.",
+                built_by="record_link",
+            )
+            _mark(edge, "observed_fact", "supported", "Same frame. Not independent and not a cause.")
+            linked.add((left["timeline_id"], right["timeline_id"]))
 
 
 def _cooccurrence(graph, timeline, nodes, linked) -> None:
@@ -153,6 +178,8 @@ def _shared_identifier(left, right) -> bool:
         return False
     if left.get("ca_ioa") and left.get("ca_ioa") == right.get("ca_ioa"):
         return False
+    if set(left.get("lineage") or []) & set(right.get("lineage") or []):
+        return False
     return _stem(left) is not None and _stem(left) == _stem(right) and left["entity"] != right["entity"]
 
 
@@ -192,6 +219,8 @@ def _public(edge: dict) -> dict:
     ids = list(edge.get("evidence_ids") or [])
     return {
         "edge_id": edge["edge_id"],
+        "source_fact_id": edge.get("source_fact_id"),
+        "target_fact_id": edge.get("target_fact_id"),
         "source_entity": edge["source_entity"],
         "target_entity": edge["target_entity"],
         "source_modality": edge["source_modality"],

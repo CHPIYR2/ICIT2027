@@ -126,8 +126,33 @@ def score_run(prepared: dict, result: dict, gold: dict, *, db=None) -> dict:
         "unverified_baseline_claims": len(unverified_raw),
         "confirmed_inferred_relations": len(result["report"].get("confirmed_inferred_relations") or []),
         "minimum_report": result["minimum"],
+        "published_record_links": sum(
+            claim.get("claim_type") == "relation_claim" and claim.get("canonical_origin") == "observed"
+            for claim in result["published_claims"]
+        ),
+        "same_frame_relations": sum(item.get("relation_type") == "same_frame" for item in prepared["relations"]),
         "citation_presence_in_timeline": _citation_presence(timeline_ids, claims),
         "rejected_reasons": _reasons(result),
+        **_attribution_counts(result),
+    }
+
+
+def _attribution_counts(result) -> dict:
+    verification = result["verification"]
+    pool = [
+        *(verification.get("verified") or []), *(verification.get("rejected") or []),
+        *(verification.get("offline_audit_verified") or []), *(verification.get("offline_audit_rejected") or []),
+    ]
+    time_match: dict[str, int] = {}
+    for claim in pool:
+        key = str(claim.get("time_match"))
+        time_match[key] = time_match.get(key, 0) + 1
+    return {
+        "claims_with_model_supplied_evidence_ids": sum(bool(claim.get("model_supplied_evidence_ids")) for claim in pool),
+        "claims_with_system_resolved_evidence_ids": sum(bool(claim.get("system_resolved_evidence_ids")) for claim in pool),
+        "model_selected_fact_ids": sorted({item for claim in pool for item in claim.get("model_selected_fact_ids") or []}),
+        "model_selected_edge_ids": sorted({item for claim in pool for item in claim.get("model_selected_edge_ids") or []}),
+        "time_match": time_match,
     }
 
 

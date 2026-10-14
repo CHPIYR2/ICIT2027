@@ -1,0 +1,26 @@
+{
+  "name": "postalert-t3-atomic",
+  "purpose": "Regenerate the three T2 frozen windows after the IEC-104 atomicity, lineage export, score, and edge-provenance fixes. Development diagnosis only; not a gold evaluation.",
+  "model": "qwen3.5:9b-q4_K_M",
+  "temperature": 0,
+  "seed": 1,
+  "num_ctx": 8192,
+  "allow_salvage": false,
+  "selection_limit": 24,
+  "background_seconds": 15,
+  "background_policy": "The 15 s immediately before the window, clipped to the indexed range. A clipped or empty background is recorded, not filled.",
+  "cases": [
+    {"name": "supplied-ev0961", "db": "runs/etgi/basic-ev0961/evidence.sqlite"},
+    {"name": "preceding-ev0961", "db": "runs/etgi/basic-ev0961/evidence.sqlite", "window": "preceding", "preceding_seconds": 15},
+    {"name": "supplied-ev12", "db": "runs/etgi/memory-comparison-20261014/ev_12dcd56b2f5e78144cfb/evidence.sqlite"}
+  ],
+  "variants": [
+    {"level": "B0", "claim_mode": "typed_refs", "num_predict": 512},
+    {"level": "B1", "claim_mode": "typed_refs", "num_predict": 512},
+    {"level": "B2", "claim_mode": "typed_refs", "num_predict": 512},
+    {"level": "B3", "claim_mode": "typed_refs", "num_predict": 512},
+    {"level": "B4", "claim_mode": "typed_refs", "num_predict": 512},
+    {"level": "B4", "claim_mode": "free_form", "num_predict": 512},
+    {"level": "B4", "claim_mode": "free_form", "num_predict": 1536}
+  ]
+}

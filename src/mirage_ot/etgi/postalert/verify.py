@@ -16,6 +16,7 @@ Canonical anchor binding:
 """
 from __future__ import annotations
 
+TIME_TOLERANCE_SECONDS = 1.0
 _LEVELS = {"observed_fact", "temporal_cooccurrence", "supported_inference", "unresolved", "disputed"}
 _CAUSAL = (" cause", " caused", " because of the attack", " triggered by ")
 _CLAIM_KINDS = ("observation_claim", "measurement_claim", "relation_claim", "absence_claim")
@@ -34,7 +35,8 @@ def verify_claims(db, claims: list[dict], relations: list[dict], timeline: list[
             continue
         claim = _normalize(raw, timeline_by_id, edge_by_id, lineage_map)
         reasons, rendered, meta = _check(db, claim, raw, relations, timeline_by_id, edge_by_id, lineage_map)
-        record = {"claim_index": index, **claim, **meta, "reasons": reasons}
+        record = {"claim_index": index, **claim, **meta, **_attribution(raw, claim, timeline_by_id),
+                  "reasons": reasons}
         if reasons:
             rejected.append(record)
         else:
@@ -44,6 +46,40 @@ def verify_claims(db, claims: list[dict], relations: list[dict], timeline: list[
                 record["unverified_model_statement"] = claim["statement"]
             verified.append(record)
     return {"verified": verified, "rejected": rejected}
+
+
+def _attribution(raw: dict, claim: dict, timeline_by_id: dict) -> dict:
+    """Separate what the model chose from what the system filled in."""
+    fact_id = raw.get("fact_id") or raw.get("timeline_id")
+    supplied = [str(item) for item in raw.get("evidence_ids") or []]
+    resolved = [] if supplied else [str(item) for item in claim.get("evidence_ids") or []]
+    return {
+        "model_selected_fact_ids": [fact_id] if fact_id else [],
+        "model_selected_edge_ids": [raw["edge_id"]] if raw.get("edge_id") else [],
+        "model_supplied_evidence_ids": supplied,
+        "system_resolved_evidence_ids": resolved,
+        "time_tolerance_seconds": TIME_TOLERANCE_SECONDS,
+        "time_match": _time_match(raw, timeline_by_id.get(fact_id) if fact_id else None),
+    }
+
+
+def _time_match(raw: dict, event: dict | None) -> str:
+    supplied = [raw.get(key) for key in ("time", "start_time", "end_time") if raw.get(key) is not None]
+    if not supplied:
+        return "inherited_from_anchor" if event else "no_time_supplied"
+    if event is None:
+        return "row_tolerance_only"
+    try:
+        stamps = [float(item) for item in supplied]
+    except (TypeError, ValueError):
+        return "not_numeric"
+    low = float(event["time"])
+    high = float(event.get("time_end", event["time"]))
+    if all(low <= stamp <= high for stamp in stamps):
+        return "exact_anchor"
+    if all(low - TIME_TOLERANCE_SECONDS <= stamp <= high + TIME_TOLERANCE_SECONDS for stamp in stamps):
+        return "tolerance_aligned"
+    return "outside_tolerance"
 
 
 def _build_lineage_map(timeline_by_id: dict[str, dict], lineage: dict[str, list[str]] | None) -> dict[str, set[str]]:
@@ -178,12 +214,12 @@ def _event_time_matches_claim(claim: dict, event: dict) -> bool:
     high = float(event.get("time_end", event["time"]))
     if claim.get("time") is not None:
         stamp = float(claim["time"])
-        return low - 1.0 <= stamp <= high + 1.0
+        return low - TIME_TOLERANCE_SECONDS <= stamp <= high + TIME_TOLERANCE_SECONDS
     start = low if claim.get("start_time") is None else float(claim["start_time"])
     end = high if claim.get("end_time") is None else float(claim["end_time"])
     if end < start:
         return False
-    return start <= high + 1.0 and end >= low - 1.0
+    return start <= high + TIME_TOLERANCE_SECONDS and end >= low - TIME_TOLERANCE_SECONDS
 
 
 def _check_observation(claim: dict, raw: dict, rows: list[dict], timeline_by_id: dict,
@@ -331,11 +367,11 @@ def _check_relation(claim: dict, raw: dict, rows: list[dict], relations: list[di
 
 
 def _edge_allowed_ids(edge: dict, timeline_by_id: dict, lineage_map: dict[str, set[str]]) -> set[str]:
+    """The edge's own ids plus the lineage of its two endpoint facts, not every fact on the same entity."""
     allowed = set(edge.get("evidence_ids") or [])
-    endpoints = {edge.get("source_entity"), edge.get("target_entity")}
-    for tid, event in timeline_by_id.items():
-        if event.get("entity") in endpoints:
-            allowed |= lineage_map.get(tid, set(event.get("evidence_ids") or []))
+    for tid in (edge.get("source_fact_id"), edge.get("target_fact_id")):
+        if tid and tid in timeline_by_id:
+            allowed |= lineage_map.get(tid, set(timeline_by_id[tid].get("evidence_ids") or []))
     return allowed
 
 
@@ -428,14 +464,14 @@ def _row_in_time(claim: dict, row: dict) -> bool:
         return False
     stamp = row["timestamp"]
     if claim.get("time") is not None:
-        return abs(stamp - float(claim["time"])) <= 1.0
+        return abs(stamp - float(claim["time"])) <= TIME_TOLERANCE_SECONDS
     start = None if claim.get("start_time") is None else float(claim["start_time"])
     end = None if claim.get("end_time") is None else float(claim["end_time"])
     if start is not None and end is not None and end < start:
         return False
-    if start is not None and stamp < start - 1.0:
+    if start is not None and stamp < start - TIME_TOLERANCE_SECONDS:
         return False
-    if end is not None and stamp > end + 1.0:
+    if end is not None and stamp > end + TIME_TOLERANCE_SECONDS:
         return False
     return True
 

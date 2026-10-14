@@ -4,7 +4,7 @@ from pathlib import Path
 from mirage_ot.etgi.agent.ollama import LLMTurn
 from mirage_ot.etgi.evidence.queries import EvidenceDB
 from mirage_ot.etgi.evidence.store import connect, create, insert_evidence
-from mirage_ot.etgi.postalert.pipeline import prepare, run_explanation, write_run
+from mirage_ot.etgi.postalert.pipeline import export_lineage_bundle, prepare, run_explanation, write_run
 from mirage_ot.etgi.postalert.verify import verify_claims
 
 
@@ -424,3 +424,155 @@ def test_absence_claim_rejects_range_outside_indexed_window(tmp_path):
     assert len(checked["rejected"]) == 1
     assert "absence_range_outside_indexed_incident_window" in checked["rejected"][0]["reasons"]
 
+
+
+def _multi_point_db(tmp_path: Path) -> EvidenceDB:
+    """Two IEC-104 frames, each carrying two information objects, captured at two vantages."""
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    rows = []
+    for frame, stamp, voltage, power in (("frame-1", 1002.0, 0.98, 33000.0), ("frame-2", 1004.0, 0.97, 31000.0)):
+        for vantage in ("n302", "n318"):
+            parent = f"EV-{frame[-1]}{vantage[-1]}" + "0" * 14
+            rows.append(_row(parent, stamp, "network", "10.0.0.1:2404->10.0.0.2:50000/TCP", "tcp_packet", 120,
+                             fingerprint=frame, vantage=vantage, src="10.0.0.1", dst="10.0.0.2",
+                             sport=2404, dport=50000))
+            rows.append(_row(f"EV-{frame[-1]}{vantage[-1]}v" + "0" * 13, stamp, "network", "bus.7:voltage",
+                             "iec104_asdu", voltage, fingerprint=frame, vantage=vantage, ca_ioa="129.10010",
+                             protocol_class="monitor", parent_evidence_id=parent))
+            rows.append(_row(f"EV-{frame[-1]}{vantage[-1]}p" + "0" * 13, stamp, "network", "sgen.9:active_power",
+                             "iec104_asdu", power, fingerprint=frame, vantage=vantage, ca_ioa="125.10080",
+                             protocol_class="monitor", parent_evidence_id=parent))
+    for row in rows:
+        insert_evidence(conn, row)
+    conn.commit()
+    return EvidenceDB(conn, incident_start=1000, incident_end=1010)
+
+
+def test_iec104_points_in_one_frame_are_separate_facts_with_shared_lineage(tmp_path):
+    db = _multi_point_db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    points = {event["entity"]: event for event in prepared["timeline"] if event["source"]["kind"] == "iec104_asdu"}
+    assert set(points) == {"bus.7:voltage", "sgen.9:active_power"}
+    voltage, power = points["bus.7:voltage"], points["sgen.9:active_power"]
+    assert (voltage["value_min"], voltage["value_max"]) == (0.97, 0.98)
+    assert (power["value_min"], power["value_max"]) == (31000.0, 33000.0)
+    assert voltage["sample_count"] == 2 and power["sample_count"] == 2
+    assert voltage["ca_ioa"] == "129.10010" and power["ca_ioa"] == "125.10080"
+    assert set(voltage["lineage"]) == set(power["lineage"])
+    assert voltage["independent"] is False and power["independent"] is False
+    pair = {voltage["timeline_id"], power["timeline_id"]}
+    links = [r for r in prepared["relations"] if {r["source_fact_id"], r["target_fact_id"]} == pair]
+    assert [(r["relation_type"], r["claim_level"]) for r in links] == [("same_frame", "observed_fact")]
+    for row in export_lineage_bundle(db, prepared["timeline"], prepared["lineage"])["rows"]:
+        if row["kind"] == "iec104_asdu":
+            owner = voltage if row["entity"] == "bus.7:voltage" else power
+            assert row["evidence_id"] in prepared["lineage"][owner["timeline_id"]]
+            other = power if owner is voltage else voltage
+            assert row["evidence_id"] not in prepared["lineage"][other["timeline_id"]]
+
+
+def test_measurement_from_a_sibling_point_in_the_same_frame_is_rejected(tmp_path):
+    db = _multi_point_db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    voltage = next(event for event in prepared["timeline"] if event["entity"] == "bus.7:voltage")
+    claim = {"claim_type": "measurement_claim", "fact_id": voltage["timeline_id"], "value": 33000.0,
+             "claim_level": "observed_fact"}
+    checked = verify_claims(db, [claim], prepared["relations"], prepared["timeline"], lineage=prepared["lineage"])
+    assert checked["verified"] == []
+
+
+def test_same_flow_at_two_vantages_reports_distinct_frames(tmp_path):
+    prepared = prepare(_multi_point_db(tmp_path), 1000, 1010, background_start=1000, background_end=1000)
+    flow = next(event for event in prepared["timeline"] if event["role"] == "communication")
+    assert flow["packet_count"] == 4
+    assert flow["packet_count_by_vantage"] == {"n302": 2, "n318": 2}
+    assert flow["distinct_frame_count"] == 2
+
+
+def test_lineage_bundle_exports_every_id_beyond_the_query_cap(tmp_path):
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    for index in range(130):
+        insert_evidence(conn, _row(f"EV-{index:016x}", 1000 + index * 0.05, "network",
+                                   "10.0.0.1:2404->10.0.0.2:50000/TCP", "tcp_packet", 60,
+                                   fingerprint=f"frame-{index}", vantage="n302", src="10.0.0.1", dst="10.0.0.2",
+                                   sport=2404, dport=50000))
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000, incident_end=1010)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    bundle = export_lineage_bundle(db, prepared["timeline"], prepared["lineage"])
+    assert bundle["requested_count"] == 130
+    assert bundle["exported_count"] == 130
+    assert bundle["missing_ids"] == []
+    assert bundle["row_check_failures"] == []
+
+
+def test_lineage_bundle_includes_parents_and_passes_row_checks(tmp_path):
+    db = _multi_point_db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    bundle = export_lineage_bundle(db, prepared["timeline"], prepared["lineage"], chunk=3)
+    assert bundle["missing_ids"] == []
+    assert bundle["row_check_failures"] == []
+    assert bundle["exported_count"] == 12
+
+
+def test_edge_provenance_excludes_same_entity_at_another_time(tmp_path):
+    db = _db(tmp_path)
+    timeline = [
+        {"timeline_id": "TL001", "entity": "10.0.0.1:2404->10.0.0.2:50000/TCP", "time": 1001, "time_end": 1001,
+         "evidence_ids": ["EV-aaaaaaaaaaaaaaaa"], "role": "communication", "source": {"kind": "tcp_packet"}},
+        {"timeline_id": "TL002", "entity": "10.0.0.2:50000->10.0.0.1:2404/TCP", "time": 1001.1, "time_end": 1001.1,
+         "evidence_ids": ["EV-bbbbbbbbbbbbbbbb"], "role": "communication", "source": {"kind": "tcp_packet"}},
+        {"timeline_id": "TL003", "entity": "10.0.0.1:2404->10.0.0.2:50000/TCP", "time": 1009, "time_end": 1009,
+         "evidence_ids": ["EV-dddddddddddddddd"], "role": "communication", "source": {"kind": "tcp_packet"}},
+    ]
+    edge = {"edge_id": "R0001", "source_fact_id": "TL001", "target_fact_id": "TL002",
+            "source_entity": timeline[0]["entity"], "target_entity": timeline[1]["entity"],
+            "relation_type": "communication", "claim_level": "observed_fact",
+            "verification_status": "supported", "status": "supported",
+            "evidence_ids": ["EV-aaaaaaaaaaaaaaaa", "EV-bbbbbbbbbbbbbbbb"]}
+    lineage = {item["timeline_id"]: item["evidence_ids"] for item in timeline}
+    stray = {"claim_type": "relation_claim", "edge_id": "R0001", "claim_level": "observed_fact",
+             "evidence_ids": ["EV-aaaaaaaaaaaaaaaa", "EV-dddddddddddddddd"]}
+    checked = verify_claims(db, [stray], [edge], timeline, lineage=lineage)
+    assert "edge_evidence_not_in_edge_provenance" in checked["rejected"][0]["reasons"]
+
+
+def test_flat_or_missing_background_gives_bounded_labeled_scores(tmp_path):
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    for index in range(5):
+        insert_evidence(conn, _row(f"EV-b{index:015x}", 990 + index, "electrical", "bus.0:voltage",
+                                   "electrical_update", 1.0, update_status="new"))
+    insert_evidence(conn, _row("EV-c000000000000000", 1002, "electrical", "bus.0:voltage",
+                               "electrical_update", 1.0001, update_status="new"))
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000, incident_end=1010)
+    flat = prepare(db, 1000, 1010, background_start=985, background_end=1000)
+    item = flat["timeline"][0]
+    detail = flat["selection"]["query"]
+    assert detail["background_status"] == "observed"
+    assert 0 <= item["score"] <= 10
+    none = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    assert none["selection"]["query"]["background_status"] == "none_requested"
+    assert none["timeline"][0]["score"] == 0.0
+
+
+def test_claim_records_model_choices_separately_from_system_resolution(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    fact = next(event for event in prepared["timeline"] if event["role"] == "electrical_change"
+                and event["entity"] == "bus.0:voltage")
+    exact = {"claim_type": "measurement_claim", "fact_id": fact["timeline_id"], "value": 1.0,
+             "claim_level": "observed_fact"}
+    shifted = {**exact, "time": fact["time"] + 0.6}
+    checked = verify_claims(db, [exact, shifted], prepared["relations"], prepared["timeline"],
+                            lineage=prepared["lineage"])
+    first, second = checked["verified"]
+    assert first["model_selected_fact_ids"] == [fact["timeline_id"]]
+    assert first["model_supplied_evidence_ids"] == []
+    assert first["system_resolved_evidence_ids"]
+    assert first["time_match"] == "inherited_from_anchor"
+    assert second["time_match"] == "tolerance_aligned"
+    assert second["time_tolerance_seconds"] == 1.0

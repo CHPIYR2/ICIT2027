@@ -1,18 +1,24 @@
 """Rank incident rows against a background interval.
 
-The score uses a change relative to the background, whether a value is present,
-and whether a device or CA/IOA mapping exists. IEC type-id classes are the
-decoder's monitor/control/system ranges. They are not attack labels.
-The category quotas below are a fixed coverage policy so one high-frequency
-modality does not crowd out the others; they are not an attack importance rule.
+An IEC-104 frame can carry several information objects. The frame is kept as
+the source container in lineage, but each (class, entity, CA/IOA) point is its
+own observation group, so values of different points are never mixed.
+
+Scores are log-scaled and comparable only within one role. The category quotas
+are a fixed exposure policy so one high-frequency modality does not crowd out
+the others; neither the score nor the quotas are an event-importance gold.
+IEC type-id classes are decoder ranges, not attack labels.
 """
 from __future__ import annotations
+import math
 from ..evidence.store import public_row
 
 _HOLD = {"hold", "initial"}
+SCORE_CAP = 10.0
+RELATIVE_FLOOR = 0.01
 COVERAGE_POLICY_NOTE = (
-    "Fixed category quotas ensure network flows, decoded ASDUs, and IPAL electrical updates "
-    "remain represented when present. They are an exposure policy, not an attack classifier."
+    "Fixed category quotas keep network flows, decoded ASDU points, and IPAL electrical updates "
+    "represented when present. They are an exposure policy, not an attack classifier or importance gold."
 )
 
 
@@ -21,9 +27,10 @@ def select_evidence(db, start: float, end: float, *, background_start: float | N
     background_end = start if background_end is None else background_end
     background_start = background_end if background_start is None else background_start
     incident_seconds = max(end - start, 1.0)
-    background_seconds = max(background_end - background_start, 0.0)
-    incident = _load(db, start, end)
     background = _load(db, background_start, background_end) if background_start < background_end else []
+    background_seconds = _observed_span(background, background_start, background_end)
+    background_status = _background_status(background, background_start, background_end)
+    incident = _load(db, start, end)
     excluded = []
     kept_rows = []
     for row in incident:
@@ -33,11 +40,10 @@ def select_evidence(db, start: float, end: float, *, background_start: float | N
         else:
             kept_rows.append(row)
     groups = _groups(kept_rows)
-    collapsed = []
-    for row in kept_rows:
-        if row.get("parent_evidence_id"):
-            collapsed.append({"evidence_id": row["evidence_id"], "reason": "same_packet_derivative",
-                              "attached_to": row["parent_evidence_id"]})
+    collapsed = [
+        {"evidence_id": row["evidence_id"], "reason": "same_packet_derivative", "attached_to": row["parent_evidence_id"]}
+        for row in kept_rows if row.get("parent_evidence_id")
+    ]
     background_groups = _groups([row for row in background if _exclude_reason(row) is None])
     ranked = []
     for key, group in groups.items():
@@ -88,8 +94,11 @@ def select_evidence(db, start: float, end: float, *, background_start: float | N
             "background_start": background_start,
             "background_end": background_end,
             "incident_seconds": incident_seconds,
-            "background_seconds": background_seconds,
-            "order": "score descending, then time",
+            "background_seconds_requested": max(background_end - background_start, 0.0),
+            "background_seconds_observed": background_seconds,
+            "background_status": background_status,
+            "order": "score descending within each role quota, then time",
+            "score_scale": f"min(log1p(z), {SCORE_CAP}); comparable within one role only",
             "limit": limit,
             "coverage_policy": COVERAGE_POLICY_NOTE,
         },
@@ -97,6 +106,7 @@ def select_evidence(db, start: float, end: float, *, background_start: float | N
         "background_rows": len(background),
         "available_by_modality": _modality_counts(kept_rows),
         "available_by_kind": _kind_counts(kept_rows),
+        "candidate_groups_by_kind": _group_kind_counts(groups),
         "excluded_count": len(excluded),
         "excluded_by_reason": counts,
         "collapsed_by_reason": collapsed_counts,
@@ -115,6 +125,22 @@ def _load(db, start: float, end: float) -> list[dict]:
     return [public_row(row) for row in found]
 
 
+def _observed_span(rows: list[dict], start: float, end: float) -> float:
+    if not rows:
+        return 0.0
+    low = max(start, min(row["timestamp"] for row in rows))
+    high = min(end, max(row["timestamp"] for row in rows))
+    return max(high - low, 0.0)
+
+
+def _background_status(rows: list[dict], start: float, end: float) -> str:
+    if end <= start:
+        return "none_requested"
+    if not rows:
+        return "empty_not_indexed_or_no_rows"
+    return "observed"
+
+
 def _exclude_reason(row: dict) -> str | None:
     if row.get("update_status") in _HOLD or row.get("kind") == "electrical_hold_summary":
         return "forward_filled_or_initial_state"
@@ -128,9 +154,9 @@ def _groups(rows: list[dict]) -> dict:
             key = ("tcp", row.get("entity"), row.get("vantage"))
         elif row["kind"] == "electrical_update":
             key = ("electrical", row.get("entity"))
-        elif row.get("parent_evidence_id") or (row.get("fingerprint") and row["kind"] == "iec104_asdu"):
+        elif row["kind"] == "iec104_asdu":
             kind_key = "packet_control" if row.get("protocol_class") == "control" else "packet"
-            key = (kind_key, row.get("parent_evidence_id") or row.get("fingerprint"))
+            key = (kind_key, row.get("entity"), row.get("ca_ioa"))
         else:
             key = ("row", row["evidence_id"])
         bucket = grouped.setdefault(key, {"rows": [], "time": row["timestamp"]})
@@ -139,50 +165,66 @@ def _groups(rows: list[dict]) -> dict:
     return grouped
 
 
+def _numeric(rows: list[dict]) -> list[float]:
+    return [
+        float(row["value"]) for row in rows
+        if row.get("value_present") and isinstance(row.get("value"), (int, float)) and not isinstance(row.get("value"), bool)
+    ]
+
+
 def _score(key, group, background, *, incident_seconds: float, background_seconds: float) -> tuple[float, dict]:
     rows = group["rows"]
     if key[0] == "tcp":
-        current = len(rows)
-        base = len(background["rows"]) if background else 0
-        incident_rate = current / max(incident_seconds, 1.0)
-        background_rate = (base / background_seconds) if background and background_seconds > 0 else 0.0
+        frames = len({row.get("fingerprint") or row["evidence_id"] for row in rows})
+        base_frames = len({row.get("fingerprint") or row["evidence_id"] for row in background["rows"]}) if background else 0
+        incident_rate = frames / max(incident_seconds, 1.0)
+        background_rate = (base_frames / background_seconds) if background and background_seconds > 0 else None
+        basis = "rate_minus_background" if background_rate is not None else "rate_without_background"
+        excess = incident_rate - (background_rate or 0.0)
         mapped = 1.0 if rows[0].get("src_ip") and rows[0].get("dst_ip") else 0.5
-        return max(incident_rate - background_rate, 0.0) * mapped, {
-            "packets": current,
-            "background_packets": base,
-            "packets_per_second": round(incident_rate, 4),
-            "background_packets_per_second": round(background_rate, 4),
+        score = min(math.log1p(max(excess, 0.0)), SCORE_CAP) * mapped
+        return score, {
+            "basis": basis,
+            "packets_at_vantage": len(rows),
+            "distinct_frames": frames,
+            "background_distinct_frames": base_frames,
+            "frames_per_second": round(incident_rate, 4),
+            "background_frames_per_second": None if background_rate is None else round(background_rate, 4),
             "mapped": mapped == 1.0,
         }
-    values = [
-        row["value"] for row in rows
-        if row.get("value_present") and isinstance(row.get("value"), (int, float)) and not isinstance(row.get("value"), bool)
-    ]
-    background_values = []
-    if background:
-        background_values = [
-            row["value"] for row in background["rows"]
-            if row.get("value_present") and isinstance(row.get("value"), (int, float)) and not isinstance(row.get("value"), bool)
-        ]
+    values = _numeric(rows)
+    background_values = _numeric(background["rows"]) if background else []
+    z, basis = _robust_change(values, background_values)
     quality = 1.0 if values else 0.25
     mapped = 1.0 if any(row.get("ca_ioa") or ":" in str(row.get("entity") or "") for row in rows) else 0.6
-    if background_values and values:
-        center = _median(background_values)
-        scale = _mad(background_values, center) or 1e-3
-        change = max(abs(value - center) / scale for value in values)
-    elif len(values) >= 2:
-        change = max(values) - min(values)
-    elif values:
-        change = 1.0
-    else:
-        change = 0.0
-    iec = 1.0
-    if any(row.get("protocol_class") == "control" for row in rows):
-        iec = 2.0
-    return change * quality * mapped * iec, {
-        "change": change, "quality": quality, "mapped": mapped == 1.0,
-        "iec_class_weight": iec, "background_values": len(background_values),
+    score = min(math.log1p(z), SCORE_CAP) * quality * mapped
+    return score, {
+        "basis": basis, "z": round(z, 4), "quality": quality, "mapped": mapped == 1.0,
+        "samples": len(values), "background_values": len(background_values),
+        "iec_class": rows[0].get("protocol_class"),
     }
+
+
+def _robust_change(values: list[float], background: list[float]) -> tuple[float, str]:
+    """Change in units of background spread, or of 1% of the level when spread is zero."""
+    if not values:
+        return 0.0, "no_numeric_value"
+    if len(background) >= 3:
+        center = _median(background)
+        spread = 1.4826 * _mad(background, center)
+        if spread > 0:
+            return max(abs(value - center) for value in values) / spread, "background_robust_z"
+        scale = max(abs(center) * RELATIVE_FLOOR, 1e-6)
+        return max(abs(value - center) for value in values) / scale, "background_flat_relative_1pct"
+    if background:
+        center = _median(background)
+        scale = max(abs(center) * RELATIVE_FLOOR, 1e-6)
+        return max(abs(value - center) for value in values) / scale, "background_sparse_relative_1pct"
+    if len(values) >= 2:
+        center = _median(values)
+        scale = max(abs(center) * RELATIVE_FLOOR, 1e-6)
+        return (max(values) - min(values)) / scale, "within_window_range_relative_1pct"
+    return 0.0, "single_sample_no_background"
 
 
 def _modality_counts(rows: list[dict]) -> dict[str, int]:
@@ -198,6 +240,13 @@ def _kind_counts(rows: list[dict]) -> dict[str, int]:
     for row in rows:
         kind = str(row.get("kind") or "unknown")
         counts[kind] = counts.get(kind, 0) + 1
+    return counts
+
+
+def _group_kind_counts(groups: dict) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for key in groups:
+        counts[key[0]] = counts.get(key[0], 0) + 1
     return counts
 
 

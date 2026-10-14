@@ -120,13 +120,11 @@ def expose_timeline(timeline: list[dict], *, limit: int = 10) -> list[dict]:
 
 
 def expose_relations(relations: list[dict], exposed_timeline: list[dict], *, limit: int = 8) -> list[dict]:
-    exposed_entities = {event.get("entity") for event in exposed_timeline if event.get("entity")}
+    exposed_facts = {event.get("timeline_id") for event in exposed_timeline if event.get("timeline_id")}
     exposed_ids = {evidence_id for event in exposed_timeline for evidence_id in event.get("evidence_ids") or []}
 
     def _rank(rel: dict) -> tuple:
-        both_endpoints = int(
-            rel.get("source_entity") in exposed_entities and rel.get("target_entity") in exposed_entities
-        )
+        both_endpoints = int(rel.get("source_fact_id") in exposed_facts and rel.get("target_fact_id") in exposed_facts)
         any_id = int(bool(set(rel.get("evidence_ids") or []) & exposed_ids))
         is_supported = int(rel.get("claim_level") == "observed_fact" and rel.get("verification_status") == "supported")
         return (-both_endpoints, -is_supported, -any_id, rel.get("edge_id") or "")
