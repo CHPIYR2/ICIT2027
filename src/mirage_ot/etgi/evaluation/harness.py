@@ -299,11 +299,16 @@ def run_named(db: EvidenceDB, llm, name: str, out: Path, *, limitations=None,
     report = write_report(result, db, out, llm=llm)
     oracle = full_db or db
     questions = questions or []
-    predicted = answer_from_retrieval(oracle, questions, result["state"].retrieved_ids)
+    retrieved_ids = list(result["state"].retrieved_ids)
+    predicted = answer_from_retrieval(oracle, questions, retrieved_ids)
+    question_score = score_questions(questions, predicted)
+    gold_ids = {evidence_id for question in questions for evidence_id in question["evidence_ids"]}
+    question_score["gold_id_recall"] = (len(gold_ids & set(retrieved_ids)) / len(gold_ids)) if gold_ids else None
+    question_score["retrieved_evidence_count"] = len(retrieved_ids)
     summary = {
         "method": flags.method,
         "completion": result["state"].completion,
-        "questions": score_questions(questions, predicted),
+        "questions": question_score,
         "graph": score_graph(oracle, result["graph"]),
         "necessity": score_necessity(result["state"]),
         "llm_calls": result["state"].llm_calls,

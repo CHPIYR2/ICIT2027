@@ -23,7 +23,7 @@ def discover_members(archive: Path, scenario: str, recording: str) -> dict:
         names = zf.namelist()
     blocked = [name for name in names if name.endswith("events.json") or name.endswith("events.jsonl")
                or name.endswith("physical.zip")]
-    state = [name for name in names if name.endswith(f"{recording}.n302.state.gz")]
+    state = [name for name in names if Path(name).name.startswith(f"{recording}.") and name.endswith(".state.gz")]
     initial = [name for name in names if name.endswith(f"ipal/{recording}/initial_state.json")]
     point_map = [name for name in names if name.endswith(f"raw/{recording}/data-point-map.json")]
     pcaps = sorted(name for name in names if f"/raw/{recording}/pcap/" in name and name.endswith(".pcap"))
@@ -31,7 +31,7 @@ def discover_members(archive: Path, scenario: str, recording: str) -> dict:
         raise FileNotFoundError(f"{scenario} is not in {archive}")
     if len(state) != 1 or len(point_map) != 1 or not pcaps:
         raise FileNotFoundError(
-            f"Need one n302 state, one point map, and pcaps for {scenario} {recording}; "
+            f"Need one state file, one point map, and pcaps for {scenario} {recording}; "
             f"found state={state}, map={point_map}, pcaps={len(pcaps)}"
         )
     return {
@@ -177,7 +177,7 @@ def _index_state(conn, archive, member, initial, by_entity, by_ioa, start, end, 
                 "value_present": True,
                 "source_ref": obs.source_id,
                 "archive_member": member,
-                "vantage": "n302-state",
+                "vantage": _state_vantage(member),
                 "update_status": status,
                 "trust": "network-reported-not-simulator-truth",
                 "ca_ioa": ioas[0] if len(ioas) == 1 else None,
@@ -201,7 +201,7 @@ def _index_state(conn, archive, member, initial, by_entity, by_ioa, start, end, 
             "value_present": True,
             "source_ref": bucket["sources"][0] if bucket["sources"] else f"{member}:{entity}:hold",
             "archive_member": member,
-            "vantage": "n302-state",
+            "vantage": _state_vantage(member),
             "update_status": "hold",
             "trust": "network-reported-not-simulator-truth",
             "ca_ioa": ioas[0] if len(ioas) == 1 else None,
@@ -365,6 +365,11 @@ def _cross_check(conn, limit: int = 400) -> dict:
 
 def _packet_key(vantage, src, dst, sport, dport, timestamp) -> tuple:
     return (vantage, src, dst, sport, dport, round(float(timestamp), 6))
+
+
+def _state_vantage(member: str) -> str:
+    found = re.search(r"\.(n\d+)\.state", member)
+    return f"{found.group(1)}-state" if found else "state"
 
 
 def _vantage(member: str) -> str:
