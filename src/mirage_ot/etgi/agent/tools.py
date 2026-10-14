@@ -19,7 +19,10 @@ SPECS = [
     ("retrieve_raw_evidence", "Rows for explicit evidence ids."),
     ("propose_relations", "Propose candidate relations. This does not mark them supported."),
     ("revise_relation", "Ask to change a relation. A supported status is kept only if record checks agree."),
-    ("stop_investigation", "Stop requesting evidence."),
+    ("stop_investigation", "Stop requesting evidence and say what is still missing."),
+    ("set_subgoal", "Planner only. Name the next subgoal. This does not read the database."),
+    ("complete_subgoal", "Investigator only. Close the current subgoal and update the belief state."),
+    ("retrieve_subgoal_trajectory", "Return the stored action-observation pairs of one earlier subgoal."),
 ]
 
 
@@ -67,7 +70,16 @@ _SCHEMAS = {
         "edge_id": {"type": "string"}, "proposed_status": {"type": "string"},
         "reason": {"type": "string"}, "evidence_ids": {"type": "array", "items": {"type": "string"}}}},
     "stop_investigation": {"required": [], "properties": {
-        "unresolved_questions": {"type": "array", "items": {"type": "string"}}}},
+        "unresolved_questions": {"type": "array", "items": {"type": "string"}},
+        "reason": {"type": "string"}}},
+    "set_subgoal": {"required": ["subgoal"], "properties": {"subgoal": {"type": "string"}}},
+    "complete_subgoal": {"required": ["status"], "properties": {
+        "status": {"type": "string", "enum": ["achieved", "not_achieved", "insufficient_evidence"]},
+        "known_facts": {"type": "array"},
+        "unknowns": {"type": "array", "items": {"type": "string"}},
+        "contradictory_evidence": {"type": "array"}}},
+    "retrieve_subgoal_trajectory": {"required": ["subgoal_index"], "properties": {
+        "subgoal_index": {"type": "integer"}}},
 }
 
 
@@ -109,6 +121,11 @@ def validate_arguments(name: str, arguments: dict) -> tuple[bool, list[str]]:
                 value = item.get(key)
                 if value is None or value == "" or value == []:
                     errors.append(f"relations[{index}] missing {key}")
+    if name == "complete_subgoal" and arguments.get("status") not in (
+            "achieved", "not_achieved", "insufficient_evidence"):
+        errors.append("status must be achieved, not_achieved, or insufficient_evidence")
+    if name == "retrieve_subgoal_trajectory" and not isinstance(arguments.get("subgoal_index"), int):
+        errors.append("subgoal_index must be an integer")
     return not errors, errors
 
 
@@ -163,7 +180,8 @@ def _query(db, name, args, start, end, limit, offset, incident_start, incident_e
         )
     if name == "retrieve_raw_evidence":
         return db.get(list(args.get("evidence_ids") or []))
-    if name in ("propose_relations", "revise_relation", "stop_investigation"):
+    if name in ("propose_relations", "revise_relation", "stop_investigation",
+                "set_subgoal", "complete_subgoal", "retrieve_subgoal_trajectory"):
         return {"query": name, "accepted": True, "arguments": args, "data_is_untrusted_telemetry": True,
                 "rows": [], "evidence_ids": []}
     return {"query": name, "rows": [], "notes": [f"Unknown tool {name}"], "evidence_ids": [],

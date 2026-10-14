@@ -20,6 +20,7 @@ from ..verification.assess import apply_assessment, verify_edge
 from ..verification.necessity import run_necessity
 from ..verification.inference import assess_inference
 from .memory import InvestigationMemory
+from .subgoals import PLANNER_TOOLS, Belief, Subgoal, accept_statements, render_summary
 from .tools import dispatch, schemas, validate_arguments, _incident_window
 
 SYSTEM = """You investigate one operational-technology incident window.
@@ -30,6 +31,17 @@ Electrical values are network-reported unless a tool says otherwise.
 If the records are insufficient, leave the relation unresolved.
 The next action is one of: tool, propose_relations, or stop.
 A proposal may cite only evidence_id values that a tool returned.
+"""
+
+PLANNER_SYSTEM = SYSTEM + """
+You are the planner. Choose one next subgoal from the belief state, propose relations that cite evidence ids a tool already returned, or stop if the evidence is insufficient.
+Do not call an evidence query. Ask for one past subgoal trajectory only when its summary is not enough.
+"""
+
+INVESTIGATOR_SYSTEM = SYSTEM + """
+You are the investigator for the current subgoal. Call the evidence tools yourself.
+When this subgoal is finished, call complete_subgoal and say whether it was achieved, not achieved, or the evidence was insufficient.
+You may propose relations that cite evidence ids a tool returned, or stop the investigation if the evidence is insufficient.
 """
 
 NARRATIVE_SYSTEM = """Write an incident narrative from the JSON findings only.
@@ -86,6 +98,8 @@ class Flags:
     action_interface: str = "native_tools"
     allow_gap_fallback: bool = True
     investigation_memory: bool = False
+    subgoal_planning: bool = False
+    num_ctx: int = 8192
 
     def as_dict(self) -> dict:
         return dict(self.__dict__)
@@ -119,6 +133,11 @@ class RunState:
     completion: str = ""
     budget_hit: bool = False
     search_capped: bool = False
+    model_stop: bool = False
+    stop_reason: str = ""
+    context_limited_turns: int = 0
+    subgoals: list = field(default_factory=list)
+    belief: dict = field(default_factory=dict)
     model: str = ""
     narrative: str = ""
     narrative_rejected: bool = False
@@ -154,6 +173,9 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
             if evidence_id not in state.exposed_ids:
                 state.exposed_ids.append(evidence_id)
     stopped = False
+    if flags.subgoal_planning:
+        _run_subgoals(db, llm, state, graph, flags, trace_path, out, limitations or [])
+        stopped = True
     while not stopped and not _over(state, flags) and not _tools_exhausted(state, flags):
         json_mode = flags.action_interface == "json_action"
         require_tool = bool(
@@ -194,7 +216,7 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
                 rejected = True
                 continue
             if name == "stop_investigation":
-                state.unresolved_questions.extend(_questions(arguments))
+                _record_stop(state, arguments)
                 stopped = True
                 committed = True
                 continue
@@ -241,7 +263,7 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
         messages[:] = _trim_messages(messages)
         _checkpoint(out, state, graph, flags)
     inferred = [edge for edge in graph.edges.values() if edge.get("built_by") == "llm"]
-    if (not inferred and state.llm_queries and not _over(state, flags)
+    if (not flags.subgoal_planning and not inferred and state.llm_queries and not _over(state, flags)
             and state.llm_calls < flags.max_llm_calls):
         closing = _chat(
             llm, messages,
@@ -265,14 +287,13 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
                 _trace(trace_path, {"type": "propose_relations", "created": created, "origin": "llm",
                                     "evidence_ids": _cited(arguments)})
             elif name == "stop_investigation":
-                state.unresolved_questions.extend(_questions(arguments))
+                _record_stop(state, arguments)
             else:
                 _trace(trace_path, {"type": "ignored_closing_tool", "name": name, "arguments": arguments,
                                     "origin": "llm", "reason": "closing turn accepts propose_relations or stop only"})
     _verify_all(db, graph, state, flags, trace_path)
     _necessity(llm, db, graph, state, flags, trace_path)
-    if state.search_capped:
-        state.budget_hit = True
+    _close_status(state, graph)
     _checkpoint(out, state, graph, flags)
     return {"state": state, "graph": graph, "flags": flags, "limitations": limitations or [], "trace": str(trace_path)}
 
@@ -532,6 +553,9 @@ def _trace_llm(path, kind: str, turn, messages: list[dict] | None = None) -> Non
                   "prompt_chars": sum(len(str(message.get("content") or "")) for message in (messages or [])),
                   "done_reason": getattr(turn, "done_reason", ""),
                   "truncated": bool(getattr(turn, "truncated", False)),
+                  "context_limited": bool((getattr(turn, "raw", {}) or {}).get("context_limited")),
+                  "context_window": (getattr(turn, "raw", {}) or {}).get("context_window"),
+                  "prompt_plus_completion": (getattr(turn, "raw", {}) or {}).get("prompt_plus_completion"),
                   "message_keys": (getattr(turn, "raw", {}) or {}).get("message_keys"),
                   "stop_reason": getattr(turn, "done_reason", "") or ("tool_call" if turn.tool_calls else "no_tool_call")})
 
@@ -556,7 +580,7 @@ def _query_signature(name: str, arguments: dict, incident_start: float, incident
 
 
 def _execute(db, graph, state, name, arguments, trace_path, *, origin: str,
-             goal: str = "", remember: bool = False) -> dict:
+             goal: str = "", remember: bool = False, subgoal: str = "") -> dict:
     signature = _query_signature(name, arguments, state.incident_start, state.incident_end)
     if signature in state.called_signatures:
         state.duplicate_queries += 1
@@ -599,9 +623,10 @@ def _execute(db, graph, state, name, arguments, trace_path, *, origin: str,
     if remember:
         state.memory.add_cards(exposed["rows"])
         state.memory.record(signature=signature, tool=name, arguments=arguments, goal=goal,
-                            summary=exposed, evidence_ids=exposed["evidence_ids"], new_evidence_ids=new_ids)
+                            summary=exposed, evidence_ids=exposed["evidence_ids"], new_evidence_ids=new_ids,
+                            subgoal=subgoal)
     _trace(trace_path, {"type": "tool", "name": name, "arguments": arguments, "origin": origin,
-                        "goal": (goal or "")[:300], "duplicate": False,
+                        "goal": (goal or "")[:300], "subgoal": (subgoal or "")[:300], "duplicate": False,
                         "returned": result.get("returned"), "total": result.get("total"),
                         "evidence_ids": exposed["evidence_ids"], "new_evidence_ids": new_ids,
                         "exposed_evidence_ids": exposed["evidence_ids"]})
@@ -685,10 +710,13 @@ def _context_cards(db, state, graph, context: str) -> dict:
 
 def _chat(llm, messages, *, tools, state, flags, require_tool: bool = False, response_format=None):
     turn = llm.chat(messages, tools=tools, temperature=flags.temperature, seed=flags.seed + state.llm_calls,
-                    num_predict=flags.num_predict, require_tool=require_tool, response_format=response_format)
+                    num_predict=flags.num_predict, require_tool=require_tool, response_format=response_format,
+                    num_ctx=flags.num_ctx or None)
     state.llm_calls += 1
     state.prompt_tokens += turn.prompt_tokens
     state.completion_tokens += turn.completion_tokens
+    if (getattr(turn, "raw", {}) or {}).get("context_limited"):
+        state.context_limited_turns += 1
     return turn
 
 
@@ -707,6 +735,8 @@ def _actions(turn) -> list[dict]:
         return [{"name": "propose_relations", "arguments": parsed}]
     if action in ("revise", "revise_relation"):
         return [{"name": "revise_relation", "arguments": parsed}]
+    if action in ("set_subgoal", "complete_subgoal", "retrieve_subgoal_trajectory"):
+        return [{"name": action, "arguments": parsed}]
     return []
 
 
@@ -721,6 +751,302 @@ def _object(text: str) -> dict:
     except json.JSONDecodeError:
         return {}
     return value if isinstance(value, dict) else {}
+
+
+def _record_stop(state: RunState, arguments: dict) -> None:
+    state.model_stop = True
+    state.stop_reason = str(arguments.get("reason") or "")[:500]
+    state.unresolved_questions.extend(_questions(arguments))
+    if state.completion == "NO_VALID_MODEL_ACTION":
+        state.completion = ""
+
+
+def _close_status(state: RunState, graph) -> None:
+    """A model stop with no proposed edge is an abstention. A full tool budget is not."""
+    proposed = [
+        edge for edge in list(graph.edges.values()) + list(graph.removed.values())
+        if edge.get("built_by") == "llm"
+    ]
+    if state.model_stop and not proposed and state.completion != "NO_VALID_MODEL_ACTION":
+        state.completion = "MODEL_ABSTAINED"
+
+
+def _run_subgoals(db, llm, state, graph, flags, trace_path, out, limitations) -> None:
+    """Planner names a subgoal. The investigator calls evidence tools for that subgoal only."""
+    belief = Belief()
+    subgoals: list[Subgoal] = []
+    active: Subgoal | None = None
+    retrieved: list[int] = []
+    task = _task(db, state, graph, flags, limitations)
+    while not _over(state, flags):
+        if active is None:
+            messages = _role_messages(
+                PLANNER_SYSTEM, task, belief, subgoals, retrieved, state, graph, flags, active=None,
+            )
+            turn = _chat(
+                llm, messages, tools=schemas(PLANNER_TOOLS), state=state, flags=flags,
+                require_tool=bool(state.tool_choice_probe.get("server_accepts_tool_choice")),
+            )
+            _trace_llm(trace_path, "llm_planner", turn, messages)
+            outcome, active = _planner_turn(
+                db, graph, state, flags, belief, subgoals, retrieved, turn, trace_path,
+            )
+        else:
+            queries_open = state.tool_calls < flags.max_tool_calls
+            if not queries_open:
+                state.search_capped = True
+            names = (_QUERY_TOOLS if queries_open else ()) + (
+                "complete_subgoal", "propose_relations", "stop_investigation", "retrieve_subgoal_trajectory",
+            )
+            messages = _role_messages(
+                INVESTIGATOR_SYSTEM, task, belief, subgoals, retrieved, state, graph, flags, active=active,
+            )
+            turn = _chat(
+                llm, messages, tools=schemas(names), state=state, flags=flags,
+                require_tool=bool(state.tool_choice_probe.get("server_accepts_tool_choice")),
+            )
+            _trace_llm(trace_path, "llm_investigator", turn, messages)
+            outcome = _investigator_turn(
+                db, graph, state, flags, belief, subgoals, retrieved, active, turn, trace_path,
+            )
+            if active.status != "active":
+                active = None
+        state.belief = belief.as_dict()
+        state.subgoals = [item.public() for item in subgoals]
+        if outcome == "stop":
+            break
+        if outcome == "rejected":
+            continue
+        if outcome == "no_action":
+            if (getattr(turn, "raw", {}) or {}).get("context_limited"):
+                state.errors.append("generation hit the context window before num_predict")
+            state.errors.append("no valid model action")
+            state.completion = "NO_VALID_MODEL_ACTION"
+            break
+        _checkpoint(out, state, graph, flags)
+    if active is not None and active.status == "active":
+        if state.model_stop:
+            active.status = "closed_by_stop"
+            origin = "llm"
+        elif state.completion == "NO_VALID_MODEL_ACTION":
+            active.status = "no_action"
+            origin = "llm"
+        else:
+            active.status = "budget_ended"
+            origin = "budget"
+        active.summary = render_summary(active)
+        _trace(trace_path, {"type": "subgoal_closed", "index": active.index, "status": active.status,
+                            "origin": origin, "summary": active.summary})
+    state.belief = belief.as_dict()
+    state.subgoals = [item.public() for item in subgoals]
+
+
+def _role_messages(system, task, belief, subgoals, retrieved, state, graph, flags, *, active) -> list[dict]:
+    completed = [item.public() for item in subgoals if item.status != "active"]
+    body = {
+        "task": json.loads(task),
+        "belief": belief.as_dict(),
+        "completed_subgoals": completed,
+        "current_subgoal": None if active is None else active.text,
+        "queries_available": state.tool_calls < flags.max_tool_calls,
+    }
+    if flags.investigation_memory:
+        body["investigation_memory"] = state.memory.digest(
+            unresolved=state.unresolved_questions,
+            candidates=[_public_edge(edge) for edge in graph.edges.values() if edge.get("built_by") == "llm"],
+        )
+    if retrieved:
+        body["retrieved_subgoal_trajectories"] = [
+            {"index": subgoals[index].index, "subgoal": subgoals[index].text, "steps": subgoals[index].steps}
+            for index in retrieved if index < len(subgoals)
+        ]
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": json.dumps(body, default=str)},
+    ]
+    if active is not None:
+        messages.extend(active.messages)
+    return messages
+
+
+def _planner_turn(db, graph, state, flags, belief, subgoals, retrieved, turn, trace_path):
+    actions = _actions(turn)
+    if not actions:
+        return "no_action", None
+    committed = False
+    opened_subgoal = None
+    for action in actions[:2]:
+        name = action.get("name")
+        arguments = action.get("arguments") or {}
+        if name not in PLANNER_TOOLS:
+            _reject_action(state, trace_path, name, arguments, ["planner cannot call an evidence tool"])
+            continue
+        ok, errors = validate_arguments(name, arguments)
+        if not ok:
+            _reject_action(state, trace_path, name, arguments, errors)
+            continue
+        if name == "stop_investigation":
+            _record_stop(state, arguments)
+            _trace(trace_path, {"type": "stop", "origin": "llm", "role": "planner",
+                                "reason": state.stop_reason})
+            return "stop", None
+        if name == "propose_relations":
+            created = _propose(db, graph, state, arguments)
+            _preview_relations(db, graph, flags, belief, created)
+            _trace(trace_path, {"type": "propose_relations", "created": created, "origin": "llm",
+                                "role": "planner", "evidence_ids": _cited(arguments)})
+            committed = True
+            continue
+        if name == "retrieve_subgoal_trajectory":
+            committed = _retrieve_subgoal(state, subgoals, retrieved, arguments, trace_path, role="planner") or committed
+            continue
+        if name != "set_subgoal":
+            _reject_action(state, trace_path, name, arguments, ["unsupported planner action"])
+            continue
+        if opened_subgoal is not None:
+            _reject_action(state, trace_path, name, arguments, ["one subgoal at a time"])
+            continue
+        text = str(arguments.get("subgoal") or "").strip()
+        opened = Subgoal(text, len(subgoals))
+        subgoals.append(opened)
+        _trace(trace_path, {"type": "subgoal", "origin": "llm", "role": "planner",
+                            "index": opened.index, "subgoal": opened.text})
+        opened_subgoal = opened
+        continue
+    return ("continue" if committed or opened_subgoal else "rejected"), opened_subgoal
+
+
+def _investigator_turn(db, graph, state, flags, belief, subgoals, retrieved, active, turn, trace_path) -> str:
+    actions = _actions(turn)
+    if not actions:
+        return "no_action"
+    exchanges = []
+    committed = False
+    for action in actions[:3]:
+        name = action.get("name")
+        arguments = action.get("arguments") or {}
+        if name == "set_subgoal":
+            _reject_action(state, trace_path, name, arguments, ["investigator cannot replace the planner subgoal"])
+            continue
+        ok, errors = validate_arguments(name, arguments)
+        if not ok:
+            _reject_action(state, trace_path, name, arguments, errors)
+            continue
+        if name == "stop_investigation":
+            _record_stop(state, arguments)
+            _trace(trace_path, {"type": "stop", "origin": "llm", "role": "investigator",
+                                "reason": state.stop_reason, "subgoal_index": active.index})
+            return "stop"
+        if name == "propose_relations":
+            created = _propose(db, graph, state, arguments)
+            _preview_relations(db, graph, flags, belief, created)
+            _trace(trace_path, {"type": "propose_relations", "created": created, "origin": "llm",
+                                "role": "investigator", "subgoal_index": active.index,
+                                "evidence_ids": _cited(arguments)})
+            committed = True
+            continue
+        if name == "retrieve_subgoal_trajectory":
+            committed = _retrieve_subgoal(
+                state, subgoals, retrieved, arguments, trace_path, role="investigator", active_index=active.index,
+            ) or committed
+            continue
+        if name == "complete_subgoal":
+            _complete_subgoal(db, belief, active, arguments, trace_path, state)
+            return "continue"
+        if name not in _QUERY_TOOLS:
+            _reject_action(state, trace_path, name, arguments, ["not an evidence tool"])
+            continue
+        if state.tool_calls >= flags.max_tool_calls:
+            state.search_capped = True
+            _trace(trace_path, {"type": "budget_blocked_tool", "name": name, "arguments": arguments,
+                                "origin": "llm", "role": "investigator",
+                                "reason": "tool budget exhausted; the query was not run"})
+            continue
+        result = _execute(
+            db, graph, state, name, arguments, trace_path, origin="llm",
+            goal=turn.content or "", remember=flags.investigation_memory, subgoal=active.text,
+        )
+        exchanges.append((name, arguments, result))
+        active.steps.append({
+            "tool": name,
+            "arguments": arguments,
+            "duplicate": bool(result.get("duplicate")),
+            "status": result.get("status"),
+            "new_evidence_ids": list(result.get("new_evidence_ids") or []),
+            "evidence_ids": list(result.get("evidence_ids") or [])[:8],
+        })
+        committed = True
+    if exchanges:
+        active.messages.append(_assistant_tool_message(turn, exchanges))
+        for name, _arguments, result in exchanges:
+            active.messages.append(_tool_result_message(name, result, origin="llm", state=state))
+    if not committed and not exchanges:
+        return "rejected"
+    return "continue"
+
+
+def _complete_subgoal(db, belief, active, arguments, trace_path, state) -> None:
+    status = arguments.get("status")
+    active.status = status
+    known, rejected_known = accept_statements(db, arguments.get("known_facts"))
+    contradictions, rejected_contradictions = accept_statements(db, arguments.get("contradictory_evidence"))
+    belief.known_facts.extend(known)
+    belief.contradictory_evidence.extend(contradictions)
+    for item in arguments.get("unknowns") or []:
+        text = str(item).strip()[:300]
+        if text:
+            belief.unknowns.append(text)
+    active.summary = render_summary(active)
+    state.errors.extend(
+        f"belief statement rejected: {item.get('statement')}" for item in rejected_known + rejected_contradictions
+    )
+    _trace(trace_path, {
+        "type": "subgoal_closed", "origin": "llm", "role": "investigator", "index": active.index,
+        "status": status, "summary": active.summary,
+        "known_facts": known, "rejected_statements": rejected_known + rejected_contradictions,
+        "unknowns": belief.unknowns[-4:],
+    })
+
+
+def _retrieve_subgoal(state, subgoals, retrieved, arguments, trace_path, *, role: str,
+                      active_index: int | None = None) -> bool:
+    index = arguments.get("subgoal_index")
+    if not isinstance(index, int) or index < 0 or index >= len(subgoals) or index == active_index:
+        _reject_action(state, trace_path, "retrieve_subgoal_trajectory", arguments, ["unknown subgoal index"])
+        return False
+    if subgoals[index].status == "active":
+        _reject_action(state, trace_path, "retrieve_subgoal_trajectory", arguments, ["that subgoal is still active"])
+        return False
+    if index not in retrieved:
+        retrieved.append(index)
+    _trace(trace_path, {"type": "retrieve_subgoal_trajectory", "origin": "llm", "role": role, "index": index})
+    return True
+
+
+def _preview_relations(db, graph, flags, belief, created: list[str]) -> None:
+    for edge_id in created:
+        edge = graph.edges.get(edge_id)
+        if edge is None:
+            continue
+        assessment = verify_edge(
+            db, edge, contradiction_search=flags.contradiction_search,
+            source_dependency=flags.source_dependency,
+        )
+        inference = assess_inference(db, edge, assessment)
+        belief.verification_results.append({
+            "edge_id": edge_id,
+            "record_status": assessment.get("status"),
+            "claim_level": inference.get("claim_level"),
+            "inference_status": inference.get("inference_status"),
+            "causal_status": inference.get("causal_status"),
+            "note": "Preview of the existing record check. The published graph is written after the run.",
+        })
+
+
+def _reject_action(state, trace_path, name, arguments, errors) -> None:
+    state.errors.append(f"invalid {name}: {errors}")
+    _trace(trace_path, {"type": "invalid_tool_call", "name": name, "arguments": arguments,
+                        "errors": errors, "origin": "llm"})
 
 
 def _questions(arguments: dict) -> list[str]:
@@ -776,6 +1102,11 @@ def _checkpoint(out: Path, state: RunState, graph, flags: Flags) -> None:
         "queries_with_new_evidence": state.queries_with_new_evidence,
         "investigation_memory": state.memory.as_dict() if flags.investigation_memory else None,
         "gap_fallbacks": state.gap_fallbacks,
+        "model_stop": state.model_stop,
+        "stop_reason": state.stop_reason,
+        "context_limited_turns": state.context_limited_turns,
+        "subgoals": state.subgoals,
+        "belief": state.belief,
         "prompt_tokens": state.prompt_tokens,
         "completion_tokens": state.completion_tokens,
         "called_tools": state.called_tools,

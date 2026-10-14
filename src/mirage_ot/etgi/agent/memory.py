@@ -13,11 +13,13 @@ class InvestigationMemory:
         self.by_signature: dict[str, dict] = {}
 
     def record(self, *, signature: str, tool: str, arguments: dict, goal: str,
-               summary: dict, evidence_ids: list[str], new_evidence_ids: list[str]) -> None:
+               summary: dict, evidence_ids: list[str], new_evidence_ids: list[str],
+               subgoal: str = "") -> None:
         entry = {
             "tool": tool,
             "arguments": _brief(arguments),
             "goal": (goal or "")[:300],
+            "subgoal": (subgoal or "")[:300],
             "duplicate": False,
             "evidence_ids": list(evidence_ids),
             "new_evidence_ids": list(new_evidence_ids),
@@ -47,7 +49,7 @@ class InvestigationMemory:
         recent = list(self.cards.values())[-12:]
         return {
             "completed_queries": [
-                {key: item[key] for key in ("tool", "arguments", "goal", "duplicate", "new_evidence_ids")}
+                {key: item[key] for key in ("tool", "arguments", "goal", "subgoal", "duplicate", "new_evidence_ids")}
                 | {"evidence_id_count": len(item["evidence_ids"])}
                 for item in self.queries[-8:]
             ],

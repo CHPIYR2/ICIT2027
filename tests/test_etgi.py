@@ -457,3 +457,129 @@ def test_model_answers_are_scored_against_gold():
     assert scored["investigation_question_accuracy"] == 1
     wrong = score_model_answers(questions, [{"id": "shared_frame_count", "answer": 3}])
     assert wrong["investigation_question_accuracy"] == 0
+
+
+def test_length_at_46_tokens_is_the_default_context_window():
+    from mirage_ot.etgi.agent.ollama import classify_stop
+    hit = classify_stop(
+        prompt_tokens=4050, completion_tokens=46, num_predict=512, done_reason="length",
+        num_ctx=None, content_chars=0, tool_calls=0,
+    )
+    assert hit["context_limited"] is True
+    assert hit["empty_visible_output"] is True
+    assert hit["context_window"] == 4096
+    assert hit["prompt_plus_completion"] == 4096
+    budget = classify_stop(
+        prompt_tokens=1000, completion_tokens=512, num_predict=512, done_reason="length",
+        num_ctx=8192, content_chars=20, tool_calls=0,
+    )
+    assert budget["context_limited"] is False
+
+
+def test_subgoal_investigator_cites_a_real_row_and_can_stop(tmp_path):
+    db = _db(tmp_path)
+    llm = Scripted([
+        {"tool_calls": [{"name": "query_tcp_flows", "arguments": {}}]},
+        {"tool_calls": [{"name": "set_subgoal", "arguments": {"subgoal": "Read the TCP rows in this window."}}]},
+        {"tool_calls": [{"name": "query_tcp_flows", "arguments": {"limit": 5}}]},
+        {"tool_calls": [{"name": "complete_subgoal", "arguments": {
+            "status": "achieved",
+            "known_facts": [{"statement": "A TCP row was returned.", "evidence_ids": ["EV-aaaaaaaaaaaaaaaa"]}],
+            "unknowns": ["No second vantage was requested."],
+            "contradictory_evidence": [{"statement": "not in the database", "evidence_ids": ["ev-001"]}],
+        }}]},
+        {"tool_calls": [{"name": "stop_investigation", "arguments": {
+            "reason": "No further relation is supported.",
+            "unresolved_questions": ["No out-of-band meter reading."],
+        }}]},
+    ])
+    flags = Flags(
+        subgoal_planning=True, investigation_memory=True, allow_gap_fallback=False,
+        evidence_necessity=False, temporal_graph=False, max_tool_calls=4, max_llm_calls=6,
+    )
+    result = investigate(db, llm, incident_start=1000, incident_end=1010, out=tmp_path / "sub", flags=flags, limitations=[])
+    state = result["state"]
+    assert state.llm_queries == 1
+    assert state.gap_fallbacks == 0
+    assert "query_tcp_flows" in state.called_tools
+    assert state.model_stop is True
+    assert state.completion == "MODEL_ABSTAINED"
+    assert state.subgoals[0]["status"] == "achieved"
+    assert state.belief["known_facts"][0]["evidence_ids"] == ["EV-aaaaaaaaaaaaaaaa"]
+    assert state.belief["contradictory_evidence"] == []
+    assert state.belief["unknowns"] == ["No second vantage was requested."]
+    report = write_report(result, db, tmp_path / "sub", llm=None)
+    assert report["completion"] == "MODEL_ABSTAINED"
+    roles = []
+    for line in (tmp_path / "sub" / "investigation_trace.jsonl").read_text().splitlines():
+        item = json.loads(line)
+        if item.get("role"):
+            roles.append(item["role"])
+        if item.get("type") == "tool":
+            assert item["origin"] == "llm"
+    assert "planner" in roles and "investigator" in roles
+
+
+def test_tool_budget_is_not_recorded_as_abstention(tmp_path):
+    db = _db(tmp_path)
+    llm = Scripted([
+        {"tool_calls": [{"name": "set_subgoal", "arguments": {"subgoal": "Look at one flow."}}]},
+    ])
+    flags = Flags(
+        subgoal_planning=True, allow_gap_fallback=False, evidence_necessity=False,
+        temporal_graph=False, max_llm_calls=1, max_tool_calls=4,
+    )
+    result = investigate(db, llm, incident_start=1000, incident_end=1010, out=tmp_path / "budget", flags=flags, limitations=[])
+    assert result["state"].model_stop is False
+    assert result["state"].subgoals[0]["status"] == "budget_ended"
+    report = write_report(result, db, tmp_path / "budget", llm=None)
+    assert report["completion"] == "INCOMPLETE_BUDGET_EXHAUSTED"
+
+
+def test_an_empty_investigator_turn_is_not_a_budget_stop(tmp_path):
+    db = _db(tmp_path)
+    llm = Scripted([
+        {"tool_calls": [{"name": "set_subgoal", "arguments": {"subgoal": "Read one row."}}]},
+        {"content": ""},
+    ])
+    flags = Flags(
+        subgoal_planning=True, allow_gap_fallback=False, evidence_necessity=False,
+        temporal_graph=False, max_llm_calls=4, max_tool_calls=4,
+    )
+    result = investigate(db, llm, incident_start=1000, incident_end=1010, out=tmp_path / "empty", flags=flags, limitations=[])
+    assert result["state"].completion == "NO_VALID_MODEL_ACTION"
+    assert result["state"].model_stop is False
+    assert result["state"].budget_hit is False
+    assert result["state"].subgoals[0]["status"] == "no_action"
+    report = write_report(result, db, tmp_path / "empty", llm=None)
+    assert report["completion"] == "NO_VALID_MODEL_ACTION"
+
+
+def test_a_sourced_proposal_is_not_an_abstention(tmp_path):
+    db = _db(tmp_path)
+    relation = {
+        "source_entity": "10.0.0.1:2404->10.0.0.2:50000/TCP", "source_modality": "network",
+        "target_entity": "10.0.0.2:50000->10.0.0.1:2404/TCP", "target_modality": "network",
+        "relation_type": "communication", "time_order": "undirected",
+        "evidence_ids": ["EV-aaaaaaaaaaaaaaaa", "EV-bbbbbbbbbbbbbbbb"],
+        "rationale": "The two TCP rows are a bidirectional exchange.",
+    }
+    llm = Scripted([
+        {"tool_calls": [{"name": "set_subgoal", "arguments": {"subgoal": "Check whether the two TCP rows form one exchange."}}]},
+        {"tool_calls": [{"name": "query_tcp_flows", "arguments": {"limit": 5}}]},
+        {"tool_calls": [{"name": "propose_relations", "arguments": {"relations": [relation]}}]},
+        {"tool_calls": [{"name": "stop_investigation", "arguments": {"reason": "The cited rows were checked."}}]},
+    ])
+    flags = Flags(
+        subgoal_planning=True, allow_gap_fallback=False, evidence_necessity=False,
+        temporal_graph=False, max_tool_calls=4, max_llm_calls=6,
+    )
+    result = investigate(db, llm, incident_start=1000, incident_end=1010, out=tmp_path / "propose", flags=flags, limitations=[])
+    proposed = [edge for edge in result["graph"].edges.values() if edge.get("built_by") == "llm"]
+    assert proposed
+    assert set(proposed[0]["evidence_ids"]) <= {"EV-aaaaaaaaaaaaaaaa", "EV-bbbbbbbbbbbbbbbb"}
+    assert result["state"].model_stop is True
+    assert result["state"].completion != "MODEL_ABSTAINED"
+    assert result["state"].belief["verification_results"]
+    report = write_report(result, db, tmp_path / "propose", llm=None)
+    assert report["completion"] != "MODEL_ABSTAINED"

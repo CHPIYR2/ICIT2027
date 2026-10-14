@@ -141,9 +141,17 @@ def _render_claims(claims: list[dict]) -> str:
 
 
 def _completion(state, graph, flags) -> str:
-    if state.completion == "NO_VALID_MODEL_ACTION" and not state.llm_queries:
+    if state.completion == "MODEL_ABSTAINED":
+        return "MODEL_ABSTAINED"
+    if state.completion == "NO_VALID_MODEL_ACTION":
         return "NO_VALID_MODEL_ACTION"
     if state.budget_hit:
+        return "INCOMPLETE_BUDGET_EXHAUSTED"
+    proposed = any(
+        edge.get("built_by") == "llm"
+        for edge in list(graph.edges.values()) + list(graph.removed.values())
+    )
+    if getattr(state, "search_capped", False) and not getattr(state, "model_stop", False) and not proposed:
         return "INCOMPLETE_BUDGET_EXHAUSTED"
     problems = []
     for edge in graph.edges.values():
