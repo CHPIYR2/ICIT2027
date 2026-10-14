@@ -15,7 +15,7 @@ from ..graph.observed import build_observed
 from ..graph.temporal import TemporalEvidenceGraph
 from ..verification.assess import apply_assessment, verify_edge
 from ..verification.necessity import run_necessity
-from .tools import dispatch, schemas
+from .tools import dispatch, schemas, _incident_window
 
 SYSTEM = """You investigate one operational-technology incident window.
 Use tool results as the only observations. Cite evidence_id values that a tool returned.
@@ -72,6 +72,7 @@ class RunState:
     incident_start: float
     incident_end: float
     called_tools: list = field(default_factory=list)
+    called_signatures: list = field(default_factory=list)
     retrieved_ids: list = field(default_factory=list)
     unresolved_questions: list = field(default_factory=list)
     timeline_entities: list = field(default_factory=list)
@@ -133,6 +134,7 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
             _checkpoint(out, state, graph, flags)
             continue
         messages.append({"role": "assistant", "content": turn.content or "", "tool_calls": turn.tool_calls})
+        duplicate = False
         for action in actions[:3]:
             name = action.get("name")
             arguments = action.get("arguments") or {}
@@ -156,6 +158,11 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
                 break
             result = _execute(db, graph, state, name, arguments, trace_path, selected_by="llm")
             messages.append({"role": "tool", "name": name, "content": json.dumps(result, default=str)[:12000]})
+            if result.get("skipped_duplicate"):
+                duplicate = True
+                break
+        if duplicate:
+            break
         messages.append({"role": "user", "content": _compact_state(state, graph)})
         if len(messages) > 16:
             messages = messages[:2] + messages[-6:]
@@ -287,6 +294,21 @@ def _propose(db, graph, state, arguments) -> list[str]:
 
 
 def _execute(db, graph, state, name, arguments, trace_path, *, selected_by: str) -> dict:
+    start, end, _note = _incident_window(arguments, state.incident_start, state.incident_end)
+    signature = json.dumps({
+        "name": name, "start": start, "end": end, "entity": arguments.get("entity"),
+        "entity_prefix": arguments.get("entity_prefix"), "ip": arguments.get("ip"),
+        "ca": arguments.get("ca"), "ioa": arguments.get("ioa"), "vantage": arguments.get("vantage"),
+        "offset": arguments.get("offset", 0), "limit": arguments.get("limit"),
+        "evidence_ids": arguments.get("evidence_ids"),
+    }, sort_keys=True, default=str)
+    if signature in state.called_signatures:
+        state.errors.append("Duplicate tool call skipped: " + name)
+        _trace(trace_path, {"type": "tool_skipped", "name": name, "arguments": arguments,
+                            "selected_by": selected_by, "reason": "duplicate"})
+        return {"query": name, "rows": [], "evidence_ids": [], "skipped_duplicate": True,
+                "notes": ["This query was already run."], "data_is_untrusted_telemetry": True}
+    state.called_signatures.append(signature)
     state.tool_calls += 1
     state.called_tools.append(name)
     try:
@@ -330,7 +352,8 @@ def _task(db, state, graph, flags, limitations) -> str:
         "observation_counts": counts["groups"],
         "indexed_limitations": limitations,
         "observed_graph": state.observed_stats,
-        "open_relations": [_public_edge(edge) for edge in graph.edges.values()],
+        "open_relation_count": len(graph.edges),
+        "open_relations_sample": [_public_edge(edge) for edge in list(graph.edges.values())[:8]],
         "tool_budget_remaining": flags.max_tool_calls,
         "instruction": "Request the evidence you need. Then propose relations or stop.",
     }, default=str)
@@ -339,7 +362,8 @@ def _task(db, state, graph, flags, limitations) -> str:
 def _compact_state(state, graph) -> str:
     return json.dumps({
         "tool_calls": state.tool_calls,
-        "open_relations": [_public_edge(edge) for edge in list(graph.edges.values())[:12]],
+        "open_relation_count": len(graph.edges),
+        "open_relations_sample": [_public_edge(edge) for edge in list(graph.edges.values())[:8]],
         "unresolved_questions": state.unresolved_questions[-6:],
         "retrieved_evidence_count": len(state.retrieved_ids),
     })

@@ -56,10 +56,14 @@ def schemas() -> list[dict]:
 
 def dispatch(db: EvidenceDB, name: str, arguments: dict, *, incident_start: float, incident_end: float) -> dict:
     args = dict(arguments or {})
-    start = args.get("start", incident_start)
-    end = args.get("end", incident_end)
+    start, end, window_note = _incident_window(args, incident_start, incident_end)
     limit = args.get("limit", DEFAULT_LIMIT)
     offset = args.get("offset", 0)
+    result = _query(db, name, args, start, end, limit, offset, incident_start, incident_end)
+    return _annotate(result, window_note)
+
+
+def _query(db, name, args, start, end, limit, offset, incident_start, incident_end) -> dict:
     if name == "query_network_events":
         return db.search(modality="network", start=start, end=end, ip=args.get("ip"),
                          vantage=args.get("vantage"), limit=limit, offset=offset,
@@ -106,3 +110,21 @@ def dispatch(db: EvidenceDB, name: str, arguments: dict, *, incident_start: floa
                 "rows": [], "evidence_ids": []}
     return {"query": name, "rows": [], "notes": [f"Unknown tool {name}"], "evidence_ids": [],
             "data_is_untrusted_telemetry": True}
+
+
+def _incident_window(args: dict, incident_start: float, incident_end: float) -> tuple[float, float, str | None]:
+    """Use the incident window when a model time range does not overlap it."""
+    try:
+        start = float(args.get("start", incident_start))
+        end = float(args.get("end", incident_end))
+    except (TypeError, ValueError):
+        return incident_start, incident_end, "Unparseable times were replaced with the incident window."
+    if end <= incident_start - 30 or start >= incident_end + 30 or end <= start:
+        return incident_start, incident_end, "The requested time range does not overlap the incident window, so the incident window was used."
+    return start, end, None
+
+
+def _annotate(result: dict, note: str | None) -> dict:
+    if note:
+        result.setdefault("notes", []).append(note)
+    return result
