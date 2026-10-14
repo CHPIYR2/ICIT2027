@@ -87,6 +87,7 @@ class RunState:
     started: float = field(default_factory=time.time)
     completion: str = ""
     budget_hit: bool = False
+    search_capped: bool = False
     model: str = ""
     narrative: str = ""
     narrative_rejected: bool = False
@@ -112,7 +113,7 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
         messages.append({"role": "user", "content": json.dumps(
             _context_cards(db, state, graph, flags.context), default=str)})
     stopped = False
-    while not stopped and not _over(state, flags):
+    while not stopped and not _over(state, flags) and not _tools_exhausted(state, flags):
         turn = _chat(llm, messages, tools=schemas() if flags.active_retrieval else None, state=state, flags=flags,
                      require_tool=flags.active_retrieval)
         _trace(trace_path, {"type": "llm", "content": turn.content, "tool_calls": turn.tool_calls,
@@ -148,8 +149,7 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
             if not flags.active_retrieval:
                 state.errors.append(f"tool {name} skipped because active retrieval is off")
                 continue
-            if _over(state, flags):
-                state.budget_hit = True
+            if _over(state, flags) or _tools_exhausted(state, flags):
                 break
             result = _execute(db, graph, state, name, arguments, trace_path, selected_by="llm")
             messages.append({"role": "tool", "name": name, "content": json.dumps(result, default=str)[:12000]})
@@ -158,7 +158,7 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
                 break
         if duplicate:
             fallback = _next_gap(state, graph)
-            if fallback is None or _over(state, flags):
+            if fallback is None or _over(state, flags) or _tools_exhausted(state, flags):
                 break
             name, arguments = fallback
             state.gap_fallbacks += 1
@@ -178,7 +178,8 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
             tools=schemas(("propose_relations", "stop_investigation")), state=state, flags=flags,
             require_tool=True,
         )
-        _trace(trace_path, {"type": "llm_closing", "content": closing.content, "tool_calls": closing.tool_calls})
+        _trace(trace_path, {"type": "llm_closing", "content": closing.content, "tool_calls": closing.tool_calls,
+                            "prompt_tokens": closing.prompt_tokens, "completion_tokens": closing.completion_tokens})
         for action in _actions(closing)[:3]:
             if action.get("name") == "propose_relations":
                 created = _propose(db, graph, state, action.get("arguments") or {})
@@ -187,6 +188,8 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
                 state.unresolved_questions.extend(_questions(action.get("arguments") or {}))
     _verify_all(db, graph, state, flags, trace_path)
     _necessity(llm, db, graph, state, flags, trace_path)
+    if state.search_capped:
+        state.budget_hit = True
     _checkpoint(out, state, graph, flags)
     return {"state": state, "graph": graph, "flags": flags, "limitations": limitations or [], "trace": str(trace_path)}
 
@@ -452,9 +455,16 @@ def _span(rows: list[dict], default: float, entity: str) -> tuple[float, float]:
 
 
 def _over(state: RunState, flags: Flags) -> bool:
-    tool_limit = flags.active_retrieval and state.tool_calls >= flags.max_tool_calls
-    if tool_limit or state.llm_calls >= flags.max_llm_calls or time.time() - state.started > flags.max_seconds:
+    """LLM-call and wall-clock budget. Tool exhaustion is separate so necessity can still run."""
+    if state.llm_calls >= flags.max_llm_calls or time.time() - state.started > flags.max_seconds:
         state.budget_hit = True
+        return True
+    return False
+
+
+def _tools_exhausted(state: RunState, flags: Flags) -> bool:
+    if flags.active_retrieval and state.tool_calls >= flags.max_tool_calls:
+        state.search_capped = True
         return True
     return False
 

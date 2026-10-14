@@ -33,6 +33,7 @@ def main(argv=None) -> None:
     investigate_cmd.add_argument("--max-tool-calls", type=int)
     investigate_cmd.add_argument("--max-llm-calls", type=int)
     investigate_cmd.add_argument("--necessity-repeats", type=int)
+    investigate_cmd.add_argument("--max-necessity-relations", type=int)
     suite = commands.add_parser("suite")
     suite.add_argument("--db", type=Path, required=True)
     suite.add_argument("--out", type=Path, required=True)
@@ -43,6 +44,7 @@ def main(argv=None) -> None:
     suite.add_argument("--max-tool-calls", type=int)
     suite.add_argument("--max-llm-calls", type=int)
     suite.add_argument("--necessity-repeats", type=int)
+    suite.add_argument("--max-necessity-relations", type=int)
     args = parser.parse_args(argv)
     if args.command == "index":
         meta = index_window(
@@ -95,6 +97,8 @@ def _apply_budget(flags: Flags, args) -> None:
         flags.max_llm_calls = args.max_llm_calls
     if getattr(args, "necessity_repeats", None) is not None:
         flags.necessity_repeats = args.necessity_repeats
+    if getattr(args, "max_necessity_relations", None) is not None:
+        flags.max_necessity_relations = args.max_necessity_relations
 
 
 def _run_with_budget(db, llm, name, out, *, limitations, questions, args) -> dict:
