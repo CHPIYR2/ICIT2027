@@ -1,10 +1,30 @@
-# MIRAGE-OT · Research starter v0.1
+# MIRAGE-OT
+
+The current method is ETGI, Evidence-Seeking Temporal Graph Investigation.
+A local model queries a Sherlock window, proposes relations, and a record
+check decides whether each relation is supported, disputed, or unresolved.
+Electrical values stay marked as network-reported. The method specification
+is `docs/ETGI_RESEARCH_SPEC.md`.
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e '.[test]'
+pytest -q
+etgi index --archive data/raw/sherlock/v3/01-Basic.zip \
+  --scenario 01-Basic --recording test \
+  --start 1742961051.1897168 --end 1742961125.4603136 \
+  --out runs/etgi/basic-ev0961/evidence.sqlite
+etgi investigate --db runs/etgi/basic-ev0961/evidence.sqlite \
+  --out runs/etgi/basic-ev0961/etgi-qwen --model qwen3.5:9b-q4_K_M
+```
+
+The GRU forecast prototype below is the earlier negative result. ETGI does
+not import it. Attack labels and `physical.zip` are not investigation inputs.
 
 **Brand-new implementation, intentionally unrelated to earlier EBRL code.**
-MIRAGE-OT targets **post-alert investigation**: learn within-network,
-within-electrical, and network–electrical *statistical event dependencies* and
-produce traceable incident-association graphs. Attack-specific recognition rules
-are **not** used. An optional Ollama interface explains the frozen learned graph.
+The prototype below learns within-network, within-electrical, and
+network–electrical statistical dependencies. Attack-specific recognition
+rules are not used. An optional Ollama interface explains the frozen learned graph.
 
 **Status:** Working **synthetic smoke-test prototype**, **NOT** a validated
 Sherlock v3 result, nor an established relation confidence estimator.
