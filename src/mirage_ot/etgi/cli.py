@@ -73,7 +73,39 @@ def main(argv=None) -> None:
     peval.add_argument("--pilot-dir", type=Path, default=Path("runs/etgi/t3-pilot-pool-20261015"))
     peval.add_argument("--out", type=Path, required=True)
     peval.add_argument("--endpoint", default="http://127.0.0.1:11434")
+    recon = commands.add_parser("reconstruct")
+    recon.add_argument("--db", type=Path, required=True)
+    recon.add_argument("--out", type=Path, required=True)
+    recon.add_argument("--model", default="qwen3.5:9b-q4_K_M")
+    recon.add_argument("--endpoint", default="http://127.0.0.1:11434")
+    recon.add_argument("--no-llm", action="store_true")
+    recon.add_argument("--num-predict", type=int, default=512)
+    recon.add_argument("--num-ctx", type=int, default=8192)
     args = parser.parse_args(argv)
+    if args.command == "reconstruct":
+        from .reconstruction.engine import reconstruct_incident
+        conn, meta = open_indexed(args.db)
+        start = float(meta["incident_start"])
+        end = float(meta["incident_end"])
+        bg_start = start - float(meta.get("context_seconds") or 15.0)
+        db = EvidenceDB(conn, incident_start=start, incident_end=end)
+        llm_client = None if args.no_llm else OllamaClient(args.model, endpoint=args.endpoint)
+        result = reconstruct_incident(
+            db, start, end, background_start=bg_start, background_end=start,
+            llm=llm_client, num_predict=args.num_predict, num_ctx=args.num_ctx,
+            seed=1, out_dir=args.out,
+        )
+        conn.close()
+        print(json.dumps({
+            "out": str(args.out),
+            "code_sha256": result["manifest"]["code_sha256"],
+            "transactions": result["transactions"]["transaction_count"],
+            "graph_nodes": result["event_graph"]["node_count"],
+            "graph_edges": result["event_graph"]["edge_count"],
+            "storylines": result["storylines"]["storyline_count"],
+            "lineage_bundle": result["lineage_bundle_summary"],
+        }, indent=2))
+        return
     if args.command == "pilot-eval":
         from .postalert.author_pilot_eval import run_author_validated_pilot_evaluation
         summary = run_author_validated_pilot_evaluation(args.pilot_dir, args.out, endpoint=args.endpoint)

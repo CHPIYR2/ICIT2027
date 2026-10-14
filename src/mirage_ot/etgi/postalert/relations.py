@@ -107,9 +107,14 @@ def _same_frame(graph, timeline, nodes, linked) -> None:
             shared = [item for item in left["lineage"] if item in set(right["lineage"])]
             if not shared:
                 continue
+            edge_ev_ids = list(dict.fromkeys([
+                *(left.get("evidence_ids") or [])[:1],
+                *(right.get("evidence_ids") or [])[:1],
+                *shared[:2],
+            ]))
             edge = graph.add_edge(
                 source=nodes[left["timeline_id"]]["node_id"], target=nodes[right["timeline_id"]]["node_id"],
-                relation_type="same_frame", origin="observed", evidence_ids=shared[:4],
+                relation_type="same_frame", origin="observed", evidence_ids=edge_ev_ids,
                 rationale="Both information objects were carried by the same IEC-104 frame. One source container, not independent evidence.",
                 built_by="record_link",
             )
