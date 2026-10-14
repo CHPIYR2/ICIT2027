@@ -1,0 +1,233 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,booktabs}
+\usepackage{url}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\title{Evidence-Seeking Temporal Graph Investigation for Operational Technology Incidents}
+
+\author{\IEEEauthorblockN{Manuscript draft}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We study whether a local language-model agent can investigate a known time window in an operational-technology trace by querying network and electrical records, proposing relations, and keeping only relations that the records support.
+The method, Evidence-Seeking Temporal Graph Investigation (ETGI), indexes Sherlock~v3 without attack labels, checks each candidate against communication, shared-frame, shared-source, and same-device record links, and re-judges a cited relation after the cited rows are removed.
+On one Basic test window, revision publishes 36 record links with citation validity 1, and a source audit is required before 25 network--electrical edges are labeled as one IEC-104 report rather than two modalities.
+The 9B model did not call the tools or propose relations, question exact match is 1/5 for every compared method, and necessity changes 0 of 3 judgments on the only tested edge.
+The case study does not establish an accuracy gain.
+\end{abstract}
+
+\begin{IEEEkeywords}
+operational technology, incident investigation, evidence graph, IEC-104
+\end{IEEEkeywords}
+
+\section{Introduction}
+An investigation of an operational-technology alert is a time window and a set of allowed sensors.
+The useful output is a timeline of observed behavior, relations that can be traced to records, and an explicit statement of what remains unresolved.
+Attack-type labels are a poor summary of that task, and a learned graph trained to forecast normal measurements is a poor way to build the relations.
+On an earlier Basic interval, a gated graph forecast was worse than the same model with the graph messages removed, and the gates tended to close.
+
+ETGI replaces that forecast with a tool-using investigator and a record check.
+The investigator may read packet captures and IPAL state.
+It may not read official event text, the malicious flag, or simulator traces in \texttt{physical.zip}.
+Electrical values decoded from IEC-104 are labeled as network-reported.
+Agreement between an ASDU and the IPAL row of the same point is one source.
+
+This draft reports one Basic window and the ablations that fit in a fixed tool budget on a laptop model.
+The positive result is mechanical: revision and the source audit change the published graph in a way that can be recomputed from the index.
+The negative result is also mechanical: the model did not drive the search, and the question score did not move.
+
+\section{Related Work}
+PROVSEEK retrieves host-provenance evidence iteratively and binds claims to node and edge identifiers~\cite{provseek}.
+CyberSleuth runs a multi-agent forensic pipeline on web-attack packet captures, with tshark and web search, and is scored against CVE gold and expert ratings~\cite{cybersleuth}.
+GALA+ keeps microservice investigators inside a service graph and mixes metrics with traces; expansion depends on the agent's own confidence~\cite{gala}.
+GraphRAG summarizes communities of an entity graph extracted from documents~\cite{graphrag}.
+HippoRAG~2 retrieves multi-hop questions by Personalized PageRank over an extracted knowledge graph~\cite{hipporag2}.
+Graphiti stores bi-temporal facts for agent memory~\cite{zep}.
+None of these treats an IEC-104 measurement and the process value decoded from it as one observation.
+
+ExCyTIn-Bench scores investigation questions whose answers are in the telemetry rather than in the agent's self-assessment~\cite{excytin}.
+FActScore and RAGChecker score whether generated claims are supported by a source~\cite{factscore,ragchecker}.
+ETGI follows that separation.
+The score is a query over the index.
+A second model is not the ground truth.
+Our graph-retrieval baseline only returns evidence ids already attached to record links.
+It does not build community summaries and is not a reproduction of GraphRAG.
+
+\section{Problem}
+An incident is a window $I=(t_s,t_e,\mathcal{O})$.
+The system may read sources in $\mathcal{O}$ inside the window and a short context around it.
+It returns a graph $G_I=(V_I,E_I)$.
+A node is an observation or a candidate event, with modality, entity, time, and evidence identifiers.
+An edge is a candidate relation with status supported, disputed, or unresolved, plus the identifiers that support or contradict it.
+A directed communication edge records packet direction.
+Other edges are associations.
+An arrow is not a cause.
+The output also lists missing evidence and alternative explanations carried on the edges.
+No attack class is required.
+
+\section{Method}
+\subsection{Evidence index}
+A Sherlock ZIP is read in place.
+State rows are emitted as new, held, or equal to the initial state.
+Holds become one summary per entity.
+TCP and ARP frames are stored without payloads, with an Ethernet frame hash.
+IEC-104 ASDUs are taken from tshark's dissector because the official IPAL transcriber was not installed.
+Type-id classes follow IEC~60870-5-104.
+They are not attack labels.
+Information-object values are stored only when the dissected fields align with the information-object addresses.
+A single value is not copied onto several addresses.
+Queries are parameterized, paginated, and cannot see evaluator fields.
+A missing number is null.
+A stored zero is a zero.
+The model cannot submit SQL.
+
+\subsection{Search and record links}
+The model is offered the query tools and may propose relations.
+If it does not call a tool, the controller issues the next unused query in a fixed gap list and marks the trace \texttt{controller\_gap}.
+The list is IEC-104, electrical changes, TCP flows, ARP, shared frames, then a comparison with the preceding context.
+A repeated query is not run again.
+Time ranges that miss the incident window are replaced by that window.
+
+Before the model speaks, the index adds candidate edges for bidirectional TCP flows, shared frame hashes, an ASDU joined to the IPAL name of its CA/IOA, and two attributes of one device.
+Verification then assigns status.
+Supported requires one of those record links and at least one evidence group that is not only a hold or an initial fill.
+A hold or initial value cited as a change, a numerical disagreement on one point inside one second, or a violated time order yields disputed.
+Packet length is not a measurement and is not a disagreement.
+Co-occurrence alone stays unresolved.
+
+\subsection{Revision, necessity, and the report}
+Revision appends a history entry.
+It does not delete the proposal.
+Without revision, the published status remains the initial unresolved label even if the check found a record link.
+Necessity shows the model only the cited cards, with tools disabled, at temperature 0.
+Each cited id is then removed together with rows that share its frame hash or parent packet, and the judgment is repeated.
+A change means the judgment depended on that card.
+It does not prove the relation.
+The report is rendered from the graph.
+A free-text narrative is kept only when every evidence id and every number in it already occurs in the findings.
+If the tool budget stops the search, the run is marked incomplete.
+
+\section{Experimental Setup}
+The dataset is Sherlock~v3~\cite{sherlockv3}.
+The reported window is Basic test episode \texttt{ev\_0961f1c2}, from 1742961051.1897168 to 1742961125.4603136, with 15\,s of context indexed and excluded from the question interval.
+Official event text was not an input.
+The window is not unseen: the catalog that supplied the bounds had been read before, including family descriptions.
+The model is \texttt{qwen3.5:9b-q4\_K\_M} on Ollama, temperature 0.
+The tool cap is 6 calls.
+Necessity uses one edge, one repeat, and at most three citations.
+Gemma~12B was not run.
+
+Baselines share the index and the model.
+B0 sees the earliest 20 rows.
+B1 sees a sample stratified by record kind.
+B2 sees up to 60 ids already cited by record-link edges.
+B3 may call tools and does not run contradiction search, the source audit, necessity, or revision.
+Ablations remove one ETGI switch.
+Modality runs hide network rows or electrical rows.
+Question gold is five queries: control-direction CA/IOA values, entities with a new electrical value, the count of shared frame hashes, whether a control ASDU has a reversed-socket follow-up within 5\,s, and the stored value of one evidence id.
+Exact match and the fraction of gold ids actually retrieved are both reported.
+There is no relation-graph gold, so edge precision and recall are not computed.
+
+\section{Results}
+The incident interval contains 1,759 new electrical values on 254 entities, 16 control-direction ASDUs on 4 CA/IOA values, 3,216 monitor-direction ASDUs, and 89 TCP flows.
+No ARP packet and no shared frame hash fall in the interval.
+Of 312 decoded IEC-104 values with a nearby IPAL sample of the same entity, 312 match.
+
+The model issued no search tool call.
+All six queries are gap fallbacks.
+The proposal tool was invoked with an empty argument list.
+The published graph therefore contains only record links: 7 supported communications, 4 supported same-device edges, and 25 supported shared-source edges.
+Citation validity is 1.
+The unsupported rate among published supported edges is 0.
+The narrative was rejected because it introduced the timestamp 1742961053.85.
+The run is incomplete because the tool budget was spent.
+Question exact match is 1/5.
+The matched question has gold answer 0.
+Gold-id recall is 24/1,775.
+
+Table~\ref{tab:methods} compares methods.
+No method exceeds 1/5 exact match.
+Agentic retrieval without revision retrieves the same 24 gold ids and publishes no supported edge.
+The earliest-row and stratified baselines publish no edges and retrieve 4 and 19 gold ids.
+The graph-neighborhood baseline retrieves 0 of the gold ids because its first 60 citations are packet ids.
+
+\begin{table}[t]
+\caption{Basic window. Exact match is out of five questions. Gold recall is retrieved gold ids over 1,775. Supported counts are N--N / P--P / N--P.}
+\label{tab:methods}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Method & Exact & Gold ids & Supported \\
+\midrule
+B0 direct & 1/5 & 4 & 0/0/0 \\
+B1 stratified & 1/5 & 19 & 0/0/0 \\
+B2 graph neighborhood & 1/5 & 0 & 0/0/0 \\
+B3 agentic retrieval & 1/5 & 24 & 0/0/0 \\
+ETGI & 1/5 & 24 & 7/4/25 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Ablation}
+Table~\ref{tab:ablation} removes one switch.
+Without revision the 36 edges stay unresolved.
+Without the source audit the 25 shared-source edges stay unresolved, while the 11 within-modality record links stay supported.
+Without the temporal graph the model proposes nothing and the edge set is empty.
+Without contradiction search the published counts do not change.
+Without necessity they also do not change.
+Necessity on one supported communication leaves the judgment supported after each of three packet removals.
+Active retrieval is not required for the 36 supported edges; removing it drops gold-id overlap from 24 to 19.
+
+\begin{table}[t]
+\caption{Ablation on the same window. N--P unresolved counts the shared-source candidates that were not published as supported.}
+\label{tab:ablation}
+\centering
+\begin{tabular}{lcc}
+\toprule
+Variant & Supported & N--P unresolved \\
+\midrule
+Full ETGI & 7/4/25 & 0 \\
+No retrieval & 7/4/25 & 0 \\
+No temporal graph & 0/0/0 & 0 \\
+No contradiction search & 7/4/25 & 0 \\
+No source dependency & 7/4/0 & 25 \\
+No necessity & 7/4/25 & 0 \\
+No revision & 0/0/0 & 25 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Modality}
+With only network records the graph has the 7 communications.
+With only electrical records it has the 4 same-device edges.
+The 25 cross-modal edges appear only when both views are visible, and they are shared-source labels.
+Electrical-only input is still network-reported state.
+The decoder match of 312/312 is the reason those edges are not counted as independent sensors.
+
+\section{Limitations}
+The window was chosen from a catalog whose descriptions had already been seen, even though those descriptions were not given to the model.
+One model and one main window cannot separate a controller bug from a property of the task.
+The tool page of 20 rows cannot cover 254 entities, so exact entity-list match is a weak score; recall makes the same cap visible.
+Shared frame hashes do not occur here, so that check is unexercised.
+Necessity was not applied to an inferred edge, because none was proposed.
+Rural was not run.
+On one Semiurban test window (1743640079.1774833--1743640109.233572, tool cap 4) the same split appears: 7 supported communications, 5 supported same-device edges, 18 supported shared-source edges, gap-only tool calls, an empty proposal, and a rejected narrative.
+The decoder match there is 339/339.
+That window is not a second full comparison.
+The implementation is not evidence that the investigative claims are true.
+
+\section{Conclusion}
+ETGI separates record links from model proposals and refuses to treat an IEC-104 value and its IPAL copy as two observations.
+On the reported Basic window, revision and the source audit determine the published graph, contradiction search and necessity do not change it, and the local model neither selects the queries nor proposes relations.
+Question scores do not improve over agentic retrieval.
+The case study supports the bookkeeping.
+It does not support a claim of better investigation accuracy.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
