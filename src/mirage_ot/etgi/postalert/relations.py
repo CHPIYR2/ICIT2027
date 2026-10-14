@@ -3,6 +3,7 @@
 A shared TCP direction, frame, CA/IOA point, or device prefix is an observed
 fact. A gap of at most two seconds with no other shared identifier stays
 temporal co-occurrence. It is not a supported inference and not a cause.
+Candidate kind (`candidate_level`) is kept separate from `verification_status`.
 """
 from __future__ import annotations
 from ..graph.temporal import TemporalEvidenceGraph
@@ -46,7 +47,7 @@ def _communications(graph, timeline, nodes, linked) -> None:
             edge = graph.add_edge(
                 source=nodes[left["timeline_id"]]["node_id"], target=nodes[right["timeline_id"]]["node_id"],
                 relation_type="communication", origin="observed", time_order="undirected",
-                evidence_ids=[*left["evidence_ids"][:4], *right["evidence_ids"][:4]],
+                evidence_ids=[*left["evidence_ids"][:2], *right["evidence_ids"][:2]],
                 rationale="Both directions of one TCP 5-tuple were observed.", built_by="record_link",
             )
             _mark(edge, "observed_fact", "supported", "Recorded TCP directions. Not a cause.")
@@ -89,10 +90,6 @@ def _shared_source(graph, timeline, nodes, linked) -> None:
         )
         _mark(edge, "observed_fact", "supported", "One mapped point. Not a second modality and not a cause.")
         linked.add((event["timeline_id"], other["timeline_id"]))
-        if _values_disagree(event, other):
-            edge["claim_level"] = "disputed"
-            edge["status"] = "disputed"
-            edge["uncertainty_notes"].append("The IEC-104 value and the electrical value differ.")
 
 
 def _cooccurrence(graph, timeline, nodes, linked) -> None:
@@ -112,8 +109,8 @@ def _cooccurrence(graph, timeline, nodes, linked) -> None:
                 continue
             if _shared_identifier(left, right):
                 level, status, note = (
-                    "supported_inference", "unresolved",
-                    "A shared identifier other than time is present. This is not a cause.",
+                    "supported_inference", "supported",
+                    "A shared device stem other than time is present. This is an inference, not a cause.",
                 )
             else:
                 level, status, note = (
@@ -131,7 +128,19 @@ def _cooccurrence(graph, timeline, nodes, linked) -> None:
 
 
 def _disputes(graph, timeline, nodes) -> None:
-    return
+    """Flag numeric disagreement on the same entity within 2 seconds."""
+    for edge in graph.edges.values():
+        if edge["relation_type"] != "shared_source":
+            continue
+        left = next((event for event in timeline if nodes[event["timeline_id"]]["node_id"] == edge["source"]), None)
+        right = next((event for event in timeline if nodes[event["timeline_id"]]["node_id"] == edge["target"]), None)
+        if left and right and _values_disagree(left, right):
+            edge["claim_level"] = "disputed"
+            edge["candidate_level"] = "shared_source"
+            edge["status"] = "disputed"
+            edge["verification_status"] = "disputed"
+            edge["contradicting_evidence"] = list(edge["evidence_ids"][:2])
+            edge["uncertainty_notes"].append("The IEC-104 value and the IPAL electrical value differ within the window.")
 
 
 def _already(linked, left, right) -> bool:
@@ -155,6 +164,8 @@ def _stem(event: dict) -> str | None:
 
 
 def _values_disagree(left, right) -> bool:
+    if not left.get("value_present") or not right.get("value_present"):
+        return False
     if left.get("value") is None or right.get("value") is None:
         return False
     return abs(float(left["value"]) - float(right["value"])) > 1e-3
@@ -169,7 +180,9 @@ def _reverse(entity: str) -> str | None:
 
 
 def _mark(edge, level: str, status: str, note: str) -> None:
+    edge["candidate_level"] = level
     edge["claim_level"] = level
+    edge["verification_status"] = status
     edge["status"] = status
     edge["causal_status"] = "not_established"
     edge["uncertainty_notes"].append(note)
@@ -184,7 +197,9 @@ def _public(edge: dict) -> dict:
         "source_modality": edge["source_modality"],
         "target_modality": edge["target_modality"],
         "relation_type": edge["relation_type"],
+        "candidate_level": edge.get("candidate_level"),
         "claim_level": edge.get("claim_level"),
+        "verification_status": edge.get("verification_status"),
         "status": edge["status"],
         "causal_status": "not_established",
         "evidence_ids": ids[:4],

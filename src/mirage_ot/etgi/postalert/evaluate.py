@@ -1,8 +1,14 @@
-"""Scores that do not use the model's own text as gold."""
+"""Scores that do not use the model's own text as gold.
+
+`citation_presence_in_timeline` only checks whether a cited ID appears in the
+selected timeline. `claim_verification_rate` checks whether the claim passed
+the structural predicate against the indexed rows.
+"""
 from __future__ import annotations
+from .verify import verify_claims
 
 
-def gold_facts(db, start: float, end: float) -> dict:
+def gold_facts(db, start: float, end: float, prepared: dict | None = None) -> dict:
     measurement = db.conn.execute(
         """SELECT evidence_id, entity, value FROM evidence
            WHERE kind = 'electrical_update' AND update_status = 'new' AND value_present = 1
@@ -21,38 +27,101 @@ def gold_facts(db, start: float, end: float) -> dict:
            LIMIT 1""",
         (start, end),
     ).fetchone()
+    top_electrical = None
+    top_comm = None
+    if prepared:
+        top_electrical = next((e for e in prepared["timeline"] if e.get("role") == "electrical_change"), None)
+        top_comm = next((r for r in prepared["relations"] if r.get("relation_type") == "communication"), None)
     return {
-        "measurement_id": None if measurement is None else measurement["evidence_id"],
-        "measurement_entity": None if measurement is None else measurement["entity"],
-        "measurement_value": None if measurement is None else measurement["value"],
-        "tcp_ids": [] if pair is None else [pair["left_id"], pair["right_id"]],
+        "arbitrary_first_measurement_id": None if measurement is None else measurement["evidence_id"],
+        "arbitrary_first_measurement_entity": None if measurement is None else measurement["entity"],
+        "arbitrary_first_measurement_value": None if measurement is None else measurement["value"],
+        "arbitrary_tcp_ids": [] if pair is None else [pair["left_id"], pair["right_id"]],
+        "top_selected_electrical": None if top_electrical is None else {
+            "timeline_id": top_electrical["timeline_id"],
+            "entity": top_electrical["entity"],
+            "value": top_electrical.get("value"),
+            "evidence_ids": top_electrical["evidence_ids"],
+        },
+        "top_selected_communication": None if top_comm is None else {
+            "edge_id": top_comm["edge_id"],
+            "source_entity": top_comm["source_entity"],
+            "target_entity": top_comm["target_entity"],
+            "evidence_ids": top_comm["evidence_ids"],
+        },
     }
 
 
-def score_run(prepared: dict, result: dict, gold: dict) -> dict:
-    timeline_ids = {evidence_id for event in prepared["timeline"] for evidence_id in event["evidence_ids"]}
+def score_run(prepared: dict, result: dict, gold: dict, *, db=None) -> dict:
+    lineage = prepared.get("lineage") or {}
+    timeline_ids = {
+        evidence_id
+        for event in prepared["timeline"]
+        for evidence_id in (lineage.get(event["timeline_id"]) or event["evidence_ids"])
+    }
+    exposed_ids = {
+        evidence_id
+        for event in (prepared.get("exposed_timeline") or [])
+        for evidence_id in event.get("evidence_ids") or []
+    }
     claims = result["model"]["claims"]
+    verified = result["verification"].get("verified") or []
+    rejected = result["verification"].get("rejected") or []
+    if db is not None and not verified and not rejected and claims:
+        audited = verify_claims(db, claims, prepared["relations"], prepared["timeline"])
+        audit_verified = len(audited["verified"])
+        audit_rejected = len(audited["rejected"])
+    else:
+        audit_verified = len(verified)
+        audit_rejected = len(rejected)
+    top_el = gold.get("top_selected_electrical")
+    top_comm = gold.get("top_selected_communication")
     return {
         "timeline_events": len(prepared["timeline"]),
-        "measurement_in_timeline": gold["measurement_id"] in timeline_ids if gold["measurement_id"] else None,
-        "tcp_pair_in_timeline": all(item in timeline_ids for item in gold["tcp_ids"]) if gold["tcp_ids"] else None,
-        "observed_relations": sum(item.get("claim_level") == "observed_fact" for item in prepared["relations"]),
-        "cooccurrence_relations": sum(item.get("claim_level") == "temporal_cooccurrence" for item in prepared["relations"]),
-        "supported_inferences": sum(item.get("claim_level") == "supported_inference" for item in prepared["relations"]),
-        "disputed_relations": sum(item.get("claim_level") == "disputed" for item in prepared["relations"]),
+        "exposed_events": len(prepared.get("exposed_timeline") or []),
+        "exposed_electrical_changes": sum(
+            item.get("role") == "electrical_change" for item in (prepared.get("exposed_timeline") or [])
+        ),
+        "top_electrical_exposed": bool(top_el and set(top_el["evidence_ids"]) & exposed_ids) if top_el else None,
+        "top_communication_in_relations": bool(top_comm) if top_comm is not None else False,
+        "arbitrary_measurement_in_timeline": (
+            gold["arbitrary_first_measurement_id"] in timeline_ids
+            if gold.get("arbitrary_first_measurement_id") else None
+        ),
+        "observed_relations": sum(
+            item.get("claim_level") == "observed_fact" and item.get("verification_status") == "supported"
+            for item in prepared["relations"]
+        ),
+        "cooccurrence_relations": sum(
+            item.get("claim_level") == "temporal_cooccurrence" for item in prepared["relations"]
+        ),
+        "supported_inferences": sum(
+            item.get("claim_level") == "supported_inference" and item.get("verification_status") == "supported"
+            for item in prepared["relations"]
+        ),
+        "disputed_relations": sum(
+            item.get("verification_status") == "disputed" for item in prepared["relations"]
+        ),
         "model_claims": len(claims),
+        "partial_output": bool(result["model"].get("partial_output")),
+        "salvaged_claim_count": int(result["model"].get("salvaged_claim_count") or 0),
         "model_abstained": result["model"]["abstain"],
-        "verified_claims": len(result["verification"].get("verified") or []),
-        "rejected_claims": len(result["verification"].get("rejected") or []),
+        "verified_claims": len(verified),
+        "rejected_claims": len(rejected),
+        "audit_verified_claims": audit_verified,
+        "audit_rejected_claims": audit_rejected,
+        "claim_verification_rate": (audit_verified / len(claims)) if claims else None,
         "published_claims": len(result["published_claims"]),
+        "unverified_published_claims": (
+            0 if result["report"].get("level") == "B4" else max(len(claims) - audit_verified, 0)
+        ),
         "minimum_report": result["minimum"],
-        "citation_validity": _citation_validity(prepared, claims),
+        "citation_presence_in_timeline": _citation_presence(timeline_ids, claims),
         "rejected_reasons": _reasons(result),
     }
 
 
-def _citation_validity(prepared, claims) -> float | None:
-    known = {evidence_id for event in prepared["timeline"] for evidence_id in event["evidence_ids"]}
+def _citation_presence(known: set[str], claims: list[dict]) -> float | None:
     cited = [str(item) for claim in claims for item in (claim.get("evidence_ids") or [])]
     if not cited:
         return None

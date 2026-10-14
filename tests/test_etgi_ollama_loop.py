@@ -37,6 +37,8 @@ def test_live_json_action_takes_two_queries_then_cites_evidence(tmp_path):
         probe = client.probe_tool_choice()
     except Exception as exc:
         pytest.skip(f"Ollama is not available: {exc}")
+    if probe.get("probe_error") or not probe.get("http_status"):
+        pytest.skip(f"Ollama is not available: {probe}")
     flags = Flags(action_interface="json_action", allow_gap_fallback=False, evidence_necessity=False,
                   temporal_graph=False, max_tool_calls=3, max_llm_calls=4, num_predict=400,
                   method="json-known-answer")

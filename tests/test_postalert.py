@@ -11,11 +11,12 @@ from mirage_ot.etgi.postalert.verify import verify_claims
 class Scripted:
     model_name = "scripted"
 
-    def __init__(self, content):
+    def __init__(self, content, *, done_reason="stop"):
         self.content = content
+        self.done_reason = done_reason
 
     def chat(self, messages, **kwargs):
-        return LLMTurn(self.content, [], 20, 10, {}, self.model_name, done_reason="stop")
+        return LLMTurn(self.content, [], 20, 10, {}, self.model_name, done_reason=self.done_reason)
 
 
 def _db(tmp_path: Path) -> EvidenceDB:
@@ -76,11 +77,12 @@ def test_rejected_claims_are_kept_and_a_minimum_report_remains(tmp_path):
     db = _db(tmp_path)
     prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
     bad = json.dumps({"abstain": False, "hypotheses": [], "claims": [
-        {"statement": "The voltage was 9.", "evidence_ids": ["EV-eeeeeeeeeeeeeeee"], "entity": "bus.0:voltage",
-         "time": 1003.2, "value": 9, "claim_level": "observed_fact"},
-        {"statement": "This caused the change.", "evidence_ids": ["EV-9999999999999999"], "claim_level": "supported_inference"},
+        {"claim_type": "measurement_claim", "statement": "The voltage was 9.", "evidence_ids": ["EV-eeeeeeeeeeeeeeee"],
+         "entity": "bus.0:voltage", "time": 1003.2, "value": 9, "claim_level": "observed_fact"},
+        {"claim_type": "relation_claim", "statement": "This caused the change.",
+         "evidence_ids": ["EV-9999999999999999"], "claim_level": "supported_inference"},
     ]})
-    result = run_explanation(db, Scripted(bad), prepared, level="B4")
+    result = run_explanation(db, Scripted(bad), prepared, level="B4", claim_mode="free_form")
     reasons = [reason for claim in result["verification"]["rejected"] for reason in claim["reasons"]]
     assert "value_does_not_match_cited_rows" in reasons
     assert any(reason.startswith("evidence_id_not_in_database") for reason in reasons)
@@ -89,7 +91,7 @@ def test_rejected_claims_are_kept_and_a_minimum_report_remains(tmp_path):
     assert "bus.0:voltage" in result["report"]["text"]
     assert result["report"]["no_confirmed_inferred_relation"]
     out = tmp_path / "run"
-    write_run(db, Scripted(bad), prepared, out, level="B4")
+    write_run(db, Scripted(bad), prepared, out, level="B4", claim_mode="free_form")
     assert (out / "timeline.json").exists()
     assert (out / "relations.json").exists()
     saved = json.loads((out / "verification.json").read_text())
@@ -101,7 +103,7 @@ def test_a_truncated_claim_list_keeps_the_closed_claims():
     text = """{"abstain": false, "claims": [
         {"statement": "A TCP flow was observed.", "evidence_ids": ["EV-aaaaaaaaaaaaaaaa"], "claim_level": "observed_fact"},
         {"statement": "cut off", "evidence_ids": ["EV-"""
-    parsed = _object(text)
+    parsed = _object(text, allow_salvage=True)
     assert len(parsed["claims"]) == 1
     assert parsed["claims"][0]["evidence_ids"] == ["EV-aaaaaaaaaaaaaaaa"]
 
@@ -111,13 +113,217 @@ def test_a_matching_observation_can_be_published(tmp_path):
     prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
     shared = next(relation for relation in prepared["relations"] if relation["relation_type"] == "shared_source")
     claim = {
-        "statement": "The IEC-104 point and the electrical name are the same mapped point.",
+        "claim_type": "relation_claim",
+        "edge_id": shared["edge_id"],
         "evidence_ids": shared["evidence_ids"],
-        "entity": "bus.0:voltage",
-        "time": 1003.2,
-        "value": 1.0,
+        "source_entity": shared["source_entity"],
+        "target_entity": shared["target_entity"],
         "claim_level": "observed_fact",
         "relation_type": "shared_source",
     }
-    checked = verify_claims(db, [claim], prepared["relations"])
+    checked = verify_claims(db, [claim], prepared["relations"], prepared["timeline"])
     assert checked["verified"] and not checked["rejected"]
+
+
+def test_packet_existence_does_not_require_numeric_measurement(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    claim = {
+        "claim_type": "observation_claim",
+        "evidence_ids": ["EV-aaaaaaaaaaaaaaaa"],
+        "entity": "10.0.0.1:2404->10.0.0.2:50000/TCP",
+        "time": 1001.0,
+        "value": True,
+        "claim_level": "observed_fact",
+    }
+    checked = verify_claims(db, [claim], prepared["relations"], prepared["timeline"])
+    assert len(checked["verified"]) == 1
+    assert not checked["rejected"]
+    assert "Observed tcp_packet" in checked["verified"][0]["rendered_text"]
+
+
+def test_true_is_not_equal_to_numeric_one(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    claim = {
+        "claim_type": "measurement_claim",
+        "evidence_ids": ["EV-eeeeeeeeeeeeeeee"],
+        "entity": "bus.0:voltage",
+        "time": 1003.2,
+        "value": True,
+        "claim_level": "observed_fact",
+    }
+    checked = verify_claims(db, [claim], prepared["relations"], prepared["timeline"])
+    assert not checked["verified"]
+    assert "value_must_be_numeric" in checked["rejected"][0]["reasons"]
+
+
+def test_observed_single_packet_without_edge_can_pass(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    claim = {
+        "claim_type": "observation_claim",
+        "evidence_ids": ["EV-aaaaaaaaaaaaaaaa"],
+        "entity": "10.0.0.1:2404->10.0.0.2:50000/TCP",
+        "time": 1001.0,
+        "claim_level": "observed_fact",
+    }
+    checked = verify_claims(db, [claim], [], prepared["timeline"])
+    assert len(checked["verified"]) == 1
+
+
+def test_unsupported_statement_cannot_pass_with_only_valid_id(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    fake = {
+        "statement": "The packet carried an unauthorized firmware installation payload of 999 gigabytes.",
+        "evidence_ids": ["EV-aaaaaaaaaaaaaaaa"],
+        "claim_level": "observed_fact",
+    }
+    checked = verify_claims(db, [fake], prepared["relations"], prepared["timeline"])
+    assert checked["verified"] == []
+    assert "missing_observation_anchor" in checked["rejected"][0]["reasons"]
+
+
+def test_relation_requires_both_endpoint_refs_and_type(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    one_side = {
+        "claim_type": "relation_claim",
+        "source_entity": "10.0.0.1:2404->10.0.0.2:50000/TCP",
+        "target_entity": "10.0.0.2:50000->10.0.0.1:2404/TCP",
+        "relation_type": "communication",
+        "evidence_ids": ["EV-aaaaaaaaaaaaaaaa"],
+        "claim_level": "observed_fact",
+    }
+    checked = verify_claims(db, [one_side], prepared["relations"], prepared["timeline"])
+    assert checked["verified"] == []
+    assert "relation_missing_endpoint_evidence" in checked["rejected"][0]["reasons"]
+
+
+def test_entity_timestamp_and_value_match_same_fact(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    mixed = {
+        "claim_type": "measurement_claim",
+        "evidence_ids": ["EV-eeeeeeeeeeeeeeee", "EV-ffffffffffffffff"],
+        "entity": "bus.0:voltage",
+        "time": 1003.2,
+        "value": 5.0,
+        "claim_level": "observed_fact",
+    }
+    checked = verify_claims(db, [mixed], prepared["relations"], prepared["timeline"])
+    assert checked["verified"] == []
+    assert "fields_do_not_match_same_row" in checked["rejected"][0]["reasons"]
+
+
+def test_time_interval_supported_with_typed_range(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    claim = {
+        "claim_type": "observation_claim",
+        "evidence_ids": ["EV-aaaaaaaaaaaaaaaa", "EV-bbbbbbbbbbbbbbbb"],
+        "entity": "10.0.0.1:2404->10.0.0.2:50000/TCP",
+        "time": {"start": 1000.5, "end": 1001.5},
+        "claim_level": "observed_fact",
+    }
+    checked = verify_claims(db, [claim], prepared["relations"], prepared["timeline"])
+    assert len(checked["verified"]) == 1
+
+
+def test_multimodal_input_exposes_available_electrical_changes(tmp_path):
+    conn = connect(tmp_path / "mm.sqlite")
+    create(conn)
+    for i in range(10):
+        insert_evidence(conn, _row(
+            f"EV-00000000000000{i:02d}", 1000.0 + i * 0.01, "network",
+            f"10.0.0.1:2404->10.0.0.{i + 2}:50000/TCP", "tcp_packet", 60,
+            vantage="n302", src="10.0.0.1", dst=f"10.0.0.{i + 2}", sport=2404, dport=50000,
+        ))
+    insert_evidence(conn, _row(
+        "EV-eeeeeeeeeeeeeeee", 1008.0, "electrical", "line.0:active_power", "electrical_update", 42.0,
+        update_status="new",
+    ))
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000, incident_end=1010)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    roles = [card["role"] for card in prepared["exposed_timeline"]]
+    assert "electrical_change" in roles
+    assert prepared["coverage"]["exposed_by_modality"].get("electrical", 0) >= 1
+
+
+def test_derived_iec104_and_ipal_not_independent_sources(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    fake_edge = {
+        "edge_id": "R9999",
+        "source_entity": "bus.0:voltage",
+        "target_entity": "bus.0:voltage",
+        "relation_type": "temporal_association",
+        "claim_level": "supported_inference",
+        "status": "supported",
+        "evidence_ids": ["EV-dddddddddddddddd", "EV-eeeeeeeeeeeeeeee"],
+    }
+    claim = {
+        "claim_type": "relation_claim",
+        "edge_id": "R9999",
+        "source_entity": "bus.0:voltage",
+        "target_entity": "bus.0:voltage",
+        "relation_type": "temporal_association",
+        "evidence_ids": ["EV-dddddddddddddddd", "EV-eeeeeeeeeeeeeeee"],
+        "claim_level": "supported_inference",
+    }
+    checked = verify_claims(db, [claim], [*prepared["relations"], fake_edge], prepared["timeline"])
+    assert checked["verified"] == []
+    assert "same_source_counted_as_independent_evidence" in checked["rejected"][0]["reasons"]
+
+
+def test_partial_json_is_not_complete_response(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    truncated = """{"abstain": false, "claims": [
+        {"claim_type": "observation_claim", "fact_id": "TL001", "claim_level": "observed_fact"},
+        {"claim_type": "observation_claim", "fact_id": "TL0"""
+    result = run_explanation(
+        db, Scripted(truncated, done_reason="length"), prepared,
+        level="B4", claim_mode="typed_refs", allow_salvage=False,
+    )
+    assert result["model"]["partial_output"] is True
+    assert result["model"]["abstain"] is False
+    assert result["model"]["salvaged_claim_count"] == 1
+    assert result["model"]["claims"] == []
+    assert result["published_claims"] == []
+
+
+def test_code_version_and_run_artifact_consistency(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    out = tmp_path / "artifact"
+    reply = json.dumps({"abstain": True, "hypotheses": [], "claims": []})
+    write_run(db, Scripted(reply), prepared, out, level="B4")
+    manifest = json.loads((out / "run_manifest.json").read_text())
+    saved_timeline = json.loads((out / "timeline.json").read_text())
+    lineage = json.loads((out / "lineage.json").read_text())
+    assert manifest["code_sha256"]
+    assert manifest["db_fingerprint"]["evidence_rows"] == 6
+    for event in saved_timeline:
+        assert event["evidence_id_count"] == len(lineage[event["timeline_id"]])
+
+
+def test_public_report_does_not_include_rejected_claim_text(tmp_path):
+    db = _db(tmp_path)
+    prepared = prepare(db, 1000, 1010, background_start=1000, background_end=1000)
+    bad = json.dumps({"abstain": False, "hypotheses": [], "claims": [{
+        "claim_type": "measurement_claim",
+        "statement": "HALLUCINATED_STORAGE_SOC_100",
+        "evidence_ids": ["EV-aaaaaaaaaaaaaaaa"],
+        "entity": "storage.1:state_of_charge",
+        "value": 100.0,
+        "claim_level": "observed_fact",
+    }]})
+    out = tmp_path / "pub"
+    write_run(db, Scripted(bad), prepared, out, level="B4", claim_mode="free_form")
+    report_md = (out / "report.md").read_text()
+    rejected_audit = (out / "rejected_claims.json").read_text()
+    assert "HALLUCINATED_STORAGE_SOC_100" not in report_md
+    assert "HALLUCINATED_STORAGE_SOC_100" in rejected_audit
