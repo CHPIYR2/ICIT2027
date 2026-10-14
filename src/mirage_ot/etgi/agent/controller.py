@@ -19,6 +19,7 @@ from ..graph.temporal import TemporalEvidenceGraph
 from ..verification.assess import apply_assessment, verify_edge
 from ..verification.necessity import run_necessity
 from ..verification.inference import assess_inference
+from .memory import InvestigationMemory
 from .tools import dispatch, schemas, validate_arguments, _incident_window
 
 SYSTEM = """You investigate one operational-technology incident window.
@@ -84,6 +85,7 @@ class Flags:
     context: str = "tools"
     action_interface: str = "native_tools"
     allow_gap_fallback: bool = True
+    investigation_memory: bool = False
 
     def as_dict(self) -> dict:
         return dict(self.__dict__)
@@ -107,7 +109,10 @@ class RunState:
     llm_calls: int = 0
     tool_calls: int = 0
     llm_queries: int = 0
+    duplicate_queries: int = 0
+    queries_with_new_evidence: int = 0
     gap_fallbacks: int = 0
+    memory: InvestigationMemory = field(default_factory=InvestigationMemory)
     prompt_tokens: int = 0
     completion_tokens: int = 0
     started: float = field(default_factory=time.time)
@@ -209,7 +214,8 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
                 continue
             if _over(state, flags) or _tools_exhausted(state, flags):
                 break
-            result = _execute(db, graph, state, name, arguments, trace_path, origin="llm")
+            result = _execute(db, graph, state, name, arguments, trace_path, origin="llm",
+                              goal=turn.content or "", remember=flags.investigation_memory)
             exchanges.append((name, arguments, result))
             if result.get("skipped_duplicate"):
                 duplicate = True
@@ -231,7 +237,7 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
                 state.errors.append("no valid model action")
                 state.completion = "NO_VALID_MODEL_ACTION"
             break
-        messages.append({"role": "user", "content": _compact_state(state, graph)})
+        messages.append({"role": "user", "content": _compact_state(state, graph, flags)})
         messages[:] = _trim_messages(messages)
         _checkpoint(out, state, graph, flags)
     inferred = [edge for edge in graph.edges.values() if edge.get("built_by") == "llm"]
@@ -413,7 +419,7 @@ def _run_gap(db, graph, state, flags, messages, trace_path, out) -> bool:
     state.gap_fallbacks += 1
     result = _execute(db, graph, state, name, arguments, trace_path, origin="controller_gap")
     messages.append(_tool_result_message(name, result, origin="controller_gap", state=state))
-    messages.append({"role": "user", "content": _compact_state(state, graph)})
+    messages.append({"role": "user", "content": _compact_state(state, graph, flags)})
     _checkpoint(out, state, graph, flags)
     return True
 
@@ -436,7 +442,11 @@ def _tool_result_message(name: str, result: dict, *, origin: str, state: RunStat
     for evidence_id in exposed["evidence_ids"]:
         if evidence_id not in state.exposed_ids:
             state.exposed_ids.append(evidence_id)
-    payload = json.dumps({"origin": origin, "tool_name": name, **exposed}, default=str)
+    payload = json.dumps({
+        "origin": origin, "tool_name": name, "duplicate": bool(result.get("duplicate")),
+        "status": result.get("status"), "new_evidence_ids": result.get("new_evidence_ids") or [],
+        **exposed,
+    }, default=str)
     if delivery == "tool":
         return {"role": "tool", "tool_name": name, "content": payload[:12000]}
     return {"role": "user", "content": payload[:12000]}
@@ -534,41 +544,67 @@ def _cited(arguments: dict) -> list[str]:
     return found
 
 
-def _execute(db, graph, state, name, arguments, trace_path, *, origin: str) -> dict:
-    start, end, _note = _incident_window(arguments, state.incident_start, state.incident_end)
-    signature = json.dumps({
+def _query_signature(name: str, arguments: dict, incident_start: float, incident_end: float) -> str:
+    start, end, _note = _incident_window(arguments, incident_start, incident_end)
+    return json.dumps({
         "name": name, "start": start, "end": end, "entity": arguments.get("entity"),
         "entity_prefix": arguments.get("entity_prefix"), "ip": arguments.get("ip"),
         "ca": arguments.get("ca"), "ioa": arguments.get("ioa"), "vantage": arguments.get("vantage"),
         "offset": arguments.get("offset", 0), "limit": arguments.get("limit"),
         "evidence_ids": arguments.get("evidence_ids"),
     }, sort_keys=True, default=str)
+
+
+def _execute(db, graph, state, name, arguments, trace_path, *, origin: str,
+             goal: str = "", remember: bool = False) -> dict:
+    signature = _query_signature(name, arguments, state.incident_start, state.incident_end)
     if signature in state.called_signatures:
-        state.errors.append("Duplicate tool call skipped: " + name)
+        state.duplicate_queries += 1
+        previous = state.memory.previous(signature) if remember else None
+        summary = (previous or {}).get("summary") or {}
         _trace(trace_path, {"type": "tool_skipped", "name": name, "arguments": arguments,
-                            "origin": origin, "reason": "duplicate"})
-        return {"query": name, "rows": [], "evidence_ids": [], "skipped_duplicate": True,
-                "notes": ["This query was already run."], "data_is_untrusted_telemetry": True}
+                            "origin": origin, "reason": "duplicate", "goal": (goal or "")[:300],
+                            "duplicate": True})
+        return {
+            "query": name, "rows": summary.get("rows") or [],
+            "evidence_ids": list((previous or {}).get("evidence_ids") or []),
+            "skipped_duplicate": True, "duplicate": True, "status": "already_queried",
+            "new_evidence_ids": [], "previous_summary": summary,
+            "notes": ["This query was already run. The database was not read again."],
+            "data_is_untrusted_telemetry": True,
+        }
     state.called_signatures.append(signature)
     state.tool_calls += 1
     state.called_tools.append(name)
     if origin == "llm":
         state.llm_queries += 1
+    before = set(state.retrieved_ids)
     try:
         result = dispatch(db, name, arguments, incident_start=state.incident_start, incident_end=state.incident_end)
     except (TypeError, ValueError) as exc:
         result = {"query": name, "rows": [], "evidence_ids": [], "notes": [str(exc)],
                   "data_is_untrusted_telemetry": True}
         state.errors.append(str(exc))
-    for evidence_id in result.get("evidence_ids") or []:
+    exposed = _expose(result)
+    new_ids = [item for item in exposed["evidence_ids"] if item not in before]
+    for evidence_id in exposed["evidence_ids"]:
         if evidence_id not in state.retrieved_ids:
             state.retrieved_ids.append(evidence_id)
+    if new_ids:
+        state.queries_with_new_evidence += 1
+    result["new_evidence_ids"] = new_ids
+    result["duplicate"] = False
     if name == "query_entity_timeline" and arguments.get("entity"):
         state.timeline_entities.append(arguments["entity"])
+    if remember:
+        state.memory.add_cards(exposed["rows"])
+        state.memory.record(signature=signature, tool=name, arguments=arguments, goal=goal,
+                            summary=exposed, evidence_ids=exposed["evidence_ids"], new_evidence_ids=new_ids)
     _trace(trace_path, {"type": "tool", "name": name, "arguments": arguments, "origin": origin,
+                        "goal": (goal or "")[:300], "duplicate": False,
                         "returned": result.get("returned"), "total": result.get("total"),
-                        "evidence_ids": result.get("evidence_ids"),
-                        "exposed_evidence_ids": _expose(result)["evidence_ids"]})
+                        "evidence_ids": exposed["evidence_ids"], "new_evidence_ids": new_ids,
+                        "exposed_evidence_ids": exposed["evidence_ids"]})
     return result
 
 
@@ -606,14 +642,20 @@ def _task(db, state, graph, flags, limitations) -> str:
     }, default=str)
 
 
-def _compact_state(state, graph) -> str:
-    return json.dumps({
+def _compact_state(state, graph, flags=None) -> str:
+    payload = {
         "tool_calls": state.tool_calls,
         "open_relation_count": len(graph.edges),
-        "open_relations_sample": [_public_edge(edge) for edge in list(graph.edges.values())[:8]],
+        "open_relations_sample": [_public_edge(edge) for edge in list(graph.edges.values())[:4]],
         "unresolved_questions": state.unresolved_questions[-6:],
         "retrieved_evidence_count": len(state.retrieved_ids),
-    })
+    }
+    if flags is not None and flags.investigation_memory:
+        payload["investigation_memory"] = state.memory.digest(
+            unresolved=state.unresolved_questions,
+            candidates=[_public_edge(edge) for edge in graph.edges.values() if edge.get("built_by") == "llm"],
+        )
+    return json.dumps(payload)
 
 
 def _context_cards(db, state, graph, context: str) -> dict:
@@ -730,6 +772,9 @@ def _checkpoint(out: Path, state: RunState, graph, flags: Flags) -> None:
         "llm_calls": state.llm_calls,
         "tool_calls": state.tool_calls,
         "llm_queries": state.llm_queries,
+        "duplicate_queries": state.duplicate_queries,
+        "queries_with_new_evidence": state.queries_with_new_evidence,
+        "investigation_memory": state.memory.as_dict() if flags.investigation_memory else None,
         "gap_fallbacks": state.gap_fallbacks,
         "prompt_tokens": state.prompt_tokens,
         "completion_tokens": state.completion_tokens,

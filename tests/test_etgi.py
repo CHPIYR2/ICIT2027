@@ -345,6 +345,37 @@ def test_json_action_reads_evidence_then_queries_again(tmp_path):
     assert set(proposed[0]["evidence_ids"]) <= {"EV-aaaaaaaaaaaaaaaa", "EV-bbbbbbbbbbbbbbbb"}
 
 
+def test_memory_blocks_a_repeated_query(tmp_path):
+    db = _db(tmp_path)
+
+    class Twice(Scripted):
+        def __init__(self):
+            super().__init__([])
+            self.seen = []
+
+        def chat(self, messages, **kwargs):
+            self.seen.append(json.dumps(messages))
+            step = len(self.seen)
+            if step == 1:
+                call = {"name": "query_electrical_changes", "arguments": {"limit": 5}}
+            elif step == 2:
+                call = {"name": "query_electrical_changes", "arguments": {"limit": 5}}
+            else:
+                return LLMTurn(json.dumps({"action": "stop", "unresolved_questions": []}), [], 2, 2, {}, "scripted")
+            return LLMTurn("", [call], 2, 2, {}, "scripted")
+
+    llm = Twice()
+    flags = Flags(investigation_memory=True, allow_gap_fallback=False, evidence_necessity=False,
+                  temporal_graph=False, max_tool_calls=3, max_llm_calls=3)
+    result = investigate(db, llm, incident_start=1000, incident_end=1010, out=tmp_path / "mem", flags=flags, limitations=[])
+    assert result["state"].llm_queries == 1
+    assert result["state"].duplicate_queries == 1
+    assert result["state"].queries_with_new_evidence == 1
+    assert "already_queried" in llm.seen[-1]
+    assert "investigation_memory" in llm.seen[2]
+    assert "EV-eeeeeeeeeeeeeeee" in llm.seen[2]
+
+
 def test_empty_proposal_is_invalid():
     ok, errors = validate_arguments("propose_relations", {})
     assert ok is False

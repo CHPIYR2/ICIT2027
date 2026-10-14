@@ -37,6 +37,7 @@ def main(argv=None) -> None:
     investigate_cmd.add_argument("--num-predict", type=int)
     investigate_cmd.add_argument("--action-interface", choices=("native_tools", "json_action"))
     investigate_cmd.add_argument("--no-gap-fallback", action="store_true")
+    investigate_cmd.add_argument("--investigation-memory", action="store_true")
     suite = commands.add_parser("suite")
     suite.add_argument("--db", type=Path, required=True)
     suite.add_argument("--out", type=Path, required=True)
@@ -111,6 +112,8 @@ def _apply_budget(flags: Flags, args) -> None:
         flags.action_interface = args.action_interface
     if getattr(args, "no_gap_fallback", False):
         flags.allow_gap_fallback = False
+    if getattr(args, "investigation_memory", False):
+        flags.investigation_memory = True
 
 
 def _run_with_budget(db, llm, name, out, *, limitations, questions, args) -> dict:
