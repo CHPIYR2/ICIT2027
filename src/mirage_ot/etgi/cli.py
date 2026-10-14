@@ -34,6 +34,9 @@ def main(argv=None) -> None:
     investigate_cmd.add_argument("--max-llm-calls", type=int)
     investigate_cmd.add_argument("--necessity-repeats", type=int)
     investigate_cmd.add_argument("--max-necessity-relations", type=int)
+    investigate_cmd.add_argument("--num-predict", type=int)
+    investigate_cmd.add_argument("--action-interface", choices=("native_tools", "json_action"))
+    investigate_cmd.add_argument("--no-gap-fallback", action="store_true")
     suite = commands.add_parser("suite")
     suite.add_argument("--db", type=Path, required=True)
     suite.add_argument("--out", type=Path, required=True)
@@ -102,6 +105,12 @@ def _apply_budget(flags: Flags, args) -> None:
         flags.necessity_repeats = args.necessity_repeats
     if getattr(args, "max_necessity_relations", None) is not None:
         flags.max_necessity_relations = args.max_necessity_relations
+    if getattr(args, "num_predict", None) is not None:
+        flags.num_predict = args.num_predict
+    if getattr(args, "action_interface", None):
+        flags.action_interface = args.action_interface
+    if getattr(args, "no_gap_fallback", False):
+        flags.allow_gap_fallback = False
 
 
 def _run_with_budget(db, llm, name, out, *, limitations, questions, args) -> dict:

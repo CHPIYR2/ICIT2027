@@ -16,6 +16,7 @@ class LLMTurn:
     model: str = ""
     done_reason: str = ""
     truncated: bool = False
+    thinking: str = ""
 
 
 class OllamaClient:
@@ -26,18 +27,21 @@ class OllamaClient:
         self.timeout = timeout
 
     def chat(self, messages: list[dict], *, tools=None, temperature: float = 0.0,
-             seed: int = 1, num_predict: int = 700, require_tool: bool = False) -> LLMTurn:
+             seed: int = 1, num_predict: int = 700, require_tool: bool = False,
+             think: bool = False, response_format: dict | None = None) -> LLMTurn:
         payload = {
             "model": self.model,
             "messages": messages,
             "stream": False,
-            "think": False,
+            "think": think,
             "options": {"temperature": temperature, "seed": seed, "num_predict": num_predict},
         }
         if tools:
             payload["tools"] = tools
             if require_tool:
                 payload["tool_choice"] = "required"
+        if response_format is not None:
+            payload["format"] = response_format
         try:
             body = self._post(payload)
         except urllib.error.HTTPError as exc:
@@ -61,6 +65,9 @@ class OllamaClient:
         content = message.get("content") or ""
         if isinstance(content, list):
             content = "".join(str(part) for part in content)
+        thinking = message.get("thinking") or ""
+        if isinstance(thinking, list):
+            thinking = "".join(str(part) for part in thinking)
         completion = int(body.get("eval_count") or 0)
         reason = str(body.get("done_reason") or "")
         return LLMTurn(
@@ -68,9 +75,12 @@ class OllamaClient:
             prompt_tokens=int(body.get("prompt_eval_count") or 0),
             completion_tokens=completion,
             raw={"done_reason": reason, "eval_count": completion,
-                 "prompt_eval_count": int(body.get("prompt_eval_count") or 0)},
+                 "prompt_eval_count": int(body.get("prompt_eval_count") or 0),
+                 "message_keys": sorted(message.keys()),
+                 "thinking_chars": len(str(thinking)), "content_chars": len(str(content))},
             model=self.model, done_reason=reason,
             truncated=reason == "length" or (num_predict > 0 and completion >= num_predict and reason != "stop"),
+            thinking=str(thinking),
         )
 
     def probe_tool_choice(self) -> dict:

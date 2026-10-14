@@ -2,9 +2,9 @@
 
 Record-level verification still decides whether a communication, shared frame,
 shared IEC-104 report, or same-device pair is an observed fact. This module
-is separate. A temporal association can be evidence-supported when each
-endpoint has a matching non-hold record and the two times fall inside a
-stated gap. That status is not a cause, and it is not a record link.
+is separate. A gap of at most 2 seconds, with nothing else linking the endpoints, is
+temporal co-occurrence. It is not a trusted relation. A shared IEC-104 report
+stays an observed fact about one source, not a second modality.
 """
 from __future__ import annotations
 from ..evidence.queries import EvidenceDB
@@ -33,11 +33,18 @@ def assess_inference(db: EvidenceDB, edge: dict, record: dict) -> dict:
         order_holds = _median(source_times) <= _median(target_times) + 1.0
     elif order == "target_before_source":
         order_holds = _median(target_times) <= _median(source_times) + 1.0
-    if gap <= ASSOCIATION_GAP_SECONDS and order_holds:
+    if gap <= ASSOCIATION_GAP_SECONDS and order_holds and not _shared_identifier(rows, edge):
+        return _result(
+            "cooccurrence", "temporal_cooccurrence", causal,
+            [f"The cited times are {gap:.3f}s apart. That is temporal co-occurrence, "
+             "not a trusted event relation and not a cause."],
+            observed_gap_seconds=gap,
+        )
+    if gap <= ASSOCIATION_GAP_SECONDS and order_holds and _shared_identifier(rows, edge):
         return _result(
             "evidence_supported", "supported_inference", causal,
-            [f"Both endpoints have evidence {gap:.3f}s apart, inside {ASSOCIATION_GAP_SECONDS}s. "
-             "This is an association, not a demonstrated cause."],
+            ["The endpoints share an identifier other than time, and the records are not one IEC-104 report. "
+             "This is an inference, not independent multimodal confirmation and not a cause."],
             observed_gap_seconds=gap,
         )
     return _result(
@@ -71,6 +78,38 @@ def _times(rows: list[dict], edge: dict, side: str) -> list[float]:
         same_modality = modality is None or row["modality"] == modality or same_entity
         if same_entity and same_modality:
             found.append(row["timestamp"])
+    return found
+
+
+def _shared_identifier(rows: list[dict], edge: dict) -> bool:
+    """An IP or device stem on both sides, excluding one IEC-104/IPAL report."""
+    left = [row for row in rows if _side(row, edge, "source")]
+    right = [row for row in rows if _side(row, edge, "target")]
+    if not left or not right:
+        return False
+    if any(row.get("ca_ioa") and row["ca_ioa"] == other.get("ca_ioa") for row in left for other in right):
+        return False
+    if any(row.get("fingerprint") and row["fingerprint"] == other.get("fingerprint") for row in left for other in right):
+        return False
+    left_keys = _keys(left)
+    right_keys = _keys(right)
+    return bool(left_keys & right_keys)
+
+
+def _side(row: dict, edge: dict, side: str) -> bool:
+    entity = edge.get(f"{side}_entity") or ""
+    return row["entity"] == entity or (row.get("ca_ioa") and row["ca_ioa"] == entity)
+
+
+def _keys(rows: list[dict]) -> set[str]:
+    found = set()
+    for row in rows:
+        for ip in (row.get("src_ip"), row.get("dst_ip")):
+            if ip:
+                found.add(ip)
+        entity = row.get("entity") or ""
+        if ":" in entity and not entity.endswith("/TCP"):
+            found.add(entity.split(":", 1)[0])
     return found
 
 

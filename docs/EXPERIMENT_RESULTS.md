@@ -60,6 +60,23 @@ B2's 60 ids are packet ids from the communication edges, which are not in the qu
 
 Electrical-only still uses network-reported state. The 25 cross-modal edges appear only when both views are visible, and they are shared-source links. Hiding either view removes them rather than turning them into within-modality edges.
 
+## Length diagnosis and interface comparison, 2026-10-14
+
+The four saved Basic turns in `etgi-qwen-agentfix` each have `prompt_eval_count` 2050, `eval_count` 700, `done_reason` length, empty `tool_calls`, and about 2,200–3,081 characters of `message.content`. The trace did not store `message.thinking`. Replaying that same initial prompt against Ollama 0.32.5, saved under `runs/etgi/basic-ev0961/diagnostic-length-20261014`, shows where the budget went:
+
+| Setting | prompt tokens | eval tokens | done_reason | thinking chars | content chars | tool call |
+| --- | ---: | ---: | --- | ---: | ---: | --- |
+| num_predict 700, thinking off | 2050 | 700 | length | 0 | 3081 | no |
+| num_predict 2048, thinking off | 2050 | 2046 | length | 0 | 8983 | no |
+| num_predict 700, thinking on | 2050 | 562 | stop | 1889 | 793 | no |
+| num_predict 2048, thinking on | 2050 | 562 | stop | 1889 | 793 | no |
+
+With thinking off, the whole generation budget is `message.content`: a markdown analysis that stops mid-sentence at the token cap. Raising the cap to 2048 only lengthens that essay. It still does not emit a tool call, so `tool_choice=required` is not honored on this prompt. With thinking on, the budget is mostly `message.thinking` (1,889 characters) plus a short content, and the model stops on its own, still without a tool call. A follow-up turn that adds one short evidence page raises the prompt from 2,050 to 2,122 tokens and then returns a tool call in 63 tokens. The initial task had also embedded 170 evidence ids from the first graph edges without their row bodies. The later run's 280 exposed ids were mostly those ids plus later pages, not 280 full records.
+
+After the page summary change, native tool calling on the same Basic window (`interface-native-20261014`, no controller gap, num_predict 512) chose `retrieve_raw_evidence` for three ids that are in the database (`EV-43ead8119c854618`, `EV-c248e2d16d8acd65`, `EV-35343629250fd956`). Prompt 3,778 then 3,665 tokens; generation 138 and 125 tokens; both `done_reason=stop`. The second call repeated the same ids and was skipped. The closing call asked for another retrieve and was not executed, because that turn only accepts a proposal or a stop. No inferred edge was added. The 36 record links remain observed facts. JSON actions on the same window (`interface-json-20261014`, num_predict 256) produced one truncated proposal, 1,958 prompt tokens, 256 generation tokens, `done_reason=length`, and no tool call. Native calling is the interface that selected a valid query. JSON calling did not, at this budget.
+
+On the two-packet known-answer case, native calling with num_predict 512 queried the network, quoted both returned evidence ids, and proposed one communication citing `EV-aaaaaaaaaaaaaaaa` and `EV-bbbbbbbbbbbbbbbb`. Verification kept it as `observed_fact` / `communication`, `causal_status=not_established`. A 2-second-only pair is now `temporal_cooccurrence`, not a trusted inference. Baseline and Gemma runs were not repeated.
+
 ## Agent-loop rerun, 2026-10-14
 
 The earlier Basic numbers above are unchanged. A later run is in `runs/etgi/basic-ev0961/etgi-qwen-agentfix` and does not replace them.

@@ -213,10 +213,10 @@ def test_scripted_investigation_revises_coincidence(tmp_path):
     result = investigate(db, llm, incident_start=1000, incident_end=1010, out=tmp_path / "run",
                          flags=flags, limitations=["electrical values are network-reported"])
     offered = [edge for edge in result["graph"].edges.values()
-               if edge["source_entity"] == "bus.0:voltage" and edge["relation_type"] == "temporal_association"
-               and edge["target_entity"] == "sgen.0:active_power"]
-    assert offered and offered[0]["status"] == "associated"
-    assert offered[0]["claim_level"] == "supported_inference"
+               if edge["source_entity"] == "bus.0:voltage" and edge["target_entity"] == "sgen.0:active_power"]
+    assert offered and offered[0]["status"] == "unresolved"
+    assert offered[0]["claim_level"] == "temporal_cooccurrence"
+    assert offered[0]["relation_type"] == "temporal_cooccurrence"
     assert offered[0]["causal_status"] == "not_established"
     assert offered[0]["direct_record_link"] is False
     assert offered[0]["history"][0]["operation"] == "relation_proposed"
@@ -305,6 +305,44 @@ def test_unknown_evidence_id_does_not_create_an_edge(tmp_path):
     result = investigate(db, llm, incident_start=1000, incident_end=1010, out=tmp_path / "fake", flags=flags, limitations=[])
     assert result["graph"].edges == {}
     assert any("no evidence id" in item for item in result["state"].errors)
+
+
+def test_json_action_reads_evidence_then_queries_again(tmp_path):
+    db = _db(tmp_path)
+
+    class Adaptive(Scripted):
+        def chat(self, messages, **kwargs):
+            blob = json.dumps(messages)
+            if "EV-aaaaaaaaaaaaaaaa" not in blob:
+                content = json.dumps({"action": "tool", "name": "query_tcp_flows", "arguments": {"limit": 5}})
+            elif "query_entity_timeline" not in blob:
+                content = json.dumps({"action": "tool", "name": "query_entity_timeline",
+                                      "arguments": {"entity": "10.0.0.1:2404->10.0.0.2:50000/TCP"}})
+            else:
+                content = json.dumps({"action": "propose_relations", "relations": [{
+                    "source_entity": "10.0.0.1:2404->10.0.0.2:50000/TCP",
+                    "target_entity": "10.0.0.2:50000->10.0.0.1:2404/TCP",
+                    "source_modality": "network", "target_modality": "network",
+                    "relation_type": "communication",
+                    "evidence_ids": ["EV-aaaaaaaaaaaaaaaa", "EV-bbbbbbbbbbbbbbbb"],
+                    "rationale": "both directions were returned",
+                }]})
+            return LLMTurn(content, [], 4, 4, {}, "scripted")
+
+    flags = Flags(action_interface="json_action", allow_gap_fallback=False, evidence_necessity=False,
+                  temporal_graph=False, max_tool_calls=3, max_llm_calls=4)
+    result = investigate(db, Adaptive([]), incident_start=1000, incident_end=1010,
+                         out=tmp_path / "json", flags=flags, limitations=[])
+    origins = []
+    for line in (tmp_path / "json" / "investigation_trace.jsonl").read_text().splitlines():
+        item = json.loads(line)
+        if item.get("type") == "tool":
+            origins.append(item.get("origin"))
+    assert origins == ["llm", "llm"]
+    assert "controller_gap" not in origins
+    proposed = [edge for edge in result["graph"].edges.values() if edge.get("built_by") == "llm"]
+    assert proposed
+    assert set(proposed[0]["evidence_ids"]) <= {"EV-aaaaaaaaaaaaaaaa", "EV-bbbbbbbbbbbbbbbb"}
 
 
 def test_empty_proposal_is_invalid():

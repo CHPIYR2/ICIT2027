@@ -141,6 +141,8 @@ def _render_claims(claims: list[dict]) -> str:
 
 
 def _completion(state, graph, flags) -> str:
+    if state.completion == "NO_VALID_MODEL_ACTION" and not state.llm_queries:
+        return "NO_VALID_MODEL_ACTION"
     if state.budget_hit:
         return "INCOMPLETE_BUDGET_EXHAUSTED"
     problems = []

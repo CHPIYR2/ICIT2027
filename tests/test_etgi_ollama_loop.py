@@ -31,6 +31,27 @@ def _db(tmp_path: Path) -> EvidenceDB:
     return EvidenceDB(conn, incident_start=1000, incident_end=1002)
 
 
+def test_live_json_action_takes_two_queries_then_cites_evidence(tmp_path):
+    try:
+        client = OllamaClient("qwen3.5:9b-q4_K_M", timeout=180)
+        probe = client.probe_tool_choice()
+    except Exception as exc:
+        pytest.skip(f"Ollama is not available: {exc}")
+    flags = Flags(action_interface="json_action", allow_gap_fallback=False, evidence_necessity=False,
+                  temporal_graph=False, max_tool_calls=3, max_llm_calls=4, num_predict=400,
+                  method="json-known-answer")
+    investigate(_db(tmp_path), client, incident_start=1000, incident_end=1002,
+                out=tmp_path / "json", flags=flags, limitations=["synthetic known-answer case"])
+    events = [json.loads(line) for line in (tmp_path / "json" / "investigation_trace.jsonl").read_text().splitlines()]
+    tools = [item for item in events if item.get("type") == "tool" and item.get("origin") == "llm"]
+    assert len(tools) >= 2, "the model did not choose two queries"
+    assert tools[0]["name"] != tools[1]["name"] or tools[0].get("arguments") != tools[1].get("arguments")
+    proposed = [item for item in events if item.get("type") == "propose_relations" and item.get("created")]
+    assert proposed, "the model did not propose a relation with a stored evidence id"
+    cited = set(proposed[0].get("evidence_ids") or [])
+    assert cited & {"EV-aaaaaaaaaaaaaaaa", "EV-bbbbbbbbbbbbbbbb"}
+
+
 def test_live_model_queries_then_uses_the_result(tmp_path):
     try:
         client = OllamaClient("qwen3.5:9b-q4_K_M", timeout=120)
@@ -39,27 +60,15 @@ def test_live_model_queries_then_uses_the_result(tmp_path):
         pytest.skip(f"Ollama is not available: {exc}")
     if not probe.get("server_accepts_tool_choice"):
         pytest.skip(f"This Ollama does not accept tool_choice: {probe}")
-    flags = Flags(evidence_necessity=False, temporal_graph=True, contradiction_search=True,
-                  source_dependency=True, graph_revision=True, max_tool_calls=3, max_llm_calls=4,
-                  num_predict=180, method="known-answer")
+    flags = Flags(evidence_necessity=False, temporal_graph=False, contradiction_search=True,
+                  source_dependency=True, graph_revision=True, allow_gap_fallback=False,
+                  max_tool_calls=2, max_llm_calls=4, num_predict=512, method="known-answer")
     investigate(_db(tmp_path), client, incident_start=1000, incident_end=1002,
                 out=tmp_path / "run", flags=flags, limitations=["synthetic known-answer case"])
     events = [json.loads(line) for line in (tmp_path / "run" / "investigation_trace.jsonl").read_text().splitlines()]
-    tool_events = [item for item in events if item.get("type") == "tool" and item.get("origin") == "llm"]
-    assert tool_events, "the model did not choose a tool; gap fallback alone is not this test"
-    shown = []
-    for item in tool_events:
-        shown.extend(item.get("exposed_evidence_ids") or item.get("evidence_ids") or [])
-    assert shown, "the chosen tool did not expose an evidence id"
-    later = []
-    seen_tool = False
-    for item in events:
-        if item.get("type") == "tool" and item.get("origin") == "llm":
-            seen_tool = True
-            continue
-        if seen_tool and item.get("type") in ("llm", "llm_closing", "propose_relations"):
-            later.append(json.dumps(item))
-    blob = "\n".join(later)
-    assert any(evidence_id in blob for evidence_id in shown) or any(
-        item.get("type") == "llm" and item.get("tool_calls") for item in events[1:]
-    ), "no later decision used the exposed evidence"
+    tools = [item for item in events if item.get("type") == "tool" and item.get("origin") == "llm"]
+    assert tools, "the model did not choose a tool"
+    proposed = [item for item in events if item.get("type") == "propose_relations" and item.get("created")]
+    assert proposed, "the model did not keep a relation that cites stored evidence"
+    cited = set(proposed[0].get("evidence_ids") or [])
+    assert cited & set(tools[0].get("evidence_ids") or [])
