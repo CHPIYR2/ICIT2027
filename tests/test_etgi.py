@@ -6,7 +6,11 @@ from mirage_ot.etgi.agent.ollama import LLMTurn
 from mirage_ot.etgi.evidence.iec104 import split_fields
 from mirage_ot.etgi.evidence.queries import EvidenceDB
 from mirage_ot.etgi.evidence.store import connect, create, expand_blocked, insert_evidence
-from mirage_ot.etgi.evaluation.harness import answer_from_retrieval, build_questions, score_graph, score_questions
+from mirage_ot.etgi.evaluation.harness import (
+    answer_from_retrieval, answer_investigation_questions, build_questions, score_graph,
+    score_model_answers, score_questions,
+)
+from mirage_ot.etgi.agent.tools import validate_arguments
 from mirage_ot.etgi.graph.temporal import TemporalEvidenceGraph
 from mirage_ot.etgi.reporting.generator import write_report
 from mirage_ot.etgi.verification.assess import verify_edge
@@ -211,7 +215,10 @@ def test_scripted_investigation_revises_coincidence(tmp_path):
     offered = [edge for edge in result["graph"].edges.values()
                if edge["source_entity"] == "bus.0:voltage" and edge["relation_type"] == "temporal_association"
                and edge["target_entity"] == "sgen.0:active_power"]
-    assert offered and offered[0]["status"] == "unresolved"
+    assert offered and offered[0]["status"] == "associated"
+    assert offered[0]["claim_level"] == "supported_inference"
+    assert offered[0]["causal_status"] == "not_established"
+    assert offered[0]["direct_record_link"] is False
     assert offered[0]["history"][0]["operation"] == "relation_proposed"
     report = write_report(result, db, tmp_path / "run", llm=None)
     assert report["completion"] == "COMPLETE"
@@ -252,9 +259,10 @@ def test_question_gold_uses_retrieved_ids_only(tmp_path):
     assert "bus.0:voltage" in by_id["new_electrical_entities"]["answer"]
     assert by_id["measurement_value"]["answer"]["value"] in (0, 1.0, 5)
     full = answer_from_retrieval(db, questions, [row["evidence_id"] for row in db.search(limit=100)["rows"]])
-    assert score_questions(questions, full)["exact_match"] == 1
+    sufficiency = score_questions(questions, full)
+    assert sufficiency["evidence_sufficiency_for_question_reconstruction"] == 1
     partial = answer_from_retrieval(db, questions, ["EV-ffffffffffffffff"])
-    assert score_questions(questions, partial)["exact_match"] < 1
+    assert score_questions(questions, partial)["evidence_sufficiency_for_question_reconstruction"] < 1
 
 
 def test_iec104_split_does_not_broadcast_one_value():
@@ -278,3 +286,105 @@ def test_iec104_split_does_not_broadcast_one_value():
     assert aligned[0]["protocol_class"] == "control"
     assert aligned[0]["value"] == 1
     assert aligned[0]["ca_ioa"] == "101.10"
+
+
+def test_unknown_evidence_id_does_not_create_an_edge(tmp_path):
+    db = _db(tmp_path)
+    llm = Scripted([
+        {"tool_calls": [{"name": "propose_relations", "arguments": {
+            "relations": [{
+                "source_entity": "firewall", "target_entity": "switch_1",
+                "source_modality": "network", "target_modality": "electrical",
+                "relation_type": "temporal_association", "evidence_ids": ["ev-001"],
+                "rationale": "made up",
+            }],
+        }}]},
+        {"content": json.dumps({"action": "stop", "unresolved_questions": []})},
+    ])
+    flags = Flags(evidence_necessity=False, temporal_graph=False, max_tool_calls=2, max_llm_calls=2)
+    result = investigate(db, llm, incident_start=1000, incident_end=1010, out=tmp_path / "fake", flags=flags, limitations=[])
+    assert result["graph"].edges == {}
+    assert any("no evidence id" in item for item in result["state"].errors)
+
+
+def test_empty_proposal_is_invalid():
+    ok, errors = validate_arguments("propose_relations", {})
+    assert ok is False
+    ok, _errors = validate_arguments("propose_relations", {"relations": []})
+    assert ok is False
+    ok, errors = validate_arguments("query_entity_timeline", {})
+    assert ok is False and any("entity" in item for item in errors)
+
+
+def test_gap_result_is_visible_on_the_next_turn(tmp_path):
+    db = _db(tmp_path)
+
+    class Remember(Scripted):
+        def __init__(self):
+            super().__init__([
+                {"content": "I need evidence."},
+                {"content": json.dumps({"action": "stop", "unresolved_questions": []})},
+            ])
+            self.seen = []
+
+        def chat(self, messages, **kwargs):
+            self.seen.append(json.dumps(messages))
+            return super().chat(messages, **kwargs)
+
+    llm = Remember()
+    flags = Flags(evidence_necessity=False, temporal_graph=False, max_tool_calls=2, max_llm_calls=2)
+    investigate(db, llm, incident_start=1000, incident_end=1010, out=tmp_path / "gap", flags=flags, limitations=[])
+    assert "controller_gap" in llm.seen[1]
+    assert "EV-dddddddddddddddd" in llm.seen[1]
+
+
+def test_model_tool_result_uses_tool_role(tmp_path):
+    db = _db(tmp_path)
+
+    class Remember(Scripted):
+        def __init__(self):
+            super().__init__([
+                {"tool_calls": [{"name": "query_electrical_changes", "arguments": {"limit": 5}}]},
+                {"content": json.dumps({"action": "stop", "unresolved_questions": []})},
+            ])
+            self.seen = []
+
+        def chat(self, messages, **kwargs):
+            self.seen.append(messages)
+            return super().chat(messages, **kwargs)
+
+    llm = Remember()
+    flags = Flags(evidence_necessity=False, temporal_graph=False, max_tool_calls=2, max_llm_calls=2)
+    investigate(db, llm, incident_start=1000, incident_end=1010, out=tmp_path / "llm", flags=flags, limitations=[])
+    tool_messages = [item for item in llm.seen[1] if item.get("role") == "tool"]
+    assert tool_messages
+    body = json.loads(tool_messages[0]["content"])
+    assert body["origin"] == "llm"
+    assert "EV-eeeeeeeeeeeeeeee" in body["evidence_ids"]
+
+
+def test_far_association_is_not_treated_as_support(tmp_path):
+    from mirage_ot.etgi.verification.inference import assess_inference
+    db = _db(tmp_path)
+    graph = TemporalEvidenceGraph()
+    left = graph.add_node(modality="electrical", entity="bus.0:voltage", event_type="electrical_update",
+                          start_time=1003.2, end_time=1003.2, description="", evidence_ids=["EV-eeeeeeeeeeeeeeee"])
+    right = graph.add_node(modality="electrical", entity="switch.1:closed", event_type="electrical_update",
+                           start_time=1006, end_time=1006, description="", evidence_ids=["EV-2222222222222222"])
+    edge = graph.add_edge(source=left["node_id"], target=right["node_id"], relation_type="temporal_association",
+                          origin="inferred", evidence_ids=["EV-eeeeeeeeeeeeeeee", "EV-2222222222222222"])
+    record = verify_edge(db, edge)
+    inference = assess_inference(db, edge, record)
+    assert record["direct_record_link"] is False
+    assert inference["claim_level"] == "unresolved_hypothesis"
+    assert inference["causal_status"] == "not_established"
+
+
+def test_model_answers_are_scored_against_gold():
+    questions = [{"id": "shared_frame_count", "question": "How many shared frames?", "answer": 0, "evidence_ids": []}]
+    llm = Scripted([{"content": json.dumps({"answers": [{"id": "shared_frame_count", "answer": 0}]})}])
+    answers = answer_investigation_questions(llm, questions, [])
+    scored = score_model_answers(questions, answers)
+    assert scored["investigation_question_accuracy"] == 1
+    wrong = score_model_answers(questions, [{"id": "shared_frame_count", "answer": 3}])
+    assert wrong["investigation_question_accuracy"] == 0

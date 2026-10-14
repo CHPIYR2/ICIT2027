@@ -7,7 +7,6 @@ from ..agent.controller import NARRATIVE_SYSTEM
 from ..graph.export import write_graph
 
 _EVIDENCE = re.compile(r"EV-[0-9a-f]{16}")
-_NUMBER = re.compile(r"-?\d+(?:\.\d+)?")
 
 
 def write_report(result: dict, db, out: Path, *, llm=None) -> dict:
@@ -16,7 +15,8 @@ def write_report(result: dict, db, out: Path, *, llm=None) -> dict:
     flags = result["flags"]
     limitations = list(result.get("limitations") or [])
     findings = _findings(state, graph, limitations)
-    narrative, rejected, reason = _narrative(llm, state, flags, findings)
+    claims = verified_claims(graph, db)
+    narrative, rejected, reason = _narrative(llm, state, flags, findings, claims)
     state.narrative = narrative
     state.narrative_rejected = rejected
     state.completion = _completion(state, graph, flags)
@@ -42,6 +42,8 @@ def write_report(result: dict, db, out: Path, *, llm=None) -> dict:
         "contradictions": findings["contradictions"],
         "missing_evidence": findings["missing_evidence"],
         "uncertainty": findings["uncertainty"],
+        "verified_claims": [claim for claim in claims if claim.get("verified")],
+        "rejected_claims": [claim for claim in claims if not claim.get("verified")],
         "necessity": state.necessity,
         "narrative": narrative,
         "narrative_rejected": rejected,
@@ -56,33 +58,86 @@ def write_report(result: dict, db, out: Path, *, llm=None) -> dict:
     return body
 
 
-def _narrative(llm, state, flags, findings) -> tuple[str, bool, str]:
+def verified_claims(graph, db) -> list[dict]:
+    """Check entity, time, field, value, and evidence ids before any prose is written."""
+    claims = []
+    seen = set()
+    for edge in list(graph.edges.values()) + list(graph.removed.values()):
+        for evidence_id in (edge.get("supporting_evidence") or edge.get("evidence_ids") or [])[:8]:
+            if evidence_id in seen:
+                continue
+            seen.add(evidence_id)
+            loaded = db.get([evidence_id])["rows"]
+            if not loaded:
+                claims.append({"claim_id": f"C-{evidence_id}", "verified": False, "evidence_ids": [evidence_id],
+                               "reason": "evidence id is not in the database"})
+                continue
+            row = loaded[0]
+            claims.append({
+                "claim_id": f"C-{evidence_id}",
+                "kind": "observation",
+                "entity": row["entity"],
+                "time": row["timestamp"],
+                "field": row["kind"],
+                "value": row["value"],
+                "value_present": row["value_present"],
+                "evidence_ids": [evidence_id],
+                "causal": False,
+                "verified": True,
+            })
+        if edge.get("claim_level") == "supported_inference" and edge["edge_id"] not in seen:
+            claims.append({
+                "claim_id": f"C-{edge['edge_id']}",
+                "kind": "inference",
+                "entity": f"{edge.get('source_entity')} ~ {edge.get('target_entity')}",
+                "time": None,
+                "field": edge.get("relation_type"),
+                "value": None,
+                "evidence_ids": list(edge.get("evidence_ids") or []),
+                "causal": False,
+                "verified": True,
+                "text": "Temporal association inside the stated gap. Not a demonstrated cause.",
+            })
+    return claims
+
+
+def _narrative(llm, state, flags, findings, claims: list[dict]) -> tuple[str, bool, str]:
+    verified = [claim for claim in claims if claim.get("verified")]
+    explanation = _render_claims(verified)
     if llm is None or state.llm_calls >= flags.max_llm_calls:
-        return "", False, ""
+        return explanation, False, ""
     turn = llm.chat(
         [{"role": "system", "content": NARRATIVE_SYSTEM},
-         {"role": "user", "content": json.dumps(findings, default=str)[:14000]}],
+         {"role": "user", "content": json.dumps({"verified_claims": verified}, default=str)[:14000]}],
         tools=None, temperature=0.0, seed=flags.seed, num_predict=min(500, flags.num_predict),
     )
     state.llm_calls += 1
     state.prompt_tokens += turn.prompt_tokens
     state.completion_tokens += turn.completion_tokens
-    text = (turn.content or "").strip()
-    allowed_ids = set(_EVIDENCE.findall(json.dumps(findings)))
-    allowed_numbers = {float(item) for item in _NUMBER.findall(json.dumps(findings, default=str))}
-    bad_ids = sorted(set(_EVIDENCE.findall(text)) - allowed_ids)
-    bad_numbers = []
-    for token in _NUMBER.findall(text):
-        if float(token) not in allowed_numbers:
-            bad_numbers.append(token)
-    if bad_ids or bad_numbers:
-        reason = "Narrative cited unknown evidence or numbers."
-        if bad_ids:
-            reason += " Unknown ids: " + ", ".join(bad_ids[:8])
-        if bad_numbers:
-            reason += " Unknown numbers: " + ", ".join(bad_numbers[:8])
-        return "", True, reason
-    return text, False, ""
+    allowed = {evidence_id for claim in verified for evidence_id in claim["evidence_ids"]}
+    cited = set(_EVIDENCE.findall(turn.content or ""))
+    unknown = sorted(cited - allowed)
+    if unknown or not cited and not verified:
+        reason = "Narrative cited evidence that was not in the verified claims."
+        if unknown:
+            reason += " Unknown ids: " + ", ".join(unknown[:8])
+        return explanation, True, reason
+    return (turn.content or "").strip() or explanation, False, ""
+
+
+def _render_claims(claims: list[dict]) -> str:
+    if not claims:
+        return ""
+    lines = []
+    for claim in claims:
+        if claim["kind"] == "observation":
+            value = "missing" if not claim.get("value_present") else claim.get("value")
+            lines.append(
+                f"{claim['entity']} {claim['field']} at {claim['time']} is {value} ({', '.join(claim['evidence_ids'])})."
+            )
+        else:
+            lines.append(f"Inference, not a cause: {claim['entity']} ({', '.join(claim['evidence_ids'])}).")
+    return " ".join(lines)
 
 
 def _completion(state, graph, flags) -> str:
@@ -90,7 +145,7 @@ def _completion(state, graph, flags) -> str:
         return "INCOMPLETE_BUDGET_EXHAUSTED"
     problems = []
     for edge in graph.edges.values():
-        if edge["status"] not in ("supported", "disputed", "unresolved"):
+        if edge["status"] not in ("supported", "associated", "disputed", "unresolved"):
             problems.append(edge["edge_id"])
         if flags.contradiction_search and not edge.get("contradiction_searched"):
             problems.append(edge["edge_id"] + ":contradiction")
@@ -142,6 +197,9 @@ def _relation(edge: dict) -> dict:
         "rationale": edge.get("rationale") or "",
         "alternatives": edge.get("alternatives") or [],
         "uncertainty_notes": edge.get("uncertainty_notes") or [],
+        "claim_level": edge.get("claim_level"),
+        "causal_status": edge.get("causal_status", "not_established"),
+        "inference_status": edge.get("inference_status"),
         "built_by": edge.get("built_by"),
         "history_operations": [item.get("operation") for item in edge.get("history") or []],
     }

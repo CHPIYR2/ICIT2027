@@ -84,7 +84,10 @@ def main(argv=None) -> None:
         )
         summaries.append(summary)
         print(json.dumps({"method": summary["method"], "completion": summary["completion"],
-                          "question_exact_match": summary["questions"]["exact_match"],
+                          "evidence_sufficiency": summary["questions"].get(
+                              "evidence_sufficiency_for_question_reconstruction"),
+                          "answer_accuracy": (summary.get("investigation_question_answering") or {}).get(
+                              "investigation_question_accuracy"),
                           "unsupported_relation_rate": summary["graph"]["unsupported_relation_rate"]}, indent=2),
               flush=True)
     (args.out / "suite.json").write_text(json.dumps(summaries, indent=2), encoding="utf-8")

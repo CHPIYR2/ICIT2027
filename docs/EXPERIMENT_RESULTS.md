@@ -60,6 +60,14 @@ B2's 60 ids are packet ids from the communication edges, which are not in the qu
 
 Electrical-only still uses network-reported state. The 25 cross-modal edges appear only when both views are visible, and they are shared-source links. Hiding either view removes them rather than turning them into within-modality edges.
 
+## Agent-loop rerun, 2026-10-14
+
+The earlier Basic numbers above are unchanged. A later run is in `runs/etgi/basic-ev0961/etgi-qwen-agentfix` and does not replace them.
+
+Ollama 0.32.5 accepts `tool_choice=required`. A one-line probe did return a tool call. That does not carry over to the investigation prompt: the four search turns have `done_reason=length`, `truncated=true`, and no tool call. The four queries are still `controller_gap`. Their rows are now in the following turn; the trace records 280 exposed evidence ids. The closing proposal named `firewall` and `switch_2` and cited `ev-001`, which is not in the database. Verification removed both edges. The published graph is again 7 communications, 4 same-device edges, and 25 shared-source edges, each with `claim_level=observed_fact` and `causal_status=not_established`. No inferred edge remained. Question baselines, Gemma, and a new cross-scene suite were not started, because this Sherlock run still did not show the model choosing a tool.
+
+A separate known-answer case with two TCP packets did show a model-chosen tool call and a later step after that result (`tests/test_etgi_ollama_loop.py`, 1 passed). That check is not a Sherlock result.
+
 ## Semiurban transfer
 
 One test window, `ev_0431e34c3ed30056a8f0`, 1743640079.1774833–1743640109.233572, context 10 s, tool cap 4. The state file is `test.n406.state.gz`, not the Basic n302 name. The index has 8,511 new electrical values, 9,550 TCP packets, 18,032 IEC-104 objects, and 0 unmatched ASDU rows. Of 339 decoded values with a nearby IPAL sample, 339 match.

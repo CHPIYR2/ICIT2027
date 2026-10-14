@@ -12,8 +12,10 @@ class LLMTurn:
     tool_calls: list[dict]
     prompt_tokens: int
     completion_tokens: int
-    raw: dict = field(repr=False)
+    raw: dict = field(repr=False, default_factory=dict)
     model: str = ""
+    done_reason: str = ""
+    truncated: bool = False
 
 
 class OllamaClient:
@@ -59,12 +61,48 @@ class OllamaClient:
         content = message.get("content") or ""
         if isinstance(content, list):
             content = "".join(str(part) for part in content)
+        completion = int(body.get("eval_count") or 0)
+        reason = str(body.get("done_reason") or "")
         return LLMTurn(
             content=str(content), tool_calls=calls,
             prompt_tokens=int(body.get("prompt_eval_count") or 0),
-            completion_tokens=int(body.get("eval_count") or 0),
-            raw=body, model=self.model,
+            completion_tokens=completion,
+            raw={"done_reason": reason, "eval_count": completion,
+                 "prompt_eval_count": int(body.get("prompt_eval_count") or 0)},
+            model=self.model, done_reason=reason,
+            truncated=reason == "length" or (num_predict > 0 and completion >= num_predict and reason != "stop"),
         )
+
+    def probe_tool_choice(self) -> dict:
+        """Ask the server whether tool_choice is accepted. A 200 does not mean the model called a tool."""
+        version = ""
+        try:
+            request = urllib.request.Request(self.endpoint + "/api/version")
+            with urllib.request.urlopen(request, timeout=10) as response:
+                version = json.loads(response.read().decode("utf-8")).get("version", "")
+        except (urllib.error.URLError, json.JSONDecodeError, TimeoutError) as exc:
+            return {"version": version, "server_accepts_tool_choice": False, "probe_error": str(exc),
+                    "model_returned_tool_call": False}
+        payload = {
+            "model": self.model, "stream": False, "think": False,
+            "messages": [{"role": "user", "content": "Call the tool with limit 1."}],
+            "tools": [{"type": "function", "function": {
+                "name": "query_tcp_flows", "description": "List flows",
+                "parameters": {"type": "object", "properties": {"limit": {"type": "integer"}}, "required": ["limit"]},
+            }}],
+            "tool_choice": "required",
+            "options": {"temperature": 0, "num_predict": 40},
+        }
+        try:
+            body = self._post(payload)
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")[:300]
+            return {"version": version, "server_accepts_tool_choice": False, "http_status": exc.code,
+                    "probe_error": detail, "model_returned_tool_call": False}
+        calls = (body.get("message") or {}).get("tool_calls") or []
+        return {"version": version, "server_accepts_tool_choice": True, "http_status": 200,
+                "model_returned_tool_call": bool(calls),
+                "note": "Accepting the field does not guarantee later investigation turns will call a tool."}
 
     def _post(self, payload: dict) -> dict:
         request = urllib.request.Request(

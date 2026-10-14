@@ -23,35 +23,93 @@ SPECS = [
 ]
 
 
+_TIME = {"start": {"type": "number"}, "end": {"type": "number"},
+         "limit": {"type": "integer"}, "offset": {"type": "integer"}}
+_RELATION = {
+    "type": "object",
+    "required": ["source_entity", "target_entity", "source_modality", "target_modality",
+                 "relation_type", "evidence_ids"],
+    "properties": {
+        "source_entity": {"type": "string"},
+        "target_entity": {"type": "string"},
+        "source_modality": {"type": "string", "enum": ["network", "electrical"]},
+        "target_modality": {"type": "string", "enum": ["network", "electrical"]},
+        "relation_type": {"type": "string"},
+        "time_order": {"type": "string"},
+        "evidence_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+        "rationale": {"type": "string"},
+        "alternatives": {"type": "array", "items": {"type": "string"}},
+    },
+}
+_SCHEMAS = {
+    "query_network_events": {"required": [], "properties": {**_TIME, "ip": {"type": "string"}, "vantage": {"type": "string"}}},
+    "query_iec104_messages": {"required": [], "properties": {**_TIME, "ca": {"type": "string"}, "ioa": {"type": "string"},
+                                                             "ip": {"type": "string"}, "vantage": {"type": "string"}}},
+    "query_electrical_telemetry": {"required": [], "properties": {**_TIME, "entity": {"type": "string"}}},
+    "query_electrical_changes": {"required": [], "properties": {**_TIME, "entity": {"type": "string"}}},
+    "query_entity_timeline": {"required": ["entity"], "properties": {**_TIME, "entity": {"type": "string"}}},
+    "query_related_entities": {"required": ["entity"], "properties": {**_TIME, "entity": {"type": "string"},
+                                                                      "gap_seconds": {"type": "number"}}},
+    "query_tcp_flows": {"required": [], "properties": {**_TIME, "ip": {"type": "string"}, "vantage": {"type": "string"}}},
+    "query_arp_activity": {"required": [], "properties": {**_TIME, "ip": {"type": "string"}}},
+    "query_device_observations": {"required": [], "properties": {**_TIME, "entity": {"type": "string"},
+                                                                 "entity_prefix": {"type": "string"}, "ip": {"type": "string"}}},
+    "query_multi_vantage_evidence": {"required": [], "properties": dict(_TIME)},
+    "compare_time_windows": {"required": ["start_a", "end_a", "start_b", "end_b"], "properties": {
+        "start_a": {"type": "number"}, "end_a": {"type": "number"},
+        "start_b": {"type": "number"}, "end_b": {"type": "number"}}},
+    "retrieve_raw_evidence": {"required": ["evidence_ids"], "properties": {
+        "evidence_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1}}},
+    "propose_relations": {"required": ["relations"], "properties": {
+        "relations": {"type": "array", "minItems": 1, "items": _RELATION},
+        "unresolved_questions": {"type": "array", "items": {"type": "string"}}}},
+    "revise_relation": {"required": ["edge_id", "proposed_status", "reason"], "properties": {
+        "edge_id": {"type": "string"}, "proposed_status": {"type": "string"},
+        "reason": {"type": "string"}, "evidence_ids": {"type": "array", "items": {"type": "string"}}}},
+    "stop_investigation": {"required": [], "properties": {
+        "unresolved_questions": {"type": "array", "items": {"type": "string"}}}},
+}
+
+
 def schemas(names: tuple[str, ...] | None = None) -> list[dict]:
-    parameters = {
-        "type": "object",
-        "properties": {
-            "start": {"type": "number"},
-            "end": {"type": "number"},
-            "entity": {"type": "string"},
-            "entity_prefix": {"type": "string"},
-            "ip": {"type": "string"},
-            "ca": {"type": "string"},
-            "ioa": {"type": "string"},
-            "vantage": {"type": "string"},
-            "limit": {"type": "integer"},
-            "offset": {"type": "integer"},
-            "gap_seconds": {"type": "number"},
-            "start_a": {"type": "number"}, "end_a": {"type": "number"},
-            "start_b": {"type": "number"}, "end_b": {"type": "number"},
-            "evidence_ids": {"type": "array", "items": {"type": "string"}},
-            "relations": {"type": "array"},
-            "unresolved_questions": {"type": "array", "items": {"type": "string"}},
-            "edge_id": {"type": "string"},
-            "proposed_status": {"type": "string"},
-            "reason": {"type": "string"},
-        },
-    }
+    selected = [(name, description) for name, description in SPECS if names is None or name in names]
     return [{
         "type": "function",
-        "function": {"name": name, "description": description, "parameters": parameters},
-    } for name, description in SPECS if names is None or name in names]
+        "function": {
+            "name": name,
+            "description": description,
+            "parameters": {
+                "type": "object",
+                "properties": _SCHEMAS[name]["properties"],
+                "required": _SCHEMAS[name]["required"],
+            },
+        },
+    } for name, description in selected]
+
+
+def validate_arguments(name: str, arguments: dict) -> tuple[bool, list[str]]:
+    """Reject a tool call whose required fields are missing. An empty proposal is invalid."""
+    if name not in _SCHEMAS:
+        return False, [f"unknown tool {name}"]
+    if not isinstance(arguments, dict):
+        return False, ["arguments must be an object"]
+    errors = []
+    for key in _SCHEMAS[name]["required"]:
+        value = arguments.get(key)
+        if value is None or value == "" or value == []:
+            errors.append(f"missing required {key}")
+    if name == "propose_relations" and isinstance(arguments.get("relations"), list):
+        if not arguments["relations"]:
+            errors.append("relations must contain at least one relation")
+        for index, item in enumerate(arguments["relations"]):
+            if not isinstance(item, dict):
+                errors.append(f"relations[{index}] must be an object")
+                continue
+            for key in _RELATION["required"]:
+                value = item.get(key)
+                if value is None or value == "" or value == []:
+                    errors.append(f"relations[{index}] missing {key}")
+    return not errors, errors
 
 
 def dispatch(db: EvidenceDB, name: str, arguments: dict, *, incident_start: float, incident_end: float) -> dict:
