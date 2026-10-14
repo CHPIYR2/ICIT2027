@@ -27,6 +27,71 @@ from ..graph.temporal import TemporalEvidenceGraph
 from .transactions import evaluate_command_effect_inference
 
 
+def _reject_if_transaction_rejected(recheck: dict, stored: dict | None) -> dict:
+    """A transaction gate that already failed cannot be upgraded by a second evaluation."""
+    if not stored or stored.get("gate_passed") is not False:
+        return recheck
+    failed = list(recheck.get("failed_conditions") or [])
+    for cond in stored.get("failed_conditions") or []:
+        if cond not in failed:
+            failed.append(cond)
+    merged = dict(recheck)
+    merged["failed_conditions"] = failed
+    merged["gate_passed"] = False
+    merged["recommended_claim_level"] = "unresolved"
+    merged["recommended_verification_status"] = "unresolved"
+    return merged
+
+
+def _ipal_source_binding(update: dict, tx: dict) -> dict:
+    """Bind an IPAL row only when its parent evidence id hits one IEC-104 message lineage."""
+    parent = update.get("parent_evidence_id")
+    hits: list[tuple[str, str]] = []
+
+    def consider(msg: dict | None, role: str) -> None:
+        if not msg or not parent:
+            return
+        ids = set(msg.get("evidence_ids") or []) | set(msg.get("parent_evidence_ids") or [])
+        src = msg.get("canonical_source_id")
+        if parent in ids and src:
+            hits.append((role, src))
+
+    consider(tx.get("command_activation"), "command_activation")
+    consider(tx.get("activation_confirmation"), "command_confirmation")
+    consider(tx.get("activation_termination"), "activation_termination")
+    for fb in tx.get("protocol_state_feedback") or []:
+        consider(fb, "protocol_state_feedback")
+    mt = tx.get("measurement_transition") or {}
+    if parent and parent in set(mt.get("pre_command_evidence_ids") or []) and mt.get("pre_command_canonical_source_id"):
+        hits.append(("pre_command_measurement", mt["pre_command_canonical_source_id"]))
+    post_ids = set(mt.get("post_command_evidence_ids") or []) | set(mt.get("post_command_parent_evidence_ids") or [])
+    if parent and parent in post_ids and mt.get("post_command_canonical_source_id"):
+        hits.append(("post_command_measurement", mt["post_command_canonical_source_id"]))
+
+    sources = {src for _, src in hits}
+    own = f"SRC-IPAL-{update['evidence_id']}"
+    if len(sources) == 1:
+        return {
+            "source_binding": "lineage_parent",
+            "canonical_source_id": next(iter(sources)),
+            "bound_role": hits[0][0],
+            "counts_as_independent_source": False,
+        }
+    if len(sources) > 1:
+        return {
+            "source_binding": "ambiguous_lineage",
+            "canonical_source_id": own,
+            "bound_role": None,
+            "counts_as_independent_source": False,
+        }
+    return {
+        "source_binding": "unconfirmed_temporal_correspondence",
+        "canonical_source_id": own,
+        "bound_role": None,
+        "counts_as_independent_source": False,
+    }
+
+
 def build_temporal_event_graph(
     timeline: list[dict],
     lineage: dict[str, list[str]],
@@ -144,6 +209,8 @@ def build_temporal_event_graph(
                     "type_id": fb["type_id"], "cot": fb["cot"], "tcp_seq": fb.get("tcp_seq"),
                     "src_ip": fb["src_ip"], "dst_ip": fb["dst_ip"],
                     "pre_state_value": fb.get("pre_state_value"),
+                    "pre_quality_invalid": fb.get("pre_quality_invalid"),
+                    "post_quality_invalid": fb.get("quality_invalid"),
                 },
                 observation=(
                     f"IEC-104 {fb['type_name']} COT={fb['cot']} ({fb['cot_name']}) state report message on "
@@ -175,9 +242,9 @@ def build_temporal_event_graph(
                     evidence_ids=list(mt["pre_command_evidence_ids"]),
                     source_containers=[pre_src_id],
                     transaction_id=tx_id,
-                    protocol_meta={"type_id": 13, "cot": 1},
-                    observation=(
-                        f"Pre-command IEC-104 measurement baseline on {mt['measurement_entity']} "
+                protocol_meta={"type_id": 13, "cot": 1, "quality_invalid": mt.get("pre_quality_invalid")},
+                observation=(
+                    f"Pre-command IEC-104 measurement baseline on {mt['measurement_entity']} "
                         f"(CA/IOA={mt['ca_ioa']}) = {mt['pre_command_value']}"
                     ),
                 )
@@ -204,7 +271,7 @@ def build_temporal_event_graph(
                 evidence_ids=post_ev,
                 source_containers=[post_src_id],
                 transaction_id=tx_id,
-                protocol_meta={"type_id": 13, "cot": 1},
+                protocol_meta={"type_id": 13, "cot": 1, "quality_invalid": mt.get("post_quality_invalid")},
                 observation=(
                     f"Post-command IEC-104 measurement on {mt['measurement_entity']} "
                     f"(CA/IOA={mt['ca_ioa']}) = {mt['post_command_value']} "
@@ -215,11 +282,7 @@ def build_temporal_event_graph(
 
         ipal_fids = []
         for u in (tx.get("ipal_state_updates") or [])[:2]:
-            # Share the canonical source container of the protocol event it derives from
-            shared_src_id = (
-                facts[-1]["source_containers"][0]
-                if facts else f"SRC-IPAL-{u['evidence_id']}"
-            )
+            binding = _ipal_source_binding(u, tx)
             u_fid = _add_fact(
                 facts, fact_lineage, seen_fact_keys,
                 key=("electrical_entity_window", u["entity"], u.get("ca_ioa")),
@@ -236,9 +299,15 @@ def build_temporal_event_graph(
                 vantages=["ipal_state"],
                 vantage_capture_count=1,
                 evidence_ids=[u["evidence_id"]],
-                source_containers=[shared_src_id],
+                source_containers=[binding["canonical_source_id"]],
                 transaction_id=tx_id,
-                protocol_meta={"shared_network_source": True},
+                counts_as_independent_source=False,
+                protocol_meta={
+                    "source_binding": binding["source_binding"],
+                    "bound_role": binding.get("bound_role"),
+                    "shared_network_source": binding["source_binding"] == "lineage_parent",
+                    "parent_evidence_id": u.get("parent_evidence_id"),
+                },
                 observation=(
                     f"IPAL electrical_update on {u['entity']} (CA/IOA={u.get('ca_ioa')}) = {u['value']} "
                     f"(network-derived state table, not an independent physical sensor)"
@@ -347,20 +416,25 @@ def build_temporal_event_graph(
             )
 
         anchor_fid = ack_fid or cmd_fid
-        for fb_fid in st.get("protocol_state_feedback") or []:
+        fb_records = tx.get("protocol_state_feedback") or []
+        for fb_index, fb_fid in enumerate(st.get("protocol_state_feedback") or []):
             fb_node = facts_by_id[fb_fid]
-            pre_state_val = (fb_node.get("protocol_meta") or {}).get("pre_state_value")
-            fb_gate = evaluate_command_effect_inference(
+            fb_meta = fb_node.get("protocol_meta") or {}
+            pre_state_val = fb_meta.get("pre_state_value")
+            stored_gate = fb_records[fb_index].get("consistency_gate") if fb_index < len(fb_records) else None
+            fb_gate = _reject_if_transaction_rejected(evaluate_command_effect_inference(
                 command_acceptance_status=tx.get("command_acceptance_status"),
                 command_value_present=bool(tx.get("value_present")),
                 commanded_value=tx.get("commanded_value"),
                 pre_value_present=(pre_state_val is not None),
                 pre_command_value=pre_state_val,
+                pre_quality_invalid=fb_meta.get("pre_quality_invalid"),
                 post_value_present=bool(fb_node.get("value_present")),
                 post_command_value=fb_node.get("value"),
+                post_quality_invalid=fb_meta.get("post_quality_invalid"),
                 same_rtu_and_ca=True,
                 same_device_stem=(fb_node.get("device_stem") == tx.get("device_stem")),
-            )
+            ), stored_gate)
             _add_typed_edge(
                 graph, edges, existing_pairs, facts_by_id, node_by_fid,
                 source_fid=anchor_fid,
@@ -422,17 +496,19 @@ def build_temporal_event_graph(
             post_val = mt.get("post_command_value")
             cmd_val = tx.get("commanded_value")
             # Re-evaluate consistency gate directly from actual values AND honor explicit False flags if overridden
-            recheck_gate = evaluate_command_effect_inference(
+            recheck_gate = _reject_if_transaction_rejected(evaluate_command_effect_inference(
                 command_acceptance_status=tx.get("command_acceptance_status"),
-                command_value_present=(cmd_val is not None),
+                command_value_present=bool(tx.get("value_present")),
                 commanded_value=cmd_val,
                 pre_value_present=(pre_val is not None),
                 pre_command_value=pre_val,
+                pre_quality_invalid=mt.get("pre_quality_invalid"),
                 post_value_present=(post_val is not None),
                 post_command_value=post_val,
+                post_quality_invalid=mt.get("post_quality_invalid"),
                 same_rtu_and_ca=(post_node.get("ca_ioa", "").split(".")[0] == str(tx.get("ca"))),
                 same_device_stem=(post_node.get("device_stem") == tx.get("device_stem")),
-            )
+            ), mt.get("consistency_gate"))
             if mt.get("shifted_from_pre_baseline") is False and "not_shifted_from_pre_baseline" not in recheck_gate["failed_conditions"]:
                 recheck_gate["failed_conditions"].append("not_shifted_from_pre_baseline")
                 recheck_gate["gate_passed"] = False
@@ -501,12 +577,25 @@ def build_temporal_event_graph(
                     ),
                 )
 
-        # Link protocol feedback / post-measurement to derived IPAL electrical_update (`shared_source`, N-P)
+        # Link IPAL rows only when parent lineage identifies one IEC-104 message.
+        # Time proximity alone is not this derivation; category 2b keeps the weaker alignment.
         for u_fid in st.get("ipal_state_updates") or []:
             u_fact = facts_by_id[u_fid]
-            proto_source = post_fid if (post_fid and facts_by_id[post_fid]["entity"] == u_fact["entity"]) else (
-                (st["protocol_state_feedback"][0] if st.get("protocol_state_feedback") else anchor_fid)
+            meta = u_fact.get("protocol_meta") or {}
+            if meta.get("source_binding") != "lineage_parent":
+                continue
+            shared = (u_fact.get("source_containers") or [None])[0]
+            proto_source = next(
+                (
+                    f["fact_id"] for f in facts
+                    if f["fact_id"] != u_fid
+                    and f.get("transaction_id") == tx_id
+                    and shared in (f.get("source_containers") or [])
+                ),
+                None,
             )
+            if proto_source is None:
+                continue
             _add_typed_edge(
                 graph, edges, existing_pairs, facts_by_id, node_by_fid,
                 source_fid=proto_source,
@@ -517,10 +606,11 @@ def build_temporal_event_graph(
                 verification_status="supported",
                 graph_consistency_gate_status="direct_record_observation",
                 independent_support=False,
-                temporal_condition=f"abs(dt) = {round(abs(u_fact['time'] - facts_by_id[proto_source]['time']), 4)}s <= 1.5s",
+                temporal_condition="parent_evidence_lineage_match",
                 support_basis=(
-                    "IPAL electrical state update is derived from the same network telemetry stream as the "
-                    "IEC-104 point; recorded for cross-layer consistency but NOT counted as independent support."
+                    "IPAL row parent_evidence_id matches this IEC-104 message lineage "
+                    f"({meta.get('bound_role')}). Shared canonical source {shared}; "
+                    "not an independent sensor and not inferred from fact creation order."
                 ),
             )
 
@@ -549,6 +639,12 @@ def build_temporal_event_graph(
     for nf in iec_facts:
         for ef in el_facts:
             if nf["entity"] == ef["entity"] and nf.get("ca_ioa") == ef.get("ca_ioa"):
+                if any(
+                    e["source_fact_id"] == nf["fact_id"] and e["target_fact_id"] == ef["fact_id"]
+                    and e["relation_type"] == "same_network_data_stream_ipal_derivation"
+                    for e in edges
+                ):
+                    continue
                 if abs(nf["time"] - ef["time"]) <= 2.0 or (
                     nf["time"] <= ef["time_end"] + 1.5 and ef["time"] <= nf["time_end"] + 1.5
                 ):
@@ -564,9 +660,9 @@ def build_temporal_event_graph(
                         independent_support=False,
                         temporal_condition="overlapping_window_same_ca_ioa",
                         support_basis=(
-                            f"IEC-104 report series and IPAL update series correspond to the same mapped point "
-                            f"({nf['entity']}, CA/IOA={nf.get('ca_ioa')}) in the network-derived state stream; "
-                            "not an independent second sensor."
+                            f"Same mapped point ({nf['entity']}, CA/IOA={nf.get('ca_ioa')}) within the time window. "
+                            "This is temporal correspondence only: nearby time does not prove the same original packet, "
+                            "and the IPAL row is not counted as independent evidence."
                         ),
                     )
     for i, left in enumerate(iec_facts):
@@ -738,6 +834,7 @@ def _add_fact(
     transaction_id: str | None,
     protocol_meta: dict,
     observation: str,
+    counts_as_independent_source: bool = True,
     **extra,
 ) -> str:
     if key in seen_fact_keys:
@@ -777,6 +874,7 @@ def _add_fact(
         "evidence_ids": dedup_ev[:4],
         "evidence_id_count": len(dedup_ev),
         "source_containers": list(dict.fromkeys(source_containers)),
+        "counts_as_independent_source": counts_as_independent_source,
         "transaction_id": transaction_id,
         "protocol_meta": protocol_meta,
         "observation": observation,

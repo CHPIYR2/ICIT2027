@@ -1,9 +1,13 @@
 # MIRAGE-OT: Automated Evidence-Grounded Incident Reconstruction and Explanation Engine
 
 - **R1 Run directory (preserved)**: `runs/etgi/reconstruction-20261015/` (`code_sha256 = c884c2d4...`, commit `b0bbe66`)
-- **R2 Reliability-Hardened Run directory**: `runs/etgi/reconstruction-r2-20261015/`
+- **R2 Reliability-Hardened Run directory (preserved)**: `runs/etgi/reconstruction-r2-20261015/`
 - **R2 Frozen code SHA-256 (`postalert/*.py` + `reconstruction/*.py`)**: `f8a168270b3cc85e95aa0c3662fd11d4cffbba57406e5751049334c1ff6a8ee0` (Git commit `7203e32`)
-- **Offline test suite**: **72 passed** (`8` in `tests/test_reconstruction.py`, `36` in `tests/test_postalert.py`, `28` in `tests/test_etgi.py`)
+- **R3 Run directory**: `runs/etgi/reconstruction-r3-20261015/`
+- **R3 code SHA-256 (`postalert/*.py` + `reconstruction/*.py`)**: `ba06d033607dea894bd1fff18f9e19e13fc5eceee8bb77beaf2b81a1493d7ff3`
+- **Offline test suite after R3**: **77 passed** (`13` in `tests/test_reconstruction.py`, `36` in `tests/test_postalert.py`, `28` in `tests/test_etgi.py`)
+
+The compact R3 review is `docs/R3_RECONSTRUCTION_REVIEW.md`. Full `transactions.json`, `event_graph.json`, `storylines.json`, `run_manifest.json`, and `evidence_audit_bundle.json` stay in the run directory and are not committed.
 
 ---
 
@@ -48,3 +52,28 @@ Following the independent code & evidence audit (`docs/MIRAGE_OT_RECONSTRUCTION_
 | `ev_3e4d` | Graph edges `EF001->EF003`, `EF007->EF009` (2 switch inference edges) | `command_to_device_state_transition` (`supported_inference` / `supported`) | **`command_to_device_state_candidate` (`unresolved` / `unresolved`)** | Failed consistency gate. Total `supported_inference` edges in `ev_3e4d` dropped from **2 $\to$ 0**. |
 | `ev_12dcd56b` | `TX001` (`sgen.10`) acceptance | `accepted_by_rtu` | **`confirmation_observed_acceptance_unknown`** | Missing `cot_negative` P/N bit in pre-existing DB (`device_state_change_status` remains `verified_measurement_transition` because `309980.938 -> 269971.625` matches target `270000.0`). |
 | `ev_12dcd56b` | `SL001` (`sgen.10`) spine topology | Non-contiguous 5-node list `['EF003','EF001','EF002','EF004','EF006']` | **Contiguous 4-node spine `['EF001','EF002','EF004','EF006']` + `context_observations=['EF003']` + `supporting_evidence_edges=['R0002']`** | Enforced contiguous directed path invariant; `independent_source_container_count` corrected from `7` $\to$ `3` (`4` with `EF003`). |
+
+---
+
+## 3. R3 reliability fixes
+
+R3 does not redesign the engine. It closes two review findings and three protocol gaps.
+
+1. **P0-1 — One consistency gate.** `evaluate_command_effect_inference()` now requires decoded quality on both the pre-command and post-command measurements. `quality_invalid is True` fails as `pre_value_quality_invalid` or `post_value_quality_invalid`. `quality_invalid is None` fails as `pre_quality_unknown` or `post_quality_unknown` and is listed under `quality_uncertainty`. The event graph passes those same fields and, if the transaction gate already failed, cannot upgrade the edge.
+2. **P0-2 — IPAL source binding.** An IPAL row shares an IEC-104 `canonical_source_id` only when `parent_evidence_id` hits that message's evidence or parent ids. Otherwise the row keeps `SRC-IPAL-...` with `source_binding=unconfirmed_temporal_correspondence` and `counts_as_independent_source=false`. Same point and nearby time produce `temporally_aligned_same_point_stream` only. `same_network_data_stream_ipal_derivation` is no longer taken from the last fact created.
+3. **P1-1 — Select versus Execute.** A COT=7 reply or a retransmission is attached only when `select_execute` agrees. Same CA/IOA and the same control value with different Select/Execute stay two transactions.
+4. **P1-2 — Multi-object ASDU.** Shared type id, COT, and CA are copied onto each IOA. Empty aggregator slots stay in place, so a missing middle value is not shifted onto the next IOA. A single value is not copied onto every IOA.
+5. **P1-3 — No control command.** Existing beam search can spine same-device supported couplings. Cross-entity time proximity stays unresolved and is not promoted. A dedicated no-command algorithm is deferred (`no_control_command_policy`).
+
+## 4. R2 to R3 on the three Basic windows
+
+The indexed databases still have no decoded `quality_invalid`. R3 therefore does not keep the two R2 `supported_inference` edges. Lineage export is complete on all three windows (`missing_ids=[]`). Every storyline spine remains a contiguous directed path. IPAL rows are `unconfirmed_temporal_correspondence` and are not counted as independent sources. There is no `same_network_data_stream_ipal_derivation` edge, because these indexes do not store an IPAL parent id.
+
+| Event | Scope | R2 | R3 | Reason |
+| --- | --- | --- | --- | --- |
+| `ev_0961` | `TX004` `sgen.6` | `verified_measurement_transition`, 1 `supported_inference` | `measurement_observed_transition_unverified`, 0 `supported_inference` | Pre/post values still move 40004.5312 → 20000.6875 toward 20000.0, but quality is not decoded (`pre_quality_unknown`, `post_quality_unknown`). |
+| `ev_0961` | `SL004` | 4-node verified spine | 3-node spine: command, confirmation, IPAL setpoint update. `independent_source_container_count=2` | The unverified measurement edge is off the spine. The IPAL row is not an independent source. |
+| `ev_0961` | `SL001`–`SL003` | 4 nodes, IPAL sharing the last protocol source | 3 nodes: command, confirmation, COT=3 report. `independent_source_container_count=3` | IPAL no longer inherits `facts[-1]`. |
+| `ev_3e4d` | transactions | 0 `supported_inference`; switch.30 `no_state_change_observed` | unchanged claim levels | Quality was already not supporting an inference. IPAL derivation edges 2 → 0. |
+| `ev_12dcd56b` | `TX001` `sgen.10` | `verified_measurement_transition`, 1 `supported_inference` | `measurement_observed_transition_unverified`, 0 `supported_inference` | 309980.938 → 269971.625 toward 270000.0 remains visible, but quality is unknown. |
+| `ev_12dcd56b` | `SL001` | verified 4-node protocol spine, 3 independent sources | command, confirmation, two IPAL updates. `independent_source_container_count=2` | Unverified measurement edge leaves the spine. Both IPAL rows are non-independent. |

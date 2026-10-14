@@ -130,27 +130,34 @@ def decode_slice(path: Path, *, timeout: int = 180) -> tuple[list[dict], str]:
 
 
 def split_fields(row: dict) -> list[dict]:
-    """Split a dissected ASDU into information objects without inventing alignment."""
-    ioas = _cells(row.get("iec60870_asdu.ioa"))
-    type_ids = _cells(row.get("iec60870_asdu.typeid"))
-    causes = _cells(row.get("iec60870_asdu.causetx"))
-    addresses = _cells(row.get("iec60870_asdu.addr"))
-    negas = _cells(row.get("iec60870_asdu.nega"))
-    tests = _cells(row.get("iec60870_asdu.test"))
-    sqs = _cells(row.get("iec60870_asdu.sq"))
-    siq_ivs = _cells(row.get("iec60870_asdu.siq.iv"))
-    qds_ivs = _cells(row.get("iec60870_asdu.qds.iv"))
-    sco_ses = _cells(row.get("iec60870_asdu.sco.se"))
-    qos_ses = _cells(row.get("iec60870_asdu.qos.se"))
+    """Split a dissected ASDU into information objects without shifting indexes.
+
+    Empty aggregator slots are kept so a missing middle value cannot move a later
+    value onto the wrong IOA. A header that occurs once (type id, COT, CA) is
+    shared by every object. A value list whose length is neither 1 nor the IOA
+    count is not reindexed.
+    """
+    ioas = _cells(row.get("iec60870_asdu.ioa"), preserve_gaps=True)
+    type_ids = _cells(row.get("iec60870_asdu.typeid"), preserve_gaps=True)
+    causes = _cells(row.get("iec60870_asdu.causetx"), preserve_gaps=True)
+    addresses = _cells(row.get("iec60870_asdu.addr"), preserve_gaps=True)
+    negas = _cells(row.get("iec60870_asdu.nega"), preserve_gaps=True)
+    tests = _cells(row.get("iec60870_asdu.test"), preserve_gaps=True)
+    sqs = _cells(row.get("iec60870_asdu.sq"), preserve_gaps=True)
+    siq_ivs = _cells(row.get("iec60870_asdu.siq.iv"), preserve_gaps=True)
+    qds_ivs = _cells(row.get("iec60870_asdu.qds.iv"), preserve_gaps=True)
+    sco_ses = _cells(row.get("iec60870_asdu.sco.se"), preserve_gaps=True)
+    qos_ses = _cells(row.get("iec60870_asdu.qos.se"), preserve_gaps=True)
 
     value_sets = {
-        "float": _cells(row.get("iec60870_asdu.float")),
-        "normval": _cells(row.get("iec60870_asdu.normval")),
-        "scalval": _cells(row.get("iec60870_asdu.scalval")),
-        "spi": _cells(row.get("iec60870_asdu.siq.spi")),
-        "sco": _cells(row.get("iec60870_asdu.sco.on")),
+        "float": _cells(row.get("iec60870_asdu.float"), preserve_gaps=True),
+        "normval": _cells(row.get("iec60870_asdu.normval"), preserve_gaps=True),
+        "scalval": _cells(row.get("iec60870_asdu.scalval"), preserve_gaps=True),
+        "spi": _cells(row.get("iec60870_asdu.siq.spi"), preserve_gaps=True),
+        "sco": _cells(row.get("iec60870_asdu.sco.on"), preserve_gaps=True),
     }
-    if not ioas:
+    nonempty_ioas = [part for part in ioas if part]
+    if not nonempty_ioas:
         return [_header(
             row, ioa=None, type_id=_first_int(type_ids), cause=_first(causes),
             address=_first(addresses), value=None, value_present=False,
@@ -158,44 +165,57 @@ def split_fields(row: dict) -> list[dict]:
             cot_test=_bool(_first(tests)), sq=_bool(_first(sqs)),
             select_execute=None, quality_invalid=None,
         )]
+    sq_flag = _bool(_aligned(sqs, 0, len(ioas)))
+    longest_values = max((len(cells) for cells in value_sets.values() if cells), default=0)
+    if sq_flag is True and len(nonempty_ioas) == 1 and longest_values > 1:
+        base = _int(nonempty_ioas[0])
+        if base is not None:
+            ioas = [str(base + offset) for offset in range(longest_values)]
+    count = len(ioas)
     objects = []
     for index, ioa in enumerate(ioas):
-        type_id = _at_int(type_ids, index)
-        cot_neg = _bool(_at(negas, index))
-        cot_tst = _bool(_at(tests, index))
-        sq_flag = _bool(_at(sqs, index))
-        se_flag = _bool(_at(sco_ses, index))
+        if not ioa:
+            continue
+        type_id = _int(_aligned(type_ids, index, count))
+        cot_neg = _bool(_aligned(negas, index, count))
+        cot_tst = _bool(_aligned(tests, index, count))
+        sq_here = _bool(_aligned(sqs, index, count))
+        se_flag = _bool(_aligned(sco_ses, index, count))
         if se_flag is None:
-            se_flag = _bool(_at(qos_ses, index))
+            se_flag = _bool(_aligned(qos_ses, index, count))
         se_mode = None if se_flag is None else ("select" if se_flag else "execute")
-        q_inv = _bool(_at(siq_ivs, index))
+        q_inv = _bool(_aligned(siq_ivs, index, count))
         if q_inv is None:
-            q_inv = _bool(_at(qds_ivs, index))
+            q_inv = _bool(_aligned(qds_ivs, index, count))
 
         choices = []
+        mismatched = False
         for name, cells in value_sets.items():
             if not cells:
                 continue
-            if len(cells) == len(ioas):
-                choices.append((name, cells[index]))
-            elif len(cells) == 1 and len(ioas) == 1:
-                choices.append((name, cells[0]))
+            # A single measurement value is not a shared ASDU header. Do not copy it onto every IOA.
+            if len(cells) == count or (len(cells) == 1 and count == 1):
+                text = cells[index] if len(cells) == count else cells[0]
+                if text:
+                    choices.append((name, text))
+            else:
+                mismatched = True
         if not choices:
             objects.append(_header(
-                row, ioa=ioa, type_id=type_id, cause=_at(causes, index),
-                address=_at(addresses, index), value=None, value_present=False,
-                alignment="identifier_without_aligned_value",
-                cot_negative=cot_neg, cot_test=cot_tst, sq=sq_flag,
+                row, ioa=ioa, type_id=type_id, cause=_aligned(causes, index, count),
+                address=_aligned(addresses, index, count), value=None, value_present=False,
+                alignment="value_count_mismatch_not_shifted" if mismatched else "identifier_without_aligned_value",
+                cot_negative=cot_neg, cot_test=cot_tst, sq=sq_here,
                 select_execute=se_mode, quality_invalid=q_inv,
             ))
             continue
         name, text = choices[0]
         number = _parse_value(name, text)
         objects.append(_header(
-            row, ioa=ioa, type_id=type_id, cause=_at(causes, index),
-            address=_at(addresses, index), value=number, value_present=number is not None,
+            row, ioa=ioa, type_id=type_id, cause=_aligned(causes, index, count),
+            address=_aligned(addresses, index, count), value=number, value_present=number is not None,
             alignment=name if number is not None else "unparsed_value",
-            cot_negative=cot_neg, cot_test=cot_tst, sq=sq_flag,
+            cot_negative=cot_neg, cot_test=cot_tst, sq=sq_here,
             select_execute=se_mode, quality_invalid=q_inv,
         ))
     return objects
@@ -247,10 +267,27 @@ def _header(
     }
 
 
-def _cells(text: str | None) -> list[str]:
+def _cells(text: str | None, *, preserve_gaps: bool = False) -> list[str]:
     if text is None or text == "":
         return []
-    return [part.strip() for part in str(text).split(",") if part.strip() != ""]
+    parts = [part.strip() for part in str(text).split(",")]
+    if preserve_gaps:
+        return parts
+    return [part for part in parts if part != ""]
+
+
+def _aligned(cells: list[str], index: int, count: int):
+    """Return the cell for this object. A single header is shared; a mismatched length is not shifted."""
+    if not cells:
+        return None
+    nonempty = [part for part in cells if part]
+    if len(cells) == 1:
+        return nonempty[0] if nonempty else None
+    if len(nonempty) == 1 and len(cells) != count:
+        return nonempty[0]
+    if len(cells) == count and index < len(cells):
+        return cells[index] or None
+    return None
 
 
 def _first(cells: list[str]):

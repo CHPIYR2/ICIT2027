@@ -402,6 +402,8 @@ def _find_retransmit_target(transactions: list[dict], msg: dict, retransmit_wind
             continue
         if tx["value_present"] != msg["value_present"] or not _same_val(tx["commanded_value"], msg["value"]):
             continue
+        if not _select_execute_compatible(tx.get("select_execute"), msg.get("select_execute")):
+            continue
         # Require identical TCP sequence number to classify as a TCP retransmission
         if cmd.get("tcp_seq") is None or msg.get("tcp_seq") is None or cmd["tcp_seq"] != msg["tcp_seq"]:
             continue
@@ -440,6 +442,8 @@ def _match_control_reply(
             reasons.append("ca_ioa_or_entity_mismatch")
         if tx["value_present"] and msg["value_present"] and not _same_val(tx["commanded_value"], msg["value"]):
             reasons.append("command_value_mismatch")
+        if not _select_execute_compatible(tx.get("select_execute"), msg.get("select_execute")):
+            reasons.append("select_execute_mismatch")
         dt = msg["timestamp"] - tx["command_activation"]["timestamp"]
         if dt < -1e-6 or dt > max_dt:
             reasons.append("outside_protocol_reply_window")
@@ -481,12 +485,19 @@ def evaluate_command_effect_inference(
     pre_command_value: float | None,
     post_value_present: bool,
     post_command_value: float | None,
+    pre_quality_invalid: bool | None = None,
     post_quality_invalid: bool | None = None,
     same_rtu_and_ca: bool = True,
     same_device_stem: bool = True,
 ) -> dict:
-    """Testable consistency gate for upgrading a command-to-state transition to `supported_inference`."""
+    """Testable consistency gate for upgrading a command-to-state transition to `supported_inference`.
+
+    Invalid quality on the pre-command or post-command measurement blocks the upgrade.
+    Missing quality is recorded as uncertainty and also blocks the upgrade: an absent
+    IV/QDS bit is not treated as a valid measurement.
+    """
     failed = []
+    uncertainties = []
     if not same_rtu_and_ca:
         failed.append("rtu_or_ca_mismatch")
     if not same_device_stem:
@@ -499,10 +510,18 @@ def evaluate_command_effect_inference(
         failed.append("command_value_unknown")
     if not pre_value_present or pre_command_value is None:
         failed.append("missing_pre_command_baseline")
+    elif pre_quality_invalid is True:
+        failed.append("pre_value_quality_invalid")
+    elif pre_quality_invalid is None:
+        failed.append("pre_quality_unknown")
+        uncertainties.append("pre_quality_not_decoded")
     if not post_value_present or post_command_value is None:
         failed.append("post_state_or_measurement_value_unknown")
-    if post_quality_invalid is True:
+    elif post_quality_invalid is True:
         failed.append("post_value_quality_invalid")
+    elif post_quality_invalid is None:
+        failed.append("post_quality_unknown")
+        uncertainties.append("post_quality_not_decoded")
 
     shifted = False
     direction_ok = False
@@ -537,6 +556,9 @@ def evaluate_command_effect_inference(
         "shifted_from_pre_baseline": shifted,
         "direction_matches_target": direction_ok,
         "matches_commanded_setpoint": matches_target,
+        "pre_quality_invalid": pre_quality_invalid,
+        "post_quality_invalid": post_quality_invalid,
+        "quality_uncertainty": uncertainties,
         "failed_conditions": failed,
         "recommended_claim_level": "supported_inference" if passed else "unresolved",
         "recommended_verification_status": "supported" if passed else "unresolved",
@@ -567,12 +589,14 @@ def _finalize_transaction(
                 and pm["value_present"] and (cmd_time - 15.0) <= pm["timestamp"] < cmd_time
             ]
             pre_val = pre_sp[-1]["value"] if pre_sp else None
+            pre_quality = pre_sp[-1].get("quality_invalid") if pre_sp else None
             gate = evaluate_command_effect_inference(
                 command_acceptance_status=tx["command_acceptance_status"],
                 command_value_present=tx["value_present"],
                 commanded_value=tx["commanded_value"],
                 pre_value_present=bool(pre_sp),
                 pre_command_value=pre_val,
+                pre_quality_invalid=pre_quality,
                 post_value_present=m["value_present"],
                 post_command_value=m["value"],
                 post_quality_invalid=m.get("quality_invalid"),
@@ -582,6 +606,7 @@ def _finalize_transaction(
             tx["protocol_state_feedback"].append({
                 **m,
                 "pre_state_value": pre_val,
+                "pre_quality_invalid": pre_quality,
                 "consistency_gate": gate,
             })
             tx["end_time"] = max(tx["end_time"], m["timestamp_end"])
@@ -608,6 +633,7 @@ def _finalize_transaction(
         if post_msgs:
             first_post = post_msgs[0]
             pre_val = pre_msgs[-1]["value"] if pre_msgs else None
+            pre_quality = pre_msgs[-1].get("quality_invalid") if pre_msgs else None
             post_val = first_post["value"]
             cmd_val = tx["commanded_value"]
             gate = evaluate_command_effect_inference(
@@ -616,6 +642,7 @@ def _finalize_transaction(
                 commanded_value=cmd_val,
                 pre_value_present=bool(pre_msgs),
                 pre_command_value=pre_val,
+                pre_quality_invalid=pre_quality,
                 post_value_present=first_post["value_present"],
                 post_command_value=post_val,
                 post_quality_invalid=first_post.get("quality_invalid"),
@@ -628,6 +655,8 @@ def _finalize_transaction(
                 "pre_command_value": pre_val,
                 "pre_command_time": pre_msgs[-1]["timestamp"] if pre_msgs else None,
                 "pre_command_time_end": pre_msgs[-1]["timestamp_end"] if pre_msgs else None,
+                "pre_quality_invalid": pre_quality,
+                "post_quality_invalid": first_post.get("quality_invalid"),
                 "pre_command_canonical_source_id": pre_msgs[-1]["canonical_source_id"] if pre_msgs else None,
                 "pre_command_evidence_ids": (
                     [*pre_msgs[-1]["evidence_ids"], *pre_msgs[-1]["parent_evidence_ids"]] if pre_msgs else []
@@ -664,6 +693,7 @@ def _finalize_transaction(
         if row.get("entity") in watched_entities and cmd_time <= row["timestamp"] <= feedback_horizon:
             tx["ipal_state_updates"].append({
                 "evidence_id": row["evidence_id"],
+                "parent_evidence_id": row.get("parent_evidence_id"),
                 "timestamp": row["timestamp"],
                 "entity": row["entity"],
                 "ca_ioa": row.get("ca_ioa"),
@@ -788,6 +818,13 @@ def _int_or_none(val) -> int | None:
         return int(val)
     except (TypeError, ValueError):
         return None
+
+
+def _select_execute_compatible(command_mode, reply_mode) -> bool:
+    """Select and Execute are different operations. Unknown on one side is not a match to the other."""
+    if command_mode in (None, "") or reply_mode in (None, ""):
+        return command_mode in (None, "") and reply_mode in (None, "") or command_mode == reply_mode
+    return command_mode == reply_mode
 
 
 def _same_val(a, b) -> bool:

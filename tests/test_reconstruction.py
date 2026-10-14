@@ -325,7 +325,7 @@ def test_p0_storyline_contiguous_path_invariant_and_source_deduplication(tmp_pat
         _row("EV-premeas000000000", 995.0, "network", "sgen.6:active_power", "iec104_asdu", 40000.0,
              ca_ioa="111.10080", protocol_class="monitor",
              src_ip="172.16.3.6", src_port=2404, dst_ip="172.16.1.2", dst_port=41978,
-             payload={"type_id": 13, "cause": "1"}),
+             payload={"type_id": 13, "cause": "1", "quality_invalid": False}),
         _row("EV-setcmd0000000000", 1002.0, "network", "sgen.6:target_active_power", "iec104_asdu", 20000.0,
              ca_ioa="111.10040", protocol_class="control",
              src_ip="172.16.1.2", src_port=41978, dst_ip="172.16.3.6", dst_port=2404,
@@ -337,7 +337,7 @@ def test_p0_storyline_contiguous_path_invariant_and_source_deduplication(tmp_pat
         _row("EV-postmeas00000000", 1005.0, "network", "sgen.6:active_power", "iec104_asdu", 20001.0,
              ca_ioa="111.10080", protocol_class="monitor",
              src_ip="172.16.3.6", src_port=2404, dst_ip="172.16.1.2", dst_port=41978,
-             payload={"type_id": 13, "cause": "1"}),
+             payload={"type_id": 13, "cause": "1", "quality_invalid": False}),
         _row("EV-ipalpost00000000", 1005.5, "electrical", "sgen.6:active_power", "electrical_update", 20001.0,
              ca_ioa="111.10080", update_status="new"),
         _row("EV-line7el000000000", 1006.0, "electrical", "line.7:active_power_from", "electrical_update", 318000.0,
@@ -448,4 +448,258 @@ def test_tcp_retransmit_same_seq_vs_new_application_command_different_seq(tmp_pa
     assert tx1["duplicate_command_messages"][0]["duplicate_classification"] == "tcp_retransmission"
     assert tx2["transaction_id"] == "TX002"
     assert tx2["command_activation"]["tcp_seq"] == 116
+
+
+def test_r3_invalid_or_missing_quality_cannot_be_upgraded_by_event_graph(tmp_path: Path):
+    """Transaction quality rejection stays unresolved when the graph recomputes the gate."""
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    rows = [
+        _row("EV-qpre000000000000", 995.0, "network", "sgen.6:active_power", "iec104_asdu", 40000.0,
+             ca_ioa="111.10080", protocol_class="monitor",
+             src_ip="172.16.3.6", src_port=2404, dst_ip="172.16.1.2", dst_port=41978,
+             payload={"type_id": 13, "cause": "1", "quality_invalid": False}),
+        _row("EV-qcmd000000000000", 1002.0, "network", "sgen.6:target_active_power", "iec104_asdu", 20000.0,
+             ca_ioa="111.10040", protocol_class="control",
+             src_ip="172.16.1.2", src_port=41978, dst_ip="172.16.3.6", dst_port=2404,
+             payload={"type_id": 50, "cause": "6", "cot_negative": False}),
+        _row("EV-qack000000000000", 1002.04, "network", "sgen.6:target_active_power", "iec104_asdu", 20000.0,
+             ca_ioa="111.10040", protocol_class="control",
+             src_ip="172.16.3.6", src_port=2404, dst_ip="172.16.1.2", dst_port=41978,
+             payload={"type_id": 50, "cause": "7", "cot_negative": False}),
+        _row("EV-qpost00000000000", 1005.0, "network", "sgen.6:active_power", "iec104_asdu", 20000.5,
+             ca_ioa="111.10080", protocol_class="monitor",
+             src_ip="172.16.3.6", src_port=2404, dst_ip="172.16.1.2", dst_port=41978,
+             payload={"type_id": 13, "cause": "1", "quality_invalid": True}),
+    ]
+    for r in rows:
+        insert_evidence(conn, r)
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000.0, incident_end=1010.0)
+    tx_res = reconstruct_transactions(db, 1000.0, 1010.0)
+    tx = tx_res["transactions"][0]
+    assert tx["device_state_change_status"] == "measurement_observed_transition_unverified"
+    assert "post_value_quality_invalid" in tx["measurement_transition"]["consistency_gate"]["failed_conditions"]
+
+    eg = build_temporal_event_graph([], {}, tx_res)
+    inf = [e for e in eg["edges"] if e["relation_category"] == "inference_hypothesis"]
+    assert inf
+    assert all(e["claim_level"] == "unresolved" for e in inf)
+    assert all(e["verification_status"] == "unresolved" for e in inf)
+
+    stripped = copy.deepcopy(tx_res)
+    mt = stripped["transactions"][0]["measurement_transition"]
+    mt["post_quality_invalid"] = None
+    mt["pre_quality_invalid"] = False
+    mt["consistency_gate"]["gate_passed"] = False
+    eg_stripped = build_temporal_event_graph([], {}, stripped)
+    inf2 = [e for e in eg_stripped["edges"] if e["relation_category"] == "inference_hypothesis"]
+    assert all(e["claim_level"] == "unresolved" for e in inf2)
+
+    missing = evaluate_command_effect_inference(
+        command_acceptance_status="accepted_by_rtu",
+        command_value_present=True, commanded_value=20000.0,
+        pre_value_present=True, pre_command_value=40000.0, pre_quality_invalid=None,
+        post_value_present=True, post_command_value=20000.0, post_quality_invalid=None,
+    )
+    assert missing["gate_passed"] is False
+    assert "pre_quality_unknown" in missing["failed_conditions"]
+    assert "post_quality_unknown" in missing["failed_conditions"]
+    assert missing["quality_uncertainty"]
+
+    pre_bad = evaluate_command_effect_inference(
+        command_acceptance_status="accepted_by_rtu",
+        command_value_present=True, commanded_value=20000.0,
+        pre_value_present=True, pre_command_value=40000.0, pre_quality_invalid=True,
+        post_value_present=True, post_command_value=20000.0, post_quality_invalid=False,
+    )
+    assert pre_bad["gate_passed"] is False
+    assert "pre_value_quality_invalid" in pre_bad["failed_conditions"]
+
+
+def test_r3_ipal_source_follows_lineage_not_last_fact(tmp_path: Path):
+    """Multiple IEC-104 points and IPAL rows: only a parent hit shares a canonical source."""
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    rows = [
+        _row("EV-a-pre00000000000", 995.0, "network", "sgen.6:active_power", "iec104_asdu", 40000.0,
+             ca_ioa="111.10080", protocol_class="monitor",
+             src_ip="172.16.3.6", src_port=2404, dst_ip="172.16.1.2", dst_port=41978,
+             payload={"type_id": 13, "cause": "1", "quality_invalid": False}),
+        _row("EV-b-cmd00000000000", 1001.0, "network", "sgen.10:target_active_power", "iec104_asdu", 900.0,
+             ca_ioa="112.10040", protocol_class="control",
+             src_ip="172.16.1.2", src_port=42000, dst_ip="172.16.3.7", dst_port=2404,
+             payload={"type_id": 50, "cause": "6", "cot_negative": False}),
+        _row("EV-b-post0000000000", 1004.0, "network", "sgen.10:active_power", "iec104_asdu", 1000.0,
+             ca_ioa="112.10080", protocol_class="monitor",
+             src_ip="172.16.3.7", src_port=2404, dst_ip="172.16.1.2", dst_port=42000,
+             payload={"type_id": 13, "cause": "1", "quality_invalid": False}),
+        _row("EV-a-cmd00000000000", 1002.0, "network", "sgen.6:target_active_power", "iec104_asdu", 20000.0,
+             ca_ioa="111.10040", protocol_class="control",
+             src_ip="172.16.1.2", src_port=41978, dst_ip="172.16.3.6", dst_port=2404,
+             payload={"type_id": 50, "cause": "6", "cot_negative": False}),
+        _row("EV-a-ack00000000000", 1002.04, "network", "sgen.6:target_active_power", "iec104_asdu", 20000.0,
+             ca_ioa="111.10040", protocol_class="control",
+             src_ip="172.16.3.6", src_port=2404, dst_ip="172.16.1.2", dst_port=41978,
+             payload={"type_id": 50, "cause": "7", "cot_negative": False}),
+        _row("EV-a-post0000000000", 1005.0, "network", "sgen.6:active_power", "iec104_asdu", 20000.5,
+             ca_ioa="111.10080", protocol_class="monitor",
+             src_ip="172.16.3.6", src_port=2404, dst_ip="172.16.1.2", dst_port=41978,
+             payload={"type_id": 13, "cause": "1", "quality_invalid": False}),
+        _row("EV-ipal-a0000000000", 1005.2, "electrical", "sgen.6:active_power", "electrical_update", 20000.5,
+             ca_ioa="111.10080", update_status="new", parent_evidence_id="EV-a-post0000000000"),
+        _row("EV-ipal-b0000000000", 1005.3, "electrical", "sgen.10:active_power", "electrical_update", 1000.0,
+             ca_ioa="112.10080", update_status="new"),
+    ]
+    for r in rows:
+        insert_evidence(conn, r)
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000.0, incident_end=1010.0)
+    tx_res = reconstruct_transactions(db, 1000.0, 1010.0)
+    eg = build_temporal_event_graph([], {}, tx_res)
+    ipal = [n for n in eg["nodes"] if n["kind"] == "electrical_update"]
+    by_entity = {n["entity"]: n for n in ipal}
+    post = next(n for n in eg["nodes"] if n["role"] == "post_command_measurement" and n["entity"] == "sgen.6:active_power")
+    post10 = next(n for n in eg["nodes"] if n["role"] == "post_command_measurement" and n["entity"] == "sgen.10:active_power")
+    assert by_entity["sgen.6:active_power"]["source_containers"] == post["source_containers"]
+    assert by_entity["sgen.6:active_power"]["protocol_meta"]["source_binding"] == "lineage_parent"
+    assert by_entity["sgen.6:active_power"]["counts_as_independent_source"] is False
+    assert by_entity["sgen.10:active_power"]["source_containers"] != post["source_containers"]
+    assert by_entity["sgen.10:active_power"]["source_containers"] != post10["source_containers"]
+    assert by_entity["sgen.10:active_power"]["protocol_meta"]["source_binding"] == "unconfirmed_temporal_correspondence"
+    deriv = [e for e in eg["edges"] if e["relation_type"] == "same_network_data_stream_ipal_derivation"]
+    assert len(deriv) == 1
+    assert deriv[0]["independent_support"] is False
+    assert deriv[0]["target_entity"] == "sgen.6:active_power"
+    temporal = [e for e in eg["edges"] if e["relation_type"] == "temporally_aligned_same_point_stream"]
+    assert all(e["independent_support"] is False for e in temporal)
+    assert all("same original packet" in e["support_basis"] for e in temporal)
+    sl = reconstruct_storylines(eg, tx_res)
+    for story in sl["storylines"]:
+        containers = []
+        for fid in story["spine_fact_ids"]:
+            node = next(n for n in eg["nodes"] if n["fact_id"] == fid)
+            if node.get("counts_as_independent_source") is not False:
+                containers.extend(node["source_containers"])
+        assert story["independent_source_container_count"] == len(set(containers))
+
+
+def test_r3_select_and_execute_stay_distinct_transactions(tmp_path: Path):
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    rows = [
+        _row("EV-sel-pkt000000000", 1001.00, "network", "172.16.1.2:50000->172.16.3.5:2404/TCP", "tcp_packet", 68,
+             fingerprint="fp-sel", src_ip="172.16.1.2", src_port=50000, dst_ip="172.16.3.5", dst_port=2404,
+             update_status="packet", payload={"tcp_seq": 10}),
+        _row("EV-sel-cmd000000000", 1001.00, "network", "switch.23:closed", "iec104_asdu", 1.0,
+             fingerprint="fp-sel", ca_ioa="110.10130", protocol_class="control",
+             parent_evidence_id="EV-sel-pkt000000000",
+             src_ip="172.16.1.2", src_port=50000, dst_ip="172.16.3.5", dst_port=2404,
+             payload={"type_id": 45, "cause": "6", "select_execute": "select", "cot_negative": False}),
+        _row("EV-exe-pkt000000000", 1001.40, "network", "172.16.1.2:50000->172.16.3.5:2404/TCP", "tcp_packet", 68,
+             fingerprint="fp-exe", src_ip="172.16.1.2", src_port=50000, dst_ip="172.16.3.5", dst_port=2404,
+             update_status="packet", payload={"tcp_seq": 40}),
+        _row("EV-exe-cmd000000000", 1001.40, "network", "switch.23:closed", "iec104_asdu", 1.0,
+             fingerprint="fp-exe", ca_ioa="110.10130", protocol_class="control",
+             parent_evidence_id="EV-exe-pkt000000000",
+             src_ip="172.16.1.2", src_port=50000, dst_ip="172.16.3.5", dst_port=2404,
+             payload={"type_id": 45, "cause": "6", "select_execute": "execute", "cot_negative": False}),
+        _row("EV-sel-ack000000000", 1001.50, "network", "switch.23:closed", "iec104_asdu", 1.0,
+             ca_ioa="110.10130", protocol_class="control",
+             src_ip="172.16.3.5", src_port=2404, dst_ip="172.16.1.2", dst_port=50000,
+             payload={"type_id": 45, "cause": "7", "select_execute": "select", "cot_negative": False}),
+        _row("EV-exe-ack000000000", 1001.80, "network", "switch.23:closed", "iec104_asdu", 1.0,
+             ca_ioa="110.10130", protocol_class="control",
+             src_ip="172.16.3.5", src_port=2404, dst_ip="172.16.1.2", dst_port=50000,
+             payload={"type_id": 45, "cause": "7", "select_execute": "execute", "cot_negative": False}),
+    ]
+    for r in rows:
+        insert_evidence(conn, r)
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000.0, incident_end=1010.0)
+    res = reconstruct_transactions(db, 1000.0, 1010.0)
+    assert res["transaction_count"] == 2
+    modes = [tx["select_execute"] for tx in res["transactions"]]
+    assert modes == ["select", "execute"]
+    assert all(tx["command_acceptance_status"] == "accepted_by_rtu" for tx in res["transactions"])
+    assert res["transactions"][0]["activation_confirmation"]["select_execute"] == "select"
+    assert res["transactions"][1]["activation_confirmation"]["select_execute"] == "execute"
+    assert res["unpaired_control_message_count"] == 0
+
+
+def test_r3_multi_ioa_asdu_keeps_shared_header_and_does_not_shift_values():
+    shared = {
+        "frame.time_epoch": "1000.0",
+        "ip.src": "172.16.3.6", "ip.dst": "172.16.1.2",
+        "tcp.srcport": "2404", "tcp.dstport": "41978",
+        "iec60870_asdu.typeid": "13",
+        "iec60870_asdu.addr": "111",
+        "iec60870_asdu.causetx": "1",
+        "iec60870_asdu.nega": "False",
+        "iec60870_asdu.sq": "False",
+        "iec60870_asdu.ioa": "10080,10090",
+        "iec60870_asdu.float": "1.5,2.5",
+        "iec60870_asdu.qds.iv": "False,True",
+    }
+    objs = iec104.split_fields(shared)
+    assert [(o["ioa"], o["type_id"], o["cause"], o["ca"], o["value"], o["quality_invalid"]) for o in objs] == [
+        ("10080", 13, "1", "111", 1.5, False),
+        ("10090", 13, "1", "111", 2.5, True),
+    ]
+
+    gapped = dict(shared)
+    gapped["iec60870_asdu.ioa"] = "10080,10081,10090"
+    gapped["iec60870_asdu.float"] = "1.5,,2.5"
+    gapped["iec60870_asdu.qds.iv"] = "False,False,True"
+    gap_objs = iec104.split_fields(gapped)
+    assert [o["value"] for o in gap_objs] == [1.5, None, 2.5]
+    assert gap_objs[1]["alignment"] == "identifier_without_aligned_value"
+    assert gap_objs[2]["ioa"] == "10090"
+
+    shifted = dict(shared)
+    shifted["iec60870_asdu.ioa"] = "10080,10081,10090"
+    shifted["iec60870_asdu.float"] = "1.5,2.5"
+    shifted["iec60870_asdu.qds.iv"] = "False"
+    bad = iec104.split_fields(shifted)
+    assert all(o["value"] is None for o in bad)
+    assert all(o["alignment"] == "value_count_mismatch_not_shifted" for o in bad)
+    assert all(o["type_id"] == 13 and o["ca"] == "111" for o in bad)
+
+
+def test_r3_no_control_command_storyline_is_limited():
+    same = [
+        {
+            "timeline_id": "TL1", "role": "electrical_change", "entity": "sgen.6:active_power",
+            "time": 10.0, "time_end": 10.0, "record_class": "transcription",
+            "value": 1.0, "value_present": True, "ca_ioa": "111.10080",
+            "observation": "active", "score": 2.0,
+            "source": {"kind": "electrical_update", "modality": "electrical", "vantages": ["ipal_state"]},
+            "evidence_ids": ["EV-a"],
+        },
+        {
+            "timeline_id": "TL2", "role": "electrical_change", "entity": "sgen.6:reactive_power",
+            "time": 11.0, "time_end": 11.0, "record_class": "transcription",
+            "value": 2.0, "value_present": True, "ca_ioa": "111.10081",
+            "observation": "reactive", "score": 1.0,
+            "source": {"kind": "electrical_update", "modality": "electrical", "vantages": ["ipal_state"]},
+            "evidence_ids": ["EV-b"],
+        },
+    ]
+    eg = build_temporal_event_graph(same, {}, {"transactions": []})
+    sl = reconstruct_storylines(eg, {"transactions": []})
+    assert sl["no_control_command_policy"]["status"] == "limited_existing_search"
+    assert sl["storyline_count"] == 1
+    story = sl["storylines"][0]
+    assert story["spine_is_contiguous_directed_path"] is True
+    assert story["transaction_id"] is None
+    assert all(step["claim_level"] != "supported_inference" for step in story["confirmed_and_supported_steps"])
+
+    cross = [
+        dict(same[0], timeline_id="TL3", entity="line.7:active_power_from", ca_ioa="106.10090", time=20.0, time_end=20.0),
+        dict(same[1], timeline_id="TL4", entity="bus.0:voltage", ca_ioa="101.10010", time=21.0, time_end=21.0),
+    ]
+    eg2 = build_temporal_event_graph(cross, {}, {"transactions": []})
+    sl2 = reconstruct_storylines(eg2, {"transactions": []})
+    assert sl2["storyline_count"] == 0
+    assert "deferred" in sl2["no_control_command_policy"]
 

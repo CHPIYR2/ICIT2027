@@ -154,6 +154,18 @@ def reconstruct_storylines(
 
     return {
         "search_method": "source_deduplicated_bounded_beam_search",
+        "no_control_command_policy": {
+            "status": "limited_existing_search",
+            "behavior": (
+                "Without a control-command anchor, storylines are formed only from supported "
+                "edges already in the graph, such as same-device attribute couplings. "
+                "Cross-entity time proximity stays unresolved and is not promoted into a spine."
+            ),
+            "deferred": (
+                "A dedicated no-command reconstruction algorithm is not part of this round. "
+                "Isolated measurements and unresolved co-occurrences remain unattached."
+            ),
+        },
         "path_invariant_enforced": "contiguous_directed_spine_with_separate_supporting_evidence",
         "beam_width": beam_width,
         "max_depth": max_depth,
@@ -486,4 +498,6 @@ def _format_storyline(
 
 
 def _informative_containers(node: dict) -> set[str]:
+    if node.get("counts_as_independent_source") is False:
+        return set()
     return set(node.get("source_containers") or node.get("evidence_ids")[:1])
