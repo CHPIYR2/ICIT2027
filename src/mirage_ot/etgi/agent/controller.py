@@ -194,7 +194,7 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
             if flags.allow_gap_fallback and _run_gap(db, graph, state, flags, messages, trace_path, out):
                 continue
             state.errors.append("no valid model action")
-            state.completion = "NO_VALID_MODEL_ACTION"
+            state.completion = _no_action_status(turn)
             break
         exchanges = []
         duplicate = False
@@ -257,7 +257,7 @@ def investigate(db: EvidenceDB, llm, *, incident_start: float, incident_end: flo
                 continue
             if not committed and not exchanges:
                 state.errors.append("no valid model action")
-                state.completion = "NO_VALID_MODEL_ACTION"
+                state.completion = _no_action_status(turn)
             break
         messages.append({"role": "user", "content": _compact_state(state, graph, flags)})
         messages[:] = _trim_messages(messages)
@@ -709,6 +709,22 @@ def _context_cards(db, state, graph, context: str) -> dict:
 
 
 def _chat(llm, messages, *, tools, state, flags, require_tool: bool = False, response_format=None):
+    from .ollama import LLMTurn, estimate_prompt_tokens, trim_messages_to_budget
+    trimmed, dropped = trim_messages_to_budget(messages, tools, flags.num_ctx, flags.num_predict)
+    if dropped:
+        messages[:] = trimmed
+        state.errors.append(f"trimmed {dropped} earlier messages to reserve the generation budget")
+    estimate = estimate_prompt_tokens(messages, tools)
+    if flags.num_ctx and estimate + flags.num_predict + 64 > flags.num_ctx:
+        state.context_limited_turns += 1
+        state.llm_calls += 1
+        return LLMTurn(
+            "", [], estimate, 0,
+            raw={"done_reason": "context_budget", "context_limited": True, "call_skipped": True,
+                 "estimated_prompt_tokens": estimate, "context_window": flags.num_ctx,
+                 "prompt_plus_completion": estimate},
+            model=getattr(llm, "model_name", ""), done_reason="context_budget", truncated=True,
+        )
     turn = llm.chat(messages, tools=tools, temperature=flags.temperature, seed=flags.seed + state.llm_calls,
                     num_predict=flags.num_predict, require_tool=require_tool, response_format=response_format,
                     num_ctx=flags.num_ctx or None)
@@ -753,11 +769,18 @@ def _object(text: str) -> dict:
     return value if isinstance(value, dict) else {}
 
 
+def _no_action_status(turn) -> str:
+    raw = getattr(turn, "raw", {}) or {}
+    if raw.get("context_limited") or raw.get("call_skipped"):
+        return "CONTEXT_LIMITED"
+    return "NO_VALID_MODEL_ACTION"
+
+
 def _record_stop(state: RunState, arguments: dict) -> None:
     state.model_stop = True
     state.stop_reason = str(arguments.get("reason") or "")[:500]
     state.unresolved_questions.extend(_questions(arguments))
-    if state.completion == "NO_VALID_MODEL_ACTION":
+    if state.completion in ("NO_VALID_MODEL_ACTION", "CONTEXT_LIMITED"):
         state.completion = ""
 
 
@@ -821,7 +844,7 @@ def _run_subgoals(db, llm, state, graph, flags, trace_path, out, limitations) ->
             if (getattr(turn, "raw", {}) or {}).get("context_limited"):
                 state.errors.append("generation hit the context window before num_predict")
             state.errors.append("no valid model action")
-            state.completion = "NO_VALID_MODEL_ACTION"
+            state.completion = _no_action_status(turn)
             break
         _checkpoint(out, state, graph, flags)
     if active is not None and active.status == "active":

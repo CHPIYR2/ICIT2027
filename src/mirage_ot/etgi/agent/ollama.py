@@ -6,6 +6,32 @@ import urllib.request
 from dataclasses import dataclass, field
 
 
+def estimate_prompt_tokens(messages: list[dict], tools=None) -> int:
+    """Rough token count used to reserve generation room before a request.
+
+    JSON in this investigation is about four characters per token. The estimate
+    is for the budget check, not a claim about the server's tokenizer.
+    """
+    payload = json.dumps({"messages": messages, "tools": tools}, default=str)
+    return max(1, len(payload) // 4)
+
+
+def trim_messages_to_budget(messages: list[dict], tools, num_ctx: int, num_predict: int) -> tuple[list[dict], int]:
+    """Drop the oldest tool results until the prompt leaves room for num_predict."""
+    if not num_ctx or num_predict <= 0:
+        return list(messages), 0
+    kept = list(messages)
+    dropped = 0
+    reserve = num_predict + 64
+    while len(kept) > 2 and estimate_prompt_tokens(kept, tools) + reserve > num_ctx:
+        index = next((i for i, message in enumerate(kept) if message.get("role") in ("tool", "assistant")), None)
+        if index is None or index >= len(kept) - 1:
+            break
+        del kept[index]
+        dropped += 1
+    return kept, dropped
+
+
 def classify_stop(*, prompt_tokens: int, completion_tokens: int, num_predict: int,
                   done_reason: str, num_ctx: int | None, content_chars: int, tool_calls: int) -> dict:
     """Tell a full context window apart from the requested generation budget.

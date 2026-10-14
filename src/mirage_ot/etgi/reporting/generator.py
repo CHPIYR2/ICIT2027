@@ -141,6 +141,8 @@ def _render_claims(claims: list[dict]) -> str:
 
 
 def _completion(state, graph, flags) -> str:
+    if state.completion == "CONTEXT_LIMITED":
+        return "CONTEXT_LIMITED"
     if state.completion == "MODEL_ABSTAINED":
         return "MODEL_ABSTAINED"
     if state.completion == "NO_VALID_MODEL_ACTION":

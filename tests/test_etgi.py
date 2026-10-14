@@ -583,3 +583,60 @@ def test_a_sourced_proposal_is_not_an_abstention(tmp_path):
     assert result["state"].belief["verification_results"]
     report = write_report(result, db, tmp_path / "propose", llm=None)
     assert report["completion"] != "MODEL_ABSTAINED"
+
+
+def test_context_budget_is_reserved_before_the_call():
+    from mirage_ot.etgi.agent.ollama import estimate_prompt_tokens, trim_messages_to_budget
+    messages = [{"role": "system", "content": "s"}, {"role": "user", "content": "u"}]
+    messages[1:1] = [{"role": "tool", "content": "x" * 4000} for _ in range(12)]
+    assert estimate_prompt_tokens(messages, None) + 512 + 64 > 8192
+    trimmed, dropped = trim_messages_to_budget(messages, None, 8192, 512)
+    assert dropped > 0
+    assert estimate_prompt_tokens(trimmed, None) + 512 + 64 <= 8192
+
+
+def test_skipped_context_is_not_an_abstention(tmp_path):
+    db = _db(tmp_path)
+
+    class Limited(Scripted):
+        def chat(self, messages, **kwargs):
+            return LLMTurn("", [], 100, 0, {"context_limited": True, "call_skipped": True}, "scripted",
+                           done_reason="context_budget", truncated=True)
+
+    flags = Flags(allow_gap_fallback=False, evidence_necessity=False, temporal_graph=False,
+                  max_llm_calls=2, max_tool_calls=2, num_ctx=8192, num_predict=512)
+    result = investigate(db, Limited([]), incident_start=1000, incident_end=1010, out=tmp_path / "ctx", flags=flags, limitations=[])
+    assert result["state"].completion == "CONTEXT_LIMITED"
+    assert result["state"].model_stop is False
+    report = write_report(result, db, tmp_path / "ctx", llm=None)
+    assert report["completion"] == "CONTEXT_LIMITED"
+
+
+def test_relation_diagnostic_scores_a_proposal_and_an_abstention():
+    from mirage_ot.etgi.evaluation.capability import score_relation, score_selection, answers_match
+    sufficient = {"kind": "sufficient", "relation_type": "communication", "evidence_ids": ["EV-aaaaaaaaaaaaaaaa", "EV-bbbbbbbbbbbbbbbb"]}
+    proposed = score_relation({
+        "decision": "propose", "relation_type": "communication",
+        "evidence_ids": ["EV-aaaaaaaaaaaaaaaa", "EV-bbbbbbbbbbbbbbbb"], "claim": "observed_fact",
+    }, sufficient)
+    assert proposed["correct"] is True
+    missed = score_relation({"decision": "abstain", "evidence_ids": [], "claim": "unresolved"}, sufficient)
+    assert missed["correct"] is False
+    insufficient = {"kind": "insufficient", "relation_type": None, "evidence_ids": ["EV-eeeeeeeeeeeeeeee", "EV-ffffffffffffffff"]}
+    abstained = score_relation({"decision": "abstain", "evidence_ids": [], "claim": "temporal_cooccurrence"}, insufficient)
+    assert abstained["correct"] is True
+    forced = score_relation({
+        "decision": "propose", "relation_type": "communication",
+        "evidence_ids": ["EV-eeeeeeeeeeeeeeee"], "claim": "observed_fact",
+    }, insufficient)
+    assert forced["correct"] is False
+    assert answers_match(1, 1.0) is True
+    assert answers_match("Yes, the rows show both directions.", True) is True
+    assert score_relation({
+        "decision": "propose", "relation_type": "bidirectional_tcp_exchange",
+        "evidence_ids": ["EV-aaaaaaaaaaaaaaaa", "EV-bbbbbbbbbbbbbbbb"], "claim": "observed_fact",
+        "reason": "bidirectional TCP",
+    }, sufficient)["correct"] is True
+    assert score_selection(["EV-aaaaaaaaaaaaaaaa", "EV-bbbbbbbbbbbbbbbb"], ["EV-aaaaaaaaaaaaaaaa"])["exact"] is False
+    assert score_selection(["EV-aaaaaaaaaaaaaaaa"], ["EV-aaaaaaaaaaaaaaaa"])["exact"] is True
+
