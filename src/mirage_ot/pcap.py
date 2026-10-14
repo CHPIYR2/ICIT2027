@@ -6,6 +6,7 @@ For paper-quality protocol analysis replace with a validated transcriber and tes
 cross vantage point duplicate packets. Parser limitations are always reported.
 """
 import gzip
+import hashlib
 import io
 import ipaddress
 import struct
@@ -76,7 +77,9 @@ def iter_pcap(handle, *, source: str, start: float | None = None,
             tpa = str(ipaddress.IPv4Address(blob[pos + 24:pos + 28]))
             entity = f'{spa}->{tpa}/ARP'
             yield Observation(t, 'network', entity, 'arp_packet', 1.0, packet_id,
-                              {'op': op, 'src_mac': sha, 'ethertype': '0x0806'})
+                              {'op': op, 'src_mac': sha, 'ethertype': '0x0806',
+                               'source_ip': spa, 'destination_ip': tpa,
+                               'frame_sha256': hashlib.sha256(blob).hexdigest()})
         elif etype == 0x0800 and len(blob) >= pos + 20:
             pkt = blob[pos:]
             ver = pkt[0] >> 4
@@ -93,12 +96,15 @@ def iter_pcap(handle, *, source: str, start: float | None = None,
                 if offset < 20 or len(transport) < offset:
                     continue
                 flags = transport[13]
+                seq = int.from_bytes(transport[4:8], 'big')
                 payload = transport[offset:]
                 entity = f'{src}:{sport}->{dst}:{dport}/TCP'
                 yield Observation(t, 'network', entity, 'tcp_packet', float(incl), packet_id,
-                                  {'tcp_flags': flags, 'payload_bytes': len(payload),
+                                  {'tcp_flags': flags, 'tcp_seq': seq, 'payload_bytes': len(payload),
                                    'iec104_candidate': int(sport == 2404 or dport == 2404),
-                                   'source_ip': src, 'destination_ip': dst})
+                                   'source_ip': src, 'destination_ip': dst,
+                                   'source_port': sport, 'destination_port': dport,
+                                   'frame_sha256': hashlib.sha256(blob).hexdigest()})
             elif proto == 17 and len(transport) >= 8:
                 sport, dport = struct.unpack('>HH', transport[:4])
                 entity = f'{src}:{sport}->{dst}:{dport}/UDP'
