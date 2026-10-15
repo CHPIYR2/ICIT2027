@@ -149,4 +149,55 @@ Quality consistency is true; both lineage checks have 0 failures (192 anchor evi
 
 Outputs: `event_anchors.json`, `event_graph.json`, `behavioral_storylines.json`, `unresolved_branches.json`,
 `storylines.json`, `investigation_report.md/.json`, `evidence_audit_bundle.json`, `quality_consistency.json`,
-`run_manifest.json`.
+`lineage_consistency.json`, `run_manifest.json`.
+
+---
+
+## 10. Behavioral Reconstruction Refinement (Tasks 1–4, base `265017c`)
+
+Prior outputs in `runs/etgi/behavioral-20261015/reconstruction/` are preserved untouched; refined runs are written to
+`runs/etgi/behavioral-r5-20261015/reconstruction/`.
+
+### 10.1 Anchor reliability (`anchors.py`)
+Every anchor is classified as `verified_observation` or `unverified_observation` with `verification_issues`:
+- Pre and post quality descriptors (`quality_invalid`, `ov/bl/sb/nt` in `quality_flags`, `quality_good`) and COT test
+  bits (`pre_cot_test`, `post_cot_test`) must be decoded and clear on all points.
+- Pre-sample cadence gap must satisfy `0 < post_time - pre_time <= 30.0 s` (`pre_sample_gap_exceeded` otherwise).
+- Measurement steps require `>= 2` subsequent samples (`insufficient_post_samples` otherwise), immediate consistency
+  across the first 2 subsequent samples, and `>= 80%` consistent subsequent samples (`not_sustained_in_later_samples`
+  otherwise). `to_zero` requires `abs(post_value) < 1e-3`.
+- State reports (`COT=3`) require a prior IEC-104 value in the window with a differing value and good quality/test bit
+  (`no_prior_state_value_in_window` otherwise).
+- Observations that fail any check are retained as `unverified_observation` (`completeness_status =
+  "behavioral_unverified_observation"`) and cannot enter a supported storyline spine.
+
+### 10.2 Behavioral relation consistency gate (`behavior.py`)
+`evaluate_behavioral_relation_consistency(left_fact, right_fact)` separates:
+- **`corroborated_same_device_behavioral_transition`** (`measurement_state_transition`, `supported`): requires same
+  `device_stem`, separate ASDUs, `0 <= dt <= 15 s`, overlapping `[pre_time, post_time]` transition intervals,
+  both endpoints `verified_observation` (good quality, `T=0`, sustained), complementary endpoints (`from` vs `to` on a
+  shared measurement quantity, or verified state transition `1->0`/`0->1` paired with `to_zero`/`from_zero`), and
+  matching step kinds, magnitude change directions, and active-power flow sign opposition.
+- **`same_entity_sequential_observation`** (`sequential_observation`, `unverified`): same `device_stem` and separate
+  ASDUs within `15 s` that fail any gate condition. Stored off-spine with `consistency_gate.failed_conditions`.
+
+### 10.3 Separate quality vs. lineage consistency (`consistency.py`)
+- `quality_consistency.json` (`check_scope = "quality_and_behavioral_consistency"`): verifies transaction gates,
+  behavioral anchor metadata, `evaluate_behavioral_relation_consistency` on every behavioral edge, and storyline
+  status/step invariants.
+- `lineage_consistency.json` (`check_scope = "evidence_lineage_only"`): records timeline and behavioral anchor
+  evidence lineage checks separately from quality checks.
+
+### 10.4 Storyline changes on the four real windows (`behavioral-20261015` $\to$ `behavioral-r5-20261015`)
+
+| Window | Scope | `265017c` (`behavioral-20261015`) | Refined (`behavioral-r5-20261015`) | Reason |
+| --- | --- | --- | --- | --- |
+| `ev_564bebaa` | `line.0` (`A002 -> A008`), `line.3` (`A004 -> A024`), `line.4` (`A005 -> A015`), `line.1` (`A009 -> A010`), `line.12` (`A014 -> A017`) | 5 supported chains | **5 supported chains retained** (`corroborated_same_device_behavioral_transition`) | Both ends are `verified_observation` (`16/16` or `17/17` sustained, good quality, `T=0`), complementary `from`/`to`, matching `to_zero` or `level_shift` direction and ratio. |
+| `ev_564bebaa` | `line.2` early (`A011 -> A023`, +6.78s $\to$ +10.70s) | Supported chain (`SL009`) | **Downgraded** to `same_entity_sequential_observation` (`R0134`); `A011` and `A023` become two `verified_single_anchor` storylines | `A011` (`from` side) is `level_shift` (`P_from -> 0.02585 W`, `Q_from -> -11680 VAr` charging reactive power), whereas `A023` (`to` side) is `to_zero` (`P_to, Q_to -> ~1e-7`). Fails `change_type_mismatch`. |
+| `ev_564bebaa` | `line.2` late (`A028 -> A029`, +96.89s $\to$ +100.73s) | Supported chain (`SL022`) | **Downgraded** to `same_entity_sequential_observation` (`R0211`); `A028` and `A029` marked `behavioral_unverified_observation` | Open-line residual current bounce (`4/8 = 50%` and `1/7 = 14.3%` post-sample consistency). Fails `left_not_sustained`, `right_not_sustained`, `magnitude_ratio_mismatch:current`. |
+| `ev_564bebaa` | `line.14` late (`A030 -> A031`, +126.45s $\to$ +137.44s) | Supported chain (`SL023`) | **Downgraded** to `same_entity_sequential_observation` (`R0212`); `A030` and `A031` marked `behavioral_unverified_observation` | Unloaded-line current bounce (`1/5 = 20%` and `1/4 = 25%` persistence), and `|I_from|` increases (`0.079 -> 0.195`) while `|I_to|` decreases (`0.187 -> 0.168`). Fails persistence and `magnitude_direction_mismatch:current`. |
+| `ev_564bebaa` | `A001` (`switch.13`), `A007` (`switch.14`), `A026`, `A027`, `A032` | Single-anchor storylines | Quarantined as `behavioral_unverified_observation` | `A001`/`A007`: `no_prior_state_value_in_window`; `A026`/`A027`: `not_sustained_in_later_samples` (`2/16`, `1/12`); `A032`: `insufficient_post_samples` (`1/1`). |
+| `ev_4e913b` | `sgen.0` (`A001 -> A002`, +1.19s $\to$ +10.84s) | Supported chain (`SL001`, `independent_support=False`) | **Downgraded** to `same_entity_sequential_observation` (`R0035`); `A001` is `behavioral_unverified_observation`, `A002` is `behavioral_single_anchor` | `A001` (`sgen.0:is_connected=0` COT=3) has `no_prior_state_value_in_window`. `A002` (`sgen.0:active_power` `20000.4 -> 0.0`, `15/15` sustained) remains verified. `A003`/`A004` marked unverified (`1/3`, `1/1`). |
+| `ev_812f80` | `A001`, `A002` (IEC-104 links `.22`, `.23`) | 2 single-anchor storylines, 1 unresolved branch | Unchanged (`2` `verified_observation` single-anchor storylines, `1` unresolved branch) | Both link anchors are backed by TCP/IEC-104 packet evidence. |
+| `ev_cbe1e5` | `A001` (ARP `.28`), `A002`–`A004` (links `.10`, `.20`, `.9`), `A005`–`A007` (current steps) | 7 single-anchor storylines | `A001`–`A004` remain `behavioral_single_anchor` (`verified_observation`); `A005`–`A007` marked `behavioral_unverified_observation` | `A005` (`1/9`) and `A006` (`1/5`) fail `not_sustained_in_later_samples`; `A007` (`1/1`, `dt_pre=120.72s`) fails `pre_sample_gap_exceeded` and `insufficient_post_samples`. |
+

@@ -892,11 +892,15 @@ def test_r4_consistency_checker_flags_a_graph_that_ignores_the_gate(tmp_path: Pa
 MASTER = "172.16.1.2"
 
 
-def _iec(eid, t, entity, ca_ioa, value, *, rtu, tx, obj=0, type_id=13, cause="1", vantage="n302", quality=True):
+def _iec(
+    eid, t, entity, ca_ioa, value, *, rtu, tx, obj=0, type_id=13, cause="1",
+    vantage="n302", quality=True, cot_test=False, extra_payload=None,
+):
     return _row(eid, t, "network", entity, "iec104_asdu", value, vantage=vantage, ca_ioa=ca_ioa,
                 protocol_class="monitor", src_ip=rtu, src_port=2404, dst_ip=MASTER, dst_port=40000,
                 payload={"type_id": type_id, "cause": cause, "apci_tx": tx, "asdu_index": 0,
-                         "object_index": obj, "quality_good": quality, "cot_test": False})
+                         "object_index": obj, "quality_good": quality, "cot_test": cot_test,
+                         **(extra_payload or {})})
 
 
 def _tcp(eid, t, src, sport, dst, dport, flags):
@@ -907,17 +911,23 @@ def _tcp(eid, t, src, sport, dst, dport, flags):
 def _behavioral_rows():
     rtu_a, rtu_b, rtu_c = "172.16.3.18", "172.16.3.16", "172.16.3.22"
     rows = []
-    for i, (t, p, cur, volt) in enumerate([(990.0, 100.0, 25.0, 0.98), (1005.0, 0.0, 0.0, 0.0), (1015.0, 0.0, 0.0, 0.0)]):
+    samples_a = [
+        (990.0, 100.0, 25.0, 0.98, 1e-7, 100.0, 100.0),
+        (1005.0, 0.0, 0.0, 0.0, 3e-7, 300.0, 300.0),
+        (1015.0, 0.0, 0.0, 0.0, 2e-7, 100.0, 305.0),
+        (1025.0, 0.0, 0.0, 0.0, 1e-7, 100.0, 298.0),
+    ]
+    for i, (t, p, cur, volt, noise, l7, l8) in enumerate(samples_a):
         rows += [
             _iec(f"EV-a-l3p-{i}", t, "line.3:p_to", "123.1", p, rtu=rtu_a, tx=10 + i, obj=0),
             _iec(f"EV-a-l3i-{i}", t, "line.3:i_to", "123.2", cur, rtu=rtu_a, tx=10 + i, obj=1),
             _iec(f"EV-a-b5v-{i}", t, "bus.5:voltage", "123.3", volt, rtu=rtu_a, tx=10 + i, obj=2),
-            _iec(f"EV-a-noise-{i}", t, "line.9:p", "123.4", [1e-7, 3e-7, 2e-7][i], rtu=rtu_a, tx=10 + i, obj=3),
-            _iec(f"EV-a-l7-{i}", t, "line.7:p", "123.5", [100.0, 300.0, 100.0][i], rtu=rtu_a, tx=10 + i, obj=4),
-            _iec(f"EV-a-l8-{i}", t, "line.8:p", "123.6", [100.0, 300.0, 305.0][i], rtu=rtu_a, tx=10 + i, obj=5),
+            _iec(f"EV-a-noise-{i}", t, "line.9:p", "123.4", noise, rtu=rtu_a, tx=10 + i, obj=3),
+            _iec(f"EV-a-l7-{i}", t, "line.7:p", "123.5", l7, rtu=rtu_a, tx=10 + i, obj=4),
+            _iec(f"EV-a-l8-{i}", t, "line.8:p", "123.6", l8, rtu=rtu_a, tx=10 + i, obj=5),
         ]
     rows.append(_iec("EV-a-l3p-1-m", 1005.0002, "line.3:p_to", "123.1", 0.0, rtu=rtu_a, tx=11, obj=0, vantage="n318"))
-    for i, (t, p) in enumerate([(990.0, -100.0), (1010.0, 0.0), (1020.0, 0.0)]):
+    for i, (t, p) in enumerate([(990.0, -100.0), (1010.0, 0.0), (1020.0, 0.0), (1030.0, 0.0)]):
         rows.append(_iec(f"EV-b-l3p-{i}", t, "line.3:p_from", "121.1", p, rtu=rtu_b, tx=50 + i))
     rows += [
         _iec("EV-b-sw13", 1001.0, "switch.13:is_closed", "121.9", 0.0, rtu=rtu_b, tx=60, type_id=1, cause="3"),
@@ -962,13 +972,18 @@ def test_behavioral_anchor_discovery_on_synthetic_rows(tmp_path: Path):
 
     sw13 = by_entity["switch.13:is_closed"]
     assert sw13["transition_status"] == "state_report_no_prior_value_in_window"
+    assert sw13["verification_status"] == "unverified_observation"
+    assert "no_prior_state_value_in_window" in sw13["verification_issues"]
     assert [r["evidence_id"] for r in sw13["ipal_rows"]] == ["EV-ipal-sw13"]
     sw14 = by_entity["switch.14:is_closed"]
     assert sw14["transition_status"] == "state_change_observed"
+    assert sw14["verification_status"] == "verified_observation"
+    assert sw14["verification_issues"] == []
     assert sw14["prior_evidence_ids"] == ["EV-b-sw14-gi"]
 
     line3_a = by_entity["line.3:i_to,p_to"]
     assert line3_a["step_kinds"] == ["to_zero"] and line3_a["sustained_in_later_samples"] is True
+    assert line3_a["verification_status"] == "verified_observation"
     assert sorted(line3_a["evidence_ids"]) == ["EV-a-l3i-1", "EV-a-l3p-1", "EV-a-l3p-1-m"]
     assert line3_a["vantages"] == ["n302", "n318"]
     assert by_entity["bus.5:voltage"]["asdu_key"] == line3_a["asdu_key"]
@@ -977,6 +992,7 @@ def test_behavioral_anchor_discovery_on_synthetic_rows(tmp_path: Path):
     assert not any(e.startswith("line.9") for e in by_entity), "values below the magnitude floor are noise"
     assert not any(e.startswith("line.7") for e in by_entity), "a level shift that reverts is not an anchor"
     assert by_entity["line.8:p"]["step_kinds"] == ["level_shift"]
+    assert by_entity["line.8:p"]["verification_status"] == "verified_observation"
 
     link = by_entity[f"{MASTER}<->172.16.3.22:2404/IEC104"]
     assert link["event_kinds"] == ["connection_attempt_unanswered", "connection_established", "tcp_fin"]
@@ -1001,9 +1017,12 @@ def test_behavioral_graph_keeps_cross_device_relations_unresolved(tmp_path: Path
     def edges(rel):
         return [e for e in eg["edges"] if e["relation_type"] == rel]
 
-    (same,) = edges("same_device_behavior_in_separate_asdu")
+    (same,) = edges("corroborated_same_device_behavioral_transition")
     assert (nodes[same["source_fact_id"]]["entity"], nodes[same["target_fact_id"]]["entity"]) == ("line.3:i_to,p_to", "line.3:p_from")
     assert same["verification_status"] == "supported" and same["independent_support"] is True
+    assert same["graph_consistency_gate_status"] == "passed_behavioral_consistency_gate"
+    assert same["consistency_gate"]["gate_passed"] is True
+    assert same["consistency_gate"]["matched_quantities"] == ["p"]
 
     asdu = edges("same_iec104_asdu")
     assert asdu and all(e["relation_category"] == "shared_source" and e["independent_support"] is False for e in asdu)
@@ -1039,7 +1058,7 @@ def test_behavioral_graph_keeps_cross_device_relations_unresolved(tmp_path: Path
     assert "bus.5:voltage" in {c["entity"] for c in chain["co_reported_in_same_asdu"]}
     assert chain["temporal_correspondences"][0]["common_source_status"] == "unconfirmed_no_lineage"
     sw13 = next(s for s in stories if nodes[s["spine_fact_ids"][0]]["entity"] == "switch.13:is_closed")
-    assert sw13["completeness_status"] == "behavioral_single_anchor"
+    assert sw13["completeness_status"] == "behavioral_unverified_observation"
     assert sw13["unresolved_cooccurrence_branches"]
     assert all(b["verification_status"] == "unresolved" for b in sl["unresolved_branches"])
 
@@ -1049,15 +1068,180 @@ def test_behavioral_engine_writes_anchor_storyline_and_branch_artifacts(tmp_path
     out = tmp_path / "out"
     res = reconstruct_incident(db, 1000.0, 1060.0, background_start=985.0, background_end=1000.0, llm=None, out_dir=out)
     assert res["event_anchors"]["behavioral_mode"] is True
-    for name in ("event_anchors.json", "behavioral_storylines.json", "unresolved_branches.json", "investigation_report.md"):
+    for name in (
+        "event_anchors.json", "behavioral_storylines.json", "unresolved_branches.json",
+        "quality_consistency.json", "lineage_consistency.json", "investigation_report.md",
+    ):
         assert (out / name).exists(), name
     assert res["lineage_bundle_summary"]["row_check_failures"] == []
     assert res["lineage_bundle_summary"]["behavioral_anchor_lineage"]["row_check_failures"] == []
     assert res["quality_consistency"]["consistent"] is True
+    assert res["quality_consistency"]["check_scope"] == "quality_and_behavioral_consistency"
+    assert res["lineage_consistency"]["consistent"] is True
+    assert res["lineage_consistency"]["check_scope"] == "evidence_lineage_only"
     md = (out / "investigation_report.md").read_text()
     assert "## 2A. Behavioral Incident Reconstruction (No Control Command)" in md
     assert "Candidate relations (unresolved, time proximity only" in md
-    assert "same_device_behavior_in_separate_asdu" in md
+    assert "corroborated_same_device_behavioral_transition" in md
+
+
+def test_behavioral_anchor_reliability_counterexamples_stay_unverified(tmp_path: Path):
+    """Task 2 counterexamples: invalid quality, QDS flags, test bits, stale pre-gap, or low persistence stay unverified."""
+    from mirage_ot.etgi.reconstruction.anchors import discover_event_anchors
+
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    rtu_a, rtu_b = "172.16.3.18", "172.16.3.16"
+    rows = []
+    for i, (t, val) in enumerate([(990.0, 100.0), (1005.0, 0.0), (1015.0, 0.0), (1025.0, 0.0)]):
+        # 1) post_quality_invalid on bus.1:voltage at step sample (i == 1)
+        rows.append(_iec(
+            f"EV-qinv-{i}", t, "bus.1:voltage", "123.10", val, rtu=rtu_a, tx=100 + i,
+            quality=(i != 1), extra_payload={"quality_invalid": (i == 1)},
+        ))
+        # 2) post_quality_flags_set:nt on bus.2:voltage at step sample (i == 1)
+        rows.append(_iec(
+            f"EV-qnt-{i}", t, "bus.2:voltage", "123.20", val, rtu=rtu_a, tx=200 + i,
+            quality=(i != 1),
+            extra_payload={"quality_invalid": False, "quality_flags": {"ov": False, "bl": False, "sb": False, "nt": (i == 1)}},
+        ))
+        # 3) post_test_bit_set on bus.3:voltage at step sample (i == 1)
+        rows.append(_iec(
+            f"EV-tbit-{i}", t, "bus.3:voltage", "123.30", val, rtu=rtu_a, tx=300 + i,
+            cot_test=(i == 1),
+        ))
+    # 4) pre_sample_gap_exceeded (> 30s gap before step) on line.5:p_from
+    for i, (t, val) in enumerate([(950.0, 200.0), (1005.0, 0.0), (1015.0, 0.0), (1025.0, 0.0)]):
+        rows.append(_iec(f"EV-gap-{i}", t, "line.5:p_from", "121.10", val, rtu=rtu_b, tx=400 + i))
+    # 5) insufficient_post_samples (only 1 post sample before window end) on line.6:p_from
+    for i, (t, val) in enumerate([(1040.0, 200.0), (1050.0, 0.0), (1058.0, 0.0)]):
+        rows.append(_iec(f"EV-1post-{i}", t, "line.6:p_from", "121.20", val, rtu=rtu_b, tx=500 + i))
+    # 6) not_sustained_in_later_samples (holds for 1 sample then bounces away: 1/4 = 0.25 < 0.8) on line.14:current_from
+    for i, (t, val) in enumerate([(990.0, -0.08), (1005.0, 0.20), (1015.0, 0.195), (1025.0, -0.07), (1035.0, 0.09), (1045.0, 0.55)]):
+        rows.append(_iec(f"EV-bounce-{i}", t, "line.14:current_from", "121.30", val, rtu=rtu_b, tx=600 + i))
+
+    for r in rows:
+        insert_evidence(conn, r)
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000.0, incident_end=1060.0)
+
+    anchor_res = discover_event_anchors(db, 1000.0, 1060.0, background_start=940.0)
+    by_entity = {a["entity"]: a for a in anchor_res["anchors"]}
+    assert anchor_res["verified_anchor_count"] == 0
+    assert anchor_res["unverified_anchor_count"] == 6
+    assert "post_quality_invalid" in by_entity["bus.1:voltage"]["verification_issues"]
+    assert "post_quality_flags_set:nt" in by_entity["bus.2:voltage"]["verification_issues"]
+    assert "post_test_bit_set" in by_entity["bus.3:voltage"]["verification_issues"]
+    assert "pre_sample_gap_exceeded" in by_entity["line.5:p_from"]["verification_issues"]
+    assert "insufficient_post_samples" in by_entity["line.6:p_from"]["verification_issues"]
+    assert "not_sustained_in_later_samples" in by_entity["line.14:current_from"]["verification_issues"]
+
+    eg = build_temporal_event_graph([], {}, {"transactions": []}, behavioral_anchors=anchor_res["anchors"])
+    sl = reconstruct_storylines(eg, {"transactions": []})
+    assert sl["supported_behavioral_storyline_count"] == 0
+    assert sl["verified_single_anchor_storyline_count"] == 0
+    assert sl["unverified_behavioral_observation_count"] == 6
+    assert all(s["completeness_status"] == "behavioral_unverified_observation" for s in sl["storylines"])
+
+
+def test_behavioral_relation_consistency_separates_sequential_observations_from_corroborated_transitions(tmp_path: Path):
+    """Task 1 counterexamples: same_device + different_asdu + dt<=15s is NOT enough without compatible verified transitions."""
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    rtu_a, rtu_b = "172.16.3.14", "172.16.3.16"
+    rows = []
+    # Case 1 (line.2): from-side has level_shift on Q_from (+375000 -> -11680) and P_from (890000 -> 0.026),
+    # while to-side has to_zero on Q_to (-385000 -> 0.0) and P_to (-889000 -> 0.0) -> change_type_mismatch
+    for i, (t, pf, qf) in enumerate([
+        (990.0, 890000.0, 375000.0), (1006.0, 0.026, -11680.0), (1016.0, 0.026, -11679.0), (1026.0, 0.026, -11678.0),
+    ]):
+        rows.append(_iec(f"EV-l2pf-{i}", t, "line.2:active_power_from", "114.1", pf, rtu=rtu_a, tx=10 + i, obj=0))
+        rows.append(_iec(f"EV-l2qf-{i}", t, "line.2:reactive_power_from", "114.2", qf, rtu=rtu_a, tx=10 + i, obj=1))
+    for i, (t, pt, qt) in enumerate([
+        (990.0, -889000.0, -385000.0), (1010.0, 0.0, 0.0), (1020.0, 0.0, 0.0), (1030.0, 0.0, 0.0),
+    ]):
+        rows.append(_iec(f"EV-l2pt-{i}", t, "line.2:active_power_to", "116.1", pt, rtu=rtu_b, tx=20 + i, obj=0))
+        rows.append(_iec(f"EV-l2qt-{i}", t, "line.2:reactive_power_to", "116.2", qt, rtu=rtu_b, tx=20 + i, obj=1))
+
+    # Case 2 (line.14): |current_from| increases (0.10 -> 0.30) while |current_to| decreases (0.40 -> 0.15) -> magnitude_direction_mismatch
+    for i, (t, cf) in enumerate([(990.0, 0.10), (1005.0, 0.30), (1015.0, 0.30), (1025.0, 0.30)]):
+        rows.append(_iec(f"EV-l14cf-{i}", t, "line.14:current_from", "114.3", cf, rtu=rtu_a, tx=30 + i))
+    for i, (t, ct) in enumerate([(990.0, 0.40), (1008.0, 0.15), (1018.0, 0.15), (1028.0, 0.15)]):
+        rows.append(_iec(f"EV-l14ct-{i}", t, "line.14:current_to", "116.3", ct, rtu=rtu_b, tx=40 + i))
+
+    # Case 3 (sgen.0): COT=3 is_connected=0 WITHOUT prior baseline followed by active_power 20000 -> 0 -> sequential_observation
+    rows.append(_iec("EV-sgen0-st", 1001.0, "sgen.0:is_connected", "115.1", 0.0, rtu="172.16.3.15", tx=50, type_id=1, cause="3"))
+    for i, (t, p) in enumerate([(990.0, 20000.0), (1010.0, 0.0), (1020.0, 0.0), (1030.0, 0.0)]):
+        rows.append(_iec(f"EV-sgen0-p-{i}", t, "sgen.0:active_power", "115.2", p, rtu="172.16.3.15", tx=60 + i))
+
+    # Case 4 (sgen.1, positive control): COT=20 prior is_connected=1.0 then COT=3 is_connected=0.0 then active_power 30000 -> 0 -> supported!
+    rows.append(_iec("EV-sgen1-pre", 990.0, "sgen.1:is_connected", "117.1", 1.0, rtu="172.16.3.17", tx=70, type_id=1, cause="20"))
+    rows.append(_iec("EV-sgen1-st", 1002.0, "sgen.1:is_connected", "117.1", 0.0, rtu="172.16.3.17", tx=71, type_id=1, cause="3"))
+    for i, (t, p) in enumerate([(990.0, 30000.0), (1008.0, 0.0), (1018.0, 0.0), (1028.0, 0.0)]):
+        rows.append(_iec(f"EV-sgen1-p-{i}", t, "sgen.1:active_power", "117.2", p, rtu="172.16.3.17", tx=80 + i))
+
+    for r in rows:
+        insert_evidence(conn, r)
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000.0, incident_end=1060.0)
+
+    res = reconstruct_incident(db, 1000.0, 1060.0, background_start=985.0, background_end=1000.0, llm=None, out_dir=tmp_path / "out")
+    assert res["quality_consistency"]["consistent"] is True
+    assert res["lineage_consistency"]["consistent"] is True
+
+    seq_by_stem = {s["device_stem"]: s for s in res["storylines"]["sequential_same_device_observations"]}
+    assert set(seq_by_stem) == {"line.2", "line.14", "sgen.0"}
+    assert "change_type_mismatch" in seq_by_stem["line.2"]["failed_conditions"]
+    assert "magnitude_direction_mismatch:current" in seq_by_stem["line.14"]["failed_conditions"]
+    assert "left_anchor_unverified" in seq_by_stem["sgen.0"]["failed_conditions"]
+
+    supported = [
+        s for s in res["storylines"]["storylines"]
+        if s.get("storyline_kind") == "behavioral" and s["confirmed_and_supported_steps"]
+    ]
+    assert len(supported) == 1
+    assert supported[0]["confirmed_and_supported_steps"][0]["source_entity"] == "sgen.1:is_connected"
+    assert supported[0]["confirmed_and_supported_steps"][0]["target_entity"] == "sgen.1:active_power"
+    assert supported[0]["confirmed_and_supported_steps"][0]["relation_type"] == "corroborated_same_device_behavioral_transition"
+
+
+def test_behavioral_consistency_checker_catches_tampered_edge_or_storyline(tmp_path: Path):
+    """Task 3: check_quality_consistency rejects a sequential edge promoted to supported or an unverified anchor on a spine."""
+    from mirage_ot.etgi.reconstruction.report import apply_quality_consistency
+
+    db = _behavioral_db(tmp_path)
+    res = reconstruct_incident(db, 1000.0, 1060.0, background_start=985.0, background_end=1000.0, llm=None, out_dir=tmp_path / "out")
+    assert res["quality_consistency"]["consistent"] is True
+
+    # Tamper 1: force an unverified anchor (switch.13) to look like a verified single-anchor storyline
+    tampered_sl = copy.deepcopy(res["storylines"])
+    for s in tampered_sl["storylines"]:
+        if s.get("anchor_ids") == ["A001"]:
+            s["completeness_status"] = "behavioral_single_anchor"
+    check1 = check_quality_consistency(
+        res["transactions"], res["event_graph"], tampered_sl, res["report"], anchor_result=res["event_anchors"],
+    )
+    assert check1["consistent"] is False
+    assert any(i["issue"] == "unverified_anchor_marked_as_verified_storyline" for i in check1["issues"])
+
+    # Tamper 2: corrupt the right endpoint of the supported line.3 edge to be unverified in the graph
+    tampered_eg = copy.deepcopy(res["event_graph"])
+    for n in tampered_eg["nodes"]:
+        if n["entity"] == "line.3:p_from":
+            n["protocol_meta"]["verification_status"] = "unverified_observation"
+            n["protocol_meta"]["sustained_in_later_samples"] = False
+    check2 = check_quality_consistency(
+        res["transactions"], tampered_eg, res["storylines"], res["report"], anchor_result=res["event_anchors"],
+    )
+    issues2 = {i["issue"] for i in check2["issues"]}
+    assert check2["consistent"] is False
+    assert "supported_behavioral_edge_failed_consistency_gate" in issues2
+    assert "unverified_anchor_in_supported_behavioral_storyline" in issues2
+
+    diag_report = apply_quality_consistency(copy.deepcopy(res["report"]), check2, res["lineage_consistency"])
+    assert diag_report["report_status"] == "diagnostic_only_quality_inconsistent"
+    assert diag_report["behavioral_reconstruction"]["supported_chain_count"] == 0
+    assert diag_report["behavioral_reconstruction"]["withheld_supported_chain_count"] == 1
 
 
 def test_quality_inconsistent_report_is_diagnostic_only(tmp_path: Path, monkeypatch):

@@ -331,7 +331,10 @@ def behavioral_summary(anchor_result: dict | None, storyline_result: dict, nodes
         {
             "anchor_id": a["anchor_id"], "rank": a["rank"], "anchor_type": a["anchor_type"],
             "time": a["time"], "relative_time": round(a["time"] - t0, 3), "entity": a["entity"],
-            "rtu_ip": a.get("rtu_ip"), "observation": a["observation"],
+            "rtu_ip": a.get("rtu_ip"),
+            "verification_status": a.get("verification_status", "unverified_observation"),
+            "verification_issues": list(a.get("verification_issues") or []),
+            "observation": a["observation"],
             "covered_by_transaction": a.get("covered_by_transaction", False),
         }
         for a in anchor_result["anchors"]
@@ -347,6 +350,12 @@ def behavioral_summary(anchor_result: dict | None, storyline_result: dict, nodes
             f"independent_source={st['independent_support']}"
             for st in sl["confirmed_and_supported_steps"]
         ]
+        sequential = [
+            f"{sq['edge_id']} {sq['relation_type']}: {sq['from_entity']} "
+            f"(@+{round(sq['from_time'] - t0, 3)}s) -> {sq['to_entity']} "
+            f"(@+{round(sq['to_time'] - t0, 3)}s); failed_gate={sq['failed_conditions']}"
+            for sq in sl.get("sequential_same_device_observations") or []
+        ]
         co_reported = [f"{c['entity']} ({c['anchor_id']}, {c['edge_id']})" for c in sl.get("co_reported_in_same_asdu") or []]
         candidates = [
             f"{b['edge_id']}: -> {b['candidate_entity']} (@+{round(b['candidate_time'] - t0, 3)}s)"
@@ -359,10 +368,13 @@ def behavioral_summary(anchor_result: dict | None, storyline_result: dict, nodes
             "storyline_id": sl["storyline_id"],
             "anchor_ids": sl["anchor_ids"],
             "anchor_types": sl["anchor_types"],
+            "anchor_verification_statuses": sl.get("anchor_verification_statuses") or {},
+            "anchor_verification_issues": sl.get("anchor_verification_issues") or {},
             "completeness_status": sl["completeness_status"],
             "start_relative": round(sl["start_time"] - t0, 3),
             "reconstructed_behavior": sl["reconstructed_behavior"],
             "supported_relations": supported,
+            "sequential_same_device_observations": sequential,
             "co_reported_in_same_asdu": co_reported,
             "candidate_relations_unresolved": candidates,
             "ipal_time_aligned_rows": [
@@ -376,6 +388,14 @@ def behavioral_summary(anchor_result: dict | None, storyline_result: dict, nodes
         "method": anchor_result["method"],
         "inputs_not_used": anchor_result.get("inputs_not_used"),
         "anchor_count": anchor_result["anchor_count"],
+        "verified_anchor_count": anchor_result.get("verified_anchor_count"),
+        "unverified_anchor_count": anchor_result.get("unverified_anchor_count"),
+        "supported_chain_count": sum(1 for c in chains if c["completeness_status"] == "behavioral_chain_with_supported_relations"),
+        "verified_single_anchor_count": sum(1 for c in chains if c["completeness_status"] == "behavioral_single_anchor"),
+        "unverified_observation_storyline_count": sum(
+            1 for c in chains if c["completeness_status"] == "behavioral_unverified_observation"
+        ),
+        "sequential_same_device_observation_count": len(storyline_result.get("sequential_same_device_observations") or []),
         "anchors": anchors,
         "chains": chains,
         "unresolved_branch_count": len(storyline_result.get("unresolved_branches") or []),
@@ -397,13 +417,19 @@ def _render_behavioral(beh: dict, diagnostic: bool) -> list[str]:
         f"Control objects in window: `{inv.get('iec104_control_objects_in_window')}`."
     )
     lines.append(
-        f"- `{beh['anchor_count']}` event anchors, `{len(beh['chains'])}` behavioral storylines, "
+        f"- `{beh['anchor_count']}` event anchors (`{beh.get('verified_anchor_count')}` verified, "
+        f"`{beh.get('unverified_anchor_count')}` unverified), `{len(beh['chains'])}` behavioral storylines "
+        f"(`{beh.get('supported_chain_count')}` with corroborated multi-ASDU transitions, "
+        f"`{beh.get('verified_single_anchor_count')}` verified single-anchor, "
+        f"`{beh.get('unverified_observation_storyline_count')}` unverified observations), "
+        f"`{beh.get('sequential_same_device_observation_count')}` sequential same-entity observations (gate failed), "
         f"`{beh['unresolved_branch_count']}` unresolved cross-device branches."
     )
     lines.extend(["", "### 2A.1 Event Anchors (by time)"])
     for a in beh["anchors"]:
         lines.append(
-            f"- **{a['anchor_id']}** (rank `{a['rank']}`, `{a['anchor_type']}`, +`{a['relative_time']}`s, "
+            f"- **{a['anchor_id']}** (rank `{a['rank']}`, `{a['anchor_type']}`, "
+            f"`{a.get('verification_status')}`, +`{a['relative_time']}`s, "
             f"RTU `{a['rtu_ip']}`): {a['observation']}"
         )
     lines.extend(["", "### 2A.2 Behavioral Storylines"])
@@ -413,10 +439,27 @@ def _render_behavioral(beh: dict, diagnostic: bool) -> list[str]:
             f"status=`{ch['completeness_status']}`{', WITHHELD: quality inconsistent' if diagnostic else ''})"
         )
         lines.append(f"- **Reconstructed**: {ch['reconstructed_behavior']}")
+        if ch.get("anchor_verification_issues"):
+            lines.append(
+                f"- **Unverified observation issues**: `{ch['anchor_verification_issues']}`"
+            )
         lines.append(
             "- **Evidence-supported relations**: "
-            + ("; ".join(ch["supported_relations"]) if ch["supported_relations"] else "none (single anchor)")
+            + (
+                "; ".join(ch["supported_relations"])
+                if ch["supported_relations"]
+                else (
+                    "none (unverified observation; excluded from supported spine)"
+                    if ch["completeness_status"] == "behavioral_unverified_observation"
+                    else "none (single anchor)"
+                )
+            )
         )
+        if ch.get("sequential_same_device_observations"):
+            lines.append(
+                "- **Sequential same-entity observations (failed behavioral consistency gate, NOT supported transition)**: "
+                + "; ".join(ch["sequential_same_device_observations"])
+            )
         if ch["co_reported_in_same_asdu"]:
             lines.append(
                 "- **Co-reported in the same ASDU (shared message, not a device relation)**: "
@@ -459,8 +502,19 @@ def inference_gate_summary(tx: dict) -> dict:
     }
 
 
-def apply_quality_consistency(report: dict, quality_consistency: dict) -> dict:
+def apply_quality_consistency(
+    report: dict,
+    quality_consistency: dict,
+    lineage_consistency: dict | None = None,
+) -> dict:
     """Withhold every verified claim when the phases disagree on quality; diagnostics stay."""
+    report["quality_consistency_status"] = (
+        "consistent" if quality_consistency.get("consistent") else "inconsistent"
+    )
+    if lineage_consistency is not None:
+        report["lineage_consistency_status"] = (
+            "consistent" if lineage_consistency.get("consistent") else "inconsistent"
+        )
     if quality_consistency.get("consistent"):
         report["report_status"] = "quality_consistent"
     else:
@@ -468,6 +522,14 @@ def apply_quality_consistency(report: dict, quality_consistency: dict) -> dict:
         report["withheld_verified_device_transitions"] = report["verified_device_transitions"]
         report["verified_device_transitions"] = []
         report["quality_consistency_issues"] = quality_consistency.get("issues") or []
+        beh = report.get("behavioral_reconstruction")
+        if beh:
+            beh["withheld_supported_chain_count"] = beh.get("supported_chain_count", 0)
+            beh["supported_chain_count"] = 0
+            for ch in beh.get("chains") or []:
+                if ch.get("supported_relations"):
+                    ch["withheld_supported_relations"] = ch["supported_relations"]
+                    ch["supported_relations"] = []
     report["markdown"] = render_investigation_markdown(report)
     return report
 
@@ -479,6 +541,8 @@ def render_investigation_markdown(report: dict) -> str:
         + (" — DIAGNOSTIC ONLY, NOT VERIFIED" if diagnostic else ""),
         "",
         f"- **Report Status**: `{report.get('report_status')}`",
+        f"- **Quality & Behavioral Consistency (`quality_consistency.json`)**: `{report.get('quality_consistency_status', 'pending')}`",
+        f"- **Evidence Lineage Audit (`lineage_consistency.json`)**: `{report.get('lineage_consistency_status', 'pending')}`",
     ]
     if diagnostic:
         lines.extend([

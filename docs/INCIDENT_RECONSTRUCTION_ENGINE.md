@@ -112,3 +112,27 @@ Details: `docs/BEHAVIORAL_RECONSTRUCTION.md`.
    increases. Without a transaction they enter the graph and root behavioral storylines; cross-device links stay
    `cross_device_temporal_candidate` (unresolved). New artifacts: `event_anchors.json`,
    `behavioral_storylines.json`, `unresolved_branches.json`.
+
+## 8. Behavioral reconstruction refinement & Incident Synthesis design
+
+Details: `docs/BEHAVIORAL_RECONSTRUCTION.md` (Section 10) and `docs/INCIDENT_SYNTHESIS_DESIGN.md`.
+
+1. **Supported transition vs. sequential observation (`behavior.py`).** `evaluate_behavioral_relation_consistency()`
+   checks device stem, separate ASDUs, `0 <= dt <= 15 s`, overlapping `[pre_time, post_time]` transition intervals,
+   endpoint verification (`verified_observation`), complementary endpoints (`from` vs `to` on a shared quantity or
+   verified `COT=3` state transition paired with `to_zero`/`from_zero`), and matching change type, magnitude direction,
+   and power flow sign. Pairs that pass become `corroborated_same_device_behavioral_transition` (`supported`);
+   same-device pairs that fail become `same_entity_sequential_observation` (`unverified`, off-spine).
+2. **Anchor reliability (`anchors.py`).** Pre/post quality descriptors, COT test bits, pre-sample cadence gap
+   (`<= 30 s`), and post-sample persistence (`>= 2` post samples, `>= 80 %` consistent) classify each anchor as
+   `verified_observation` or `unverified_observation`. Unverified observations are retained as
+   `behavioral_unverified_observation` and excluded from supported spines.
+3. **Separate quality and lineage consistency (`consistency.py`).** `quality_consistency.json` checks transaction and
+   behavioral transition consistency; `lineage_consistency.json` records timeline and anchor evidence lineage checks
+   separately.
+4. **Refined Basic results (`runs/etgi/behavioral-r5-20261015/`).** In `ev_564bebaa`, 5 of the 8 chains remain
+   supported (`line.0`, `line.1`, `line.3`, `line.4`, `line.12`) and 3 are downgraded to
+   `same_entity_sequential_observation` (`line.2` early `A011 -> A023` due to `change_type_mismatch`; `line.2` late
+   `A028 -> A029` and `line.14` late `A030 -> A031` due to failed persistence and direction/ratio mismatch). In
+   `ev_4e913b`, `sgen.0` `A001 -> A002` is downgraded to `same_entity_sequential_observation` because `A001` lacks a
+   prior state value in the window.

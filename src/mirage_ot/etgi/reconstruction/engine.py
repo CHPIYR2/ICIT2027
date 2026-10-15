@@ -18,7 +18,7 @@ from ..graph.export import write_graph
 from ..postalert.pipeline import _db_fingerprint, export_lineage_bundle, prepare
 from .anchors import discover_event_anchors
 from .behavior import audit_anchor_lineage
-from .consistency import check_quality_consistency
+from .consistency import build_lineage_consistency_record, check_quality_consistency
 from .event_graph import build_temporal_event_graph
 from .report import apply_quality_consistency, build_investigation_report, run_llm_explanation
 from .storyline import reconstruct_storylines
@@ -86,8 +86,11 @@ def reconstruct_incident(
         db, [n for n in eg_result["nodes"] if n["fact_id"] not in behavioral_fids], eg_result["fact_lineage"],
     )
     lineage_bundle["behavioral_anchor_lineage"] = audit_anchor_lineage(db, anchor_result["anchors"], placed)
-    quality_consistency = check_quality_consistency(tx_result, eg_result, sl_result, report)
-    report = apply_quality_consistency(report, quality_consistency)
+    lineage_consistency = build_lineage_consistency_record(lineage_bundle)
+    quality_consistency = check_quality_consistency(
+        tx_result, eg_result, sl_result, report, anchor_result=anchor_result,
+    )
+    report = apply_quality_consistency(report, quality_consistency, lineage_consistency)
     manifest = reconstruction_manifest(
         db,
         incident_start=start,
@@ -152,6 +155,9 @@ def reconstruct_incident(
         (out_dir / "quality_consistency.json").write_text(
             json.dumps(quality_consistency, indent=2, default=str), encoding="utf-8",
         )
+        (out_dir / "lineage_consistency.json").write_text(
+            json.dumps(lineage_consistency, indent=2, default=str), encoding="utf-8",
+        )
         (out_dir / "run_manifest.json").write_text(
             json.dumps(manifest, indent=2, default=str), encoding="utf-8",
         )
@@ -169,6 +175,7 @@ def reconstruct_incident(
         "explanation": explanation,
         "report": report,
         "quality_consistency": quality_consistency,
+        "lineage_consistency": lineage_consistency,
     }
 
 

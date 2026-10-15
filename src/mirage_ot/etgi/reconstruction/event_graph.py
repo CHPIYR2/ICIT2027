@@ -921,6 +921,7 @@ def _add_typed_edge(
     independent_support: bool,
     temporal_condition: str,
     support_basis: str,
+    **extra,
 ) -> None:
     if source_fid == target_fid:
         return
@@ -980,6 +981,7 @@ def _add_typed_edge(
         "target_evidence_ids": dst_ev_ids,
         "evidence_ids": ev_ids,
         "evidence_id_count": len(ev_ids),
+        **extra,
     })
 
 

@@ -167,14 +167,18 @@ def reconstruct_storylines(
     ]
 
     candidate_edges = [e for e in event_graph["edges"] if e["relation_type"] == "cross_device_temporal_candidate"]
+    sequential_edges = [e for e in event_graph["edges"] if e["relation_type"] == "same_entity_sequential_observation"]
     if any(_anchor_id(n) for n in event_graph["nodes"]):
         policy = {
             "status": "behavioral_anchor_search",
             "behavior": (
                 "Storylines start at event anchors (state reports, measurement steps, link activity, ARP "
-                "activity). A spine step needs a supported relation: a direct protocol relation or the same "
-                "element reported in a separate ASDU. Facts carried by one ASDU are listed as co-reported. "
-                "Cross-device time proximity stays an unresolved branch."
+                "activity). A spine step requires a verified observation on both endpoints and a passed "
+                "behavioral relation consistency gate (`corroborated_same_device_behavioral_transition`). "
+                "Same-device observations that fail the gate stay `same_entity_sequential_observation` off "
+                "the spine; unverified anchors stay single-node `behavioral_unverified_observation` records. "
+                "Facts carried by one ASDU are listed as co-reported; cross-device time proximity stays an "
+                "unresolved branch."
             ),
         }
     else:
@@ -209,7 +213,17 @@ def reconstruct_storylines(
             )
         ),
         "behavioral_storyline_count": len(behavioral),
+        "supported_behavioral_storyline_count": sum(
+            1 for s in behavioral if s["completeness_status"] == "behavioral_chain_with_supported_relations"
+        ),
+        "verified_single_anchor_storyline_count": sum(
+            1 for s in behavioral if s["completeness_status"] == "behavioral_single_anchor"
+        ),
+        "unverified_behavioral_observation_count": sum(
+            1 for s in behavioral if s["completeness_status"] == "behavioral_unverified_observation"
+        ),
         "storylines": storylines,
+        "sequential_same_device_observations": [_sequential_record(e, nodes_by_id) for e in sequential_edges],
         "unresolved_branches": [_branch_record(e, nodes_by_id) for e in candidate_edges],
         "unattached_observations": unattached,
     }
@@ -219,6 +233,36 @@ def _anchor_id(node: dict) -> str | None:
     if node.get("role") == "ipal_correspondence":
         return None
     return (node.get("protocol_meta") or {}).get("anchor_id")
+
+
+def _anchor_verified(node: dict) -> bool:
+    return (node.get("protocol_meta") or {}).get("verification_status") == "verified_observation"
+
+
+def _sequential_record(edge: dict, nodes_by_id: dict[str, dict]) -> dict:
+    src, dst = nodes_by_id[edge["source_fact_id"]], nodes_by_id[edge["target_fact_id"]]
+    gate = edge.get("consistency_gate") or {}
+    return {
+        "edge_id": edge["edge_id"],
+        "from_fact_id": src["fact_id"],
+        "from_anchor_id": _anchor_id(src),
+        "from_entity": src["entity"],
+        "from_time": src["time"],
+        "to_fact_id": dst["fact_id"],
+        "to_anchor_id": _anchor_id(dst),
+        "to_entity": dst["entity"],
+        "to_time": dst["time"],
+        "device_stem": src.get("device_stem"),
+        "relation_type": edge["relation_type"],
+        "claim_level": edge["claim_level"],
+        "verification_status": edge["verification_status"],
+        "graph_consistency_gate_status": edge.get("graph_consistency_gate_status"),
+        "failed_conditions": list(gate.get("failed_conditions") or []),
+        "consistency_gate": gate,
+        "temporal_condition": edge["temporal_condition"],
+        "support_basis": edge["support_basis"],
+        "evidence_ids": edge["evidence_ids"],
+    }
 
 
 def _branch_record(edge: dict, nodes_by_id: dict[str, dict]) -> dict:
@@ -261,13 +305,23 @@ def _behavioral_storylines(
     anchor_fids = {n["fact_id"] for n in roots}
     adj_beh: dict[str, list[dict]] = {}
     same_asdu: dict[str, list[dict]] = {}
+    same_device_seq: dict[str, list[dict]] = {}
     incoming: dict[str, list[dict]] = {}
     for edge in event_graph["edges"]:
         src, dst = edge["source_fact_id"], edge["target_fact_id"]
         if src not in anchor_fids or dst not in anchor_fids:
             continue
-        if edge["relation_category"] in BEHAVIORAL_SPINE_CATEGORIES and edge["verification_status"] == "supported":
+        if (
+            edge["relation_category"] in BEHAVIORAL_SPINE_CATEGORIES
+            and edge["verification_status"] == "supported"
+            and edge.get("graph_consistency_gate_status") == "passed_behavioral_consistency_gate"
+            and _anchor_verified(nodes_by_id[src])
+            and _anchor_verified(nodes_by_id[dst])
+        ):
             adj_beh.setdefault(src, []).append(edge)
+        elif edge["relation_type"] == "same_entity_sequential_observation":
+            same_device_seq.setdefault(src, []).append(edge)
+            same_device_seq.setdefault(dst, []).append(edge)
         elif edge["relation_type"] == "same_iec104_asdu":
             same_asdu.setdefault(src, []).append(edge)
             same_asdu.setdefault(dst, []).append(edge)
@@ -278,13 +332,24 @@ def _behavioral_storylines(
     for root in roots:
         if root["fact_id"] in used_fids:
             continue
-        open_adj = {
-            fid: [e for e in edges if e["target_fact_id"] not in used_fids]
-            for fid, edges in adj_beh.items()
-        }
-        best_path, alt_paths = _beam_search_spine(
-            root["fact_id"], nodes_by_id, open_adj, beam_width=beam_width, max_depth=max_depth,
-        )
+        root_verified = _anchor_verified(root)
+        if root_verified:
+            open_adj = {
+                fid: [e for e in edges if e["target_fact_id"] not in used_fids]
+                for fid, edges in adj_beh.items()
+            }
+            best_path, alt_paths = _beam_search_spine(
+                root["fact_id"], nodes_by_id, open_adj, beam_width=beam_width, max_depth=max_depth,
+            )
+        else:
+            best_path = {
+                "node_ids": [root["fact_id"]],
+                "edges": [],
+                "containers": set(_informative_containers(root)),
+                "independent_edge_count": 0,
+                "score": 0.0,
+            }
+            alt_paths = []
         used_fids.update(best_path["node_ids"])
         spine = best_path["node_ids"]
         story = _format_storyline(
@@ -306,23 +371,46 @@ def _behavioral_storylines(
                     "relation_type": "same_iec104_asdu", "independent_support": False,
                     "meaning": "carried by the same ASDU; no relation between the devices' changes is established",
                 })
+        sequential_obs = []
+        seen_seq_edges: set[str] = set()
+        for fid in spine:
+            for edge in same_device_seq.get(fid, []):
+                if edge["edge_id"] in seen_seq_edges:
+                    continue
+                seen_seq_edges.add(edge["edge_id"])
+                sequential_obs.append(_sequential_record(edge, nodes_by_id))
         incoming_branches = [
             _branch_record(e, nodes_by_id)
             for fid in spine for e in incoming.get(fid, [])
             if e["source_fact_id"] not in spine
         ]
         spine_nodes = [nodes_by_id[f] for f in spine]
+        if not root_verified:
+            comp_status = "behavioral_unverified_observation"
+        elif story["confirmed_and_supported_steps"]:
+            comp_status = "behavioral_chain_with_supported_relations"
+        else:
+            comp_status = "behavioral_single_anchor"
         story.update({
             "storyline_kind": "behavioral",
             "anchor_ids": [_anchor_id(n) for n in spine_nodes],
             "anchor_types": sorted({n["role"] for n in spine_nodes}),
-            "completeness_status": (
-                "behavioral_chain_with_supported_relations" if story["confirmed_and_supported_steps"]
-                else "behavioral_single_anchor"
-            ),
+            "anchor_verification_statuses": {
+                _anchor_id(n): (n.get("protocol_meta") or {}).get("verification_status", "unverified_observation")
+                for n in spine_nodes
+            },
+            "anchor_verification_issues": {
+                _anchor_id(n): list((n.get("protocol_meta") or {}).get("verification_issues") or [])
+                for n in spine_nodes
+                if (n.get("protocol_meta") or {}).get("verification_issues")
+            },
+            "completeness_status": comp_status,
             "co_reported_in_same_asdu": co_reported,
+            "sequential_same_device_observations": sequential_obs,
             "incoming_unresolved_branches": incoming_branches,
-            "reconstructed_behavior": _describe_behavior(spine_nodes, story["confirmed_and_supported_steps"], co_reported),
+            "reconstructed_behavior": _describe_behavior(
+                spine_nodes, story["confirmed_and_supported_steps"], co_reported, sequential_obs,
+            ),
             "not_reconstructed": (
                 "Cause, the initiating actor, and any relation to devices outside this chain. Cross-device "
                 "links are listed only as unresolved branches; no grid topology is available."
@@ -332,13 +420,23 @@ def _behavioral_storylines(
     return out
 
 
-def _describe_behavior(spine_nodes: list[dict], steps: list[dict], co_reported: list[dict]) -> str:
+def _describe_behavior(
+    spine_nodes: list[dict],
+    steps: list[dict],
+    co_reported: list[dict],
+    sequential_obs: list[dict] | None = None,
+) -> str:
     parts = [f"[{n['protocol_meta']['anchor_id']}] {n['observation'].rstrip('.')}" for n in spine_nodes]
     text = " THEN ".join(parts)
     if steps:
         text += (
-            f". {len(steps)} supported relation(s): the same element reported again in a separate ASDU "
-            "(element identity from the data point map; not a cause)"
+            f". {len(steps)} corroborated same-device behavioral transition(s) in separate ASDUs "
+            "(passed behavioral consistency gate; element identity from the data point map; not a cause)"
+        )
+    if sequential_obs:
+        text += (
+            f". {len(sequential_obs)} same-device sequential observation(s) kept off-spine "
+            f"(failed behavioral consistency gate: {[s['failed_conditions'] for s in sequential_obs]})"
         )
     if co_reported:
         text += f". Co-reported in the same ASDU: {', '.join(sorted({c['entity'] for c in co_reported}))}"
@@ -532,6 +630,7 @@ def _format_storyline(
             "claim_level": e["claim_level"],
             "verification_status": e["verification_status"],
             "graph_consistency_gate_status": e.get("graph_consistency_gate_status"),
+            "consistency_gate": e.get("consistency_gate"),
             "independent_support": e["independent_support"],
             "temporal_condition": e["temporal_condition"],
             "support_basis": e["support_basis"],
