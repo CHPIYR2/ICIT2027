@@ -1,3 +1,7 @@
+# MIRAGE-OT Review Artifacts
+
+Synthesis reliability outputs for `ev_564bebaa45f0686cf98d` and `ev_cbe1e5bef23346604396` are in `review_artifacts/synthesis/` (generating commit `286f4c2341234a244538048644be5112e42de8a1`). The R5 behavioral artifacts below are unchanged.
+
 # MIRAGE-OT Review Artifacts (`behavioral-r5-20261015`)
 
 This directory contains self-contained, auditable reconstruction outputs for the four Sherlock v3 `01-Basic` no-control-command windows evaluated in the **R5 Behavioral Reconstruction Refinement** round (`runs/etgi/behavioral-r5-20261015/reconstruction/`).
