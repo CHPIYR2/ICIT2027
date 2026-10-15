@@ -1,0 +1,92 @@
+{
+  "mode": "full",
+  "workers": 6,
+  "freeze_verification": {
+    "verified": true,
+    "frozen_engine_git_commit": "2981fb062b127218a34f23f2ff0292e4ca8cfea7",
+    "code_sha256": "d43d9867ce847df169e13345e4c3461cd99fd5167292a85cedaaa553d93e5bb3",
+    "evidence_code_sha256": "032c6977ac0507e9c442b37e4e78455d0ab6d1a21b1efe751a0ccf37242a3b85",
+    "module_count": 30
+  },
+  "upstream_archive_verification": {
+    "01-Basic.zip": {
+      "compressed_bytes": 703191516,
+      "compressed_gib_binary": 0.6549,
+      "compressed_gb_decimal": 0.7032,
+      "uncompressed_bytes": 899785684,
+      "md5": "c482e0dc7e56b063b357d8b03be5cce6",
+      "matches_freeze_manifest": true
+    },
+    "02-Semiurban.zip": {
+      "compressed_bytes": 6375875182,
+      "compressed_gib_binary": 5.938,
+      "compressed_gb_decimal": 6.3759,
+      "uncompressed_bytes": 7812778716,
+      "md5": "0f7d3eb61e478d05f4b431ae99d45564",
+      "matches_freeze_manifest": true
+    },
+    "03-Rural.zip": {
+      "compressed_bytes": 1866012065,
+      "compressed_gib_binary": 1.7379,
+      "compressed_gb_decimal": 1.866,
+      "uncompressed_bytes": 2508796032,
+      "md5": "0cc7807bd5a76ea5bc85a1da6fd6c061",
+      "matches_freeze_manifest": true
+    }
+  },
+  "strict_input_isolation_verified": true,
+  "existing_index_audit": {
+    "ev_0431e34c3ed30056a8f0": {
+      "candidates": [
+        {
+          "path": "runs/etgi/semiurban-ev0431/evidence.sqlite",
+          "exists": true,
+          "compatible": false,
+          "reasons": [
+            "context_seconds_mismatch:10.0!=15.0",
+            "per_type_quality_keyset_mismatch:0/18030",
+            "per_type_quality_bits_invalid:0+0/18030",
+            "quality_good_contract_violation:0/18030",
+            "cot_test_not_bool:0/18032"
+          ],
+          "total_evidence_rows": 39177,
+          "iec104_rows": 18032,
+          "typed_quality_rows": 18030,
+          "exact_per_type_quality_keyset_rows": 0,
+          "aligned_all_bits_bool_rows": 0,
+          "r4_unaligned_null_guarded_rows": 0,
+          "quality_good_contract_ok_rows": 0,
+          "cot_test_bool_ok_rows": 0,
+          "per_type_audit": {
+            "13": {
+              "total": 18030,
+              "exact_keyset_ok": 0,
+              "all_bits_bool_ok": 0,
+              "r4_unaligned_null_guarded": 0,
+              "cot_test_ok": 0
+            },
+            "50": {
+              "total": 2,
+              "exact_keyset_ok": 0,
+              "all_bits_bool_ok": 0,
+              "r4_unaligned_null_guarded": 0,
+              "cot_test_ok": 0
+            }
+          },
+          "sqlite_bytes": 28766208
+        }
+      ],
+      "action": "reindex_with_frozen_indexer"
+    }
+  },
+  "timing_breakdown_seconds": {
+    "code_freeze_verification_s": 0.0011,
+    "archive_integrity_audit_s": 10.7958,
+    "existing_index_audit_s": 0.0909,
+    "windows_processing_wall_clock_s": 1226.434,
+    "sum_of_worker_indexing_cpu_wall_s": 6376.602,
+    "sum_of_worker_reconstruction_s": 1246.122,
+    "process_end_to_end_wall_clock_s": 1237.349
+  },
+  "execution_failures": []
+}

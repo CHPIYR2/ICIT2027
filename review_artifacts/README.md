@@ -1,5 +1,6 @@
 # MIRAGE-OT Review Artifacts
 
+- **Stage 2 Complete 75-Window Cross-Scenario Frozen Experiment (`2981fb0`)**: `review_artifacts/stage2-cross-scenario-frozen-20261015/` & `docs/STAGE2_CROSS_SCENARIO_EXPERIMENT_RESULTS.md` (`39` `02-Semiurban` + `36` `03-Rural` test windows, unified 103-window comparison with `01-Basic`).
 - **Stage 1 Complete 28-Window Basic Frozen Experiment (`2981fb0`)**: `review_artifacts/stage1-basic-frozen-20261015/` & `docs/STAGE1_BASIC_FROZEN_EXPERIMENT_RESULTS.md` (all 28 Sherlock v3 `01-Basic` `test` windows, 100% Quality & Lineage Consistency pass rate).
 - **Method-Freeze Synthesis outputs (`2981fb0`)**: `review_artifacts/synthesis-method-freeze-20261015/` (per-target first ARP timestamp precedence and bridge RTU IP exact alignment check).
 - **Earlier Synthesis reliability outputs (`286f4c2`)**: `review_artifacts/synthesis/` (preserved unchanged).

@@ -1,0 +1,2885 @@
+{
+  "synthesis_version": "1.1",
+  "scenario_status": "synthesized_consistent",
+  "behavioral_mode": true,
+  "window": {
+    "start": 1743610920.1932154,
+    "end": 1743611091.128593,
+    "duration_seconds": 170.935
+  },
+  "inputs_not_used": [
+    "official event labels",
+    "attack type",
+    "malicious flags",
+    "physical.zip"
+  ],
+  "epistemic_guarantees": {
+    "promotes_cooccurrence_to_supported": false,
+    "promotes_same_asdu_co_report_to_topology_or_causality": false,
+    "counts_same_asdu_as_independent": false,
+    "counts_mirror_vantages_as_independent": false,
+    "counts_ipal_as_independent": false,
+    "allows_unverified_anchors_in_supported_bridges": false,
+    "allows_same_rtu_relation_as_cross_rtu_bridge": false
+  },
+  "local_storyline_partition": {
+    "counts": {
+      "supported_multi_node_storyline_count": 1,
+      "verified_single_anchor_storyline_count": 13,
+      "protocol_partial_or_unverified_storyline_count": 0,
+      "sequential_same_device_observation_count": 4,
+      "quarantined_unverified_observation_count": 7,
+      "unverified_precursor_state_report_count": 1
+    },
+    "supported_multi_node_storylines": [
+      {
+        "storyline_id": "SL008",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A008",
+          "A016"
+        ],
+        "spine_fact_ids": [
+          "BA008",
+          "BA016"
+        ],
+        "spine_entities": [
+          "line.44:active_power_to,current_to,reactive_power_to,voltage_to",
+          "line.44:active_power_from,current_from,reactive_power_from,voltage_from"
+        ],
+        "start_time": 1743610923.66422,
+        "end_time": 1743610931.424556,
+        "start_relative_s": 3.471,
+        "completeness_status": "behavioral_chain_with_supported_relations",
+        "independent_source_container_count": 2,
+        "independent_support_edge_count": 1,
+        "supported_step_count": 1,
+        "reconstructed_behavior": "[A008] line.44: 4 measurement(s) in one ASDU from RTU 172.16.8.9 changed active_power_to 1046401.44 -> 0.0; current_to 29.3438511 -> 0.0; reactive_power_to 11406.5596 -> 0.0; voltage_to 1.02337468 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation) THEN [A016] line.44: 4 measurement(s) in one ASDU from RTU 172.16.8.6 changed active_power_from -1045469.75 -> 0.0; current_from 29.3399258 -> 0.0; reactive_power_from -11532.459 -> 0.0; voltage_from 1.02255595 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation). 1 corroborated same-device behavioral transition(s) in separate ASDUs (passed behavioral consistency gate; element identity from the data point map; not a cause). Co-reported in the same ASDU: bus.151:active_power,voltage_angle, line.121:active_power_from,current_from,reactive_power_from,voltage_from, line.39:active_power_to,current_to, load.45:active_power,reactive_power, trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv.",
+        "evidence_ids": [
+          "EV-bfffff4c8a7435c0",
+          "EV-8835c6772fa0b7b8",
+          "EV-9a3dc50ed164a774",
+          "EV-27ed260f415adf31",
+          "EV-df3c31bb096ba5de",
+          "EV-b5d183552a9fad1e",
+          "EV-804cf5079725422d",
+          "EV-6a21a921b0c8135f"
+        ]
+      }
+    ],
+    "verified_single_anchor_storylines": [
+      {
+        "storyline_id": "SL002",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A002"
+        ],
+        "spine_fact_ids": [
+          "BA002"
+        ],
+        "spine_entities": [
+          "bus.48:voltage"
+        ],
+        "start_time": 1743610922.911665,
+        "end_time": 1743610922.911665,
+        "start_relative_s": 2.718,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A002] bus.48: 1 measurement(s) in one ASDU from RTU 172.16.8.9 changed voltage 1.02302539 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation). 2 same-device sequential observation(s) kept off-spine (failed behavioral consistency gate: [['endpoints_not_complementary'], ['endpoints_not_complementary']]).",
+        "evidence_ids": [
+          "EV-28ddeddb976d3d33",
+          "EV-78c8cfb77db9609f"
+        ]
+      },
+      {
+        "storyline_id": "SL003",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A003"
+        ],
+        "spine_fact_ids": [
+          "BA003"
+        ],
+        "spine_entities": [
+          "bus.48:voltage_angle"
+        ],
+        "start_time": 1743610923.161381,
+        "end_time": 1743610923.161381,
+        "start_relative_s": 2.968,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A003] bus.48: 1 measurement(s) in one ASDU from RTU 172.16.8.9 changed voltage_angle -145.717133 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation). 2 same-device sequential observation(s) kept off-spine (failed behavioral consistency gate: [['endpoints_not_complementary'], ['endpoints_not_complementary']]).",
+        "evidence_ids": [
+          "EV-7e6050fc6680c20f",
+          "EV-ee4c1299ed148e3a"
+        ]
+      },
+      {
+        "storyline_id": "SL004",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A004"
+        ],
+        "spine_fact_ids": [
+          "BA004"
+        ],
+        "spine_entities": [
+          "bus.48:active_power,reactive_power"
+        ],
+        "start_time": 1743610923.262122,
+        "end_time": 1743610923.262122,
+        "start_relative_s": 3.069,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A004] bus.48: 2 measurement(s) in one ASDU from RTU 172.16.8.9 changed active_power -862530.438 -> 0.0; reactive_power 24431.6523 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation). 2 same-device sequential observation(s) kept off-spine (failed behavioral consistency gate: [['endpoints_not_complementary'], ['endpoints_not_complementary']]).",
+        "evidence_ids": [
+          "EV-29d8ec221378200b",
+          "EV-c58f656ad5cc3c99",
+          "EV-315c9549e59c6033",
+          "EV-f94bacb10f2f49d0"
+        ]
+      },
+      {
+        "storyline_id": "SL005",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A005"
+        ],
+        "spine_fact_ids": [
+          "BA005"
+        ],
+        "spine_entities": [
+          "bus.151:voltage"
+        ],
+        "start_time": 1743610923.361502,
+        "end_time": 1743610923.361502,
+        "start_relative_s": 3.168,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A005] bus.151: 1 measurement(s) in one ASDU from RTU 172.16.8.9 changed voltage 1.02663875 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation). 1 same-device sequential observation(s) kept off-spine (failed behavioral consistency gate: [['endpoints_not_complementary']]).",
+        "evidence_ids": [
+          "EV-c205e57257ff0bce",
+          "EV-36566130a858915c"
+        ]
+      },
+      {
+        "storyline_id": "SL006",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A006"
+        ],
+        "spine_fact_ids": [
+          "BA006"
+        ],
+        "spine_entities": [
+          "bus.151:active_power,voltage_angle"
+        ],
+        "start_time": 1743610923.66422,
+        "end_time": 1743610923.66422,
+        "start_relative_s": 3.471,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A006] bus.151: 2 measurement(s) in one ASDU from RTU 172.16.8.9 changed active_power -184745.141 -> 0.0; voltage_angle 65.2200775 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation). 1 same-device sequential observation(s) kept off-spine (failed behavioral consistency gate: [['endpoints_not_complementary']]). Co-reported in the same ASDU: line.121:active_power_from,current_from,reactive_power_from,voltage_from, line.44:active_power_to,current_to,reactive_power_to,voltage_to, load.45:active_power,reactive_power, trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv.",
+        "evidence_ids": [
+          "EV-4293fe202eb72958",
+          "EV-65c1f8dc7759207f",
+          "EV-31999d0bbfc77816",
+          "EV-7a71e566a9dd52b5"
+        ]
+      },
+      {
+        "storyline_id": "SL007",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A007"
+        ],
+        "spine_fact_ids": [
+          "BA007"
+        ],
+        "spine_entities": [
+          "line.121:active_power_from,current_from,reactive_power_from,voltage_from"
+        ],
+        "start_time": 1743610923.66422,
+        "end_time": 1743610923.66422,
+        "start_relative_s": 3.471,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A007] line.121: 4 measurement(s) in one ASDU from RTU 172.16.8.9 changed active_power_from 0.124243617 -> 0.0; current_from 0.917037785 -> 0.0; reactive_power_from -40871.2344 -> 0.0; voltage_from 1.02337468 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation). Co-reported in the same ASDU: bus.151:active_power,voltage_angle, line.44:active_power_to,current_to,reactive_power_to,voltage_to, load.45:active_power,reactive_power, trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv.",
+        "evidence_ids": [
+          "EV-f0bee297bfd2bd57",
+          "EV-baa7904f218baa7b",
+          "EV-979450281d781b24",
+          "EV-ec0de5e4b766c02a"
+        ]
+      },
+      {
+        "storyline_id": "SL009",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A009"
+        ],
+        "spine_fact_ids": [
+          "BA009"
+        ],
+        "spine_entities": [
+          "load.45:active_power,reactive_power"
+        ],
+        "start_time": 1743610923.66422,
+        "end_time": 1743610923.66422,
+        "start_relative_s": 3.471,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A009] load.45: 2 measurement(s) in one ASDU from RTU 172.16.8.9 changed active_power 43788.1445 -> 0.0; reactive_power 24468.9434 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation). Co-reported in the same ASDU: bus.151:active_power,voltage_angle, line.121:active_power_from,current_from,reactive_power_from,voltage_from, line.44:active_power_to,current_to,reactive_power_to,voltage_to, trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv.",
+        "evidence_ids": [
+          "EV-e1c4627a59ef4fab",
+          "EV-b8c053abca9694e6",
+          "EV-a2140e83a8da19d6",
+          "EV-6a3fd18cf790d6d0"
+        ]
+      },
+      {
+        "storyline_id": "SL010",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A010"
+        ],
+        "spine_fact_ids": [
+          "BA010"
+        ],
+        "spine_entities": [
+          "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv"
+        ],
+        "start_time": 1743610923.66422,
+        "end_time": 1743610923.66422,
+        "start_relative_s": 3.471,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A010] trafo.31: 12 measurement(s) in one ASDU from RTU 172.16.8.9 changed active_power_hv -184075.719 -> 0.0; active_power_loss 669.064575 -> 0.0; active_power_lv 184744.797 -> 0.0; current_hv 5.28806829 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation). Co-reported in the same ASDU: bus.151:active_power,voltage_angle, line.121:active_power_from,current_from,reactive_power_from,voltage_from, line.44:active_power_to,current_to,reactive_power_to,voltage_to, load.45:active_power,reactive_power.",
+        "evidence_ids": [
+          "EV-f4a08d69980e0d51",
+          "EV-a6621b688fa416a7",
+          "EV-bddb494d1a3380a5",
+          "EV-e88ff5e7c7f3afe9"
+        ]
+      },
+      {
+        "storyline_id": "SL011",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A011"
+        ],
+        "spine_fact_ids": [
+          "BA011"
+        ],
+        "spine_entities": [
+          "line.38:active_power_from,current_from"
+        ],
+        "start_time": 1743610926.579512,
+        "end_time": 1743610926.579512,
+        "start_relative_s": 6.386,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A011] line.38: 2 measurement(s) in one ASDU from RTU 172.16.8.5 changed active_power_from -1813526.25 -> -768882.938; current_from 51.5955696 -> 22.1570263 (level_shift; quality good=True; sustained=True; verification=verified_observation).",
+        "evidence_ids": [
+          "EV-a39d2d274232d1cb",
+          "EV-b005d130ab3a4d21",
+          "EV-06fb0d5d08a04d6b",
+          "EV-7f6ae9271ed6d9b3"
+        ]
+      },
+      {
+        "storyline_id": "SL012",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A012"
+        ],
+        "spine_fact_ids": [
+          "BA012"
+        ],
+        "spine_entities": [
+          "sgen.45:active_power"
+        ],
+        "start_time": 1743610927.822236,
+        "end_time": 1743610927.822236,
+        "start_relative_s": 7.629,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A012] sgen.45: 1 measurement(s) in one ASDU from RTU 172.16.8.9 changed active_power 91635.4844 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+        "evidence_ids": [
+          "EV-22cca1a84bad13dc",
+          "EV-828518810fce9eeb"
+        ]
+      },
+      {
+        "storyline_id": "SL013",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A013"
+        ],
+        "spine_fact_ids": [
+          "BA013"
+        ],
+        "spine_entities": [
+          "sgen.116:active_power"
+        ],
+        "start_time": 1743610927.866778,
+        "end_time": 1743610927.866778,
+        "start_relative_s": 7.674,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A013] sgen.116: 1 measurement(s) in one ASDU from RTU 172.16.8.9 changed active_power 906330.875 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation). Co-reported in the same ASDU: storage.20:active_power.",
+        "evidence_ids": [
+          "EV-7d67fa2a61ff8476",
+          "EV-cdb43776233dd495"
+        ]
+      },
+      {
+        "storyline_id": "SL014",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A014"
+        ],
+        "spine_fact_ids": [
+          "BA014"
+        ],
+        "spine_entities": [
+          "storage.20:active_power"
+        ],
+        "start_time": 1743610927.866778,
+        "end_time": 1743610927.866778,
+        "start_relative_s": 7.674,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A014] storage.20: 1 measurement(s) in one ASDU from RTU 172.16.8.9 changed active_power -93010.3047 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation). Co-reported in the same ASDU: sgen.116:active_power.",
+        "evidence_ids": [
+          "EV-7896d7796954d059",
+          "EV-022c7353683e6047"
+        ]
+      },
+      {
+        "storyline_id": "SL015",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A015"
+        ],
+        "spine_fact_ids": [
+          "BA015"
+        ],
+        "spine_entities": [
+          "line.39:active_power_to,current_to"
+        ],
+        "start_time": 1743610931.424556,
+        "end_time": 1743610931.424556,
+        "start_relative_s": 11.231,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A015] line.39: 2 measurement(s) in one ASDU from RTU 172.16.8.6 changed active_power_to 1614427.38 -> 564905.625; current_to 45.3205299 -> 15.9941158 (level_shift; quality good=True; sustained=True; verification=verified_observation). Co-reported in the same ASDU: line.44:active_power_from,current_from,reactive_power_from,voltage_from.",
+        "evidence_ids": [
+          "EV-6b38ba0ab52ffae0",
+          "EV-18b770816e2b86dc",
+          "EV-9194cb76e63c26ea",
+          "EV-c0801cb4e5858908"
+        ]
+      }
+    ],
+    "protocol_partial_or_unverified_storylines": [],
+    "sequential_same_device_observations": [
+      {
+        "edge_id": "R0059",
+        "from_anchor_id": "A002",
+        "to_anchor_id": "A003",
+        "from_fact_id": "BA002",
+        "to_fact_id": "BA003",
+        "device_stem": "bus.48",
+        "from_entity": "bus.48:voltage",
+        "to_entity": "bus.48:voltage_angle",
+        "from_relative_s": 2.718,
+        "to_relative_s": 2.968,
+        "relation_type": "same_entity_sequential_observation",
+        "claim_level": "sequential_observation",
+        "verification_status": "unverified",
+        "failed_conditions": [
+          "endpoints_not_complementary"
+        ],
+        "evidence_ids": [
+          "EV-28ddeddb976d3d33",
+          "EV-78c8cfb77db9609f",
+          "EV-7e6050fc6680c20f",
+          "EV-ee4c1299ed148e3a"
+        ]
+      },
+      {
+        "edge_id": "R0060",
+        "from_anchor_id": "A002",
+        "to_anchor_id": "A004",
+        "from_fact_id": "BA002",
+        "to_fact_id": "BA004",
+        "device_stem": "bus.48",
+        "from_entity": "bus.48:voltage",
+        "to_entity": "bus.48:active_power,reactive_power",
+        "from_relative_s": 2.718,
+        "to_relative_s": 3.069,
+        "relation_type": "same_entity_sequential_observation",
+        "claim_level": "sequential_observation",
+        "verification_status": "unverified",
+        "failed_conditions": [
+          "endpoints_not_complementary"
+        ],
+        "evidence_ids": [
+          "EV-28ddeddb976d3d33",
+          "EV-78c8cfb77db9609f",
+          "EV-29d8ec221378200b",
+          "EV-c58f656ad5cc3c99"
+        ]
+      },
+      {
+        "edge_id": "R0067",
+        "from_anchor_id": "A003",
+        "to_anchor_id": "A004",
+        "from_fact_id": "BA003",
+        "to_fact_id": "BA004",
+        "device_stem": "bus.48",
+        "from_entity": "bus.48:voltage_angle",
+        "to_entity": "bus.48:active_power,reactive_power",
+        "from_relative_s": 2.968,
+        "to_relative_s": 3.069,
+        "relation_type": "same_entity_sequential_observation",
+        "claim_level": "sequential_observation",
+        "verification_status": "unverified",
+        "failed_conditions": [
+          "endpoints_not_complementary"
+        ],
+        "evidence_ids": [
+          "EV-7e6050fc6680c20f",
+          "EV-ee4c1299ed148e3a",
+          "EV-29d8ec221378200b",
+          "EV-c58f656ad5cc3c99"
+        ]
+      },
+      {
+        "edge_id": "R0080",
+        "from_anchor_id": "A005",
+        "to_anchor_id": "A006",
+        "from_fact_id": "BA005",
+        "to_fact_id": "BA006",
+        "device_stem": "bus.151",
+        "from_entity": "bus.151:voltage",
+        "to_entity": "bus.151:active_power,voltage_angle",
+        "from_relative_s": 3.168,
+        "to_relative_s": 3.471,
+        "relation_type": "same_entity_sequential_observation",
+        "claim_level": "sequential_observation",
+        "verification_status": "unverified",
+        "failed_conditions": [
+          "endpoints_not_complementary"
+        ],
+        "evidence_ids": [
+          "EV-c205e57257ff0bce",
+          "EV-36566130a858915c",
+          "EV-4293fe202eb72958",
+          "EV-65c1f8dc7759207f"
+        ]
+      }
+    ],
+    "unverified_precursor_state_reports": [
+      {
+        "anchor_id": "A001",
+        "storyline_id": "SL001",
+        "fact_id": "BA001",
+        "time": 1743610921.870505,
+        "relative_time_s": 1.677,
+        "entity": "switch.95:is_closed",
+        "ca_ioa": "137.10410",
+        "reported_value": 0.0,
+        "rtu_ip": "172.16.8.6",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "no_prior_state_value_in_window"
+        ],
+        "epistemic_note": "Spontaneous COT=3 state report observed in network telemetry, but no prior IEC-104 state value exists in the window to prove a state change. Retained as an unverified precursor observation only; cannot form a Verified Element Bridge.",
+        "evidence_ids": [
+          "EV-ca5fd8d2ae1d9864"
+        ]
+      }
+    ],
+    "quarantined_unverified_observations": [
+      {
+        "storyline_id": "SL001",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A001"
+        ],
+        "spine_fact_ids": [
+          "BA001"
+        ],
+        "spine_entities": [
+          "switch.95:is_closed"
+        ],
+        "start_time": 1743610921.870505,
+        "end_time": 1743610921.870505,
+        "start_relative_s": 1.677,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A001] switch.95:is_closed (CA/IOA=137.10410) reported value 0.0 with COT=3 by RTU 172.16.8.6; prior IEC-104 value in window: not observed (state_report_no_prior_value_in_window; verification=unverified_observation).",
+        "evidence_ids": [
+          "EV-ca5fd8d2ae1d9864"
+        ],
+        "anchor_id": "A001",
+        "anchor_type": "spontaneous_state_report",
+        "rtu_ip": "172.16.8.6",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "no_prior_state_value_in_window"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['no_prior_state_value_in_window']."
+      },
+      {
+        "storyline_id": "SL016",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A017"
+        ],
+        "spine_fact_ids": [
+          "BA017"
+        ],
+        "spine_entities": [
+          "line.20:current_from"
+        ],
+        "start_time": 1743610953.664451,
+        "end_time": 1743610953.664451,
+        "start_relative_s": 33.471,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A017] line.20: 1 measurement(s) in one ASDU from RTU 172.16.12.1 changed current_from 0.078099966 -> -0.296976715 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-028bcdddc44e6304",
+          "EV-2e9e5ccc0ed40fee",
+          "EV-17c345fa7d072dac",
+          "EV-b5e9992d3f9f1539"
+        ],
+        "anchor_id": "A017",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.12.1",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL017",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A018"
+        ],
+        "spine_fact_ids": [
+          "BA018"
+        ],
+        "spine_entities": [
+          "line.117:current_to"
+        ],
+        "start_time": 1743610988.298294,
+        "end_time": 1743610988.298294,
+        "start_relative_s": 68.105,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A018] line.117: 1 measurement(s) in one ASDU from RTU 172.16.14.7 changed current_to 0.483951628 -> -0.170416757 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-994e0ff9163e3994",
+          "EV-a3b26be37212f98d",
+          "EV-01f10cb20082c19b",
+          "EV-06e54c4e91e0d683"
+        ],
+        "anchor_id": "A018",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.14.7",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL018",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A019"
+        ],
+        "spine_fact_ids": [
+          "BA019"
+        ],
+        "spine_entities": [
+          "line.114:current_from"
+        ],
+        "start_time": 1743610995.959363,
+        "end_time": 1743610995.959363,
+        "start_relative_s": 75.766,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A019] line.114: 1 measurement(s) in one ASDU from RTU 172.16.7.22 changed current_from -0.0853847489 -> -0.427102268 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-ccd2c6c1701ca499",
+          "EV-a0f022af9e374284"
+        ],
+        "anchor_id": "A019",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.7.22",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL019",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A020"
+        ],
+        "spine_fact_ids": [
+          "BA020"
+        ],
+        "spine_entities": [
+          "line.20:current_from"
+        ],
+        "start_time": 1743611013.709687,
+        "end_time": 1743611013.709687,
+        "start_relative_s": 93.516,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A020] line.20: 1 measurement(s) in one ASDU from RTU 172.16.12.1 changed current_from -0.100544535 -> 0.305412918 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-cc028b46a2512d55",
+          "EV-8f54ad5600ed3202",
+          "EV-ee6058770a951e2a",
+          "EV-cc7037c81f8815f7"
+        ],
+        "anchor_id": "A020",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.12.1",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL020",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A021"
+        ],
+        "spine_fact_ids": [
+          "BA021"
+        ],
+        "spine_entities": [
+          "line.117:current_to"
+        ],
+        "start_time": 1743611028.325933,
+        "end_time": 1743611028.325933,
+        "start_relative_s": 108.133,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A021] line.117: 1 measurement(s) in one ASDU from RTU 172.16.14.7 changed current_to -0.116465427 -> -0.27715385 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-f4382016d0a9acb8",
+          "EV-62cebd066f7f12ad",
+          "EV-b1fab40e83343285",
+          "EV-29b37b6a0840375a"
+        ],
+        "anchor_id": "A021",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.14.7",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL021",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A022"
+        ],
+        "spine_fact_ids": [
+          "BA022"
+        ],
+        "spine_entities": [
+          "line.115:current_to"
+        ],
+        "start_time": 1743611031.574855,
+        "end_time": 1743611031.574855,
+        "start_relative_s": 111.382,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A022] line.115: 1 measurement(s) in one ASDU from RTU 172.16.7.13 changed current_to -0.380721211 -> -0.10805615 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-61ec2c461a7a695d",
+          "EV-54fc0f1a712a3454",
+          "EV-217d0af306288d42",
+          "EV-853239b5f20fb34a"
+        ],
+        "anchor_id": "A022",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.7.13",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      }
+    ]
+  },
+  "rtu_asdu_bundles": [
+    {
+      "bundle_id": "BND-001",
+      "asdu_container_id": "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7703|0",
+      "container_kind": "iec104_asdu",
+      "rtu_ip": "172.16.8.9",
+      "master_ip": null,
+      "host_ip": null,
+      "time": 1743610922.911665,
+      "time_end": 1743610922.911665,
+      "relative_time_s": 2.718,
+      "member_anchor_ids": [
+        "A002"
+      ],
+      "member_fact_ids": [
+        "BA002"
+      ],
+      "member_entities": [
+        "bus.48:voltage"
+      ],
+      "member_device_stems": [
+        "bus.48"
+      ],
+      "member_anchor_types": [
+        "measurement_step"
+      ],
+      "co_reported_same_asdu_edge_ids": [],
+      "all_members_verified": true,
+      "independent_source_count": 1,
+      "vantages": [
+        "n406"
+      ],
+      "evidence_ids": [
+        "EV-28ddeddb976d3d33"
+      ],
+      "co_reporting_semantics": "shared_asdu_container_co_report_only_not_topological_or_causal"
+    },
+    {
+      "bundle_id": "BND-002",
+      "asdu_container_id": "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7704|0",
+      "container_kind": "iec104_asdu",
+      "rtu_ip": "172.16.8.9",
+      "master_ip": null,
+      "host_ip": null,
+      "time": 1743610923.161381,
+      "time_end": 1743610923.161381,
+      "relative_time_s": 2.968,
+      "member_anchor_ids": [
+        "A003"
+      ],
+      "member_fact_ids": [
+        "BA003"
+      ],
+      "member_entities": [
+        "bus.48:voltage_angle"
+      ],
+      "member_device_stems": [
+        "bus.48"
+      ],
+      "member_anchor_types": [
+        "measurement_step"
+      ],
+      "co_reported_same_asdu_edge_ids": [],
+      "all_members_verified": true,
+      "independent_source_count": 1,
+      "vantages": [
+        "n406"
+      ],
+      "evidence_ids": [
+        "EV-7e6050fc6680c20f"
+      ],
+      "co_reporting_semantics": "shared_asdu_container_co_report_only_not_topological_or_causal"
+    },
+    {
+      "bundle_id": "BND-003",
+      "asdu_container_id": "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7705|0",
+      "container_kind": "iec104_asdu",
+      "rtu_ip": "172.16.8.9",
+      "master_ip": null,
+      "host_ip": null,
+      "time": 1743610923.262122,
+      "time_end": 1743610923.262122,
+      "relative_time_s": 3.069,
+      "member_anchor_ids": [
+        "A004"
+      ],
+      "member_fact_ids": [
+        "BA004"
+      ],
+      "member_entities": [
+        "bus.48:active_power,reactive_power"
+      ],
+      "member_device_stems": [
+        "bus.48"
+      ],
+      "member_anchor_types": [
+        "measurement_step"
+      ],
+      "co_reported_same_asdu_edge_ids": [],
+      "all_members_verified": true,
+      "independent_source_count": 1,
+      "vantages": [
+        "n406"
+      ],
+      "evidence_ids": [
+        "EV-29d8ec221378200b",
+        "EV-c58f656ad5cc3c99"
+      ],
+      "co_reporting_semantics": "shared_asdu_container_co_report_only_not_topological_or_causal"
+    },
+    {
+      "bundle_id": "BND-004",
+      "asdu_container_id": "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7706|0",
+      "container_kind": "iec104_asdu",
+      "rtu_ip": "172.16.8.9",
+      "master_ip": null,
+      "host_ip": null,
+      "time": 1743610923.361502,
+      "time_end": 1743610923.361502,
+      "relative_time_s": 3.168,
+      "member_anchor_ids": [
+        "A005"
+      ],
+      "member_fact_ids": [
+        "BA005"
+      ],
+      "member_entities": [
+        "bus.151:voltage"
+      ],
+      "member_device_stems": [
+        "bus.151"
+      ],
+      "member_anchor_types": [
+        "measurement_step"
+      ],
+      "co_reported_same_asdu_edge_ids": [],
+      "all_members_verified": true,
+      "independent_source_count": 1,
+      "vantages": [
+        "n406"
+      ],
+      "evidence_ids": [
+        "EV-c205e57257ff0bce"
+      ],
+      "co_reporting_semantics": "shared_asdu_container_co_report_only_not_topological_or_causal"
+    },
+    {
+      "bundle_id": "BND-005",
+      "asdu_container_id": "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7707|0",
+      "container_kind": "iec104_asdu",
+      "rtu_ip": "172.16.8.9",
+      "master_ip": null,
+      "host_ip": null,
+      "time": 1743610923.66422,
+      "time_end": 1743610923.66422,
+      "relative_time_s": 3.471,
+      "member_anchor_ids": [
+        "A006",
+        "A007",
+        "A008",
+        "A009",
+        "A010"
+      ],
+      "member_fact_ids": [
+        "BA006",
+        "BA007",
+        "BA008",
+        "BA009",
+        "BA010"
+      ],
+      "member_entities": [
+        "bus.151:active_power,voltage_angle",
+        "line.121:active_power_from,current_from,reactive_power_from,voltage_from",
+        "line.44:active_power_to,current_to,reactive_power_to,voltage_to",
+        "load.45:active_power,reactive_power",
+        "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv"
+      ],
+      "member_device_stems": [
+        "bus.151",
+        "line.121",
+        "line.44",
+        "load.45",
+        "trafo.31"
+      ],
+      "member_anchor_types": [
+        "measurement_step"
+      ],
+      "co_reported_same_asdu_edge_ids": [
+        "R0087",
+        "R0088",
+        "R0089",
+        "R0090",
+        "R0097",
+        "R0098",
+        "R0099",
+        "R0106",
+        "R0107",
+        "R0114"
+      ],
+      "all_members_verified": true,
+      "independent_source_count": 1,
+      "vantages": [
+        "n406"
+      ],
+      "evidence_ids": [
+        "EV-4293fe202eb72958",
+        "EV-65c1f8dc7759207f",
+        "EV-f0bee297bfd2bd57",
+        "EV-baa7904f218baa7b",
+        "EV-979450281d781b24",
+        "EV-ec0de5e4b766c02a",
+        "EV-bfffff4c8a7435c0",
+        "EV-8835c6772fa0b7b8",
+        "EV-9a3dc50ed164a774",
+        "EV-27ed260f415adf31",
+        "EV-e1c4627a59ef4fab",
+        "EV-b8c053abca9694e6",
+        "EV-f4a08d69980e0d51",
+        "EV-a6621b688fa416a7",
+        "EV-bddb494d1a3380a5",
+        "EV-e88ff5e7c7f3afe9",
+        "EV-c9c2b5c4b33c1716",
+        "EV-f664e5229d23322a",
+        "EV-fec02371fc199db6",
+        "EV-679502cbf9941d33",
+        "EV-04beb4a3c66b3f1a",
+        "EV-4023807e1aee0c23",
+        "EV-cecf166b3fbdd5fb",
+        "EV-463f550cf3eed79c"
+      ],
+      "co_reporting_semantics": "shared_asdu_container_co_report_only_not_topological_or_causal"
+    },
+    {
+      "bundle_id": "BND-006",
+      "asdu_container_id": "SRC-ASDU-172.16.8.5|2404|172.16.5.2|49230|7457|0",
+      "container_kind": "iec104_asdu",
+      "rtu_ip": "172.16.8.5",
+      "master_ip": null,
+      "host_ip": null,
+      "time": 1743610926.579512,
+      "time_end": 1743610926.579512,
+      "relative_time_s": 6.386,
+      "member_anchor_ids": [
+        "A011"
+      ],
+      "member_fact_ids": [
+        "BA011"
+      ],
+      "member_entities": [
+        "line.38:active_power_from,current_from"
+      ],
+      "member_device_stems": [
+        "line.38"
+      ],
+      "member_anchor_types": [
+        "measurement_step"
+      ],
+      "co_reported_same_asdu_edge_ids": [],
+      "all_members_verified": true,
+      "independent_source_count": 1,
+      "vantages": [
+        "n406"
+      ],
+      "evidence_ids": [
+        "EV-a39d2d274232d1cb",
+        "EV-b005d130ab3a4d21"
+      ],
+      "co_reporting_semantics": "shared_asdu_container_co_report_only_not_topological_or_causal"
+    },
+    {
+      "bundle_id": "BND-007",
+      "asdu_container_id": "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7708|0",
+      "container_kind": "iec104_asdu",
+      "rtu_ip": "172.16.8.9",
+      "master_ip": null,
+      "host_ip": null,
+      "time": 1743610927.822236,
+      "time_end": 1743610927.822236,
+      "relative_time_s": 7.629,
+      "member_anchor_ids": [
+        "A012"
+      ],
+      "member_fact_ids": [
+        "BA012"
+      ],
+      "member_entities": [
+        "sgen.45:active_power"
+      ],
+      "member_device_stems": [
+        "sgen.45"
+      ],
+      "member_anchor_types": [
+        "measurement_step"
+      ],
+      "co_reported_same_asdu_edge_ids": [],
+      "all_members_verified": true,
+      "independent_source_count": 1,
+      "vantages": [
+        "n406"
+      ],
+      "evidence_ids": [
+        "EV-22cca1a84bad13dc"
+      ],
+      "co_reporting_semantics": "shared_asdu_container_co_report_only_not_topological_or_causal"
+    },
+    {
+      "bundle_id": "BND-008",
+      "asdu_container_id": "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7709|0",
+      "container_kind": "iec104_asdu",
+      "rtu_ip": "172.16.8.9",
+      "master_ip": null,
+      "host_ip": null,
+      "time": 1743610927.866778,
+      "time_end": 1743610927.866778,
+      "relative_time_s": 7.674,
+      "member_anchor_ids": [
+        "A013",
+        "A014"
+      ],
+      "member_fact_ids": [
+        "BA013",
+        "BA014"
+      ],
+      "member_entities": [
+        "sgen.116:active_power",
+        "storage.20:active_power"
+      ],
+      "member_device_stems": [
+        "sgen.116",
+        "storage.20"
+      ],
+      "member_anchor_types": [
+        "measurement_step"
+      ],
+      "co_reported_same_asdu_edge_ids": [
+        "R0136"
+      ],
+      "all_members_verified": true,
+      "independent_source_count": 1,
+      "vantages": [
+        "n406"
+      ],
+      "evidence_ids": [
+        "EV-7d67fa2a61ff8476",
+        "EV-7896d7796954d059"
+      ],
+      "co_reporting_semantics": "shared_asdu_container_co_report_only_not_topological_or_causal"
+    },
+    {
+      "bundle_id": "BND-009",
+      "asdu_container_id": "SRC-ASDU-172.16.8.6|2404|172.16.5.2|44248|7234|0",
+      "container_kind": "iec104_asdu",
+      "rtu_ip": "172.16.8.6",
+      "master_ip": null,
+      "host_ip": null,
+      "time": 1743610931.424556,
+      "time_end": 1743610931.424556,
+      "relative_time_s": 11.231,
+      "member_anchor_ids": [
+        "A015",
+        "A016"
+      ],
+      "member_fact_ids": [
+        "BA015",
+        "BA016"
+      ],
+      "member_entities": [
+        "line.39:active_power_to,current_to",
+        "line.44:active_power_from,current_from,reactive_power_from,voltage_from"
+      ],
+      "member_device_stems": [
+        "line.39",
+        "line.44"
+      ],
+      "member_anchor_types": [
+        "measurement_step"
+      ],
+      "co_reported_same_asdu_edge_ids": [
+        "R0141"
+      ],
+      "all_members_verified": true,
+      "independent_source_count": 1,
+      "vantages": [
+        "n406"
+      ],
+      "evidence_ids": [
+        "EV-6b38ba0ab52ffae0",
+        "EV-18b770816e2b86dc",
+        "EV-df3c31bb096ba5de",
+        "EV-b5d183552a9fad1e",
+        "EV-804cf5079725422d",
+        "EV-6a21a921b0c8135f"
+      ],
+      "co_reporting_semantics": "shared_asdu_container_co_report_only_not_topological_or_causal"
+    }
+  ],
+  "verified_element_bridges": [
+    {
+      "edge_id": "R0113",
+      "storyline_id": "SL008",
+      "bridged_device_stem": "line.44",
+      "from_bundle_id": "BND-005",
+      "to_bundle_id": "BND-009",
+      "from_anchor_id": "A008",
+      "to_anchor_id": "A016",
+      "from_fact_id": "BA008",
+      "to_fact_id": "BA016",
+      "from_entity": "line.44:active_power_to,current_to,reactive_power_to,voltage_to",
+      "to_entity": "line.44:active_power_from,current_from,reactive_power_from,voltage_from",
+      "from_rtu_ip": "172.16.8.9",
+      "to_rtu_ip": "172.16.8.6",
+      "from_time": 1743610923.66422,
+      "to_time": 1743610931.424556,
+      "from_relative_s": 3.471,
+      "to_relative_s": 11.231,
+      "dt_seconds": 7.760336,
+      "matched_quantities": [
+        "active_power",
+        "current",
+        "reactive_power",
+        "voltage"
+      ],
+      "step_kinds": [
+        "to_zero"
+      ],
+      "claim_level": "observed_fact",
+      "verification_status": "supported",
+      "causal_status": "not_established",
+      "consistency_gate": {
+        "gate_passed": true,
+        "pair_mode": "measurement_step->measurement_step",
+        "same_device_stem": true,
+        "separate_asdu": true,
+        "temporal_window_ok": true,
+        "dt_seconds": 7.760336,
+        "transition_intervals_aligned": true,
+        "left_anchor_verified": true,
+        "right_anchor_verified": true,
+        "left_quality_good": true,
+        "right_quality_good": true,
+        "left_sustained": true,
+        "right_sustained": true,
+        "left_verification_issues": [],
+        "right_verification_issues": [],
+        "attribute_compatible": true,
+        "matched_quantities": [
+          "active_power",
+          "current",
+          "reactive_power",
+          "voltage"
+        ],
+        "change_type_and_direction_compatible": true,
+        "independent_rtu_support": true,
+        "failed_conditions": [],
+        "recommended_relation_category": "measurement_state_transition",
+        "recommended_relation_type": "corroborated_same_device_behavioral_transition",
+        "recommended_claim_level": "observed_fact",
+        "recommended_verification_status": "supported"
+      },
+      "evidence_ids": [
+        "EV-bfffff4c8a7435c0",
+        "EV-8835c6772fa0b7b8",
+        "EV-df3c31bb096ba5de",
+        "EV-b5d183552a9fad1e"
+      ],
+      "bridge_id": "BRG-001",
+      "bridge_scope": "cross_rtu_verified_element_bridge",
+      "independent_rtu_support": true,
+      "what_bridge_establishes": "Both endpoints of line.44 were reported by different RTUs in separate ASDUs (BND-005 from RTU 172.16.8.9 at +3.471s and BND-009 from RTU 172.16.8.6 at +11.231s) with corroborated transitions on ['active_power', 'current', 'reactive_power', 'voltage'].",
+      "what_bridge_does_not_establish": "Does NOT establish a physical topology connection or causal link between other co-reported devices in BND-005 (['bus.151', 'line.121', 'load.45', 'trafo.31']) and BND-009 (['line.39'])."
+    }
+  ],
+  "same_rtu_supported_relations": [],
+  "bridged_bundle_components": [
+    {
+      "component_id": "CMP-001",
+      "bundle_ids": [
+        "BND-005",
+        "BND-009"
+      ],
+      "bridge_ids": [
+        "BRG-001"
+      ],
+      "member_anchor_ids": [
+        "A006",
+        "A007",
+        "A008",
+        "A009",
+        "A010",
+        "A015",
+        "A016"
+      ],
+      "rtu_ips": [
+        "172.16.8.6",
+        "172.16.8.9"
+      ],
+      "member_bundle_count": 2,
+      "start_time": 1743610923.66422,
+      "end_time": 1743610931.424556,
+      "start_relative_s": 3.471,
+      "end_relative_s": 11.231,
+      "bridged_device_stems": [
+        "line.44"
+      ],
+      "co_reported_only_device_stems": [
+        "bus.151",
+        "line.121",
+        "line.39",
+        "load.45",
+        "trafo.31"
+      ],
+      "attached_sequential_same_device_observations": [
+        "R0080"
+      ],
+      "epistemic_summary": "Bundles ['BND-005', 'BND-009'] across RTUs ['172.16.8.6', '172.16.8.9'] are connected ONLY through corroborated same-element transitions on ['line.44']. Co-reported elements ['bus.151', 'line.121', 'line.39', 'load.45', 'trafo.31'] share an ASDU container with a bridged element endpoint, which does NOT prove topological adjacency or causation."
+    }
+  ],
+  "candidate_scenario_phases": [
+    {
+      "phase_id": "PHS-001",
+      "phase_profile": "multi_rtu_corroborated_measurement_transitions",
+      "start_time": 1743610921.870505,
+      "end_time": 1743610931.424556,
+      "start_relative_s": 1.677,
+      "end_relative_s": 11.231,
+      "transaction_ids": [],
+      "verified_bundle_ids": [
+        "BND-001",
+        "BND-002",
+        "BND-003",
+        "BND-004",
+        "BND-005",
+        "BND-006",
+        "BND-007",
+        "BND-008",
+        "BND-009"
+      ],
+      "verified_storyline_ids": [
+        "SL002",
+        "SL003",
+        "SL004",
+        "SL005",
+        "SL006",
+        "SL007",
+        "SL008",
+        "SL009",
+        "SL010",
+        "SL011",
+        "SL012",
+        "SL013",
+        "SL014",
+        "SL015"
+      ],
+      "verified_anchor_ids": [
+        "A002",
+        "A003",
+        "A004",
+        "A005",
+        "A006",
+        "A007",
+        "A008",
+        "A009",
+        "A010",
+        "A011",
+        "A012",
+        "A013",
+        "A014",
+        "A015",
+        "A016"
+      ],
+      "verified_bridge_ids": [
+        "BRG-001"
+      ],
+      "sequential_same_device_edge_ids": [
+        "R0059",
+        "R0060",
+        "R0067",
+        "R0080"
+      ],
+      "unverified_precursor_anchor_ids": [
+        "A001"
+      ],
+      "observed_host_and_link_context": {
+        "rtu_ips": [
+          "172.16.8.5",
+          "172.16.8.6",
+          "172.16.8.9"
+        ],
+        "master_ips": [],
+        "arp_activity": []
+      },
+      "unresolved_cross_device_candidate_count": 72,
+      "unresolved_cross_device_candidates": [
+        {
+          "edge_id": "R0053",
+          "from_anchor_id": "A001",
+          "to_anchor_id": "A002",
+          "from_entity": "switch.95:is_closed",
+          "to_entity": "bus.48:voltage",
+          "dt_seconds": 1.041,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "bus.48:voltage changed 1.041s after switch.95:is_closed. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-ca5fd8d2ae1d9864",
+            "EV-28ddeddb976d3d33",
+            "EV-78c8cfb77db9609f"
+          ]
+        },
+        {
+          "edge_id": "R0054",
+          "from_anchor_id": "A001",
+          "to_anchor_id": "A003",
+          "from_entity": "switch.95:is_closed",
+          "to_entity": "bus.48:voltage_angle",
+          "dt_seconds": 1.291,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "bus.48:voltage_angle changed 1.291s after switch.95:is_closed. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-ca5fd8d2ae1d9864",
+            "EV-7e6050fc6680c20f",
+            "EV-ee4c1299ed148e3a"
+          ]
+        },
+        {
+          "edge_id": "R0055",
+          "from_anchor_id": "A001",
+          "to_anchor_id": "A004",
+          "from_entity": "switch.95:is_closed",
+          "to_entity": "bus.48:active_power,reactive_power",
+          "dt_seconds": 1.392,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "bus.48:active_power,reactive_power changed 1.392s after switch.95:is_closed. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-ca5fd8d2ae1d9864",
+            "EV-29d8ec221378200b",
+            "EV-c58f656ad5cc3c99"
+          ]
+        },
+        {
+          "edge_id": "R0056",
+          "from_anchor_id": "A001",
+          "to_anchor_id": "A005",
+          "from_entity": "switch.95:is_closed",
+          "to_entity": "bus.151:voltage",
+          "dt_seconds": 1.491,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "bus.151:voltage changed 1.491s after switch.95:is_closed. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-ca5fd8d2ae1d9864",
+            "EV-c205e57257ff0bce",
+            "EV-36566130a858915c"
+          ]
+        },
+        {
+          "edge_id": "R0057",
+          "from_anchor_id": "A001",
+          "to_anchor_id": "A006",
+          "from_entity": "switch.95:is_closed",
+          "to_entity": "bus.151:active_power,voltage_angle",
+          "dt_seconds": 1.794,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "bus.151:active_power,voltage_angle changed 1.794s after switch.95:is_closed. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-ca5fd8d2ae1d9864",
+            "EV-4293fe202eb72958",
+            "EV-65c1f8dc7759207f"
+          ]
+        },
+        {
+          "edge_id": "R0058",
+          "from_anchor_id": "A001",
+          "to_anchor_id": "A007",
+          "from_entity": "switch.95:is_closed",
+          "to_entity": "line.121:active_power_from,current_from,reactive_power_from,voltage_from",
+          "dt_seconds": 1.794,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.121:active_power_from,current_from,reactive_power_from,voltage_from changed 1.794s after switch.95:is_closed. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-ca5fd8d2ae1d9864",
+            "EV-f0bee297bfd2bd57",
+            "EV-baa7904f218baa7b"
+          ]
+        },
+        {
+          "edge_id": "R0061",
+          "from_anchor_id": "A002",
+          "to_anchor_id": "A005",
+          "from_entity": "bus.48:voltage",
+          "to_entity": "bus.151:voltage",
+          "dt_seconds": 0.45,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "bus.151:voltage changed 0.45s after bus.48:voltage (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-28ddeddb976d3d33",
+            "EV-78c8cfb77db9609f",
+            "EV-c205e57257ff0bce",
+            "EV-36566130a858915c"
+          ]
+        },
+        {
+          "edge_id": "R0062",
+          "from_anchor_id": "A002",
+          "to_anchor_id": "A006",
+          "from_entity": "bus.48:voltage",
+          "to_entity": "bus.151:active_power,voltage_angle",
+          "dt_seconds": 0.753,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "bus.151:active_power,voltage_angle changed 0.753s after bus.48:voltage (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-28ddeddb976d3d33",
+            "EV-78c8cfb77db9609f",
+            "EV-4293fe202eb72958",
+            "EV-65c1f8dc7759207f"
+          ]
+        },
+        {
+          "edge_id": "R0063",
+          "from_anchor_id": "A002",
+          "to_anchor_id": "A007",
+          "from_entity": "bus.48:voltage",
+          "to_entity": "line.121:active_power_from,current_from,reactive_power_from,voltage_from",
+          "dt_seconds": 0.753,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.121:active_power_from,current_from,reactive_power_from,voltage_from changed 0.753s after bus.48:voltage (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-28ddeddb976d3d33",
+            "EV-78c8cfb77db9609f",
+            "EV-f0bee297bfd2bd57",
+            "EV-baa7904f218baa7b"
+          ]
+        },
+        {
+          "edge_id": "R0064",
+          "from_anchor_id": "A002",
+          "to_anchor_id": "A008",
+          "from_entity": "bus.48:voltage",
+          "to_entity": "line.44:active_power_to,current_to,reactive_power_to,voltage_to",
+          "dt_seconds": 0.753,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.44:active_power_to,current_to,reactive_power_to,voltage_to changed 0.753s after bus.48:voltage (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-28ddeddb976d3d33",
+            "EV-78c8cfb77db9609f",
+            "EV-bfffff4c8a7435c0",
+            "EV-8835c6772fa0b7b8"
+          ]
+        },
+        {
+          "edge_id": "R0065",
+          "from_anchor_id": "A002",
+          "to_anchor_id": "A009",
+          "from_entity": "bus.48:voltage",
+          "to_entity": "load.45:active_power,reactive_power",
+          "dt_seconds": 0.753,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "load.45:active_power,reactive_power changed 0.753s after bus.48:voltage (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-28ddeddb976d3d33",
+            "EV-78c8cfb77db9609f",
+            "EV-e1c4627a59ef4fab",
+            "EV-b8c053abca9694e6"
+          ]
+        },
+        {
+          "edge_id": "R0066",
+          "from_anchor_id": "A002",
+          "to_anchor_id": "A010",
+          "from_entity": "bus.48:voltage",
+          "to_entity": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv",
+          "dt_seconds": 0.753,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv changed 0.753s after bus.48:voltage (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-28ddeddb976d3d33",
+            "EV-78c8cfb77db9609f",
+            "EV-f4a08d69980e0d51",
+            "EV-a6621b688fa416a7"
+          ]
+        },
+        {
+          "edge_id": "R0068",
+          "from_anchor_id": "A003",
+          "to_anchor_id": "A005",
+          "from_entity": "bus.48:voltage_angle",
+          "to_entity": "bus.151:voltage",
+          "dt_seconds": 0.2,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "bus.151:voltage changed 0.2s after bus.48:voltage_angle (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-7e6050fc6680c20f",
+            "EV-ee4c1299ed148e3a",
+            "EV-c205e57257ff0bce",
+            "EV-36566130a858915c"
+          ]
+        },
+        {
+          "edge_id": "R0069",
+          "from_anchor_id": "A003",
+          "to_anchor_id": "A006",
+          "from_entity": "bus.48:voltage_angle",
+          "to_entity": "bus.151:active_power,voltage_angle",
+          "dt_seconds": 0.503,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "bus.151:active_power,voltage_angle changed 0.503s after bus.48:voltage_angle (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-7e6050fc6680c20f",
+            "EV-ee4c1299ed148e3a",
+            "EV-4293fe202eb72958",
+            "EV-65c1f8dc7759207f"
+          ]
+        },
+        {
+          "edge_id": "R0070",
+          "from_anchor_id": "A003",
+          "to_anchor_id": "A007",
+          "from_entity": "bus.48:voltage_angle",
+          "to_entity": "line.121:active_power_from,current_from,reactive_power_from,voltage_from",
+          "dt_seconds": 0.503,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.121:active_power_from,current_from,reactive_power_from,voltage_from changed 0.503s after bus.48:voltage_angle (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-7e6050fc6680c20f",
+            "EV-ee4c1299ed148e3a",
+            "EV-f0bee297bfd2bd57",
+            "EV-baa7904f218baa7b"
+          ]
+        },
+        {
+          "edge_id": "R0071",
+          "from_anchor_id": "A003",
+          "to_anchor_id": "A008",
+          "from_entity": "bus.48:voltage_angle",
+          "to_entity": "line.44:active_power_to,current_to,reactive_power_to,voltage_to",
+          "dt_seconds": 0.503,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.44:active_power_to,current_to,reactive_power_to,voltage_to changed 0.503s after bus.48:voltage_angle (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-7e6050fc6680c20f",
+            "EV-ee4c1299ed148e3a",
+            "EV-bfffff4c8a7435c0",
+            "EV-8835c6772fa0b7b8"
+          ]
+        },
+        {
+          "edge_id": "R0072",
+          "from_anchor_id": "A003",
+          "to_anchor_id": "A009",
+          "from_entity": "bus.48:voltage_angle",
+          "to_entity": "load.45:active_power,reactive_power",
+          "dt_seconds": 0.503,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "load.45:active_power,reactive_power changed 0.503s after bus.48:voltage_angle (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-7e6050fc6680c20f",
+            "EV-ee4c1299ed148e3a",
+            "EV-e1c4627a59ef4fab",
+            "EV-b8c053abca9694e6"
+          ]
+        },
+        {
+          "edge_id": "R0073",
+          "from_anchor_id": "A003",
+          "to_anchor_id": "A010",
+          "from_entity": "bus.48:voltage_angle",
+          "to_entity": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv",
+          "dt_seconds": 0.503,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv changed 0.503s after bus.48:voltage_angle (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-7e6050fc6680c20f",
+            "EV-ee4c1299ed148e3a",
+            "EV-f4a08d69980e0d51",
+            "EV-a6621b688fa416a7"
+          ]
+        },
+        {
+          "edge_id": "R0074",
+          "from_anchor_id": "A004",
+          "to_anchor_id": "A005",
+          "from_entity": "bus.48:active_power,reactive_power",
+          "to_entity": "bus.151:voltage",
+          "dt_seconds": 0.099,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "bus.151:voltage changed 0.099s after bus.48:active_power,reactive_power (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-29d8ec221378200b",
+            "EV-c58f656ad5cc3c99",
+            "EV-c205e57257ff0bce",
+            "EV-36566130a858915c"
+          ]
+        },
+        {
+          "edge_id": "R0075",
+          "from_anchor_id": "A004",
+          "to_anchor_id": "A006",
+          "from_entity": "bus.48:active_power,reactive_power",
+          "to_entity": "bus.151:active_power,voltage_angle",
+          "dt_seconds": 0.402,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "bus.151:active_power,voltage_angle changed 0.402s after bus.48:active_power,reactive_power (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-29d8ec221378200b",
+            "EV-c58f656ad5cc3c99",
+            "EV-4293fe202eb72958",
+            "EV-65c1f8dc7759207f"
+          ]
+        },
+        {
+          "edge_id": "R0076",
+          "from_anchor_id": "A004",
+          "to_anchor_id": "A007",
+          "from_entity": "bus.48:active_power,reactive_power",
+          "to_entity": "line.121:active_power_from,current_from,reactive_power_from,voltage_from",
+          "dt_seconds": 0.402,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.121:active_power_from,current_from,reactive_power_from,voltage_from changed 0.402s after bus.48:active_power,reactive_power (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-29d8ec221378200b",
+            "EV-c58f656ad5cc3c99",
+            "EV-f0bee297bfd2bd57",
+            "EV-baa7904f218baa7b"
+          ]
+        },
+        {
+          "edge_id": "R0077",
+          "from_anchor_id": "A004",
+          "to_anchor_id": "A008",
+          "from_entity": "bus.48:active_power,reactive_power",
+          "to_entity": "line.44:active_power_to,current_to,reactive_power_to,voltage_to",
+          "dt_seconds": 0.402,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.44:active_power_to,current_to,reactive_power_to,voltage_to changed 0.402s after bus.48:active_power,reactive_power (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-29d8ec221378200b",
+            "EV-c58f656ad5cc3c99",
+            "EV-bfffff4c8a7435c0",
+            "EV-8835c6772fa0b7b8"
+          ]
+        },
+        {
+          "edge_id": "R0078",
+          "from_anchor_id": "A004",
+          "to_anchor_id": "A009",
+          "from_entity": "bus.48:active_power,reactive_power",
+          "to_entity": "load.45:active_power,reactive_power",
+          "dt_seconds": 0.402,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "load.45:active_power,reactive_power changed 0.402s after bus.48:active_power,reactive_power (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-29d8ec221378200b",
+            "EV-c58f656ad5cc3c99",
+            "EV-e1c4627a59ef4fab",
+            "EV-b8c053abca9694e6"
+          ]
+        },
+        {
+          "edge_id": "R0079",
+          "from_anchor_id": "A004",
+          "to_anchor_id": "A010",
+          "from_entity": "bus.48:active_power,reactive_power",
+          "to_entity": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv",
+          "dt_seconds": 0.402,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv changed 0.402s after bus.48:active_power,reactive_power (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-29d8ec221378200b",
+            "EV-c58f656ad5cc3c99",
+            "EV-f4a08d69980e0d51",
+            "EV-a6621b688fa416a7"
+          ]
+        },
+        {
+          "edge_id": "R0081",
+          "from_anchor_id": "A005",
+          "to_anchor_id": "A007",
+          "from_entity": "bus.151:voltage",
+          "to_entity": "line.121:active_power_from,current_from,reactive_power_from,voltage_from",
+          "dt_seconds": 0.303,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.121:active_power_from,current_from,reactive_power_from,voltage_from changed 0.303s after bus.151:voltage (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-c205e57257ff0bce",
+            "EV-36566130a858915c",
+            "EV-f0bee297bfd2bd57",
+            "EV-baa7904f218baa7b"
+          ]
+        },
+        {
+          "edge_id": "R0082",
+          "from_anchor_id": "A005",
+          "to_anchor_id": "A008",
+          "from_entity": "bus.151:voltage",
+          "to_entity": "line.44:active_power_to,current_to,reactive_power_to,voltage_to",
+          "dt_seconds": 0.303,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.44:active_power_to,current_to,reactive_power_to,voltage_to changed 0.303s after bus.151:voltage (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-c205e57257ff0bce",
+            "EV-36566130a858915c",
+            "EV-bfffff4c8a7435c0",
+            "EV-8835c6772fa0b7b8"
+          ]
+        },
+        {
+          "edge_id": "R0083",
+          "from_anchor_id": "A005",
+          "to_anchor_id": "A009",
+          "from_entity": "bus.151:voltage",
+          "to_entity": "load.45:active_power,reactive_power",
+          "dt_seconds": 0.303,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "load.45:active_power,reactive_power changed 0.303s after bus.151:voltage (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-c205e57257ff0bce",
+            "EV-36566130a858915c",
+            "EV-e1c4627a59ef4fab",
+            "EV-b8c053abca9694e6"
+          ]
+        },
+        {
+          "edge_id": "R0084",
+          "from_anchor_id": "A005",
+          "to_anchor_id": "A010",
+          "from_entity": "bus.151:voltage",
+          "to_entity": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv",
+          "dt_seconds": 0.303,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv changed 0.303s after bus.151:voltage (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-c205e57257ff0bce",
+            "EV-36566130a858915c",
+            "EV-f4a08d69980e0d51",
+            "EV-a6621b688fa416a7"
+          ]
+        },
+        {
+          "edge_id": "R0085",
+          "from_anchor_id": "A005",
+          "to_anchor_id": "A011",
+          "from_entity": "bus.151:voltage",
+          "to_entity": "line.38:active_power_from,current_from",
+          "dt_seconds": 3.218,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.38:active_power_from,current_from changed 3.218s after bus.151:voltage. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-c205e57257ff0bce",
+            "EV-36566130a858915c",
+            "EV-a39d2d274232d1cb",
+            "EV-b005d130ab3a4d21"
+          ]
+        },
+        {
+          "edge_id": "R0086",
+          "from_anchor_id": "A005",
+          "to_anchor_id": "A012",
+          "from_entity": "bus.151:voltage",
+          "to_entity": "sgen.45:active_power",
+          "dt_seconds": 4.461,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.45:active_power changed 4.461s after bus.151:voltage (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-c205e57257ff0bce",
+            "EV-36566130a858915c",
+            "EV-22cca1a84bad13dc",
+            "EV-828518810fce9eeb"
+          ]
+        },
+        {
+          "edge_id": "R0091",
+          "from_anchor_id": "A006",
+          "to_anchor_id": "A011",
+          "from_entity": "bus.151:active_power,voltage_angle",
+          "to_entity": "line.38:active_power_from,current_from",
+          "dt_seconds": 2.915,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.38:active_power_from,current_from changed 2.915s after bus.151:active_power,voltage_angle. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-4293fe202eb72958",
+            "EV-65c1f8dc7759207f",
+            "EV-a39d2d274232d1cb",
+            "EV-b005d130ab3a4d21"
+          ]
+        },
+        {
+          "edge_id": "R0092",
+          "from_anchor_id": "A006",
+          "to_anchor_id": "A012",
+          "from_entity": "bus.151:active_power,voltage_angle",
+          "to_entity": "sgen.45:active_power",
+          "dt_seconds": 4.158,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.45:active_power changed 4.158s after bus.151:active_power,voltage_angle (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-4293fe202eb72958",
+            "EV-65c1f8dc7759207f",
+            "EV-22cca1a84bad13dc",
+            "EV-828518810fce9eeb"
+          ]
+        },
+        {
+          "edge_id": "R0093",
+          "from_anchor_id": "A006",
+          "to_anchor_id": "A013",
+          "from_entity": "bus.151:active_power,voltage_angle",
+          "to_entity": "sgen.116:active_power",
+          "dt_seconds": 4.203,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.116:active_power changed 4.203s after bus.151:active_power,voltage_angle (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-4293fe202eb72958",
+            "EV-65c1f8dc7759207f",
+            "EV-7d67fa2a61ff8476",
+            "EV-cdb43776233dd495"
+          ]
+        },
+        {
+          "edge_id": "R0094",
+          "from_anchor_id": "A006",
+          "to_anchor_id": "A014",
+          "from_entity": "bus.151:active_power,voltage_angle",
+          "to_entity": "storage.20:active_power",
+          "dt_seconds": 4.203,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "storage.20:active_power changed 4.203s after bus.151:active_power,voltage_angle (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-4293fe202eb72958",
+            "EV-65c1f8dc7759207f",
+            "EV-7896d7796954d059",
+            "EV-022c7353683e6047"
+          ]
+        },
+        {
+          "edge_id": "R0095",
+          "from_anchor_id": "A006",
+          "to_anchor_id": "A015",
+          "from_entity": "bus.151:active_power,voltage_angle",
+          "to_entity": "line.39:active_power_to,current_to",
+          "dt_seconds": 7.76,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.39:active_power_to,current_to changed 7.76s after bus.151:active_power,voltage_angle. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-4293fe202eb72958",
+            "EV-65c1f8dc7759207f",
+            "EV-6b38ba0ab52ffae0",
+            "EV-18b770816e2b86dc"
+          ]
+        },
+        {
+          "edge_id": "R0096",
+          "from_anchor_id": "A006",
+          "to_anchor_id": "A016",
+          "from_entity": "bus.151:active_power,voltage_angle",
+          "to_entity": "line.44:active_power_from,current_from,reactive_power_from,voltage_from",
+          "dt_seconds": 7.76,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.44:active_power_from,current_from,reactive_power_from,voltage_from changed 7.76s after bus.151:active_power,voltage_angle. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-4293fe202eb72958",
+            "EV-65c1f8dc7759207f",
+            "EV-df3c31bb096ba5de",
+            "EV-b5d183552a9fad1e"
+          ]
+        },
+        {
+          "edge_id": "R0100",
+          "from_anchor_id": "A007",
+          "to_anchor_id": "A011",
+          "from_entity": "line.121:active_power_from,current_from,reactive_power_from,voltage_from",
+          "to_entity": "line.38:active_power_from,current_from",
+          "dt_seconds": 2.915,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.38:active_power_from,current_from changed 2.915s after line.121:active_power_from,current_from,reactive_power_from,voltage_from. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-f0bee297bfd2bd57",
+            "EV-baa7904f218baa7b",
+            "EV-a39d2d274232d1cb",
+            "EV-b005d130ab3a4d21"
+          ]
+        },
+        {
+          "edge_id": "R0101",
+          "from_anchor_id": "A007",
+          "to_anchor_id": "A012",
+          "from_entity": "line.121:active_power_from,current_from,reactive_power_from,voltage_from",
+          "to_entity": "sgen.45:active_power",
+          "dt_seconds": 4.158,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.45:active_power changed 4.158s after line.121:active_power_from,current_from,reactive_power_from,voltage_from (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-f0bee297bfd2bd57",
+            "EV-baa7904f218baa7b",
+            "EV-22cca1a84bad13dc",
+            "EV-828518810fce9eeb"
+          ]
+        },
+        {
+          "edge_id": "R0102",
+          "from_anchor_id": "A007",
+          "to_anchor_id": "A013",
+          "from_entity": "line.121:active_power_from,current_from,reactive_power_from,voltage_from",
+          "to_entity": "sgen.116:active_power",
+          "dt_seconds": 4.203,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.116:active_power changed 4.203s after line.121:active_power_from,current_from,reactive_power_from,voltage_from (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-f0bee297bfd2bd57",
+            "EV-baa7904f218baa7b",
+            "EV-7d67fa2a61ff8476",
+            "EV-cdb43776233dd495"
+          ]
+        },
+        {
+          "edge_id": "R0103",
+          "from_anchor_id": "A007",
+          "to_anchor_id": "A014",
+          "from_entity": "line.121:active_power_from,current_from,reactive_power_from,voltage_from",
+          "to_entity": "storage.20:active_power",
+          "dt_seconds": 4.203,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "storage.20:active_power changed 4.203s after line.121:active_power_from,current_from,reactive_power_from,voltage_from (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-f0bee297bfd2bd57",
+            "EV-baa7904f218baa7b",
+            "EV-7896d7796954d059",
+            "EV-022c7353683e6047"
+          ]
+        },
+        {
+          "edge_id": "R0104",
+          "from_anchor_id": "A007",
+          "to_anchor_id": "A015",
+          "from_entity": "line.121:active_power_from,current_from,reactive_power_from,voltage_from",
+          "to_entity": "line.39:active_power_to,current_to",
+          "dt_seconds": 7.76,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.39:active_power_to,current_to changed 7.76s after line.121:active_power_from,current_from,reactive_power_from,voltage_from. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-f0bee297bfd2bd57",
+            "EV-baa7904f218baa7b",
+            "EV-6b38ba0ab52ffae0",
+            "EV-18b770816e2b86dc"
+          ]
+        },
+        {
+          "edge_id": "R0105",
+          "from_anchor_id": "A007",
+          "to_anchor_id": "A016",
+          "from_entity": "line.121:active_power_from,current_from,reactive_power_from,voltage_from",
+          "to_entity": "line.44:active_power_from,current_from,reactive_power_from,voltage_from",
+          "dt_seconds": 7.76,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.44:active_power_from,current_from,reactive_power_from,voltage_from changed 7.76s after line.121:active_power_from,current_from,reactive_power_from,voltage_from. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-f0bee297bfd2bd57",
+            "EV-baa7904f218baa7b",
+            "EV-df3c31bb096ba5de",
+            "EV-b5d183552a9fad1e"
+          ]
+        },
+        {
+          "edge_id": "R0108",
+          "from_anchor_id": "A008",
+          "to_anchor_id": "A011",
+          "from_entity": "line.44:active_power_to,current_to,reactive_power_to,voltage_to",
+          "to_entity": "line.38:active_power_from,current_from",
+          "dt_seconds": 2.915,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.38:active_power_from,current_from changed 2.915s after line.44:active_power_to,current_to,reactive_power_to,voltage_to. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-bfffff4c8a7435c0",
+            "EV-8835c6772fa0b7b8",
+            "EV-a39d2d274232d1cb",
+            "EV-b005d130ab3a4d21"
+          ]
+        },
+        {
+          "edge_id": "R0109",
+          "from_anchor_id": "A008",
+          "to_anchor_id": "A012",
+          "from_entity": "line.44:active_power_to,current_to,reactive_power_to,voltage_to",
+          "to_entity": "sgen.45:active_power",
+          "dt_seconds": 4.158,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.45:active_power changed 4.158s after line.44:active_power_to,current_to,reactive_power_to,voltage_to (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-bfffff4c8a7435c0",
+            "EV-8835c6772fa0b7b8",
+            "EV-22cca1a84bad13dc",
+            "EV-828518810fce9eeb"
+          ]
+        },
+        {
+          "edge_id": "R0110",
+          "from_anchor_id": "A008",
+          "to_anchor_id": "A013",
+          "from_entity": "line.44:active_power_to,current_to,reactive_power_to,voltage_to",
+          "to_entity": "sgen.116:active_power",
+          "dt_seconds": 4.203,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.116:active_power changed 4.203s after line.44:active_power_to,current_to,reactive_power_to,voltage_to (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-bfffff4c8a7435c0",
+            "EV-8835c6772fa0b7b8",
+            "EV-7d67fa2a61ff8476",
+            "EV-cdb43776233dd495"
+          ]
+        },
+        {
+          "edge_id": "R0111",
+          "from_anchor_id": "A008",
+          "to_anchor_id": "A014",
+          "from_entity": "line.44:active_power_to,current_to,reactive_power_to,voltage_to",
+          "to_entity": "storage.20:active_power",
+          "dt_seconds": 4.203,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "storage.20:active_power changed 4.203s after line.44:active_power_to,current_to,reactive_power_to,voltage_to (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-bfffff4c8a7435c0",
+            "EV-8835c6772fa0b7b8",
+            "EV-7896d7796954d059",
+            "EV-022c7353683e6047"
+          ]
+        },
+        {
+          "edge_id": "R0112",
+          "from_anchor_id": "A008",
+          "to_anchor_id": "A015",
+          "from_entity": "line.44:active_power_to,current_to,reactive_power_to,voltage_to",
+          "to_entity": "line.39:active_power_to,current_to",
+          "dt_seconds": 7.76,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.39:active_power_to,current_to changed 7.76s after line.44:active_power_to,current_to,reactive_power_to,voltage_to. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-bfffff4c8a7435c0",
+            "EV-8835c6772fa0b7b8",
+            "EV-6b38ba0ab52ffae0",
+            "EV-18b770816e2b86dc"
+          ]
+        },
+        {
+          "edge_id": "R0115",
+          "from_anchor_id": "A009",
+          "to_anchor_id": "A011",
+          "from_entity": "load.45:active_power,reactive_power",
+          "to_entity": "line.38:active_power_from,current_from",
+          "dt_seconds": 2.915,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.38:active_power_from,current_from changed 2.915s after load.45:active_power,reactive_power. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-e1c4627a59ef4fab",
+            "EV-b8c053abca9694e6",
+            "EV-a39d2d274232d1cb",
+            "EV-b005d130ab3a4d21"
+          ]
+        },
+        {
+          "edge_id": "R0116",
+          "from_anchor_id": "A009",
+          "to_anchor_id": "A012",
+          "from_entity": "load.45:active_power,reactive_power",
+          "to_entity": "sgen.45:active_power",
+          "dt_seconds": 4.158,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.45:active_power changed 4.158s after load.45:active_power,reactive_power (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-e1c4627a59ef4fab",
+            "EV-b8c053abca9694e6",
+            "EV-22cca1a84bad13dc",
+            "EV-828518810fce9eeb"
+          ]
+        },
+        {
+          "edge_id": "R0117",
+          "from_anchor_id": "A009",
+          "to_anchor_id": "A013",
+          "from_entity": "load.45:active_power,reactive_power",
+          "to_entity": "sgen.116:active_power",
+          "dt_seconds": 4.203,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.116:active_power changed 4.203s after load.45:active_power,reactive_power (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-e1c4627a59ef4fab",
+            "EV-b8c053abca9694e6",
+            "EV-7d67fa2a61ff8476",
+            "EV-cdb43776233dd495"
+          ]
+        },
+        {
+          "edge_id": "R0118",
+          "from_anchor_id": "A009",
+          "to_anchor_id": "A014",
+          "from_entity": "load.45:active_power,reactive_power",
+          "to_entity": "storage.20:active_power",
+          "dt_seconds": 4.203,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "storage.20:active_power changed 4.203s after load.45:active_power,reactive_power (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-e1c4627a59ef4fab",
+            "EV-b8c053abca9694e6",
+            "EV-7896d7796954d059",
+            "EV-022c7353683e6047"
+          ]
+        },
+        {
+          "edge_id": "R0119",
+          "from_anchor_id": "A009",
+          "to_anchor_id": "A015",
+          "from_entity": "load.45:active_power,reactive_power",
+          "to_entity": "line.39:active_power_to,current_to",
+          "dt_seconds": 7.76,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.39:active_power_to,current_to changed 7.76s after load.45:active_power,reactive_power. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-e1c4627a59ef4fab",
+            "EV-b8c053abca9694e6",
+            "EV-6b38ba0ab52ffae0",
+            "EV-18b770816e2b86dc"
+          ]
+        },
+        {
+          "edge_id": "R0120",
+          "from_anchor_id": "A009",
+          "to_anchor_id": "A016",
+          "from_entity": "load.45:active_power,reactive_power",
+          "to_entity": "line.44:active_power_from,current_from,reactive_power_from,voltage_from",
+          "dt_seconds": 7.76,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.44:active_power_from,current_from,reactive_power_from,voltage_from changed 7.76s after load.45:active_power,reactive_power. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-e1c4627a59ef4fab",
+            "EV-b8c053abca9694e6",
+            "EV-df3c31bb096ba5de",
+            "EV-b5d183552a9fad1e"
+          ]
+        },
+        {
+          "edge_id": "R0121",
+          "from_anchor_id": "A010",
+          "to_anchor_id": "A011",
+          "from_entity": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv",
+          "to_entity": "line.38:active_power_from,current_from",
+          "dt_seconds": 2.915,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.38:active_power_from,current_from changed 2.915s after trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-f4a08d69980e0d51",
+            "EV-a6621b688fa416a7",
+            "EV-a39d2d274232d1cb",
+            "EV-b005d130ab3a4d21"
+          ]
+        },
+        {
+          "edge_id": "R0122",
+          "from_anchor_id": "A010",
+          "to_anchor_id": "A012",
+          "from_entity": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv",
+          "to_entity": "sgen.45:active_power",
+          "dt_seconds": 4.158,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.45:active_power changed 4.158s after trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-f4a08d69980e0d51",
+            "EV-a6621b688fa416a7",
+            "EV-22cca1a84bad13dc",
+            "EV-828518810fce9eeb"
+          ]
+        },
+        {
+          "edge_id": "R0123",
+          "from_anchor_id": "A010",
+          "to_anchor_id": "A013",
+          "from_entity": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv",
+          "to_entity": "sgen.116:active_power",
+          "dt_seconds": 4.203,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.116:active_power changed 4.203s after trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-f4a08d69980e0d51",
+            "EV-a6621b688fa416a7",
+            "EV-7d67fa2a61ff8476",
+            "EV-cdb43776233dd495"
+          ]
+        },
+        {
+          "edge_id": "R0124",
+          "from_anchor_id": "A010",
+          "to_anchor_id": "A014",
+          "from_entity": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv",
+          "to_entity": "storage.20:active_power",
+          "dt_seconds": 4.203,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "storage.20:active_power changed 4.203s after trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-f4a08d69980e0d51",
+            "EV-a6621b688fa416a7",
+            "EV-7896d7796954d059",
+            "EV-022c7353683e6047"
+          ]
+        },
+        {
+          "edge_id": "R0125",
+          "from_anchor_id": "A010",
+          "to_anchor_id": "A015",
+          "from_entity": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv",
+          "to_entity": "line.39:active_power_to,current_to",
+          "dt_seconds": 7.76,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.39:active_power_to,current_to changed 7.76s after trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-f4a08d69980e0d51",
+            "EV-a6621b688fa416a7",
+            "EV-6b38ba0ab52ffae0",
+            "EV-18b770816e2b86dc"
+          ]
+        },
+        {
+          "edge_id": "R0126",
+          "from_anchor_id": "A010",
+          "to_anchor_id": "A016",
+          "from_entity": "trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv",
+          "to_entity": "line.44:active_power_from,current_from,reactive_power_from,voltage_from",
+          "dt_seconds": 7.76,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.44:active_power_from,current_from,reactive_power_from,voltage_from changed 7.76s after trafo.31:active_power_hv,active_power_loss,active_power_lv,current_hv,current_lv,loading,reactive_power_hv,reactive_power_loss,voltage_angle_hv,voltage_angle_lv,voltage_hv,voltage_lv. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-f4a08d69980e0d51",
+            "EV-a6621b688fa416a7",
+            "EV-df3c31bb096ba5de",
+            "EV-b5d183552a9fad1e"
+          ]
+        },
+        {
+          "edge_id": "R0127",
+          "from_anchor_id": "A011",
+          "to_anchor_id": "A012",
+          "from_entity": "line.38:active_power_from,current_from",
+          "to_entity": "sgen.45:active_power",
+          "dt_seconds": 1.243,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.45:active_power changed 1.243s after line.38:active_power_from,current_from. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-a39d2d274232d1cb",
+            "EV-b005d130ab3a4d21",
+            "EV-22cca1a84bad13dc",
+            "EV-828518810fce9eeb"
+          ]
+        },
+        {
+          "edge_id": "R0128",
+          "from_anchor_id": "A011",
+          "to_anchor_id": "A013",
+          "from_entity": "line.38:active_power_from,current_from",
+          "to_entity": "sgen.116:active_power",
+          "dt_seconds": 1.287,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.116:active_power changed 1.287s after line.38:active_power_from,current_from. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-a39d2d274232d1cb",
+            "EV-b005d130ab3a4d21",
+            "EV-7d67fa2a61ff8476",
+            "EV-cdb43776233dd495"
+          ]
+        },
+        {
+          "edge_id": "R0129",
+          "from_anchor_id": "A011",
+          "to_anchor_id": "A014",
+          "from_entity": "line.38:active_power_from,current_from",
+          "to_entity": "storage.20:active_power",
+          "dt_seconds": 1.287,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "storage.20:active_power changed 1.287s after line.38:active_power_from,current_from. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-a39d2d274232d1cb",
+            "EV-b005d130ab3a4d21",
+            "EV-7896d7796954d059",
+            "EV-022c7353683e6047"
+          ]
+        },
+        {
+          "edge_id": "R0130",
+          "from_anchor_id": "A011",
+          "to_anchor_id": "A015",
+          "from_entity": "line.38:active_power_from,current_from",
+          "to_entity": "line.39:active_power_to,current_to",
+          "dt_seconds": 4.845,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.39:active_power_to,current_to changed 4.845s after line.38:active_power_from,current_from. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-a39d2d274232d1cb",
+            "EV-b005d130ab3a4d21",
+            "EV-6b38ba0ab52ffae0",
+            "EV-18b770816e2b86dc"
+          ]
+        },
+        {
+          "edge_id": "R0131",
+          "from_anchor_id": "A011",
+          "to_anchor_id": "A016",
+          "from_entity": "line.38:active_power_from,current_from",
+          "to_entity": "line.44:active_power_from,current_from,reactive_power_from,voltage_from",
+          "dt_seconds": 4.845,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.44:active_power_from,current_from,reactive_power_from,voltage_from changed 4.845s after line.38:active_power_from,current_from. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-a39d2d274232d1cb",
+            "EV-b005d130ab3a4d21",
+            "EV-df3c31bb096ba5de",
+            "EV-b5d183552a9fad1e"
+          ]
+        },
+        {
+          "edge_id": "R0132",
+          "from_anchor_id": "A012",
+          "to_anchor_id": "A013",
+          "from_entity": "sgen.45:active_power",
+          "to_entity": "sgen.116:active_power",
+          "dt_seconds": 0.045,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "sgen.116:active_power changed 0.045s after sgen.45:active_power (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-22cca1a84bad13dc",
+            "EV-828518810fce9eeb",
+            "EV-7d67fa2a61ff8476",
+            "EV-cdb43776233dd495"
+          ]
+        },
+        {
+          "edge_id": "R0133",
+          "from_anchor_id": "A012",
+          "to_anchor_id": "A014",
+          "from_entity": "sgen.45:active_power",
+          "to_entity": "storage.20:active_power",
+          "dt_seconds": 0.045,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "storage.20:active_power changed 0.045s after sgen.45:active_power (same RTU 172.16.8.9). No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-22cca1a84bad13dc",
+            "EV-828518810fce9eeb",
+            "EV-7896d7796954d059",
+            "EV-022c7353683e6047"
+          ]
+        },
+        {
+          "edge_id": "R0134",
+          "from_anchor_id": "A012",
+          "to_anchor_id": "A015",
+          "from_entity": "sgen.45:active_power",
+          "to_entity": "line.39:active_power_to,current_to",
+          "dt_seconds": 3.602,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.39:active_power_to,current_to changed 3.602s after sgen.45:active_power. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-22cca1a84bad13dc",
+            "EV-828518810fce9eeb",
+            "EV-6b38ba0ab52ffae0",
+            "EV-18b770816e2b86dc"
+          ]
+        },
+        {
+          "edge_id": "R0135",
+          "from_anchor_id": "A012",
+          "to_anchor_id": "A016",
+          "from_entity": "sgen.45:active_power",
+          "to_entity": "line.44:active_power_from,current_from,reactive_power_from,voltage_from",
+          "dt_seconds": 3.602,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.44:active_power_from,current_from,reactive_power_from,voltage_from changed 3.602s after sgen.45:active_power. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-22cca1a84bad13dc",
+            "EV-828518810fce9eeb",
+            "EV-df3c31bb096ba5de",
+            "EV-b5d183552a9fad1e"
+          ]
+        },
+        {
+          "edge_id": "R0137",
+          "from_anchor_id": "A013",
+          "to_anchor_id": "A015",
+          "from_entity": "sgen.116:active_power",
+          "to_entity": "line.39:active_power_to,current_to",
+          "dt_seconds": 3.558,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.39:active_power_to,current_to changed 3.558s after sgen.116:active_power. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-7d67fa2a61ff8476",
+            "EV-cdb43776233dd495",
+            "EV-6b38ba0ab52ffae0",
+            "EV-18b770816e2b86dc"
+          ]
+        },
+        {
+          "edge_id": "R0138",
+          "from_anchor_id": "A013",
+          "to_anchor_id": "A016",
+          "from_entity": "sgen.116:active_power",
+          "to_entity": "line.44:active_power_from,current_from,reactive_power_from,voltage_from",
+          "dt_seconds": 3.558,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.44:active_power_from,current_from,reactive_power_from,voltage_from changed 3.558s after sgen.116:active_power. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-7d67fa2a61ff8476",
+            "EV-cdb43776233dd495",
+            "EV-df3c31bb096ba5de",
+            "EV-b5d183552a9fad1e"
+          ]
+        },
+        {
+          "edge_id": "R0139",
+          "from_anchor_id": "A014",
+          "to_anchor_id": "A015",
+          "from_entity": "storage.20:active_power",
+          "to_entity": "line.39:active_power_to,current_to",
+          "dt_seconds": 3.558,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.39:active_power_to,current_to changed 3.558s after storage.20:active_power. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-7896d7796954d059",
+            "EV-022c7353683e6047",
+            "EV-6b38ba0ab52ffae0",
+            "EV-18b770816e2b86dc"
+          ]
+        },
+        {
+          "edge_id": "R0140",
+          "from_anchor_id": "A014",
+          "to_anchor_id": "A016",
+          "from_entity": "storage.20:active_power",
+          "to_entity": "line.44:active_power_from,current_from,reactive_power_from,voltage_from",
+          "dt_seconds": 3.558,
+          "relation_type": "cross_device_temporal_candidate",
+          "claim_level": "temporal_cooccurrence",
+          "verification_status": "unresolved",
+          "causal_status": "not_established",
+          "support_basis": "line.44:active_power_from,current_from,reactive_power_from,voltage_from changed 3.558s after storage.20:active_power. No protocol link, shared message or topology evidence connects them; time proximity is a candidate only.",
+          "evidence_ids": [
+            "EV-7896d7796954d059",
+            "EV-022c7353683e6047",
+            "EV-df3c31bb096ba5de",
+            "EV-b5d183552a9fad1e"
+          ]
+        }
+      ],
+      "epistemic_boundary": "Phase PHS-001 groups 9 verified bundle(s) and 0 transaction(s) within +1.677s..+11.231s. 1 element bridge(s) are supported; all 72 cross-device candidate relation(s) remain strictly unresolved (causal_status=not_established)."
+    }
+  ],
+  "source_dependency_ledger": {
+    "verified_anchor_count": 15,
+    "quarantined_unverified_anchor_count": 7,
+    "iec104_asdu_container_ids": [
+      "SRC-ASDU-172.16.8.5|2404|172.16.5.2|49230|7457|0",
+      "SRC-ASDU-172.16.8.6|2404|172.16.5.2|44248|7234|0",
+      "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7703|0",
+      "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7704|0",
+      "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7705|0",
+      "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7706|0",
+      "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7707|0",
+      "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7708|0",
+      "SRC-ASDU-172.16.8.9|2404|172.16.5.2|35894|7709|0"
+    ],
+    "iec104_asdu_container_count": 9,
+    "tcp_link_container_ids": [],
+    "tcp_link_container_count": 0,
+    "arp_container_ids": [],
+    "arp_container_count": 0,
+    "composite_event_container_ids": [],
+    "composite_event_container_count": 0,
+    "verified_source_container_count": 9,
+    "distinct_rtu_ips": [
+      "172.16.8.5",
+      "172.16.8.6",
+      "172.16.8.9"
+    ],
+    "distinct_rtu_count": 3,
+    "distinct_master_ips": [],
+    "distinct_arp_host_ips": [],
+    "co_reported_same_asdu_reduction_count": 6,
+    "mirror_vantages_observed": [
+      "n406"
+    ],
+    "raw_vantage_capture_count": 40,
+    "unique_verified_evidence_id_count": 40,
+    "ipal_correspondence_fact_count": 29,
+    "ipal_correspondence_edge_count": 29,
+    "ipal_correspondence_row_count": 47,
+    "ipal_independent_source_weight": 0,
+    "accounting_rules": {
+      "same_asdu_multi_ioa": "counted_as_one_container_not_independent_per_point",
+      "mirror_vantage_captures": "deduplicated_across_n302_and_n318",
+      "ipal_state_updates": "weight_zero_temporal_correspondence_only",
+      "unverified_observations": "quarantined_excluded_from_verified_containers"
+    }
+  },
+  "competing_explanations": [
+    {
+      "explanation_id": "EXP-001",
+      "scope": [
+        "CMP-001"
+      ],
+      "hypothesis_class": "physical_switching_or_protection_cascade_hypothesis",
+      "verification_status": "unresolved_competing_hypothesis",
+      "causal_status": "not_established",
+      "anchoring_verified_evidence": {
+        "bridge_ids": [
+          "BRG-001"
+        ],
+        "bridged_device_stems": [
+          "line.44"
+        ],
+        "component_ids": [
+          "CMP-001"
+        ],
+        "iec104_asdu_container_count": 9,
+        "distinct_rtu_count": 3,
+        "evidence_ids": [
+          "EV-bfffff4c8a7435c0",
+          "EV-8835c6772fa0b7b8",
+          "EV-df3c31bb096ba5de",
+          "EV-b5d183552a9fad1e"
+        ]
+      },
+      "unverified_or_candidate_links_assumed": [
+        "A001",
+        "R0059",
+        "R0060",
+        "R0067",
+        "R0080",
+        "R0053",
+        "R0054",
+        "R0055",
+        "R0056",
+        "R0057",
+        "R0058"
+      ],
+      "explanation_summary": "Corroborated two-end transitions on ['line.44'] across 3 RTUs (bridges ['BRG-001'], components ['CMP-001']), co-occurring with bus/load/generator `to_zero` bundles and preceded by spontaneous COT=3 state report(s) ['A001']. Consistent with a physical switching/isolation event and power-flow redistribution.",
+      "alternative_comparison": "Requires assuming that unverified COT=3 state reports (which lack a prior in-window state baseline) and unresolved cross-device co-occurrences reflect physical grid connectivity.",
+      "missing_disambiguating_evidence": [
+        "Substation bus/breaker physical topology model connecting switch, bus, line, load, and sgen elements",
+        "Pre-window IEC-104 state baseline (COT=20) for spontaneous state report(s) ['A001']",
+        "Local protection relay / breaker trip records at the RTUs independent of IEC-104 telemetry"
+      ]
+    },
+    {
+      "explanation_id": "EXP-002",
+      "scope": [
+        "CMP-001"
+      ],
+      "hypothesis_class": "uncommanded_or_altered_multi_rtu_telemetry_hypothesis",
+      "verification_status": "unresolved_competing_hypothesis",
+      "causal_status": "not_established",
+      "anchoring_verified_evidence": {
+        "bridge_ids": [
+          "BRG-001"
+        ],
+        "iec104_control_objects_in_window": 0,
+        "iec104_asdu_container_count": 9,
+        "evidence_ids": [
+          "EV-bfffff4c8a7435c0",
+          "EV-8835c6772fa0b7b8",
+          "EV-df3c31bb096ba5de",
+          "EV-b5d183552a9fad1e"
+        ]
+      },
+      "unverified_or_candidate_links_assumed": [
+        "R0059",
+        "R0060",
+        "R0067",
+        "R0080"
+      ],
+      "explanation_summary": "Zero IEC-104 control commands (types 45-69) were observed in the capture, yet 9 IEC-104 ASDU containers from 3 RTUs reported abrupt `to_zero` and `level_shift` steps (including asymmetric endpoint behavior recorded in ['R0059', 'R0060', 'R0067', 'R0080']). Consistent with uncommanded local RTU action or altered/replayed network telemetry without SCADA command initiation.",
+      "alternative_comparison": "Accounts for the absence of any COT=6 control command in the PCAP without assuming a verified physical topology link across distinct devices.",
+      "missing_disambiguating_evidence": [
+        "Out-of-band physical electrical measurements (e.g. independent PMU or field recorder)",
+        "RTU local console/logic logs and L2 switch port authentication records"
+      ]
+    }
+  ]
+}
