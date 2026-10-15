@@ -1,0 +1,4340 @@
+{
+  "stage": "Stage 3 Audit-Response Baseline & Ablation Suite (stage3a)",
+  "freeze_verification": {
+    "verified": true,
+    "frozen_engine_git_commit": "2981fb062b127218a34f23f2ff0292e4ca8cfea7",
+    "code_sha256": "d43d9867ce847df169e13345e4c3461cd99fd5167292a85cedaaa553d93e5bb3",
+    "evidence_code_sha256": "032c6977ac0507e9c442b37e4e78455d0ab6d1a21b1efe751a0ccf37242a3b85",
+    "module_count": 30
+  },
+  "strict_input_isolation_verified": true,
+  "window_count_evaluated": 12,
+  "stage3_cached_artifact_evaluation_runtime_seconds": 0.549,
+  "runtime_accounting_note": "`stage3_cached_artifact_evaluation_runtime_seconds` (0.549s) measures the Stage 3 evaluation pass over cached Stage 1/2 reconstruction artifacts and SQLite rows, NOT the full end-to-end indexing + reconstruction pipeline runtime (which is reported in `E4_computational_cost`).",
+  "combined_summary": {
+    "window_count": 12,
+    "B2_applicability_and_S1_reconciliation": {
+      "S1_reconstructed_transaction_windows": 3,
+      "B2_applicable_windows_with_control_objects": 3,
+      "windows_with_unpaired_control_replies_only_no_cot6": [],
+      "not_applicable_no_control_command_windows": 9
+    },
+    "Q1_temporal_only_vs_mirage": {
+      "B1_candidate_temporal_relations": {
+        "total": 9412,
+        "mean": 784.333,
+        "median": 306.0,
+        "p95": 4073.0,
+        "max": 4073
+      },
+      "B1_unbounded_15s_temporal_pairs": {
+        "total": 45177,
+        "mean": 3764.75,
+        "median": 1034.0,
+        "p95": 19057.0,
+        "max": 19057
+      },
+      "B1_unsubstantiated_temporal_candidates": {
+        "total": 2129,
+        "mean": 177.417,
+        "median": 97.5,
+        "p95": 570.0,
+        "max": 570
+      },
+      "B1_explicit_evidence_constraint_conflicts": {
+        "total": 7270,
+        "mean": 605.833,
+        "median": 96.0,
+        "p95": 3761.0,
+        "max": 3761
+      },
+      "B1_corroborated_same_device_candidates": {
+        "total": 13,
+        "mean": 1.083,
+        "median": 0.5,
+        "p95": 5.0,
+        "max": 5
+      },
+      "B1_topology_cross_device_candidates": {
+        "total": 8563,
+        "mean": 713.583,
+        "median": 289.5,
+        "p95": 3401.0,
+        "max": 3401
+      },
+      "B1_topology_same_device_separate_asdu_candidates": {
+        "total": 579,
+        "mean": 48.25,
+        "median": 1.5,
+        "p95": 549.0,
+        "max": 549
+      },
+      "B1_topology_same_asdu_co_report_candidates": {
+        "total": 270,
+        "mean": 22.5,
+        "median": 5.5,
+        "p95": 123.0,
+        "max": 123
+      },
+      "B1_conflict_endpoint_quality_or_test_bit": {
+        "total": 1203,
+        "mean": 100.25,
+        "median": 0.0,
+        "p95": 1198.0,
+        "max": 1198
+      },
+      "B1_conflict_endpoint_transient_not_sustained": {
+        "total": 7122,
+        "mean": 593.5,
+        "median": 85.0,
+        "p95": 3754.0,
+        "max": 3754
+      },
+      "B1_conflict_same_device_direction_or_ratio": {
+        "total": 5,
+        "mean": 0.417,
+        "median": 0.0,
+        "p95": 2.0,
+        "max": 2
+      },
+      "B1_conflict_same_device_change_type_or_side": {
+        "total": 558,
+        "mean": 46.5,
+        "median": 0.0,
+        "p95": 547.0,
+        "max": 547
+      },
+      "B1_conflict_same_asdu_co_report_temporal_ordering": {
+        "total": 270,
+        "mean": 22.5,
+        "median": 5.5,
+        "p95": 123.0,
+        "max": 123
+      },
+      "MIRAGE_OT_supported_storyline_steps": {
+        "total": 26,
+        "mean": 2.167,
+        "median": 0.5,
+        "p95": 7.0,
+        "max": 7
+      },
+      "MIRAGE_OT_cross_rtu_verified_bridges": {
+        "total": 10,
+        "mean": 0.833,
+        "median": 0.0,
+        "p95": 5.0,
+        "max": 5
+      },
+      "paired_difference_explicit_conflicts_B1_minus_MIRAGE": {
+        "n_paired_windows": 12,
+        "difference_distribution": {
+          "total": 7270.0,
+          "mean": 605.833,
+          "median": 96.0,
+          "p95": 3761.0,
+          "max": 3761.0
+        },
+        "descriptive_bootstrap_95ci": [
+          125.167,
+          1322.0
+        ],
+        "windows_where_baseline_exceeds_mirage": 12,
+        "windows_where_mirage_exceeds_baseline": 0,
+        "windows_tied": 0,
+        "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+      },
+      "paired_difference_unsubstantiated_candidates_B1": {
+        "n_paired_windows": 12,
+        "difference_distribution": {
+          "total": 2129.0,
+          "mean": 177.417,
+          "median": 97.5,
+          "p95": 570.0,
+          "max": 570.0
+        },
+        "descriptive_bootstrap_95ci": [
+          73.833,
+          281.583
+        ],
+        "windows_where_baseline_exceeds_mirage": 9,
+        "windows_where_mirage_exceeds_baseline": 0,
+        "windows_tied": 3,
+        "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+      }
+    },
+    "Q2_protocol_only_vs_mirage": {
+      "control_command_windows_handled": 3,
+      "no_command_windows_not_applicable": 9,
+      "B2_retained_info_in_no_command_windows": {
+        "total": 0,
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0
+      },
+      "B2_verified_command_transitions": {
+        "total": 2,
+        "mean": 0.167,
+        "median": 0.0,
+        "p95": 1.0,
+        "max": 1
+      },
+      "omitted_verified_non_command_anchors": {
+        "total": 427,
+        "mean": 35.583,
+        "median": 19.0,
+        "p95": 117.0,
+        "max": 117
+      },
+      "omitted_supported_behavioral_transition_chains": {
+        "total": 10,
+        "mean": 0.833,
+        "median": 0.0,
+        "p95": 5.0,
+        "max": 5
+      },
+      "omitted_cross_rtu_verified_bridges": {
+        "total": 10,
+        "mean": 0.833,
+        "median": 0.0,
+        "p95": 5.0,
+        "max": 5
+      },
+      "unexpressible_network_anomalies_arp_and_link": {
+        "total": 16,
+        "mean": 1.333,
+        "median": 0.0,
+        "p95": 5.0,
+        "max": 5
+      },
+      "paired_difference_verified_anchors_MIRAGE_minus_B2": {
+        "n_paired_windows": 12,
+        "difference_distribution": {
+          "total": 427.0,
+          "mean": 35.583,
+          "median": 19.0,
+          "p95": 117.0,
+          "max": 117.0
+        },
+        "descriptive_bootstrap_95ci": [
+          15.75,
+          56.5
+        ],
+        "windows_where_baseline_exceeds_mirage": 9,
+        "windows_where_mirage_exceeds_baseline": 0,
+        "windows_tied": 3,
+        "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+      }
+    },
+    "Q3_ablation_A1_without_behavioral_gate": {
+      "all_windows": {
+        "window_count": 12,
+        "originally_supported_relations": {
+          "total": 13,
+          "mean": 1.083,
+          "median": 0.0,
+          "p95": 5.0,
+          "max": 5
+        },
+        "unsupported_promotions_total": {
+          "total": 18,
+          "mean": 1.5,
+          "median": 0.5,
+          "p95": 6.0,
+          "max": 6
+        },
+        "unsupported_promotions_behavioral": {
+          "total": 18,
+          "mean": 1.5,
+          "median": 0.5,
+          "p95": 6.0,
+          "max": 6
+        },
+        "unsupported_promotions_tx_inference": {
+          "total": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0
+        },
+        "ungated_spurious_cross_rtu_bridge_promotions": {
+          "total": 9,
+          "mean": 0.75,
+          "median": 0.0,
+          "p95": 3.0,
+          "max": 3
+        },
+        "violation_quality_or_test_bit": {
+          "total": 1,
+          "mean": 0.083,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "violation_persistence_insufficient": {
+          "total": 8,
+          "mean": 0.667,
+          "median": 0.0,
+          "p95": 2.0,
+          "max": 2
+        },
+        "violation_prior_state_baseline_missing": {
+          "total": 1,
+          "mean": 0.083,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "violation_change_type_mismatch": {
+          "total": 2,
+          "mean": 0.167,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "violation_magnitude_or_direction_conflict": {
+          "total": 5,
+          "mean": 0.417,
+          "median": 0.0,
+          "p95": 2.0,
+          "max": 2
+        },
+        "violation_non_complementary_or_disjoint": {
+          "total": 11,
+          "mean": 0.917,
+          "median": 0.0,
+          "p95": 4.0,
+          "max": 4
+        },
+        "paired_difference_A1_minus_MIRAGE": {
+          "n_paired_windows": 12,
+          "difference_distribution": {
+            "total": 18.0,
+            "mean": 1.5,
+            "median": 0.5,
+            "p95": 6.0,
+            "max": 6.0
+          },
+          "descriptive_bootstrap_95ci": [
+            0.5,
+            2.667
+          ],
+          "windows_where_baseline_exceeds_mirage": 6,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 6,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        }
+      },
+      "sensitivity_excluding_max_outlier_ev_52f5ee": {
+        "window_count": 12,
+        "originally_supported_relations": {
+          "total": 13,
+          "mean": 1.083,
+          "median": 0.0,
+          "p95": 5.0,
+          "max": 5
+        },
+        "unsupported_promotions_total": {
+          "total": 18,
+          "mean": 1.5,
+          "median": 0.5,
+          "p95": 6.0,
+          "max": 6
+        },
+        "unsupported_promotions_behavioral": {
+          "total": 18,
+          "mean": 1.5,
+          "median": 0.5,
+          "p95": 6.0,
+          "max": 6
+        },
+        "unsupported_promotions_tx_inference": {
+          "total": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0
+        },
+        "ungated_spurious_cross_rtu_bridge_promotions": {
+          "total": 9,
+          "mean": 0.75,
+          "median": 0.0,
+          "p95": 3.0,
+          "max": 3
+        },
+        "violation_quality_or_test_bit": {
+          "total": 1,
+          "mean": 0.083,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "violation_persistence_insufficient": {
+          "total": 8,
+          "mean": 0.667,
+          "median": 0.0,
+          "p95": 2.0,
+          "max": 2
+        },
+        "violation_prior_state_baseline_missing": {
+          "total": 1,
+          "mean": 0.083,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "violation_change_type_mismatch": {
+          "total": 2,
+          "mean": 0.167,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "violation_magnitude_or_direction_conflict": {
+          "total": 5,
+          "mean": 0.417,
+          "median": 0.0,
+          "p95": 2.0,
+          "max": 2
+        },
+        "violation_non_complementary_or_disjoint": {
+          "total": 11,
+          "mean": 0.917,
+          "median": 0.0,
+          "p95": 4.0,
+          "max": 4
+        },
+        "paired_difference_A1_minus_MIRAGE": {
+          "n_paired_windows": 12,
+          "difference_distribution": {
+            "total": 18.0,
+            "mean": 1.5,
+            "median": 0.5,
+            "p95": 6.0,
+            "max": 6.0
+          },
+          "descriptive_bootstrap_95ci": [
+            0.5,
+            2.667
+          ],
+          "windows_where_baseline_exceeds_mirage": 6,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 6,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        }
+      }
+    },
+    "Q4_ablation_A2_without_provenance_dedup": {
+      "raw_observation_count": {
+        "total": 1388,
+        "mean": 115.667,
+        "median": 68.5,
+        "p95": 590.0,
+        "max": 590
+      },
+      "raw_network_observation_count": {
+        "total": 863,
+        "mean": 71.917,
+        "median": 44.0,
+        "p95": 355.0,
+        "max": 355
+      },
+      "distinct_source_container_count": {
+        "total": 300,
+        "mean": 25.0,
+        "median": 10.5,
+        "p95": 68.0,
+        "max": 68
+      },
+      "distinct_asdu_container_count": {
+        "total": 291,
+        "mean": 24.25,
+        "median": 9.0,
+        "p95": 68.0,
+        "max": 68
+      },
+      "per_window_rtu_count_summed_across_windows": {
+        "total": 260,
+        "mean": 21.667,
+        "median": 7.0,
+        "p95": 63.0,
+        "max": 63
+      },
+      "unique_rtu_ips_in_scenario_count": 118,
+      "unique_rtu_ips_in_scenario": [
+        "172.16.10.1",
+        "172.16.11.1",
+        "172.16.11.2",
+        "172.16.12.1",
+        "172.16.12.2",
+        "172.16.12.3",
+        "172.16.12.4",
+        "172.16.12.5",
+        "172.16.12.6",
+        "172.16.12.7",
+        "172.16.12.8",
+        "172.16.13.1",
+        "172.16.14.1",
+        "172.16.14.2",
+        "172.16.14.3",
+        "172.16.14.4",
+        "172.16.14.5",
+        "172.16.14.6",
+        "172.16.14.7",
+        "172.16.2.3",
+        "172.16.2.5",
+        "172.16.3.1",
+        "172.16.3.10",
+        "172.16.3.11",
+        "172.16.3.12",
+        "172.16.3.13",
+        "172.16.3.14",
+        "172.16.3.16",
+        "172.16.3.17",
+        "172.16.3.18",
+        "172.16.3.19",
+        "172.16.3.2",
+        "172.16.3.20",
+        "172.16.3.21",
+        "172.16.3.22",
+        "172.16.3.23",
+        "172.16.3.24",
+        "172.16.3.3",
+        "172.16.3.4",
+        "172.16.3.7",
+        "172.16.3.8",
+        "172.16.3.9",
+        "172.16.4.1",
+        "172.16.4.2",
+        "172.16.4.3",
+        "172.16.4.4",
+        "172.16.5.1",
+        "172.16.5.2",
+        "172.16.5.3",
+        "172.16.5.4",
+        "172.16.5.5",
+        "172.16.5.6",
+        "172.16.5.7",
+        "172.16.5.8",
+        "172.16.6.1",
+        "172.16.6.2",
+        "172.16.6.3",
+        "172.16.6.4",
+        "172.16.6.5",
+        "172.16.6.6",
+        "172.16.7.1",
+        "172.16.7.10",
+        "172.16.7.11",
+        "172.16.7.12",
+        "172.16.7.13",
+        "172.16.7.14",
+        "172.16.7.15",
+        "172.16.7.16",
+        "172.16.7.17",
+        "172.16.7.18",
+        "172.16.7.19",
+        "172.16.7.2",
+        "172.16.7.20",
+        "172.16.7.21",
+        "172.16.7.22",
+        "172.16.7.23",
+        "172.16.7.24",
+        "172.16.7.25",
+        "172.16.7.26",
+        "172.16.7.27",
+        "172.16.7.28",
+        "172.16.7.29",
+        "172.16.7.3",
+        "172.16.7.30",
+        "172.16.7.31",
+        "172.16.7.33",
+        "172.16.7.4",
+        "172.16.7.6",
+        "172.16.7.7",
+        "172.16.7.8",
+        "172.16.7.9",
+        "172.16.8.1",
+        "172.16.8.10",
+        "172.16.8.11",
+        "172.16.8.12",
+        "172.16.8.13",
+        "172.16.8.14",
+        "172.16.8.15",
+        "172.16.8.16",
+        "172.16.8.17",
+        "172.16.8.18",
+        "172.16.8.2",
+        "172.16.8.3",
+        "172.16.8.4",
+        "172.16.8.5",
+        "172.16.8.6",
+        "172.16.8.7",
+        "172.16.8.8",
+        "172.16.8.9",
+        "172.16.9.1",
+        "172.16.9.10",
+        "172.16.9.2",
+        "172.16.9.3",
+        "172.16.9.4",
+        "172.16.9.5",
+        "172.16.9.6",
+        "172.16.9.7",
+        "172.16.9.8"
+      ],
+      "true_cross_vantage_mirror_duplicate_count": {
+        "total": 217,
+        "mean": 18.083,
+        "median": 3.0,
+        "p95": 120.0,
+        "max": 120
+      },
+      "same_asdu_different_ioa_point_count": {
+        "total": 244,
+        "mean": 20.333,
+        "median": 0.5,
+        "p95": 167.0,
+        "max": 167
+      },
+      "distinct_messages_in_same_tcp_session_count": {
+        "total": 48,
+        "mean": 4.0,
+        "median": 0.0,
+        "p95": 35.0,
+        "max": 35
+      },
+      "distinct_time_network_events_in_anchor_count": {
+        "total": 54,
+        "mean": 4.5,
+        "median": 0.0,
+        "p95": 20.0,
+        "max": 20
+      },
+      "ipal_derived_observation_count": {
+        "total": 525,
+        "mean": 43.75,
+        "median": 24.5,
+        "p95": 235.0,
+        "max": 235
+      },
+      "unknown_provenance_relation_count": {
+        "total": 0,
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0
+      },
+      "true_duplicate_or_derived_source_inflation_count": {
+        "total": 986,
+        "mean": 82.167,
+        "median": 41.5,
+        "p95": 522.0,
+        "max": 522
+      },
+      "multi_event_anchor_aggregation_count": {
+        "total": 102,
+        "mean": 8.5,
+        "median": 0.0,
+        "p95": 55.0,
+        "max": 55
+      },
+      "total_excess_observations_over_containers": {
+        "total": 1088,
+        "mean": 90.667,
+        "median": 57.5,
+        "p95": 522.0,
+        "max": 522
+      },
+      "strict_duplicate_and_derived_inflation_factor": {
+        "total": 44.7822,
+        "mean": 3.732,
+        "median": 2.403,
+        "p95": 9.083,
+        "max": 9.083
+      },
+      "raw_to_container_ratio": {
+        "total": 51.8667,
+        "mean": 4.322,
+        "median": 2.962,
+        "p95": 9.083,
+        "max": 9.083
+      },
+      "spurious_multi_source_storylines_without_dedup": {
+        "total": 1001,
+        "mean": 83.417,
+        "median": 21.0,
+        "p95": 392.0,
+        "max": 392
+      },
+      "paired_difference_true_duplicate_and_derived_inflation": {
+        "n_paired_windows": 12,
+        "difference_distribution": {
+          "total": 986.0,
+          "mean": 82.167,
+          "median": 41.5,
+          "p95": 522.0,
+          "max": 522.0
+        },
+        "descriptive_bootstrap_95ci": [
+          25.333,
+          170.917
+        ],
+        "windows_where_baseline_exceeds_mirage": 11,
+        "windows_where_mirage_exceeds_baseline": 0,
+        "windows_tied": 1,
+        "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+      }
+    },
+    "Q5_ablation_A3_without_incident_synthesis_and_E3_traceability": {
+      "local_storyline_count": {
+        "total": 1025,
+        "mean": 85.417,
+        "median": 24.0,
+        "p95": 392.0,
+        "max": 392
+      },
+      "deduplicated_source_containers": {
+        "total": 300,
+        "mean": 25.0,
+        "median": 10.5,
+        "p95": 68.0,
+        "max": 68
+      },
+      "rtu_asdu_bundles": {
+        "total": 290,
+        "mean": 24.167,
+        "median": 10.5,
+        "p95": 68.0,
+        "max": 68
+      },
+      "co_reported_points_collapsed": {
+        "total": 71,
+        "mean": 5.917,
+        "median": 0.5,
+        "p95": 49.0,
+        "max": 49
+      },
+      "cross_rtu_verified_bridges": {
+        "total": 10,
+        "mean": 0.833,
+        "median": 0.0,
+        "p95": 5.0,
+        "max": 5
+      },
+      "multi_bundle_bridged_components": {
+        "total": 5,
+        "mean": 0.417,
+        "median": 0.0,
+        "p95": 2.0,
+        "max": 2
+      },
+      "candidate_scenario_phases": {
+        "total": 17,
+        "mean": 1.417,
+        "median": 1.0,
+        "p95": 4.0,
+        "max": 4
+      },
+      "competing_explanations_generated": {
+        "total": 19,
+        "mean": 1.583,
+        "median": 2.0,
+        "p95": 3.0,
+        "max": 3
+      },
+      "E3_four_level_traceability": {
+        "1_evidence_citation_presence_pass_count": 12,
+        "1_evidence_citation_presence_pass_rate": 1.0,
+        "2_evidence_id_resolution_pass_count": 12,
+        "2_evidence_id_resolution_pass_rate": 1.0,
+        "3_evidence_to_fact_anchor_consistency_pass_count": 12,
+        "3_evidence_to_fact_anchor_consistency_pass_rate": 1.0,
+        "4_full_lineage_consistency_pass_count": 12,
+        "4_full_lineage_consistency_pass_rate": 1.0,
+        "failed_lineage_consistency_episodes": []
+      }
+    },
+    "E4_computational_cost": {
+      "shared_indexing_s": {
+        "total": 325.449,
+        "mean": 27.121,
+        "median": 24.628,
+        "p95": 65.282,
+        "max": 65.282
+      },
+      "shared_sqlite_mib": {
+        "total": 1373.543,
+        "mean": 114.462,
+        "median": 57.737,
+        "p95": 348.531,
+        "max": 348.531
+      },
+      "full_pipeline_reconstruction_and_synthesis_s": {
+        "total": 122.748,
+        "mean": 10.229,
+        "median": 5.248,
+        "p95": 35.512,
+        "max": 35.512
+      },
+      "standalone_synthesis_step_s": {
+        "total": 0.0133,
+        "mean": 0.001,
+        "median": 0.001,
+        "p95": 0.004,
+        "max": 0.004
+      },
+      "stage3_cached_B1_evaluation_s": {
+        "total": 0.0553,
+        "mean": 0.005,
+        "median": 0.001,
+        "p95": 0.02,
+        "max": 0.02
+      },
+      "stage3_cached_B2_evaluation_s": {
+        "total": 0.0003,
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0.0
+      },
+      "stage3_cached_A1_evaluation_s": {
+        "total": 0.0017,
+        "mean": 0.0,
+        "median": 0.0,
+        "p95": 0.001,
+        "max": 0.001
+      },
+      "stage3_cached_A2_evaluation_s": {
+        "total": 0.1562,
+        "mean": 0.013,
+        "median": 0.009,
+        "p95": 0.045,
+        "max": 0.045
+      },
+      "stage3_cached_A3_evaluation_s": {
+        "total": 0.0077,
+        "mean": 0.001,
+        "median": 0.0,
+        "p95": 0.002,
+        "max": 0.002
+      },
+      "full_artifacts_mib": {
+        "total": 141.907,
+        "mean": 11.826,
+        "median": 4.67,
+        "p95": 47.753,
+        "max": 47.753
+      }
+    }
+  },
+  "by_scenario": {
+    "01-Basic": {
+      "window_count": 4,
+      "B2_applicability_and_S1_reconciliation": {
+        "S1_reconstructed_transaction_windows": 1,
+        "B2_applicable_windows_with_control_objects": 1,
+        "windows_with_unpaired_control_replies_only_no_cot6": [],
+        "not_applicable_no_control_command_windows": 3
+      },
+      "Q1_temporal_only_vs_mirage": {
+        "B1_candidate_temporal_relations": {
+          "total": 173,
+          "mean": 43.25,
+          "median": 6.5,
+          "p95": 157.0,
+          "max": 157
+        },
+        "B1_unbounded_15s_temporal_pairs": {
+          "total": 342,
+          "mean": 85.5,
+          "median": 6.5,
+          "p95": 326.0,
+          "max": 326
+        },
+        "B1_unsubstantiated_temporal_candidates": {
+          "total": 129,
+          "mean": 32.25,
+          "median": 3.0,
+          "p95": 123.0,
+          "max": 123
+        },
+        "B1_explicit_evidence_constraint_conflicts": {
+          "total": 38,
+          "mean": 9.5,
+          "median": 3.5,
+          "p95": 29.0,
+          "max": 29
+        },
+        "B1_corroborated_same_device_candidates": {
+          "total": 6,
+          "mean": 1.5,
+          "median": 0.5,
+          "p95": 5.0,
+          "max": 5
+        },
+        "B1_topology_cross_device_candidates": {
+          "total": 142,
+          "mean": 35.5,
+          "median": 5.5,
+          "p95": 129.0,
+          "max": 129
+        },
+        "B1_topology_same_device_separate_asdu_candidates": {
+          "total": 11,
+          "mean": 2.75,
+          "median": 1.5,
+          "p95": 8.0,
+          "max": 8
+        },
+        "B1_topology_same_asdu_co_report_candidates": {
+          "total": 20,
+          "mean": 5.0,
+          "median": 0.0,
+          "p95": 20.0,
+          "max": 20
+        },
+        "B1_conflict_endpoint_quality_or_test_bit": {
+          "total": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0
+        },
+        "B1_conflict_endpoint_transient_not_sustained": {
+          "total": 17,
+          "mean": 4.25,
+          "median": 3.5,
+          "p95": 8.0,
+          "max": 8
+        },
+        "B1_conflict_same_device_direction_or_ratio": {
+          "total": 3,
+          "mean": 0.75,
+          "median": 0.5,
+          "p95": 2.0,
+          "max": 2
+        },
+        "B1_conflict_same_device_change_type_or_side": {
+          "total": 1,
+          "mean": 0.25,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "B1_conflict_same_asdu_co_report_temporal_ordering": {
+          "total": 20,
+          "mean": 5.0,
+          "median": 0.0,
+          "p95": 20.0,
+          "max": 20
+        },
+        "MIRAGE_OT_supported_storyline_steps": {
+          "total": 12,
+          "mean": 3.0,
+          "median": 2.5,
+          "p95": 7.0,
+          "max": 7
+        },
+        "MIRAGE_OT_cross_rtu_verified_bridges": {
+          "total": 5,
+          "mean": 1.25,
+          "median": 0.0,
+          "p95": 5.0,
+          "max": 5
+        },
+        "paired_difference_explicit_conflicts_B1_minus_MIRAGE": {
+          "n_paired_windows": 4,
+          "difference_distribution": {
+            "total": 38.0,
+            "mean": 9.5,
+            "median": 3.5,
+            "p95": 29.0,
+            "max": 29.0
+          },
+          "descriptive_bootstrap_95ci": [
+            2.5,
+            22.75
+          ],
+          "windows_where_baseline_exceeds_mirage": 4,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 0,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        },
+        "paired_difference_unsubstantiated_candidates_B1": {
+          "n_paired_windows": 4,
+          "difference_distribution": {
+            "total": 129.0,
+            "mean": 32.25,
+            "median": 3.0,
+            "p95": 123.0,
+            "max": 123.0
+          },
+          "descriptive_bootstrap_95ci": [
+            0.0,
+            92.25
+          ],
+          "windows_where_baseline_exceeds_mirage": 2,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 2,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        }
+      },
+      "Q2_protocol_only_vs_mirage": {
+        "control_command_windows_handled": 1,
+        "no_command_windows_not_applicable": 3,
+        "B2_retained_info_in_no_command_windows": {
+          "total": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0
+        },
+        "B2_verified_command_transitions": {
+          "total": 1,
+          "mean": 0.25,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "omitted_verified_non_command_anchors": {
+          "total": 27,
+          "mean": 6.75,
+          "median": 2.0,
+          "p95": 23.0,
+          "max": 23
+        },
+        "omitted_supported_behavioral_transition_chains": {
+          "total": 5,
+          "mean": 1.25,
+          "median": 0.0,
+          "p95": 5.0,
+          "max": 5
+        },
+        "omitted_cross_rtu_verified_bridges": {
+          "total": 5,
+          "mean": 1.25,
+          "median": 0.0,
+          "p95": 5.0,
+          "max": 5
+        },
+        "unexpressible_network_anomalies_arp_and_link": {
+          "total": 4,
+          "mean": 1.0,
+          "median": 0.0,
+          "p95": 4.0,
+          "max": 4
+        },
+        "paired_difference_verified_anchors_MIRAGE_minus_B2": {
+          "n_paired_windows": 4,
+          "difference_distribution": {
+            "total": 27.0,
+            "mean": 6.75,
+            "median": 2.0,
+            "p95": 23.0,
+            "max": 23.0
+          },
+          "descriptive_bootstrap_95ci": [
+            0.0,
+            17.25
+          ],
+          "windows_where_baseline_exceeds_mirage": 2,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 2,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        }
+      },
+      "Q3_ablation_A1_without_behavioral_gate": {
+        "all_windows": {
+          "window_count": 4,
+          "originally_supported_relations": {
+            "total": 6,
+            "mean": 1.5,
+            "median": 0.5,
+            "p95": 5.0,
+            "max": 5
+          },
+          "unsupported_promotions_total": {
+            "total": 5,
+            "mean": 1.25,
+            "median": 1.0,
+            "p95": 3.0,
+            "max": 3
+          },
+          "unsupported_promotions_behavioral": {
+            "total": 5,
+            "mean": 1.25,
+            "median": 1.0,
+            "p95": 3.0,
+            "max": 3
+          },
+          "unsupported_promotions_tx_inference": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "ungated_spurious_cross_rtu_bridge_promotions": {
+            "total": 5,
+            "mean": 1.25,
+            "median": 1.0,
+            "p95": 3.0,
+            "max": 3
+          },
+          "violation_quality_or_test_bit": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_persistence_insufficient": {
+            "total": 4,
+            "mean": 1.0,
+            "median": 1.0,
+            "p95": 2.0,
+            "max": 2
+          },
+          "violation_prior_state_baseline_missing": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_change_type_mismatch": {
+            "total": 1,
+            "mean": 0.25,
+            "median": 0.0,
+            "p95": 1.0,
+            "max": 1
+          },
+          "violation_magnitude_or_direction_conflict": {
+            "total": 3,
+            "mean": 0.75,
+            "median": 0.5,
+            "p95": 2.0,
+            "max": 2
+          },
+          "violation_non_complementary_or_disjoint": {
+            "total": 2,
+            "mean": 0.5,
+            "median": 0.0,
+            "p95": 2.0,
+            "max": 2
+          },
+          "paired_difference_A1_minus_MIRAGE": {
+            "n_paired_windows": 4,
+            "difference_distribution": {
+              "total": 5.0,
+              "mean": 1.25,
+              "median": 1.0,
+              "p95": 3.0,
+              "max": 3.0
+            },
+            "descriptive_bootstrap_95ci": [
+              0.0,
+              2.75
+            ],
+            "windows_where_baseline_exceeds_mirage": 2,
+            "windows_where_mirage_exceeds_baseline": 0,
+            "windows_tied": 2,
+            "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+          }
+        },
+        "sensitivity_excluding_max_outlier_ev_52f5ee": {
+          "window_count": 4,
+          "originally_supported_relations": {
+            "total": 6,
+            "mean": 1.5,
+            "median": 0.5,
+            "p95": 5.0,
+            "max": 5
+          },
+          "unsupported_promotions_total": {
+            "total": 5,
+            "mean": 1.25,
+            "median": 1.0,
+            "p95": 3.0,
+            "max": 3
+          },
+          "unsupported_promotions_behavioral": {
+            "total": 5,
+            "mean": 1.25,
+            "median": 1.0,
+            "p95": 3.0,
+            "max": 3
+          },
+          "unsupported_promotions_tx_inference": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "ungated_spurious_cross_rtu_bridge_promotions": {
+            "total": 5,
+            "mean": 1.25,
+            "median": 1.0,
+            "p95": 3.0,
+            "max": 3
+          },
+          "violation_quality_or_test_bit": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_persistence_insufficient": {
+            "total": 4,
+            "mean": 1.0,
+            "median": 1.0,
+            "p95": 2.0,
+            "max": 2
+          },
+          "violation_prior_state_baseline_missing": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_change_type_mismatch": {
+            "total": 1,
+            "mean": 0.25,
+            "median": 0.0,
+            "p95": 1.0,
+            "max": 1
+          },
+          "violation_magnitude_or_direction_conflict": {
+            "total": 3,
+            "mean": 0.75,
+            "median": 0.5,
+            "p95": 2.0,
+            "max": 2
+          },
+          "violation_non_complementary_or_disjoint": {
+            "total": 2,
+            "mean": 0.5,
+            "median": 0.0,
+            "p95": 2.0,
+            "max": 2
+          },
+          "paired_difference_A1_minus_MIRAGE": {
+            "n_paired_windows": 4,
+            "difference_distribution": {
+              "total": 5.0,
+              "mean": 1.25,
+              "median": 1.0,
+              "p95": 3.0,
+              "max": 3.0
+            },
+            "descriptive_bootstrap_95ci": [
+              0.0,
+              2.75
+            ],
+            "windows_where_baseline_exceeds_mirage": 2,
+            "windows_where_mirage_exceeds_baseline": 0,
+            "windows_tied": 2,
+            "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+          }
+        }
+      },
+      "Q4_ablation_A2_without_provenance_dedup": {
+        "raw_observation_count": {
+          "total": 139,
+          "mean": 34.75,
+          "median": 15.0,
+          "p95": 109.0,
+          "max": 109
+        },
+        "raw_network_observation_count": {
+          "total": 84,
+          "mean": 21.0,
+          "median": 14.0,
+          "p95": 56.0,
+          "max": 56
+        },
+        "distinct_source_container_count": {
+          "total": 20,
+          "mean": 5.0,
+          "median": 4.0,
+          "p95": 12.0,
+          "max": 12
+        },
+        "distinct_asdu_container_count": {
+          "total": 20,
+          "mean": 5.0,
+          "median": 4.0,
+          "p95": 12.0,
+          "max": 12
+        },
+        "per_window_rtu_count_summed_across_windows": {
+          "total": 13,
+          "mean": 3.25,
+          "median": 0.5,
+          "p95": 12.0,
+          "max": 12
+        },
+        "unique_rtu_ips_in_scenario_count": 12,
+        "unique_rtu_ips_in_scenario": [
+          "172.16.2.3",
+          "172.16.3.13",
+          "172.16.3.14",
+          "172.16.3.16",
+          "172.16.3.17",
+          "172.16.3.18",
+          "172.16.3.19",
+          "172.16.3.20",
+          "172.16.3.21",
+          "172.16.3.22",
+          "172.16.3.23",
+          "172.16.3.24"
+        ],
+        "true_cross_vantage_mirror_duplicate_count": {
+          "total": 8,
+          "mean": 2.0,
+          "median": 1.5,
+          "p95": 5.0,
+          "max": 5
+        },
+        "same_asdu_different_ioa_point_count": {
+          "total": 41,
+          "mean": 10.25,
+          "median": 0.0,
+          "p95": 41.0,
+          "max": 41
+        },
+        "distinct_messages_in_same_tcp_session_count": {
+          "total": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0
+        },
+        "distinct_time_network_events_in_anchor_count": {
+          "total": 15,
+          "mean": 3.75,
+          "median": 0.0,
+          "p95": 15.0,
+          "max": 15
+        },
+        "ipal_derived_observation_count": {
+          "total": 55,
+          "mean": 13.75,
+          "median": 1.0,
+          "p95": 53.0,
+          "max": 53
+        },
+        "unknown_provenance_relation_count": {
+          "total": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0
+        },
+        "true_duplicate_or_derived_source_inflation_count": {
+          "total": 104,
+          "mean": 26.0,
+          "median": 3.5,
+          "p95": 97.0,
+          "max": 97
+        },
+        "multi_event_anchor_aggregation_count": {
+          "total": 15,
+          "mean": 3.75,
+          "median": 0.0,
+          "p95": 15.0,
+          "max": 15
+        },
+        "total_excess_observations_over_containers": {
+          "total": 119,
+          "mean": 29.75,
+          "median": 11.0,
+          "p95": 97.0,
+          "max": 97
+        },
+        "strict_duplicate_and_derived_inflation_factor": {
+          "total": 13.8333,
+          "mean": 3.458,
+          "median": 1.875,
+          "p95": 9.083,
+          "max": 9.083
+        },
+        "raw_to_container_ratio": {
+          "total": 17.5833,
+          "mean": 4.396,
+          "median": 3.75,
+          "p95": 9.083,
+          "max": 9.083
+        },
+        "spurious_multi_source_storylines_without_dedup": {
+          "total": 55,
+          "mean": 13.75,
+          "median": 16.5,
+          "p95": 22.0,
+          "max": 22
+        },
+        "paired_difference_true_duplicate_and_derived_inflation": {
+          "n_paired_windows": 4,
+          "difference_distribution": {
+            "total": 104.0,
+            "mean": 26.0,
+            "median": 3.5,
+            "p95": 97.0,
+            "max": 97.0
+          },
+          "descriptive_bootstrap_95ci": [
+            1.0,
+            73.25
+          ],
+          "windows_where_baseline_exceeds_mirage": 3,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 1,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        }
+      },
+      "Q5_ablation_A3_without_incident_synthesis_and_E3_traceability": {
+        "local_storyline_count": {
+          "total": 66,
+          "mean": 16.5,
+          "median": 16.5,
+          "p95": 27.0,
+          "max": 27
+        },
+        "deduplicated_source_containers": {
+          "total": 20,
+          "mean": 5.0,
+          "median": 4.0,
+          "p95": 12.0,
+          "max": 12
+        },
+        "rtu_asdu_bundles": {
+          "total": 16,
+          "mean": 4.0,
+          "median": 2.0,
+          "p95": 12.0,
+          "max": 12
+        },
+        "co_reported_points_collapsed": {
+          "total": 11,
+          "mean": 2.75,
+          "median": 0.0,
+          "p95": 11.0,
+          "max": 11
+        },
+        "cross_rtu_verified_bridges": {
+          "total": 5,
+          "mean": 1.25,
+          "median": 0.0,
+          "p95": 5.0,
+          "max": 5
+        },
+        "multi_bundle_bridged_components": {
+          "total": 2,
+          "mean": 0.5,
+          "median": 0.0,
+          "p95": 2.0,
+          "max": 2
+        },
+        "candidate_scenario_phases": {
+          "total": 3,
+          "mean": 0.75,
+          "median": 1.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "competing_explanations_generated": {
+          "total": 5,
+          "mean": 1.25,
+          "median": 1.5,
+          "p95": 2.0,
+          "max": 2
+        },
+        "E3_four_level_traceability": {
+          "1_evidence_citation_presence_pass_count": 4,
+          "1_evidence_citation_presence_pass_rate": 1.0,
+          "2_evidence_id_resolution_pass_count": 4,
+          "2_evidence_id_resolution_pass_rate": 1.0,
+          "3_evidence_to_fact_anchor_consistency_pass_count": 4,
+          "3_evidence_to_fact_anchor_consistency_pass_rate": 1.0,
+          "4_full_lineage_consistency_pass_count": 4,
+          "4_full_lineage_consistency_pass_rate": 1.0,
+          "failed_lineage_consistency_episodes": []
+        }
+      },
+      "E4_computational_cost": {
+        "shared_indexing_s": {
+          "total": 14.491,
+          "mean": 3.623,
+          "median": 3.816,
+          "p95": 6.854,
+          "max": 6.854
+        },
+        "shared_sqlite_mib": {
+          "total": 102.239,
+          "mean": 25.56,
+          "median": 28.008,
+          "p95": 41.348,
+          "max": 41.348
+        },
+        "full_pipeline_reconstruction_and_synthesis_s": {
+          "total": 4.445,
+          "mean": 1.111,
+          "median": 1.244,
+          "p95": 1.789,
+          "max": 1.789
+        },
+        "standalone_synthesis_step_s": {
+          "total": 0.0009,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        "stage3_cached_B1_evaluation_s": {
+          "total": 0.0006,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        "stage3_cached_B2_evaluation_s": {
+          "total": 0.0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        "stage3_cached_A1_evaluation_s": {
+          "total": 0.0001,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        "stage3_cached_A2_evaluation_s": {
+          "total": 0.0148,
+          "mean": 0.004,
+          "median": 0.003,
+          "p95": 0.009,
+          "max": 0.009
+        },
+        "stage3_cached_A3_evaluation_s": {
+          "total": 0.0024,
+          "mean": 0.001,
+          "median": 0.0,
+          "p95": 0.002,
+          "max": 0.002
+        },
+        "full_artifacts_mib": {
+          "total": 13.345,
+          "mean": 3.336,
+          "median": 3.978,
+          "p95": 4.754,
+          "max": 4.754
+        }
+      }
+    },
+    "02-Semiurban": {
+      "window_count": 4,
+      "B2_applicability_and_S1_reconciliation": {
+        "S1_reconstructed_transaction_windows": 1,
+        "B2_applicable_windows_with_control_objects": 1,
+        "windows_with_unpaired_control_replies_only_no_cot6": [],
+        "not_applicable_no_control_command_windows": 3
+      },
+      "Q1_temporal_only_vs_mirage": {
+        "B1_candidate_temporal_relations": {
+          "total": 7094,
+          "mean": 1773.5,
+          "median": 1464.5,
+          "p95": 4073.0,
+          "max": 4073
+        },
+        "B1_unbounded_15s_temporal_pairs": {
+          "total": 34040,
+          "mean": 8510.0,
+          "median": 7430.0,
+          "p95": 19057.0,
+          "max": 19057
+        },
+        "B1_unsubstantiated_temporal_candidates": {
+          "total": 1114,
+          "mean": 278.5,
+          "median": 330.5,
+          "p95": 381.0,
+          "max": 381
+        },
+        "B1_explicit_evidence_constraint_conflicts": {
+          "total": 5978,
+          "mean": 1494.5,
+          "median": 1099.0,
+          "p95": 3761.0,
+          "max": 3761
+        },
+        "B1_corroborated_same_device_candidates": {
+          "total": 2,
+          "mean": 0.5,
+          "median": 0.5,
+          "p95": 1.0,
+          "max": 1
+        },
+        "B1_topology_cross_device_candidates": {
+          "total": 6393,
+          "mean": 1598.25,
+          "median": 1458.5,
+          "p95": 3401.0,
+          "max": 3401
+        },
+        "B1_topology_same_device_separate_asdu_candidates": {
+          "total": 555,
+          "mean": 138.75,
+          "median": 3.0,
+          "p95": 549.0,
+          "max": 549
+        },
+        "B1_topology_same_asdu_co_report_candidates": {
+          "total": 146,
+          "mean": 36.5,
+          "median": 9.0,
+          "p95": 123.0,
+          "max": 123
+        },
+        "B1_conflict_endpoint_quality_or_test_bit": {
+          "total": 1203,
+          "mean": 300.75,
+          "median": 2.5,
+          "p95": 1198.0,
+          "max": 1198
+        },
+        "B1_conflict_endpoint_transient_not_sustained": {
+          "total": 5951,
+          "mean": 1487.75,
+          "median": 1097.0,
+          "p95": 3754.0,
+          "max": 3754
+        },
+        "B1_conflict_same_device_direction_or_ratio": {
+          "total": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0
+        },
+        "B1_conflict_same_device_change_type_or_side": {
+          "total": 552,
+          "mean": 138.0,
+          "median": 2.5,
+          "p95": 547.0,
+          "max": 547
+        },
+        "B1_conflict_same_asdu_co_report_temporal_ordering": {
+          "total": 146,
+          "mean": 36.5,
+          "median": 9.0,
+          "p95": 123.0,
+          "max": 123
+        },
+        "MIRAGE_OT_supported_storyline_steps": {
+          "total": 7,
+          "mean": 1.75,
+          "median": 0.5,
+          "p95": 6.0,
+          "max": 6
+        },
+        "MIRAGE_OT_cross_rtu_verified_bridges": {
+          "total": 1,
+          "mean": 0.25,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "paired_difference_explicit_conflicts_B1_minus_MIRAGE": {
+          "n_paired_windows": 4,
+          "difference_distribution": {
+            "total": 5978.0,
+            "mean": 1494.5,
+            "median": 1099.0,
+            "p95": 3761.0,
+            "max": 3761.0
+          },
+          "descriptive_bootstrap_95ci": [
+            200.5,
+            2916.25
+          ],
+          "windows_where_baseline_exceeds_mirage": 4,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 0,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        },
+        "paired_difference_unsubstantiated_candidates_B1": {
+          "n_paired_windows": 4,
+          "difference_distribution": {
+            "total": 1114.0,
+            "mean": 278.5,
+            "median": 330.5,
+            "p95": 381.0,
+            "max": 381.0
+          },
+          "descriptive_bootstrap_95ci": [
+            141.5,
+            365.5
+          ],
+          "windows_where_baseline_exceeds_mirage": 4,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 0,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        }
+      },
+      "Q2_protocol_only_vs_mirage": {
+        "control_command_windows_handled": 1,
+        "no_command_windows_not_applicable": 3,
+        "B2_retained_info_in_no_command_windows": {
+          "total": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0
+        },
+        "B2_verified_command_transitions": {
+          "total": 1,
+          "mean": 0.25,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "omitted_verified_non_command_anchors": {
+          "total": 214,
+          "mean": 53.5,
+          "median": 66.0,
+          "p95": 67.0,
+          "max": 67
+        },
+        "omitted_supported_behavioral_transition_chains": {
+          "total": 1,
+          "mean": 0.25,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "omitted_cross_rtu_verified_bridges": {
+          "total": 1,
+          "mean": 0.25,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "unexpressible_network_anomalies_arp_and_link": {
+          "total": 8,
+          "mean": 2.0,
+          "median": 1.5,
+          "p95": 5.0,
+          "max": 5
+        },
+        "paired_difference_verified_anchors_MIRAGE_minus_B2": {
+          "n_paired_windows": 4,
+          "difference_distribution": {
+            "total": 214.0,
+            "mean": 53.5,
+            "median": 66.0,
+            "p95": 67.0,
+            "max": 67.0
+          },
+          "descriptive_bootstrap_95ci": [
+            27.75,
+            66.75
+          ],
+          "windows_where_baseline_exceeds_mirage": 4,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 0,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        }
+      },
+      "Q3_ablation_A1_without_behavioral_gate": {
+        "all_windows": {
+          "window_count": 4,
+          "originally_supported_relations": {
+            "total": 3,
+            "mean": 0.75,
+            "median": 0.5,
+            "p95": 2.0,
+            "max": 2
+          },
+          "unsupported_promotions_total": {
+            "total": 5,
+            "mean": 1.25,
+            "median": 0.5,
+            "p95": 4.0,
+            "max": 4
+          },
+          "unsupported_promotions_behavioral": {
+            "total": 5,
+            "mean": 1.25,
+            "median": 0.5,
+            "p95": 4.0,
+            "max": 4
+          },
+          "unsupported_promotions_tx_inference": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "ungated_spurious_cross_rtu_bridge_promotions": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_quality_or_test_bit": {
+            "total": 1,
+            "mean": 0.25,
+            "median": 0.0,
+            "p95": 1.0,
+            "max": 1
+          },
+          "violation_persistence_insufficient": {
+            "total": 1,
+            "mean": 0.25,
+            "median": 0.0,
+            "p95": 1.0,
+            "max": 1
+          },
+          "violation_prior_state_baseline_missing": {
+            "total": 1,
+            "mean": 0.25,
+            "median": 0.0,
+            "p95": 1.0,
+            "max": 1
+          },
+          "violation_change_type_mismatch": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_magnitude_or_direction_conflict": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_non_complementary_or_disjoint": {
+            "total": 5,
+            "mean": 1.25,
+            "median": 0.5,
+            "p95": 4.0,
+            "max": 4
+          },
+          "paired_difference_A1_minus_MIRAGE": {
+            "n_paired_windows": 4,
+            "difference_distribution": {
+              "total": 5.0,
+              "mean": 1.25,
+              "median": 0.5,
+              "p95": 4.0,
+              "max": 4.0
+            },
+            "descriptive_bootstrap_95ci": [
+              0.0,
+              3.0
+            ],
+            "windows_where_baseline_exceeds_mirage": 2,
+            "windows_where_mirage_exceeds_baseline": 0,
+            "windows_tied": 2,
+            "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+          }
+        },
+        "sensitivity_excluding_max_outlier_ev_52f5ee": {
+          "window_count": 4,
+          "originally_supported_relations": {
+            "total": 3,
+            "mean": 0.75,
+            "median": 0.5,
+            "p95": 2.0,
+            "max": 2
+          },
+          "unsupported_promotions_total": {
+            "total": 5,
+            "mean": 1.25,
+            "median": 0.5,
+            "p95": 4.0,
+            "max": 4
+          },
+          "unsupported_promotions_behavioral": {
+            "total": 5,
+            "mean": 1.25,
+            "median": 0.5,
+            "p95": 4.0,
+            "max": 4
+          },
+          "unsupported_promotions_tx_inference": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "ungated_spurious_cross_rtu_bridge_promotions": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_quality_or_test_bit": {
+            "total": 1,
+            "mean": 0.25,
+            "median": 0.0,
+            "p95": 1.0,
+            "max": 1
+          },
+          "violation_persistence_insufficient": {
+            "total": 1,
+            "mean": 0.25,
+            "median": 0.0,
+            "p95": 1.0,
+            "max": 1
+          },
+          "violation_prior_state_baseline_missing": {
+            "total": 1,
+            "mean": 0.25,
+            "median": 0.0,
+            "p95": 1.0,
+            "max": 1
+          },
+          "violation_change_type_mismatch": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_magnitude_or_direction_conflict": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_non_complementary_or_disjoint": {
+            "total": 5,
+            "mean": 1.25,
+            "median": 0.5,
+            "p95": 4.0,
+            "max": 4
+          },
+          "paired_difference_A1_minus_MIRAGE": {
+            "n_paired_windows": 4,
+            "difference_distribution": {
+              "total": 5.0,
+              "mean": 1.25,
+              "median": 0.5,
+              "p95": 4.0,
+              "max": 4.0
+            },
+            "descriptive_bootstrap_95ci": [
+              0.0,
+              3.0
+            ],
+            "windows_where_baseline_exceeds_mirage": 2,
+            "windows_where_mirage_exceeds_baseline": 0,
+            "windows_tied": 2,
+            "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+          }
+        }
+      },
+      "Q4_ablation_A2_without_provenance_dedup": {
+        "raw_observation_count": {
+          "total": 451,
+          "mean": 112.75,
+          "median": 119.5,
+          "p95": 206.0,
+          "max": 206
+        },
+        "raw_network_observation_count": {
+          "total": 282,
+          "mean": 70.5,
+          "median": 66.0,
+          "p95": 145.0,
+          "max": 145
+        },
+        "distinct_source_container_count": {
+          "total": 142,
+          "mean": 35.5,
+          "median": 36.0,
+          "p95": 66.0,
+          "max": 66
+        },
+        "distinct_asdu_container_count": {
+          "total": 137,
+          "mean": 34.25,
+          "median": 33.5,
+          "p95": 66.0,
+          "max": 66
+        },
+        "per_window_rtu_count_summed_across_windows": {
+          "total": 130,
+          "mean": 32.5,
+          "median": 33.0,
+          "p95": 63.0,
+          "max": 63
+        },
+        "unique_rtu_ips_in_scenario_count": 63,
+        "unique_rtu_ips_in_scenario": [
+          "172.16.12.1",
+          "172.16.13.1",
+          "172.16.14.1",
+          "172.16.14.2",
+          "172.16.14.3",
+          "172.16.14.4",
+          "172.16.14.5",
+          "172.16.14.6",
+          "172.16.14.7",
+          "172.16.7.1",
+          "172.16.7.10",
+          "172.16.7.11",
+          "172.16.7.12",
+          "172.16.7.13",
+          "172.16.7.14",
+          "172.16.7.15",
+          "172.16.7.16",
+          "172.16.7.17",
+          "172.16.7.18",
+          "172.16.7.19",
+          "172.16.7.2",
+          "172.16.7.20",
+          "172.16.7.21",
+          "172.16.7.22",
+          "172.16.7.23",
+          "172.16.7.24",
+          "172.16.7.25",
+          "172.16.7.26",
+          "172.16.7.27",
+          "172.16.7.28",
+          "172.16.7.29",
+          "172.16.7.3",
+          "172.16.7.30",
+          "172.16.7.31",
+          "172.16.7.33",
+          "172.16.7.4",
+          "172.16.7.6",
+          "172.16.7.7",
+          "172.16.7.8",
+          "172.16.7.9",
+          "172.16.8.1",
+          "172.16.8.10",
+          "172.16.8.11",
+          "172.16.8.12",
+          "172.16.8.13",
+          "172.16.8.14",
+          "172.16.8.15",
+          "172.16.8.16",
+          "172.16.8.17",
+          "172.16.8.18",
+          "172.16.8.2",
+          "172.16.8.3",
+          "172.16.8.4",
+          "172.16.8.5",
+          "172.16.8.6",
+          "172.16.8.7",
+          "172.16.8.8",
+          "172.16.8.9",
+          "172.16.9.2",
+          "172.16.9.3",
+          "172.16.9.4",
+          "172.16.9.5",
+          "172.16.9.6"
+        ],
+        "true_cross_vantage_mirror_duplicate_count": {
+          "total": 50,
+          "mean": 12.5,
+          "median": 12.5,
+          "p95": 25.0,
+          "max": 25
+        },
+        "same_asdu_different_ioa_point_count": {
+          "total": 35,
+          "mean": 8.75,
+          "median": 2.0,
+          "p95": 31.0,
+          "max": 31
+        },
+        "distinct_messages_in_same_tcp_session_count": {
+          "total": 35,
+          "mean": 8.75,
+          "median": 0.0,
+          "p95": 35.0,
+          "max": 35
+        },
+        "distinct_time_network_events_in_anchor_count": {
+          "total": 20,
+          "mean": 5.0,
+          "median": 0.0,
+          "p95": 20.0,
+          "max": 20
+        },
+        "ipal_derived_observation_count": {
+          "total": 169,
+          "mean": 42.25,
+          "median": 50.5,
+          "p95": 67.0,
+          "max": 67
+        },
+        "unknown_provenance_relation_count": {
+          "total": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0
+        },
+        "true_duplicate_or_derived_source_inflation_count": {
+          "total": 254,
+          "mean": 63.5,
+          "median": 79.5,
+          "p95": 93.0,
+          "max": 93
+        },
+        "multi_event_anchor_aggregation_count": {
+          "total": 55,
+          "mean": 13.75,
+          "median": 0.0,
+          "p95": 55.0,
+          "max": 55
+        },
+        "total_excess_observations_over_containers": {
+          "total": 309,
+          "mean": 77.25,
+          "median": 82.0,
+          "p95": 143.0,
+          "max": 143
+        },
+        "strict_duplicate_and_derived_inflation_factor": {
+          "total": 15.1948,
+          "mean": 3.799,
+          "median": 2.403,
+          "p95": 8.889,
+          "max": 8.889
+        },
+        "raw_to_container_ratio": {
+          "total": 16.0678,
+          "mean": 4.017,
+          "median": 2.839,
+          "p95": 8.889,
+          "max": 8.889
+        },
+        "spurious_multi_source_storylines_without_dedup": {
+          "total": 544,
+          "mean": 136.0,
+          "median": 76.0,
+          "p95": 392.0,
+          "max": 392
+        },
+        "paired_difference_true_duplicate_and_derived_inflation": {
+          "n_paired_windows": 4,
+          "difference_distribution": {
+            "total": 254.0,
+            "mean": 63.5,
+            "median": 79.5,
+            "p95": 93.0,
+            "max": 93.0
+          },
+          "descriptive_bootstrap_95ci": [
+            23.5,
+            90.5
+          ],
+          "windows_where_baseline_exceeds_mirage": 4,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 0,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        }
+      },
+      "Q5_ablation_A3_without_incident_synthesis_and_E3_traceability": {
+        "local_storyline_count": {
+          "total": 550,
+          "mean": 137.5,
+          "median": 76.5,
+          "p95": 392.0,
+          "max": 392
+        },
+        "deduplicated_source_containers": {
+          "total": 142,
+          "mean": 35.5,
+          "median": 36.0,
+          "p95": 66.0,
+          "max": 66
+        },
+        "rtu_asdu_bundles": {
+          "total": 138,
+          "mean": 34.5,
+          "median": 36.0,
+          "p95": 66.0,
+          "max": 66
+        },
+        "co_reported_points_collapsed": {
+          "total": 10,
+          "mean": 2.5,
+          "median": 2.0,
+          "p95": 6.0,
+          "max": 6
+        },
+        "cross_rtu_verified_bridges": {
+          "total": 1,
+          "mean": 0.25,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "multi_bundle_bridged_components": {
+          "total": 1,
+          "mean": 0.25,
+          "median": 0.0,
+          "p95": 1.0,
+          "max": 1
+        },
+        "candidate_scenario_phases": {
+          "total": 5,
+          "mean": 1.25,
+          "median": 1.0,
+          "p95": 2.0,
+          "max": 2
+        },
+        "competing_explanations_generated": {
+          "total": 7,
+          "mean": 1.75,
+          "median": 2.0,
+          "p95": 3.0,
+          "max": 3
+        },
+        "E3_four_level_traceability": {
+          "1_evidence_citation_presence_pass_count": 4,
+          "1_evidence_citation_presence_pass_rate": 1.0,
+          "2_evidence_id_resolution_pass_count": 4,
+          "2_evidence_id_resolution_pass_rate": 1.0,
+          "3_evidence_to_fact_anchor_consistency_pass_count": 4,
+          "3_evidence_to_fact_anchor_consistency_pass_rate": 1.0,
+          "4_full_lineage_consistency_pass_count": 4,
+          "4_full_lineage_consistency_pass_rate": 1.0,
+          "failed_lineage_consistency_episodes": []
+        }
+      },
+      "E4_computational_cost": {
+        "shared_indexing_s": {
+          "total": 176.964,
+          "mean": 44.241,
+          "median": 45.877,
+          "p95": 62.071,
+          "max": 62.071
+        },
+        "shared_sqlite_mib": {
+          "total": 786.183,
+          "mean": 196.546,
+          "median": 183.445,
+          "p95": 322.422,
+          "max": 322.422
+        },
+        "full_pipeline_reconstruction_and_synthesis_s": {
+          "total": 80.616,
+          "mean": 20.154,
+          "median": 19.191,
+          "p95": 35.512,
+          "max": 35.512
+        },
+        "standalone_synthesis_step_s": {
+          "total": 0.0066,
+          "mean": 0.002,
+          "median": 0.001,
+          "p95": 0.004,
+          "max": 0.004
+        },
+        "stage3_cached_B1_evaluation_s": {
+          "total": 0.0437,
+          "mean": 0.011,
+          "median": 0.012,
+          "p95": 0.02,
+          "max": 0.02
+        },
+        "stage3_cached_B2_evaluation_s": {
+          "total": 0.0002,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        "stage3_cached_A1_evaluation_s": {
+          "total": 0.0009,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.001,
+          "max": 0.001
+        },
+        "stage3_cached_A2_evaluation_s": {
+          "total": 0.0598,
+          "mean": 0.015,
+          "median": 0.015,
+          "p95": 0.027,
+          "max": 0.027
+        },
+        "stage3_cached_A3_evaluation_s": {
+          "total": 0.0032,
+          "mean": 0.001,
+          "median": 0.0,
+          "p95": 0.002,
+          "max": 0.002
+        },
+        "full_artifacts_mib": {
+          "total": 72.341,
+          "mean": 18.085,
+          "median": 10.015,
+          "p95": 47.753,
+          "max": 47.753
+        }
+      }
+    },
+    "03-Rural": {
+      "window_count": 4,
+      "B2_applicability_and_S1_reconciliation": {
+        "S1_reconstructed_transaction_windows": 1,
+        "B2_applicable_windows_with_control_objects": 1,
+        "windows_with_unpaired_control_replies_only_no_cot6": [],
+        "not_applicable_no_control_command_windows": 3
+      },
+      "Q1_temporal_only_vs_mirage": {
+        "B1_candidate_temporal_relations": {
+          "total": 2145,
+          "mean": 536.25,
+          "median": 508.0,
+          "p95": 1126.0,
+          "max": 1126
+        },
+        "B1_unbounded_15s_temporal_pairs": {
+          "total": 10795,
+          "mean": 2698.75,
+          "median": 2080.5,
+          "p95": 6631.0,
+          "max": 6631
+        },
+        "B1_unsubstantiated_temporal_candidates": {
+          "total": 886,
+          "mean": 221.5,
+          "median": 158.0,
+          "p95": 570.0,
+          "max": 570
+        },
+        "B1_explicit_evidence_constraint_conflicts": {
+          "total": 1254,
+          "mean": 313.5,
+          "median": 350.0,
+          "p95": 552.0,
+          "max": 552
+        },
+        "B1_corroborated_same_device_candidates": {
+          "total": 5,
+          "mean": 1.25,
+          "median": 0.5,
+          "p95": 4.0,
+          "max": 4
+        },
+        "B1_topology_cross_device_candidates": {
+          "total": 2028,
+          "mean": 507.0,
+          "median": 502.5,
+          "p95": 1021.0,
+          "max": 1021
+        },
+        "B1_topology_same_device_separate_asdu_candidates": {
+          "total": 13,
+          "mean": 3.25,
+          "median": 1.5,
+          "p95": 10.0,
+          "max": 10
+        },
+        "B1_topology_same_asdu_co_report_candidates": {
+          "total": 104,
+          "mean": 26.0,
+          "median": 4.5,
+          "p95": 95.0,
+          "max": 95
+        },
+        "B1_conflict_endpoint_quality_or_test_bit": {
+          "total": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0
+        },
+        "B1_conflict_endpoint_transient_not_sustained": {
+          "total": 1154,
+          "mean": 288.5,
+          "median": 307.5,
+          "p95": 537.0,
+          "max": 537
+        },
+        "B1_conflict_same_device_direction_or_ratio": {
+          "total": 2,
+          "mean": 0.5,
+          "median": 0.0,
+          "p95": 2.0,
+          "max": 2
+        },
+        "B1_conflict_same_device_change_type_or_side": {
+          "total": 5,
+          "mean": 1.25,
+          "median": 0.0,
+          "p95": 5.0,
+          "max": 5
+        },
+        "B1_conflict_same_asdu_co_report_temporal_ordering": {
+          "total": 104,
+          "mean": 26.0,
+          "median": 4.5,
+          "p95": 95.0,
+          "max": 95
+        },
+        "MIRAGE_OT_supported_storyline_steps": {
+          "total": 7,
+          "mean": 1.75,
+          "median": 1.5,
+          "p95": 4.0,
+          "max": 4
+        },
+        "MIRAGE_OT_cross_rtu_verified_bridges": {
+          "total": 4,
+          "mean": 1.0,
+          "median": 0.0,
+          "p95": 4.0,
+          "max": 4
+        },
+        "paired_difference_explicit_conflicts_B1_minus_MIRAGE": {
+          "n_paired_windows": 4,
+          "difference_distribution": {
+            "total": 1254.0,
+            "mean": 313.5,
+            "median": 350.0,
+            "p95": 552.0,
+            "max": 552.0
+          },
+          "descriptive_bootstrap_95ci": [
+            82.5,
+            544.5
+          ],
+          "windows_where_baseline_exceeds_mirage": 4,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 0,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        },
+        "paired_difference_unsubstantiated_candidates_B1": {
+          "n_paired_windows": 4,
+          "difference_distribution": {
+            "total": 886.0,
+            "mean": 221.5,
+            "median": 158.0,
+            "p95": 570.0,
+            "max": 570.0
+          },
+          "descriptive_bootstrap_95ci": [
+            12.0,
+            500.5
+          ],
+          "windows_where_baseline_exceeds_mirage": 3,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 1,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        }
+      },
+      "Q2_protocol_only_vs_mirage": {
+        "control_command_windows_handled": 1,
+        "no_command_windows_not_applicable": 3,
+        "B2_retained_info_in_no_command_windows": {
+          "total": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0
+        },
+        "B2_verified_command_transitions": {
+          "total": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0
+        },
+        "omitted_verified_non_command_anchors": {
+          "total": 186,
+          "mean": 46.5,
+          "median": 34.5,
+          "p95": 117.0,
+          "max": 117
+        },
+        "omitted_supported_behavioral_transition_chains": {
+          "total": 4,
+          "mean": 1.0,
+          "median": 0.0,
+          "p95": 4.0,
+          "max": 4
+        },
+        "omitted_cross_rtu_verified_bridges": {
+          "total": 4,
+          "mean": 1.0,
+          "median": 0.0,
+          "p95": 4.0,
+          "max": 4
+        },
+        "unexpressible_network_anomalies_arp_and_link": {
+          "total": 4,
+          "mean": 1.0,
+          "median": 0.0,
+          "p95": 4.0,
+          "max": 4
+        },
+        "paired_difference_verified_anchors_MIRAGE_minus_B2": {
+          "n_paired_windows": 4,
+          "difference_distribution": {
+            "total": 186.0,
+            "mean": 46.5,
+            "median": 34.5,
+            "p95": 117.0,
+            "max": 117.0
+          },
+          "descriptive_bootstrap_95ci": [
+            6.5,
+            101.75
+          ],
+          "windows_where_baseline_exceeds_mirage": 3,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 1,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        }
+      },
+      "Q3_ablation_A1_without_behavioral_gate": {
+        "all_windows": {
+          "window_count": 4,
+          "originally_supported_relations": {
+            "total": 4,
+            "mean": 1.0,
+            "median": 0.0,
+            "p95": 4.0,
+            "max": 4
+          },
+          "unsupported_promotions_total": {
+            "total": 8,
+            "mean": 2.0,
+            "median": 1.0,
+            "p95": 6.0,
+            "max": 6
+          },
+          "unsupported_promotions_behavioral": {
+            "total": 8,
+            "mean": 2.0,
+            "median": 1.0,
+            "p95": 6.0,
+            "max": 6
+          },
+          "unsupported_promotions_tx_inference": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "ungated_spurious_cross_rtu_bridge_promotions": {
+            "total": 4,
+            "mean": 1.0,
+            "median": 1.0,
+            "p95": 2.0,
+            "max": 2
+          },
+          "violation_quality_or_test_bit": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_persistence_insufficient": {
+            "total": 3,
+            "mean": 0.75,
+            "median": 0.5,
+            "p95": 2.0,
+            "max": 2
+          },
+          "violation_prior_state_baseline_missing": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_change_type_mismatch": {
+            "total": 1,
+            "mean": 0.25,
+            "median": 0.0,
+            "p95": 1.0,
+            "max": 1
+          },
+          "violation_magnitude_or_direction_conflict": {
+            "total": 2,
+            "mean": 0.5,
+            "median": 0.0,
+            "p95": 2.0,
+            "max": 2
+          },
+          "violation_non_complementary_or_disjoint": {
+            "total": 4,
+            "mean": 1.0,
+            "median": 0.0,
+            "p95": 4.0,
+            "max": 4
+          },
+          "paired_difference_A1_minus_MIRAGE": {
+            "n_paired_windows": 4,
+            "difference_distribution": {
+              "total": 8.0,
+              "mean": 2.0,
+              "median": 1.0,
+              "p95": 6.0,
+              "max": 6.0
+            },
+            "descriptive_bootstrap_95ci": [
+              0.0,
+              5.0
+            ],
+            "windows_where_baseline_exceeds_mirage": 2,
+            "windows_where_mirage_exceeds_baseline": 0,
+            "windows_tied": 2,
+            "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+          }
+        },
+        "sensitivity_excluding_max_outlier_ev_52f5ee": {
+          "window_count": 4,
+          "originally_supported_relations": {
+            "total": 4,
+            "mean": 1.0,
+            "median": 0.0,
+            "p95": 4.0,
+            "max": 4
+          },
+          "unsupported_promotions_total": {
+            "total": 8,
+            "mean": 2.0,
+            "median": 1.0,
+            "p95": 6.0,
+            "max": 6
+          },
+          "unsupported_promotions_behavioral": {
+            "total": 8,
+            "mean": 2.0,
+            "median": 1.0,
+            "p95": 6.0,
+            "max": 6
+          },
+          "unsupported_promotions_tx_inference": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "ungated_spurious_cross_rtu_bridge_promotions": {
+            "total": 4,
+            "mean": 1.0,
+            "median": 1.0,
+            "p95": 2.0,
+            "max": 2
+          },
+          "violation_quality_or_test_bit": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_persistence_insufficient": {
+            "total": 3,
+            "mean": 0.75,
+            "median": 0.5,
+            "p95": 2.0,
+            "max": 2
+          },
+          "violation_prior_state_baseline_missing": {
+            "total": 0,
+            "mean": 0.0,
+            "median": 0.0,
+            "p95": 0.0,
+            "max": 0
+          },
+          "violation_change_type_mismatch": {
+            "total": 1,
+            "mean": 0.25,
+            "median": 0.0,
+            "p95": 1.0,
+            "max": 1
+          },
+          "violation_magnitude_or_direction_conflict": {
+            "total": 2,
+            "mean": 0.5,
+            "median": 0.0,
+            "p95": 2.0,
+            "max": 2
+          },
+          "violation_non_complementary_or_disjoint": {
+            "total": 4,
+            "mean": 1.0,
+            "median": 0.0,
+            "p95": 4.0,
+            "max": 4
+          },
+          "paired_difference_A1_minus_MIRAGE": {
+            "n_paired_windows": 4,
+            "difference_distribution": {
+              "total": 8.0,
+              "mean": 2.0,
+              "median": 1.0,
+              "p95": 6.0,
+              "max": 6.0
+            },
+            "descriptive_bootstrap_95ci": [
+              0.0,
+              5.0
+            ],
+            "windows_where_baseline_exceeds_mirage": 2,
+            "windows_where_mirage_exceeds_baseline": 0,
+            "windows_tied": 2,
+            "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+          }
+        }
+      },
+      "Q4_ablation_A2_without_provenance_dedup": {
+        "raw_observation_count": {
+          "total": 798,
+          "mean": 199.5,
+          "median": 101.5,
+          "p95": 590.0,
+          "max": 590
+        },
+        "raw_network_observation_count": {
+          "total": 497,
+          "mean": 124.25,
+          "median": 69.0,
+          "p95": 355.0,
+          "max": 355
+        },
+        "distinct_source_container_count": {
+          "total": 138,
+          "mean": 34.5,
+          "median": 34.0,
+          "p95": 68.0,
+          "max": 68
+        },
+        "distinct_asdu_container_count": {
+          "total": 134,
+          "mean": 33.5,
+          "median": 32.0,
+          "p95": 68.0,
+          "max": 68
+        },
+        "per_window_rtu_count_summed_across_windows": {
+          "total": 117,
+          "mean": 29.25,
+          "median": 31.5,
+          "p95": 53.0,
+          "max": 53
+        },
+        "unique_rtu_ips_in_scenario_count": 53,
+        "unique_rtu_ips_in_scenario": [
+          "172.16.10.1",
+          "172.16.11.1",
+          "172.16.11.2",
+          "172.16.12.1",
+          "172.16.12.2",
+          "172.16.12.3",
+          "172.16.12.4",
+          "172.16.12.5",
+          "172.16.12.6",
+          "172.16.12.7",
+          "172.16.12.8",
+          "172.16.13.1",
+          "172.16.2.5",
+          "172.16.3.1",
+          "172.16.3.10",
+          "172.16.3.11",
+          "172.16.3.12",
+          "172.16.3.13",
+          "172.16.3.2",
+          "172.16.3.3",
+          "172.16.3.4",
+          "172.16.3.7",
+          "172.16.3.8",
+          "172.16.3.9",
+          "172.16.4.1",
+          "172.16.4.2",
+          "172.16.4.3",
+          "172.16.4.4",
+          "172.16.5.1",
+          "172.16.5.2",
+          "172.16.5.3",
+          "172.16.5.4",
+          "172.16.5.5",
+          "172.16.5.6",
+          "172.16.5.7",
+          "172.16.5.8",
+          "172.16.6.1",
+          "172.16.6.2",
+          "172.16.6.3",
+          "172.16.6.4",
+          "172.16.6.5",
+          "172.16.6.6",
+          "172.16.7.1",
+          "172.16.8.1",
+          "172.16.9.1",
+          "172.16.9.10",
+          "172.16.9.2",
+          "172.16.9.3",
+          "172.16.9.4",
+          "172.16.9.5",
+          "172.16.9.6",
+          "172.16.9.7",
+          "172.16.9.8"
+        ],
+        "true_cross_vantage_mirror_duplicate_count": {
+          "total": 159,
+          "mean": 39.75,
+          "median": 18.5,
+          "p95": 120.0,
+          "max": 120
+        },
+        "same_asdu_different_ioa_point_count": {
+          "total": 168,
+          "mean": 42.0,
+          "median": 0.5,
+          "p95": 167.0,
+          "max": 167
+        },
+        "distinct_messages_in_same_tcp_session_count": {
+          "total": 13,
+          "mean": 3.25,
+          "median": 0.0,
+          "p95": 13.0,
+          "max": 13
+        },
+        "distinct_time_network_events_in_anchor_count": {
+          "total": 19,
+          "mean": 4.75,
+          "median": 0.0,
+          "p95": 19.0,
+          "max": 19
+        },
+        "ipal_derived_observation_count": {
+          "total": 301,
+          "mean": 75.25,
+          "median": 32.5,
+          "p95": 235.0,
+          "max": 235
+        },
+        "unknown_provenance_relation_count": {
+          "total": 0,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0
+        },
+        "true_duplicate_or_derived_source_inflation_count": {
+          "total": 628,
+          "mean": 157.0,
+          "median": 51.5,
+          "p95": 522.0,
+          "max": 522
+        },
+        "multi_event_anchor_aggregation_count": {
+          "total": 32,
+          "mean": 8.0,
+          "median": 0.0,
+          "p95": 32.0,
+          "max": 32
+        },
+        "total_excess_observations_over_containers": {
+          "total": 660,
+          "mean": 165.0,
+          "median": 67.5,
+          "p95": 522.0,
+          "max": 522
+        },
+        "strict_duplicate_and_derived_inflation_factor": {
+          "total": 15.7541,
+          "mean": 3.939,
+          "median": 2.577,
+          "p95": 8.677,
+          "max": 8.677
+        },
+        "raw_to_container_ratio": {
+          "total": 18.2156,
+          "mean": 4.554,
+          "median": 3.52,
+          "p95": 8.677,
+          "max": 8.677
+        },
+        "spurious_multi_source_storylines_without_dedup": {
+          "total": 402,
+          "mean": 100.5,
+          "median": 113.5,
+          "p95": 175.0,
+          "max": 175
+        },
+        "paired_difference_true_duplicate_and_derived_inflation": {
+          "n_paired_windows": 4,
+          "difference_distribution": {
+            "total": 628.0,
+            "mean": 157.0,
+            "median": 51.5,
+            "p95": 522.0,
+            "max": 522.0
+          },
+          "descriptive_bootstrap_95ci": [
+            7.5,
+            414.25
+          ],
+          "windows_where_baseline_exceeds_mirage": 4,
+          "windows_where_mirage_exceeds_baseline": 0,
+          "windows_tied": 0,
+          "independence_caveat": "Descriptive non-parametric bootstrap interval across the evaluated windows. Because multiple windows are sliced from the same continuous Sherlock recording, windows are not strictly i.i.d.; this interval is a descriptive summary of sample variability rather than a formal i.i.d. hypothesis test."
+        }
+      },
+      "Q5_ablation_A3_without_incident_synthesis_and_E3_traceability": {
+        "local_storyline_count": {
+          "total": 409,
+          "mean": 102.25,
+          "median": 113.5,
+          "p95": 179.0,
+          "max": 179
+        },
+        "deduplicated_source_containers": {
+          "total": 138,
+          "mean": 34.5,
+          "median": 34.0,
+          "p95": 68.0,
+          "max": 68
+        },
+        "rtu_asdu_bundles": {
+          "total": 136,
+          "mean": 34.0,
+          "median": 34.0,
+          "p95": 68.0,
+          "max": 68
+        },
+        "co_reported_points_collapsed": {
+          "total": 50,
+          "mean": 12.5,
+          "median": 0.5,
+          "p95": 49.0,
+          "max": 49
+        },
+        "cross_rtu_verified_bridges": {
+          "total": 4,
+          "mean": 1.0,
+          "median": 0.0,
+          "p95": 4.0,
+          "max": 4
+        },
+        "multi_bundle_bridged_components": {
+          "total": 2,
+          "mean": 0.5,
+          "median": 0.0,
+          "p95": 2.0,
+          "max": 2
+        },
+        "candidate_scenario_phases": {
+          "total": 9,
+          "mean": 2.25,
+          "median": 2.0,
+          "p95": 4.0,
+          "max": 4
+        },
+        "competing_explanations_generated": {
+          "total": 7,
+          "mean": 1.75,
+          "median": 2.0,
+          "p95": 2.0,
+          "max": 2
+        },
+        "E3_four_level_traceability": {
+          "1_evidence_citation_presence_pass_count": 4,
+          "1_evidence_citation_presence_pass_rate": 1.0,
+          "2_evidence_id_resolution_pass_count": 4,
+          "2_evidence_id_resolution_pass_rate": 1.0,
+          "3_evidence_to_fact_anchor_consistency_pass_count": 4,
+          "3_evidence_to_fact_anchor_consistency_pass_rate": 1.0,
+          "4_full_lineage_consistency_pass_count": 4,
+          "4_full_lineage_consistency_pass_rate": 1.0,
+          "failed_lineage_consistency_episodes": []
+        }
+      },
+      "E4_computational_cost": {
+        "shared_indexing_s": {
+          "total": 133.994,
+          "mean": 33.498,
+          "median": 26.465,
+          "p95": 65.282,
+          "max": 65.282
+        },
+        "shared_sqlite_mib": {
+          "total": 485.121,
+          "mean": 121.28,
+          "median": 57.737,
+          "p95": 348.531,
+          "max": 348.531
+        },
+        "full_pipeline_reconstruction_and_synthesis_s": {
+          "total": 37.687,
+          "mean": 9.422,
+          "median": 5.248,
+          "p95": 26.175,
+          "max": 26.175
+        },
+        "standalone_synthesis_step_s": {
+          "total": 0.0058,
+          "mean": 0.001,
+          "median": 0.001,
+          "p95": 0.003,
+          "max": 0.003
+        },
+        "stage3_cached_B1_evaluation_s": {
+          "total": 0.011,
+          "mean": 0.003,
+          "median": 0.002,
+          "p95": 0.006,
+          "max": 0.006
+        },
+        "stage3_cached_B2_evaluation_s": {
+          "total": 0.0001,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        "stage3_cached_A1_evaluation_s": {
+          "total": 0.0007,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "max": 0.0
+        },
+        "stage3_cached_A2_evaluation_s": {
+          "total": 0.0816,
+          "mean": 0.02,
+          "median": 0.018,
+          "p95": 0.045,
+          "max": 0.045
+        },
+        "stage3_cached_A3_evaluation_s": {
+          "total": 0.0021,
+          "mean": 0.001,
+          "median": 0.001,
+          "p95": 0.001,
+          "max": 0.001
+        },
+        "full_artifacts_mib": {
+          "total": 56.221,
+          "mean": 14.055,
+          "median": 15.669,
+          "p95": 24.321,
+          "max": 24.321
+        }
+      }
+    }
+  },
+  "representative_real_sherlock_case_studies_count": 3,
+  "representative_real_sherlock_case_studies": [
+    {
+      "case_id": "C1_command_passed_consistency_gate",
+      "category": "IEC-104 control command passing pre/post transition consistency gate",
+      "selection_rule": "Select `01-Basic` window `ev_0961f1c2da8a257e3ebc` (setpoint command on `sgen.6`) and `02-Semiurban` window `ev_229f54b33cd3bfeb8f67` (binary command on `switch.335:closed`), where `COT=6 -> COT=7 (P/N=0)` is followed by a decoded pre-to-post shift matching the target.",
+      "scenario": "02-Semiurban",
+      "episode_id": "ev_229f54b33cd3bfeb8f67",
+      "1_observable_facts": {
+        "iec104_control_transactions": [
+          {
+            "transaction_id": "TX001",
+            "entity": "switch.335:closed",
+            "commanded_value": 0.0,
+            "acceptance_status": "accepted_by_rtu",
+            "state_change_status": "verified_state_transition",
+            "evidence_ids": [
+              "EV-00a00cd3fa83e497",
+              "EV-7c67612c711ec8cd",
+              "EV-3334e4f733bfeddb",
+              "EV-17d2cb3e83f2c955"
+            ]
+          }
+        ],
+        "unpaired_control_message_count": 0,
+        "verified_anchor_count": 67,
+        "quarantined_unverified_anchor_count": 510,
+        "sample_verified_anchors": [
+          {
+            "anchor_id": "A001",
+            "anchor_type": "arp_activity_increase",
+            "entity": "172.16.14.8/ARP",
+            "rtu_ip": "172.16.14.8",
+            "evidence_ids": [
+              "EV-5b22fe895f2c795d",
+              "EV-65ebf26ca8e9e5e4",
+              "EV-d3e19441cf7377bd"
+            ]
+          },
+          {
+            "anchor_id": "A002",
+            "anchor_type": "arp_activity_increase",
+            "entity": "172.16.14.7/ARP",
+            "rtu_ip": "172.16.14.7",
+            "evidence_ids": [
+              "EV-de0e6d51086a4384",
+              "EV-bcd4a8979aabf22e",
+              "EV-969e00fb85435a55"
+            ]
+          },
+          {
+            "anchor_id": "A012",
+            "anchor_type": "measurement_step",
+            "entity": "sgen.71:cos_phi",
+            "rtu_ip": "172.16.14.7",
+            "evidence_ids": [
+              "EV-24e7ea6eca4316f4",
+              "EV-41f8836b3844408e"
+            ]
+          },
+          {
+            "anchor_id": "A074",
+            "anchor_type": "communication_change",
+            "entity": "172.16.14.11<->172.16.14.7:2404/IEC104",
+            "rtu_ip": "172.16.14.7",
+            "evidence_ids": [
+              "EV-444ffd8fc42219d2",
+              "EV-25b470a310bc36b7",
+              "EV-3139e232246eea64"
+            ]
+          },
+          {
+            "anchor_id": "A075",
+            "anchor_type": "spontaneous_state_report",
+            "entity": "switch.335:is_closed",
+            "rtu_ip": "172.16.14.7",
+            "evidence_ids": [
+              "EV-aaff00103ec52494",
+              "EV-63822c10df2f0157"
+            ]
+          },
+          {
+            "anchor_id": "A457",
+            "anchor_type": "measurement_step",
+            "entity": "sgen.46:cos_phi",
+            "rtu_ip": "172.16.7.18",
+            "evidence_ids": [
+              "EV-e4053edc0500d3d7"
+            ]
+          }
+        ]
+      },
+      "2_baseline_relations": {
+        "B1_temporal_only": {
+          "candidate_temporal_relation_count": 4073,
+          "unsubstantiated_temporal_candidate_count": 311,
+          "explicit_evidence_constraint_conflict_count": 3761,
+          "explicit_conflict_breakdown": {
+            "endpoint_quality_or_test_bit_conflict": 1198,
+            "endpoint_transient_not_sustained_conflict": 3754,
+            "same_device_direction_or_ratio_conflict": 0,
+            "same_device_change_type_or_side_conflict": 547,
+            "same_asdu_co_report_temporal_ordering_conflict": 123
+          },
+          "topology_breakdown": {
+            "cross_device_candidate_count": 3401,
+            "same_device_separate_asdu_candidate_count": 549,
+            "same_asdu_co_report_candidate_count": 123
+          }
+        },
+        "B2_protocol_only": {
+          "applicability_status": "APPLICABLE_CONTROL_COMMAND_WINDOW",
+          "protocol_storyline_count": 1,
+          "verified_command_transitions": 1,
+          "omitted_verified_non_command_anchors": 66,
+          "omitted_cross_rtu_bridges": 0
+        }
+      },
+      "3_mirage_ot_relations": {
+        "report_status": "quality_consistent",
+        "quality_consistency_passed": true,
+        "lineage_consistency_passed": true,
+        "lineage_consistency_issues": [],
+        "e3_traceability_levels": {
+          "1_evidence_citation_presence": true,
+          "2_evidence_id_resolution": true,
+          "3_evidence_to_fact_anchor_consistency": true,
+          "4_full_lineage_consistency": true,
+          "synthesis_cited_evidence_id_count": 13,
+          "sqlite_unresolved_ids": [],
+          "timeline_row_check_failure_count": 0,
+          "behavioral_anchor_row_check_failure_count": 0
+        },
+        "verified_device_transitions": [
+          "[TX001 | verified_state_transition] Point switch.335:is_closed (CA/IOA=154.10390) shifted from pre-command state 1.0 to 0.0 (@ 1743600419.2545, ev=EV-aaff00103ec52494, EV-63822c10df2f0157)."
+        ],
+        "rtu_asdu_bundle_count": 0,
+        "cross_rtu_verified_element_bridges": [],
+        "sequential_same_device_observations_rejected_by_gate": [],
+        "unresolved_cross_device_branch_count": 0
+      },
+      "4_method_differences": {
+        "vs_B1_temporal_only": "B1 emits 4073 candidate temporal links (311 unsubstantiated cross-device/unverified candidates and 3761 explicit quality/persistence/direction/same-ASDU conflicts); MIRAGE-OT keeps cross-device links unresolved and restricts supported bridges to 0.",
+        "vs_B2_protocol_only": "B2 is `APPLICABLE_CONTROL_COMMAND_WINDOW` and omits 66 verified behavioral anchors and 0 cross-RTU bridges.",
+        "vs_A1_no_behavioral_gate": "Counterfactual A1 promotes 0 unsupported relations ({'quality_or_test_bit_violation': 0, 'persistence_insufficient_violation': 0, 'prior_state_baseline_missing_violation': 0, 'change_type_mismatch_violation': 0, 'magnitude_or_direction_conflict_violation': 0, 'non_complementary_or_disjoint_interval_violation': 0}).",
+        "vs_A2_no_provenance_dedup": "Counterfactual A2 counts 6 raw observations vs 4 message/event containers: true_mirror=1, same_asdu_ioa=0, same_tcp_session_msgs=0, diff_time_anchor_events=0, ipal=1.",
+        "vs_A3_no_incident_synthesis": "Without Incident Synthesis, A3 outputs 5 local storylines without consolidating 0 ASDU bundles, 0 cross-RTU bridges, or 3 competing explanations."
+      },
+      "5_cited_evidence_ids": [
+        "EV-00a00cd3fa83e497",
+        "EV-7c67612c711ec8cd",
+        "EV-3334e4f733bfeddb",
+        "EV-5b22fe895f2c795d",
+        "EV-65ebf26ca8e9e5e4",
+        "EV-de0e6d51086a4384",
+        "EV-bcd4a8979aabf22e",
+        "EV-781966975711b2a5",
+        "EV-d08935622b887dbd",
+        "EV-94a7e098b756773e"
+      ],
+      "6_remaining_unconfirmed_items": [
+        "Physical causation across distinct grid elements (no bus-branch topology model in telemetry)",
+        "Initiating actor or host process behind observed network frames",
+        [
+          "Independent out-of-band physical process sensor or PMU log not derived from IEC-104",
+          "Master station operator/application audit log identifying the initiating process"
+        ],
+        [
+          "ARP target addresses that match the RTU whose IEC-104 session changed",
+          "Per-target ARP timestamps before that session change and inside the horizon"
+        ]
+      ]
+    },
+    {
+      "case_id": "C3_no_command_cross_rtu_verified_bridge",
+      "category": "No control command, corroborated Cross-RTU Verified Element Bridges",
+      "selection_rule": "Select one no-command `S2` window from each scenario (`01-Basic` `ev_564bebaa45f0686cf98d`, `02-Semiurban` `ev_d3c46672f9814dcdc40c`, `03-Rural` `ev_0d966f97d1922adb09bb`) where `verified_element_bridges > 0`.",
+      "scenario": "01-Basic",
+      "episode_id": "ev_564bebaa45f0686cf98d",
+      "1_observable_facts": {
+        "iec104_control_transactions": [],
+        "unpaired_control_message_count": 0,
+        "verified_anchor_count": 23,
+        "quarantined_unverified_anchor_count": 9,
+        "sample_verified_anchors": [
+          {
+            "anchor_id": "A002",
+            "anchor_type": "measurement_step",
+            "entity": "line.0:active_power_from",
+            "rtu_ip": "172.16.2.3",
+            "evidence_ids": [
+              "EV-3c3cbb46e50d7d28",
+              "EV-dea3772f106a463b"
+            ]
+          },
+          {
+            "anchor_id": "A003",
+            "anchor_type": "measurement_step",
+            "entity": "bus.5:active_power,reactive_power,voltage,voltage_angle",
+            "rtu_ip": "172.16.3.18",
+            "evidence_ids": [
+              "EV-84daa0e68ef06102",
+              "EV-8157ecd56e21ff99",
+              "EV-a31975970a90f34a"
+            ]
+          },
+          {
+            "anchor_id": "A004",
+            "anchor_type": "measurement_step",
+            "entity": "line.3:active_power_to,current_to,reactive_power_to,voltage_to",
+            "rtu_ip": "172.16.3.18",
+            "evidence_ids": [
+              "EV-bfef5819e801be66",
+              "EV-6a99c02e933fe11b",
+              "EV-b16579cd32ab22f0"
+            ]
+          },
+          {
+            "anchor_id": "A005",
+            "anchor_type": "measurement_step",
+            "entity": "line.4:active_power_from,current_from,reactive_power_from,voltage_from",
+            "rtu_ip": "172.16.3.18",
+            "evidence_ids": [
+              "EV-5b1890a70bf8109b",
+              "EV-9419dfe4ce1fb46e",
+              "EV-119c4262b52616ff"
+            ]
+          },
+          {
+            "anchor_id": "A006",
+            "anchor_type": "measurement_step",
+            "entity": "load.3:active_power,reactive_power",
+            "rtu_ip": "172.16.3.18",
+            "evidence_ids": [
+              "EV-39c0739e7b12edb2",
+              "EV-45707581bc55f7ac"
+            ]
+          },
+          {
+            "anchor_id": "A008",
+            "anchor_type": "measurement_step",
+            "entity": "line.0:active_power_to",
+            "rtu_ip": "172.16.3.13",
+            "evidence_ids": [
+              "EV-d0ebc674e5e5f30c",
+              "EV-7d6b819e7f3d4f63"
+            ]
+          }
+        ]
+      },
+      "2_baseline_relations": {
+        "B1_temporal_only": {
+          "candidate_temporal_relation_count": 157,
+          "unsubstantiated_temporal_candidate_count": 123,
+          "explicit_evidence_constraint_conflict_count": 29,
+          "explicit_conflict_breakdown": {
+            "endpoint_quality_or_test_bit_conflict": 0,
+            "endpoint_transient_not_sustained_conflict": 8,
+            "same_device_direction_or_ratio_conflict": 2,
+            "same_device_change_type_or_side_conflict": 1,
+            "same_asdu_co_report_temporal_ordering_conflict": 20
+          },
+          "topology_breakdown": {
+            "cross_device_candidate_count": 129,
+            "same_device_separate_asdu_candidate_count": 8,
+            "same_asdu_co_report_candidate_count": 20
+          }
+        },
+        "B2_protocol_only": {
+          "applicability_status": "NOT_APPLICABLE_NO_CONTROL_COMMANDS",
+          "protocol_storyline_count": 0,
+          "verified_command_transitions": 0,
+          "omitted_verified_non_command_anchors": 23,
+          "omitted_cross_rtu_bridges": 5
+        }
+      },
+      "3_mirage_ot_relations": {
+        "report_status": "quality_consistent",
+        "quality_consistency_passed": true,
+        "lineage_consistency_passed": true,
+        "lineage_consistency_issues": [],
+        "e3_traceability_levels": {
+          "1_evidence_citation_presence": true,
+          "2_evidence_id_resolution": true,
+          "3_evidence_to_fact_anchor_consistency": true,
+          "4_full_lineage_consistency": true,
+          "synthesis_cited_evidence_id_count": 57,
+          "sqlite_unresolved_ids": [],
+          "timeline_row_check_failure_count": 0,
+          "behavioral_anchor_row_check_failure_count": 0
+        },
+        "verified_device_transitions": [],
+        "rtu_asdu_bundle_count": 12,
+        "cross_rtu_verified_element_bridges": [
+          {
+            "bridge_id": "BRG-001",
+            "edge_id": "R0067",
+            "bridged_device_stem": "line.0",
+            "from_rtu_ip": "172.16.2.3",
+            "to_rtu_ip": "172.16.3.13",
+            "matched_quantities": [
+              "active_power"
+            ],
+            "evidence_ids": [
+              "EV-3c3cbb46e50d7d28",
+              "EV-dea3772f106a463b",
+              "EV-d0ebc674e5e5f30c",
+              "EV-7d6b819e7f3d4f63"
+            ]
+          },
+          {
+            "bridge_id": "BRG-002",
+            "edge_id": "R0086",
+            "bridged_device_stem": "line.3",
+            "from_rtu_ip": "172.16.3.18",
+            "to_rtu_ip": "172.16.3.16",
+            "matched_quantities": [
+              "active_power",
+              "current",
+              "reactive_power",
+              "voltage"
+            ],
+            "evidence_ids": [
+              "EV-bfef5819e801be66",
+              "EV-6a99c02e933fe11b",
+              "EV-69a4bc3302b8506c",
+              "EV-857e0bfe8bc951af"
+            ]
+          },
+          {
+            "bridge_id": "BRG-003",
+            "edge_id": "R0094",
+            "bridged_device_stem": "line.4",
+            "from_rtu_ip": "172.16.3.18",
+            "to_rtu_ip": "172.16.3.22",
+            "matched_quantities": [
+              "active_power",
+              "current",
+              "reactive_power",
+              "voltage"
+            ],
+            "evidence_ids": [
+              "EV-5b1890a70bf8109b",
+              "EV-9419dfe4ce1fb46e",
+              "EV-4d1b23faa7123462",
+              "EV-6920e4fc1d64f76f"
+            ]
+          },
+          {
+            "bridge_id": "BRG-004",
+            "edge_id": "R0114",
+            "bridged_device_stem": "line.1",
+            "from_rtu_ip": "172.16.3.13",
+            "to_rtu_ip": "172.16.3.14",
+            "matched_quantities": [
+              "active_power"
+            ],
+            "evidence_ids": [
+              "EV-4baf725f280851a4",
+              "EV-3b0751371369bcf0",
+              "EV-d852dab86b4e7efb",
+              "EV-124724ab69696e0d"
+            ]
+          },
+          {
+            "bridge_id": "BRG-005",
+            "edge_id": "R0152",
+            "bridged_device_stem": "line.12",
+            "from_rtu_ip": "172.16.3.22",
+            "to_rtu_ip": "172.16.3.24",
+            "matched_quantities": [
+              "current",
+              "voltage"
+            ],
+            "evidence_ids": [
+              "EV-1b16f72022d1d7ca",
+              "EV-6f5888a4501b357a",
+              "EV-7b00c3a198756009",
+              "EV-b688c59c18ef4daf"
+            ]
+          }
+        ],
+        "sequential_same_device_observations_rejected_by_gate": [
+          {
+            "edge_id": "R0134",
+            "device_stem": "line.2",
+            "failed_conditions": [
+              "change_type_mismatch"
+            ],
+            "evidence_ids": [
+              "EV-99ceaa9a519bf6c0",
+              "EV-ea3a832bcfd072e7",
+              "EV-57694d9bd865c1c5",
+              "EV-ea6cc40dc344bd20"
+            ]
+          },
+          {
+            "edge_id": "R0211",
+            "device_stem": "line.2",
+            "failed_conditions": [
+              "left_not_sustained",
+              "right_not_sustained",
+              "left_anchor_unverified",
+              "right_anchor_unverified",
+              "magnitude_ratio_mismatch:current"
+            ],
+            "evidence_ids": [
+              "EV-318e793307c8d8d4",
+              "EV-4a003b5dd39cfdce",
+              "EV-89ae92e7ad7e3921",
+              "EV-8963e8730469679b"
+            ]
+          },
+          {
+            "edge_id": "R0212",
+            "device_stem": "line.14",
+            "failed_conditions": [
+              "left_not_sustained",
+              "right_not_sustained",
+              "left_anchor_unverified",
+              "right_anchor_unverified",
+              "magnitude_direction_mismatch:current"
+            ],
+            "evidence_ids": [
+              "EV-5334ae5022a11b39",
+              "EV-a9eb1dc3624c7b2a",
+              "EV-5f67fa11e1d9c937",
+              "EV-6b37f34641e363bd"
+            ]
+          }
+        ],
+        "unresolved_cross_device_branch_count": 129
+      },
+      "4_method_differences": {
+        "vs_B1_temporal_only": "B1 emits 157 candidate temporal links (123 unsubstantiated cross-device/unverified candidates and 29 explicit quality/persistence/direction/same-ASDU conflicts); MIRAGE-OT keeps cross-device links unresolved and restricts supported bridges to 5.",
+        "vs_B2_protocol_only": "B2 is `NOT_APPLICABLE_NO_CONTROL_COMMANDS` and omits 23 verified behavioral anchors and 5 cross-RTU bridges.",
+        "vs_A1_no_behavioral_gate": "Counterfactual A1 promotes 3 unsupported relations ({'quality_or_test_bit_violation': 0, 'persistence_insufficient_violation': 2, 'prior_state_baseline_missing_violation': 0, 'change_type_mismatch_violation': 1, 'magnitude_or_direction_conflict_violation': 2, 'non_complementary_or_disjoint_interval_violation': 0}).",
+        "vs_A2_no_provenance_dedup": "Counterfactual A2 counts 109 raw observations vs 12 message/event containers: true_mirror=3, same_asdu_ioa=41, same_tcp_session_msgs=0, diff_time_anchor_events=0, ipal=53.",
+        "vs_A3_no_incident_synthesis": "Without Incident Synthesis, A3 outputs 27 local storylines without consolidating 12 ASDU bundles, 5 cross-RTU bridges, or 2 competing explanations."
+      },
+      "5_cited_evidence_ids": [
+        "EV-3c3cbb46e50d7d28",
+        "EV-dea3772f106a463b",
+        "EV-84daa0e68ef06102",
+        "EV-8157ecd56e21ff99",
+        "EV-d0ebc674e5e5f30c",
+        "EV-7d6b819e7f3d4f63",
+        "EV-d852dab86b4e7efb",
+        "EV-99ceaa9a519bf6c0",
+        "EV-f969c5f8a10a6e07",
+        "EV-5ece22ffa46d5ca3",
+        "EV-09ca5573406fa16b",
+        "EV-bfef5819e801be66",
+        "EV-6a99c02e933fe11b",
+        "EV-5b1890a70bf8109b",
+        "EV-9419dfe4ce1fb46e",
+        "EV-4baf725f280851a4"
+      ],
+      "6_remaining_unconfirmed_items": [
+        "Physical causation across distinct grid elements (no bus-branch topology model in telemetry)",
+        "Initiating actor or host process behind observed network frames",
+        [
+          "Substation bus/breaker physical topology model connecting switch, bus, line, load, and sgen elements",
+          "Pre-window IEC-104 state baseline (COT=20) for spontaneous state report(s) ['A001', 'A007']",
+          "Local protection relay / breaker trip records at the RTUs independent of IEC-104 telemetry"
+        ],
+        [
+          "Out-of-band physical electrical measurements (e.g. independent PMU or field recorder)",
+          "RTU local console/logic logs and L2 switch port authentication records"
+        ]
+      ]
+    },
+    {
+      "case_id": "C7_low_information_honest_abstention",
+      "category": "Honest abstention in low-information periodic-measurement-only windows",
+      "selection_rule": "Select `01-Basic` window `ev_d58f418ff4f085ccc0a7` and `02-Semiurban` window `ev_8e3ee44aec0a0f81c99a`, where only periodic `M_ME_NC_1 (COT=1)` telemetry and transient oscillations occur.",
+      "scenario": "01-Basic",
+      "episode_id": "ev_d58f418ff4f085ccc0a7",
+      "1_observable_facts": {
+        "iec104_control_transactions": [],
+        "unpaired_control_message_count": 0,
+        "verified_anchor_count": 0,
+        "quarantined_unverified_anchor_count": 14,
+        "sample_verified_anchors": []
+      },
+      "2_baseline_relations": {
+        "B1_temporal_only": {
+          "candidate_temporal_relation_count": 4,
+          "unsubstantiated_temporal_candidate_count": 0,
+          "explicit_evidence_constraint_conflict_count": 4,
+          "explicit_conflict_breakdown": {
+            "endpoint_quality_or_test_bit_conflict": 0,
+            "endpoint_transient_not_sustained_conflict": 4,
+            "same_device_direction_or_ratio_conflict": 1,
+            "same_device_change_type_or_side_conflict": 0,
+            "same_asdu_co_report_temporal_ordering_conflict": 0
+          },
+          "topology_breakdown": {
+            "cross_device_candidate_count": 2,
+            "same_device_separate_asdu_candidate_count": 2,
+            "same_asdu_co_report_candidate_count": 0
+          }
+        },
+        "B2_protocol_only": {
+          "applicability_status": "NOT_APPLICABLE_NO_CONTROL_COMMANDS",
+          "protocol_storyline_count": 0,
+          "verified_command_transitions": 0,
+          "omitted_verified_non_command_anchors": 0,
+          "omitted_cross_rtu_bridges": 0
+        }
+      },
+      "3_mirage_ot_relations": {
+        "report_status": "quality_consistent",
+        "quality_consistency_passed": true,
+        "lineage_consistency_passed": true,
+        "lineage_consistency_issues": [],
+        "e3_traceability_levels": {
+          "1_evidence_citation_presence": true,
+          "2_evidence_id_resolution": true,
+          "3_evidence_to_fact_anchor_consistency": true,
+          "4_full_lineage_consistency": true,
+          "synthesis_cited_evidence_id_count": 4,
+          "sqlite_unresolved_ids": [],
+          "timeline_row_check_failure_count": 0,
+          "behavioral_anchor_row_check_failure_count": 0
+        },
+        "verified_device_transitions": [],
+        "rtu_asdu_bundle_count": 0,
+        "cross_rtu_verified_element_bridges": [],
+        "sequential_same_device_observations_rejected_by_gate": [
+          {
+            "edge_id": "R0037",
+            "device_stem": "line.13",
+            "failed_conditions": [
+              "left_not_sustained",
+              "right_not_sustained",
+              "left_anchor_unverified",
+              "right_anchor_unverified",
+              "transition_intervals_disjoint",
+              "magnitude_direction_mismatch:current"
+            ],
+            "evidence_ids": [
+              "EV-c5a1d0edc1f56808",
+              "EV-ce3ffd677fa3c9cc",
+              "EV-37b12ca1ac085502",
+              "EV-0123736e2c0a9532"
+            ]
+          },
+          {
+            "edge_id": "R0040",
+            "device_stem": "line.13",
+            "failed_conditions": [
+              "left_not_sustained",
+              "right_not_sustained",
+              "left_anchor_unverified",
+              "right_anchor_unverified",
+              "transition_intervals_disjoint"
+            ],
+            "evidence_ids": [
+              "EV-0ca783e7bc46f4a4",
+              "EV-93e0a848cf45dfb2",
+              "EV-2a259c2ae498f605",
+              "EV-b01041d1730e96b9"
+            ]
+          }
+        ],
+        "unresolved_cross_device_branch_count": 2
+      },
+      "4_method_differences": {
+        "vs_B1_temporal_only": "B1 emits 4 candidate temporal links (0 unsubstantiated cross-device/unverified candidates and 4 explicit quality/persistence/direction/same-ASDU conflicts); MIRAGE-OT keeps cross-device links unresolved and restricts supported bridges to 0.",
+        "vs_B2_protocol_only": "B2 is `NOT_APPLICABLE_NO_CONTROL_COMMANDS` and omits 0 verified behavioral anchors and 0 cross-RTU bridges.",
+        "vs_A1_no_behavioral_gate": "Counterfactual A1 promotes 2 unsupported relations ({'quality_or_test_bit_violation': 0, 'persistence_insufficient_violation': 2, 'prior_state_baseline_missing_violation': 0, 'change_type_mismatch_violation': 0, 'magnitude_or_direction_conflict_violation': 1, 'non_complementary_or_disjoint_interval_violation': 2}).",
+        "vs_A2_no_provenance_dedup": "Counterfactual A2 counts 0 raw observations vs 0 message/event containers: true_mirror=0, same_asdu_ioa=0, same_tcp_session_msgs=0, diff_time_anchor_events=0, ipal=0.",
+        "vs_A3_no_incident_synthesis": "Without Incident Synthesis, A3 outputs 14 local storylines without consolidating 0 ASDU bundles, 0 cross-RTU bridges, or 2 competing explanations."
+      },
+      "5_cited_evidence_ids": [
+        "EV-42943a48737cbcab",
+        "EV-12d0e000a2c6bd1a",
+        "EV-c5a1d0edc1f56808",
+        "EV-ce3ffd677fa3c9cc",
+        "EV-37b12ca1ac085502"
+      ],
+      "6_remaining_unconfirmed_items": [
+        "Physical causation across distinct grid elements (no bus-branch topology model in telemetry)",
+        "Initiating actor or host process behind observed network frames",
+        [
+          "Pre-window IEC-104 state baseline (COT=20) for line.13:current_from",
+          "Local RTU line.13 breaker/controller event log"
+        ],
+        [
+          "Out-of-band physical meter for line.13",
+          "Pre-window IEC-104 state history prior to background_start"
+        ]
+      ]
+    }
+  ],
+  "synthetic_known_answer_counterexamples_separate_from_sherlock": [
+    {
+      "synthetic_case_id": "S_KA1_test_bit_and_opposing_direction",
+      "known_ground_truth": "`line.1:active_power_from` (RTU .11) increases 100->300, whereas `line.1:active_power_to` (RTU .12) decreases in magnitude |-100|->|-40| and has COT test bit `T=1` at the step sample. Must be flagged as `explicit_evidence_constraint_conflict` in B1 and rejected from bridges in MIRAGE-OT.",
+      "B1_temporal_only_candidates": 1,
+      "B1_explicit_constraint_conflicts": 1,
+      "A1_ungated_unsupported_promotions": 1,
+      "MIRAGE_OT_supported_bridges": 0,
+      "MIRAGE_OT_sequential_rejected": 1,
+      "passed_known_answer": true
+    },
+    {
+      "synthetic_case_id": "S_KA2_mirror_and_same_asdu_and_ipal_duplication",
+      "known_ground_truth": "One ASDU (`apci_tx=31`) from RTU `172.16.3.18` carries two objects (`bus.5` and `load.3`), is mirrored at two vantages (`n302` and `n318`, 4 packet objects: 1 primary + 1 same-ASDU diff IOA + 2 true cross-vantage mirrors), and produces 2 IPAL rows (6 raw observations total). True container count is 1.",
+      "A2_naive_raw_observation_count": 6,
+      "A2_true_cross_vantage_mirror_duplicate_count": 2,
+      "A2_same_asdu_different_ioa_point_count": 1,
+      "A2_ipal_derived_count": 2,
+      "MIRAGE_OT_distinct_source_container_count": 1,
+      "passed_known_answer": true
+    },
+    {
+      "synthetic_case_id": "S_KA3_unverified_switch_vs_verified_cross_rtu_line_bridge",
+      "known_ground_truth": "Unverified `switch.99:is_closed=0` (no prior baseline) occurs 4s before `line.4` drops to zero at both `to` (RTU .18) and `from` (RTU .22) ends. The 2 cross-device links from `switch.99` are `unsubstantiated_temporal_candidates` (not proven false conflicts), while `line.4` (`to` <-> `from`) is 1 `corroborated_same_device_candidate` forming 1 Cross-RTU Bridge.",
+      "B1_temporal_only_candidates": 3,
+      "B1_unsubstantiated_candidates": 2,
+      "B1_explicit_constraint_conflicts": 0,
+      "B1_corroborated_same_device_candidates": 1,
+      "MIRAGE_OT_verified_bridges": [
+        "line.4"
+      ],
+      "MIRAGE_OT_unresolved_branches": 2,
+      "passed_known_answer": true
+    },
+    {
+      "synthetic_case_id": "S_KA4_communication_anchor_multi_event_not_mirror_duplicate",
+      "known_ground_truth": "A `communication_change` anchor on `n302` cites 4 TCP packets at different times across 3 ephemeral sessions (`56094` FIN, `56736` two SYN retries, `56752` SYN). Because all 4 packets are on `n302` at different times, `true_cross_vantage_mirror_duplicate_count` must be 0, with 1 `distinct_messages_in_same_tcp_session_count` and 2 `distinct_time_network_events_in_anchor_count`.",
+      "A2_true_cross_vantage_mirror_duplicate_count": 0,
+      "A2_distinct_messages_in_same_tcp_session_count": 1,
+      "A2_distinct_time_network_events_in_anchor_count": 2,
+      "passed_known_answer": true
+    }
+  ],
+  "post_freeze_physical_state_evaluation": null,
+  "per_window_summaries": [
+    {
+      "scenario": "01-Basic",
+      "episode_id": "ev_e76705884b8fec84592a",
+      "observation_profile": "S1_control_command_window",
+      "B1_candidate_temporal_relations": 3,
+      "B1_unsubstantiated_temporal_candidates": 0,
+      "B1_explicit_evidence_constraint_conflicts": 2,
+      "B1_corroborated_same_device_candidates": 1,
+      "B1_topology_breakdown": {
+        "cross_device_candidate_count": 2,
+        "same_device_separate_asdu_candidate_count": 1,
+        "same_asdu_co_report_candidate_count": 0
+      },
+      "B2_applicability": "APPLICABLE_CONTROL_COMMAND_WINDOW",
+      "B2_verified_command_transitions": 1,
+      "B2_omitted_verified_non_command_anchors": 0,
+      "B2_omitted_cross_rtu_bridges": 0,
+      "A1_originally_supported": 1,
+      "A1_unsupported_promotions": 0,
+      "A1_ungated_spurious_cross_rtu_bridges": 0,
+      "A1_violation_breakdown": {
+        "quality_or_test_bit_violation": 0,
+        "persistence_insufficient_violation": 0,
+        "prior_state_baseline_missing_violation": 0,
+        "change_type_mismatch_violation": 0,
+        "magnitude_or_direction_conflict_violation": 0,
+        "non_complementary_or_disjoint_interval_violation": 0
+      },
+      "A2_raw_observations": 6,
+      "A2_distinct_source_containers": 4,
+      "A2_true_cross_vantage_mirror_duplicates": 0,
+      "A2_same_asdu_different_ioa_points": 0,
+      "A2_distinct_messages_in_same_tcp_session": 0,
+      "A2_distinct_time_network_events_in_anchor": 0,
+      "A2_ipal_derived_rows": 2,
+      "A2_unknown_provenance_relations": 0,
+      "A2_true_duplicate_or_derived_inflation": 2,
+      "A2_multi_event_anchor_aggregation": 0,
+      "A3_local_storylines": 6,
+      "MIRAGE_rtu_asdu_bundles": 0,
+      "MIRAGE_cross_rtu_verified_bridges": 0,
+      "MIRAGE_bridged_components": 0,
+      "MIRAGE_competing_explanations": 1,
+      "E3_traceability_levels": {
+        "1_evidence_citation_presence": true,
+        "2_evidence_id_resolution": true,
+        "3_evidence_to_fact_anchor_consistency": true,
+        "4_full_lineage_consistency": true,
+        "synthesis_cited_evidence_id_count": 4,
+        "sqlite_unresolved_ids": [],
+        "timeline_row_check_failure_count": 0,
+        "behavioral_anchor_row_check_failure_count": 0
+      }
+    },
+    {
+      "scenario": "01-Basic",
+      "episode_id": "ev_564bebaa45f0686cf98d",
+      "observation_profile": "S2_spontaneous_state_and_measurement_drop_window",
+      "B1_candidate_temporal_relations": 157,
+      "B1_unsubstantiated_temporal_candidates": 123,
+      "B1_explicit_evidence_constraint_conflicts": 29,
+      "B1_corroborated_same_device_candidates": 5,
+      "B1_topology_breakdown": {
+        "cross_device_candidate_count": 129,
+        "same_device_separate_asdu_candidate_count": 8,
+        "same_asdu_co_report_candidate_count": 20
+      },
+      "B2_applicability": "NOT_APPLICABLE_NO_CONTROL_COMMANDS",
+      "B2_verified_command_transitions": 0,
+      "B2_omitted_verified_non_command_anchors": 23,
+      "B2_omitted_cross_rtu_bridges": 5,
+      "A1_originally_supported": 5,
+      "A1_unsupported_promotions": 3,
+      "A1_ungated_spurious_cross_rtu_bridges": 3,
+      "A1_violation_breakdown": {
+        "quality_or_test_bit_violation": 0,
+        "persistence_insufficient_violation": 2,
+        "prior_state_baseline_missing_violation": 0,
+        "change_type_mismatch_violation": 1,
+        "magnitude_or_direction_conflict_violation": 2,
+        "non_complementary_or_disjoint_interval_violation": 0
+      },
+      "A2_raw_observations": 109,
+      "A2_distinct_source_containers": 12,
+      "A2_true_cross_vantage_mirror_duplicates": 3,
+      "A2_same_asdu_different_ioa_points": 41,
+      "A2_distinct_messages_in_same_tcp_session": 0,
+      "A2_distinct_time_network_events_in_anchor": 0,
+      "A2_ipal_derived_rows": 53,
+      "A2_unknown_provenance_relations": 0,
+      "A2_true_duplicate_or_derived_inflation": 97,
+      "A2_multi_event_anchor_aggregation": 0,
+      "A3_local_storylines": 27,
+      "MIRAGE_rtu_asdu_bundles": 12,
+      "MIRAGE_cross_rtu_verified_bridges": 5,
+      "MIRAGE_bridged_components": 2,
+      "MIRAGE_competing_explanations": 2,
+      "E3_traceability_levels": {
+        "1_evidence_citation_presence": true,
+        "2_evidence_id_resolution": true,
+        "3_evidence_to_fact_anchor_consistency": true,
+        "4_full_lineage_consistency": true,
+        "synthesis_cited_evidence_id_count": 57,
+        "sqlite_unresolved_ids": [],
+        "timeline_row_check_failure_count": 0,
+        "behavioral_anchor_row_check_failure_count": 0
+      }
+    },
+    {
+      "scenario": "01-Basic",
+      "episode_id": "ev_21f18503563e6a677ae5",
+      "observation_profile": "S3_arp_or_iec104_link_disruption_window",
+      "B1_candidate_temporal_relations": 9,
+      "B1_unsubstantiated_temporal_candidates": 6,
+      "B1_explicit_evidence_constraint_conflicts": 3,
+      "B1_corroborated_same_device_candidates": 0,
+      "B1_topology_breakdown": {
+        "cross_device_candidate_count": 9,
+        "same_device_separate_asdu_candidate_count": 0,
+        "same_asdu_co_report_candidate_count": 0
+      },
+      "B2_applicability": "NOT_APPLICABLE_NO_CONTROL_COMMANDS",
+      "B2_verified_command_transitions": 0,
+      "B2_omitted_verified_non_command_anchors": 4,
+      "B2_omitted_cross_rtu_bridges": 0,
+      "A1_originally_supported": 0,
+      "A1_unsupported_promotions": 0,
+      "A1_ungated_spurious_cross_rtu_bridges": 0,
+      "A1_violation_breakdown": {
+        "quality_or_test_bit_violation": 0,
+        "persistence_insufficient_violation": 0,
+        "prior_state_baseline_missing_violation": 0,
+        "change_type_mismatch_violation": 0,
+        "magnitude_or_direction_conflict_violation": 0,
+        "non_complementary_or_disjoint_interval_violation": 0
+      },
+      "A2_raw_observations": 24,
+      "A2_distinct_source_containers": 4,
+      "A2_true_cross_vantage_mirror_duplicates": 5,
+      "A2_same_asdu_different_ioa_points": 0,
+      "A2_distinct_messages_in_same_tcp_session": 0,
+      "A2_distinct_time_network_events_in_anchor": 15,
+      "A2_ipal_derived_rows": 0,
+      "A2_unknown_provenance_relations": 0,
+      "A2_true_duplicate_or_derived_inflation": 5,
+      "A2_multi_event_anchor_aggregation": 15,
+      "A3_local_storylines": 19,
+      "MIRAGE_rtu_asdu_bundles": 4,
+      "MIRAGE_cross_rtu_verified_bridges": 0,
+      "MIRAGE_bridged_components": 0,
+      "MIRAGE_competing_explanations": 0,
+      "E3_traceability_levels": {
+        "1_evidence_citation_presence": true,
+        "2_evidence_id_resolution": true,
+        "3_evidence_to_fact_anchor_consistency": true,
+        "4_full_lineage_consistency": true,
+        "synthesis_cited_evidence_id_count": 24,
+        "sqlite_unresolved_ids": [],
+        "timeline_row_check_failure_count": 0,
+        "behavioral_anchor_row_check_failure_count": 0
+      }
+    },
+    {
+      "scenario": "01-Basic",
+      "episode_id": "ev_d58f418ff4f085ccc0a7",
+      "observation_profile": "S4_periodic_measurement_only_window",
+      "B1_candidate_temporal_relations": 4,
+      "B1_unsubstantiated_temporal_candidates": 0,
+      "B1_explicit_evidence_constraint_conflicts": 4,
+      "B1_corroborated_same_device_candidates": 0,
+      "B1_topology_breakdown": {
+        "cross_device_candidate_count": 2,
+        "same_device_separate_asdu_candidate_count": 2,
+        "same_asdu_co_report_candidate_count": 0
+      },
+      "B2_applicability": "NOT_APPLICABLE_NO_CONTROL_COMMANDS",
+      "B2_verified_command_transitions": 0,
+      "B2_omitted_verified_non_command_anchors": 0,
+      "B2_omitted_cross_rtu_bridges": 0,
+      "A1_originally_supported": 0,
+      "A1_unsupported_promotions": 2,
+      "A1_ungated_spurious_cross_rtu_bridges": 2,
+      "A1_violation_breakdown": {
+        "quality_or_test_bit_violation": 0,
+        "persistence_insufficient_violation": 2,
+        "prior_state_baseline_missing_violation": 0,
+        "change_type_mismatch_violation": 0,
+        "magnitude_or_direction_conflict_violation": 1,
+        "non_complementary_or_disjoint_interval_violation": 2
+      },
+      "A2_raw_observations": 0,
+      "A2_distinct_source_containers": 0,
+      "A2_true_cross_vantage_mirror_duplicates": 0,
+      "A2_same_asdu_different_ioa_points": 0,
+      "A2_distinct_messages_in_same_tcp_session": 0,
+      "A2_distinct_time_network_events_in_anchor": 0,
+      "A2_ipal_derived_rows": 0,
+      "A2_unknown_provenance_relations": 0,
+      "A2_true_duplicate_or_derived_inflation": 0,
+      "A2_multi_event_anchor_aggregation": 0,
+      "A3_local_storylines": 14,
+      "MIRAGE_rtu_asdu_bundles": 0,
+      "MIRAGE_cross_rtu_verified_bridges": 0,
+      "MIRAGE_bridged_components": 0,
+      "MIRAGE_competing_explanations": 2,
+      "E3_traceability_levels": {
+        "1_evidence_citation_presence": true,
+        "2_evidence_id_resolution": true,
+        "3_evidence_to_fact_anchor_consistency": true,
+        "4_full_lineage_consistency": true,
+        "synthesis_cited_evidence_id_count": 4,
+        "sqlite_unresolved_ids": [],
+        "timeline_row_check_failure_count": 0,
+        "behavioral_anchor_row_check_failure_count": 0
+      }
+    },
+    {
+      "scenario": "02-Semiurban",
+      "episode_id": "ev_229f54b33cd3bfeb8f67",
+      "observation_profile": "S1_control_command_window",
+      "B1_candidate_temporal_relations": 4073,
+      "B1_unsubstantiated_temporal_candidates": 311,
+      "B1_explicit_evidence_constraint_conflicts": 3761,
+      "B1_corroborated_same_device_candidates": 1,
+      "B1_topology_breakdown": {
+        "cross_device_candidate_count": 3401,
+        "same_device_separate_asdu_candidate_count": 549,
+        "same_asdu_co_report_candidate_count": 123
+      },
+      "B2_applicability": "APPLICABLE_CONTROL_COMMAND_WINDOW",
+      "B2_verified_command_transitions": 1,
+      "B2_omitted_verified_non_command_anchors": 66,
+      "B2_omitted_cross_rtu_bridges": 0,
+      "A1_originally_supported": 2,
+      "A1_unsupported_promotions": 0,
+      "A1_ungated_spurious_cross_rtu_bridges": 0,
+      "A1_violation_breakdown": {
+        "quality_or_test_bit_violation": 0,
+        "persistence_insufficient_violation": 0,
+        "prior_state_baseline_missing_violation": 0,
+        "change_type_mismatch_violation": 0,
+        "magnitude_or_direction_conflict_violation": 0,
+        "non_complementary_or_disjoint_interval_violation": 0
+      },
+      "A2_raw_observations": 6,
+      "A2_distinct_source_containers": 4,
+      "A2_true_cross_vantage_mirror_duplicates": 1,
+      "A2_same_asdu_different_ioa_points": 0,
+      "A2_distinct_messages_in_same_tcp_session": 0,
+      "A2_distinct_time_network_events_in_anchor": 0,
+      "A2_ipal_derived_rows": 1,
+      "A2_unknown_provenance_relations": 0,
+      "A2_true_duplicate_or_derived_inflation": 2,
+      "A2_multi_event_anchor_aggregation": 0,
+      "A3_local_storylines": 5,
+      "MIRAGE_rtu_asdu_bundles": 0,
+      "MIRAGE_cross_rtu_verified_bridges": 0,
+      "MIRAGE_bridged_components": 0,
+      "MIRAGE_competing_explanations": 3,
+      "E3_traceability_levels": {
+        "1_evidence_citation_presence": true,
+        "2_evidence_id_resolution": true,
+        "3_evidence_to_fact_anchor_consistency": true,
+        "4_full_lineage_consistency": true,
+        "synthesis_cited_evidence_id_count": 13,
+        "sqlite_unresolved_ids": [],
+        "timeline_row_check_failure_count": 0,
+        "behavioral_anchor_row_check_failure_count": 0
+      }
+    },
+    {
+      "scenario": "02-Semiurban",
+      "episode_id": "ev_c77d85a14214995d2a2e",
+      "observation_profile": "S2_spontaneous_state_and_measurement_drop_window",
+      "B1_candidate_temporal_relations": 92,
+      "B1_unsubstantiated_temporal_candidates": 72,
+      "B1_explicit_evidence_constraint_conflicts": 19,
+      "B1_corroborated_same_device_candidates": 1,
+      "B1_topology_breakdown": {
+        "cross_device_candidate_count": 75,
+        "same_device_separate_asdu_candidate_count": 5,
+        "same_asdu_co_report_candidate_count": 12
+      },
+      "B2_applicability": "NOT_APPLICABLE_NO_CONTROL_COMMANDS",
+      "B2_verified_command_transitions": 0,
+      "B2_omitted_verified_non_command_anchors": 15,
+      "B2_omitted_cross_rtu_bridges": 1,
+      "A1_originally_supported": 1,
+      "A1_unsupported_promotions": 4,
+      "A1_ungated_spurious_cross_rtu_bridges": 0,
+      "A1_violation_breakdown": {
+        "quality_or_test_bit_violation": 0,
+        "persistence_insufficient_violation": 0,
+        "prior_state_baseline_missing_violation": 0,
+        "change_type_mismatch_violation": 0,
+        "magnitude_or_direction_conflict_violation": 0,
+        "non_complementary_or_disjoint_interval_violation": 4
+      },
+      "A2_raw_observations": 80,
+      "A2_distinct_source_containers": 9,
+      "A2_true_cross_vantage_mirror_duplicates": 0,
+      "A2_same_asdu_different_ioa_points": 31,
+      "A2_distinct_messages_in_same_tcp_session": 0,
+      "A2_distinct_time_network_events_in_anchor": 0,
+      "A2_ipal_derived_rows": 40,
+      "A2_unknown_provenance_relations": 0,
+      "A2_true_duplicate_or_derived_inflation": 71,
+      "A2_multi_event_anchor_aggregation": 0,
+      "A3_local_storylines": 21,
+      "MIRAGE_rtu_asdu_bundles": 9,
+      "MIRAGE_cross_rtu_verified_bridges": 1,
+      "MIRAGE_bridged_components": 1,
+      "MIRAGE_competing_explanations": 2,
+      "E3_traceability_levels": {
+        "1_evidence_citation_presence": true,
+        "2_evidence_id_resolution": true,
+        "3_evidence_to_fact_anchor_consistency": true,
+        "4_full_lineage_consistency": true,
+        "synthesis_cited_evidence_id_count": 40,
+        "sqlite_unresolved_ids": [],
+        "timeline_row_check_failure_count": 0,
+        "behavioral_anchor_row_check_failure_count": 0
+      }
+    },
+    {
+      "scenario": "02-Semiurban",
+      "episode_id": "ev_54ead6013ea77949d028",
+      "observation_profile": "S3_arp_or_iec104_link_disruption_window",
+      "B1_candidate_temporal_relations": 732,
+      "B1_unsubstantiated_temporal_candidates": 350,
+      "B1_explicit_evidence_constraint_conflicts": 382,
+      "B1_corroborated_same_device_candidates": 0,
+      "B1_topology_breakdown": {
+        "cross_device_candidate_count": 725,
+        "same_device_separate_asdu_candidate_count": 1,
+        "same_asdu_co_report_candidate_count": 6
+      },
+      "B2_applicability": "NOT_APPLICABLE_NO_CONTROL_COMMANDS",
+      "B2_verified_command_transitions": 0,
+      "B2_omitted_verified_non_command_anchors": 66,
+      "B2_omitted_cross_rtu_bridges": 0,
+      "A1_originally_supported": 0,
+      "A1_unsupported_promotions": 1,
+      "A1_ungated_spurious_cross_rtu_bridges": 0,
+      "A1_violation_breakdown": {
+        "quality_or_test_bit_violation": 1,
+        "persistence_insufficient_violation": 1,
+        "prior_state_baseline_missing_violation": 1,
+        "change_type_mismatch_violation": 0,
+        "magnitude_or_direction_conflict_violation": 0,
+        "non_complementary_or_disjoint_interval_violation": 1
+      },
+      "A2_raw_observations": 206,
+      "A2_distinct_source_containers": 63,
+      "A2_true_cross_vantage_mirror_duplicates": 24,
+      "A2_same_asdu_different_ioa_points": 3,
+      "A2_distinct_messages_in_same_tcp_session": 35,
+      "A2_distinct_time_network_events_in_anchor": 20,
+      "A2_ipal_derived_rows": 61,
+      "A2_unknown_provenance_relations": 0,
+      "A2_true_duplicate_or_derived_inflation": 88,
+      "A2_multi_event_anchor_aggregation": 55,
+      "A3_local_storylines": 132,
+      "MIRAGE_rtu_asdu_bundles": 63,
+      "MIRAGE_cross_rtu_verified_bridges": 0,
+      "MIRAGE_bridged_components": 0,
+      "MIRAGE_competing_explanations": 2,
+      "E3_traceability_levels": {
+        "1_evidence_citation_presence": true,
+        "2_evidence_id_resolution": true,
+        "3_evidence_to_fact_anchor_consistency": true,
+        "4_full_lineage_consistency": true,
+        "synthesis_cited_evidence_id_count": 145,
+        "sqlite_unresolved_ids": [],
+        "timeline_row_check_failure_count": 0,
+        "behavioral_anchor_row_check_failure_count": 0
+      }
+    },
+    {
+      "scenario": "02-Semiurban",
+      "episode_id": "ev_bbfa5beb48621263dda4",
+      "observation_profile": "S4_periodic_measurement_only_window",
+      "B1_candidate_temporal_relations": 2197,
+      "B1_unsubstantiated_temporal_candidates": 381,
+      "B1_explicit_evidence_constraint_conflicts": 1816,
+      "B1_corroborated_same_device_candidates": 0,
+      "B1_topology_breakdown": {
+        "cross_device_candidate_count": 2192,
+        "same_device_separate_asdu_candidate_count": 0,
+        "same_asdu_co_report_candidate_count": 5
+      },
+      "B2_applicability": "NOT_APPLICABLE_NO_CONTROL_COMMANDS",
+      "B2_verified_command_transitions": 0,
+      "B2_omitted_verified_non_command_anchors": 67,
+      "B2_omitted_cross_rtu_bridges": 0,
+      "A1_originally_supported": 0,
+      "A1_unsupported_promotions": 0,
+      "A1_ungated_spurious_cross_rtu_bridges": 0,
+      "A1_violation_breakdown": {
+        "quality_or_test_bit_violation": 0,
+        "persistence_insufficient_violation": 0,
+        "prior_state_baseline_missing_violation": 0,
+        "change_type_mismatch_violation": 0,
+        "magnitude_or_direction_conflict_violation": 0,
+        "non_complementary_or_disjoint_interval_violation": 0
+      },
+      "A2_raw_observations": 159,
+      "A2_distinct_source_containers": 66,
+      "A2_true_cross_vantage_mirror_duplicates": 25,
+      "A2_same_asdu_different_ioa_points": 1,
+      "A2_distinct_messages_in_same_tcp_session": 0,
+      "A2_distinct_time_network_events_in_anchor": 0,
+      "A2_ipal_derived_rows": 67,
+      "A2_unknown_provenance_relations": 0,
+      "A2_true_duplicate_or_derived_inflation": 93,
+      "A2_multi_event_anchor_aggregation": 0,
+      "A3_local_storylines": 392,
+      "MIRAGE_rtu_asdu_bundles": 66,
+      "MIRAGE_cross_rtu_verified_bridges": 0,
+      "MIRAGE_bridged_components": 0,
+      "MIRAGE_competing_explanations": 0,
+      "E3_traceability_levels": {
+        "1_evidence_citation_presence": true,
+        "2_evidence_id_resolution": true,
+        "3_evidence_to_fact_anchor_consistency": true,
+        "4_full_lineage_consistency": true,
+        "synthesis_cited_evidence_id_count": 92,
+        "sqlite_unresolved_ids": [],
+        "timeline_row_check_failure_count": 0,
+        "behavioral_anchor_row_check_failure_count": 0
+      }
+    },
+    {
+      "scenario": "03-Rural",
+      "episode_id": "ev_d547da0be440532c580e",
+      "observation_profile": "S1_control_command_window",
+      "B1_candidate_temporal_relations": 3,
+      "B1_unsubstantiated_temporal_candidates": 0,
+      "B1_explicit_evidence_constraint_conflicts": 2,
+      "B1_corroborated_same_device_candidates": 1,
+      "B1_topology_breakdown": {
+        "cross_device_candidate_count": 2,
+        "same_device_separate_asdu_candidate_count": 1,
+        "same_asdu_co_report_candidate_count": 0
+      },
+      "B2_applicability": "APPLICABLE_CONTROL_COMMAND_WINDOW",
+      "B2_verified_command_transitions": 0,
+      "B2_omitted_verified_non_command_anchors": 0,
+      "B2_omitted_cross_rtu_bridges": 0,
+      "A1_originally_supported": 0,
+      "A1_unsupported_promotions": 0,
+      "A1_ungated_spurious_cross_rtu_bridges": 0,
+      "A1_violation_breakdown": {
+        "quality_or_test_bit_violation": 0,
+        "persistence_insufficient_violation": 0,
+        "prior_state_baseline_missing_violation": 0,
+        "change_type_mismatch_violation": 0,
+        "magnitude_or_direction_conflict_violation": 0,
+        "non_complementary_or_disjoint_interval_violation": 0
+      },
+      "A2_raw_observations": 5,
+      "A2_distinct_source_containers": 2,
+      "A2_true_cross_vantage_mirror_duplicates": 2,
+      "A2_same_asdu_different_ioa_points": 0,
+      "A2_distinct_messages_in_same_tcp_session": 0,
+      "A2_distinct_time_network_events_in_anchor": 0,
+      "A2_ipal_derived_rows": 1,
+      "A2_unknown_provenance_relations": 0,
+      "A2_true_duplicate_or_derived_inflation": 3,
+      "A2_multi_event_anchor_aggregation": 0,
+      "A3_local_storylines": 3,
+      "MIRAGE_rtu_asdu_bundles": 0,
+      "MIRAGE_cross_rtu_verified_bridges": 0,
+      "MIRAGE_bridged_components": 0,
+      "MIRAGE_competing_explanations": 1,
+      "E3_traceability_levels": {
+        "1_evidence_citation_presence": true,
+        "2_evidence_id_resolution": true,
+        "3_evidence_to_fact_anchor_consistency": true,
+        "4_full_lineage_consistency": true,
+        "synthesis_cited_evidence_id_count": 4,
+        "sqlite_unresolved_ids": [],
+        "timeline_row_check_failure_count": 0,
+        "behavioral_anchor_row_check_failure_count": 0
+      }
+    },
+    {
+      "scenario": "03-Rural",
+      "episode_id": "ev_bdac022dece4728f5d4e",
+      "observation_profile": "S2_spontaneous_state_and_measurement_drop_window",
+      "B1_candidate_temporal_relations": 1126,
+      "B1_unsubstantiated_temporal_candidates": 570,
+      "B1_explicit_evidence_constraint_conflicts": 552,
+      "B1_corroborated_same_device_candidates": 4,
+      "B1_topology_breakdown": {
+        "cross_device_candidate_count": 1021,
+        "same_device_separate_asdu_candidate_count": 10,
+        "same_asdu_co_report_candidate_count": 95
+      },
+      "B2_applicability": "NOT_APPLICABLE_NO_CONTROL_COMMANDS",
+      "B2_verified_command_transitions": 0,
+      "B2_omitted_verified_non_command_anchors": 117,
+      "B2_omitted_cross_rtu_bridges": 4,
+      "A1_originally_supported": 4,
+      "A1_unsupported_promotions": 6,
+      "A1_ungated_spurious_cross_rtu_bridges": 2,
+      "A1_violation_breakdown": {
+        "quality_or_test_bit_violation": 0,
+        "persistence_insufficient_violation": 1,
+        "prior_state_baseline_missing_violation": 0,
+        "change_type_mismatch_violation": 1,
+        "magnitude_or_direction_conflict_violation": 0,
+        "non_complementary_or_disjoint_interval_violation": 4
+      },
+      "A2_raw_observations": 590,
+      "A2_distinct_source_containers": 68,
+      "A2_true_cross_vantage_mirror_duplicates": 120,
+      "A2_same_asdu_different_ioa_points": 167,
+      "A2_distinct_messages_in_same_tcp_session": 0,
+      "A2_distinct_time_network_events_in_anchor": 0,
+      "A2_ipal_derived_rows": 235,
+      "A2_unknown_provenance_relations": 0,
+      "A2_true_duplicate_or_derived_inflation": 522,
+      "A2_multi_event_anchor_aggregation": 0,
+      "A3_local_storylines": 179,
+      "MIRAGE_rtu_asdu_bundles": 68,
+      "MIRAGE_cross_rtu_verified_bridges": 4,
+      "MIRAGE_bridged_components": 2,
+      "MIRAGE_competing_explanations": 2,
+      "E3_traceability_levels": {
+        "1_evidence_citation_presence": true,
+        "2_evidence_id_resolution": true,
+        "3_evidence_to_fact_anchor_consistency": true,
+        "4_full_lineage_consistency": true,
+        "synthesis_cited_evidence_id_count": 355,
+        "sqlite_unresolved_ids": [],
+        "timeline_row_check_failure_count": 0,
+        "behavioral_anchor_row_check_failure_count": 0
+      }
+    },
+    {
+      "scenario": "03-Rural",
+      "episode_id": "ev_f684bbfff5711a74db7d",
+      "observation_profile": "S3_arp_or_iec104_link_disruption_window",
+      "B1_candidate_temporal_relations": 561,
+      "B1_unsubstantiated_temporal_candidates": 24,
+      "B1_explicit_evidence_constraint_conflicts": 537,
+      "B1_corroborated_same_device_candidates": 0,
+      "B1_topology_breakdown": {
+        "cross_device_candidate_count": 555,
+        "same_device_separate_asdu_candidate_count": 0,
+        "same_asdu_co_report_candidate_count": 6
+      },
+      "B2_applicability": "NOT_APPLICABLE_NO_CONTROL_COMMANDS",
+      "B2_verified_command_transitions": 0,
+      "B2_omitted_verified_non_command_anchors": 13,
+      "B2_omitted_cross_rtu_bridges": 0,
+      "A1_originally_supported": 0,
+      "A1_unsupported_promotions": 0,
+      "A1_ungated_spurious_cross_rtu_bridges": 0,
+      "A1_violation_breakdown": {
+        "quality_or_test_bit_violation": 0,
+        "persistence_insufficient_violation": 0,
+        "prior_state_baseline_missing_violation": 0,
+        "change_type_mismatch_violation": 0,
+        "magnitude_or_direction_conflict_violation": 0,
+        "non_complementary_or_disjoint_interval_violation": 0
+      },
+      "A2_raw_observations": 57,
+      "A2_distinct_source_containers": 13,
+      "A2_true_cross_vantage_mirror_duplicates": 3,
+      "A2_same_asdu_different_ioa_points": 0,
+      "A2_distinct_messages_in_same_tcp_session": 13,
+      "A2_distinct_time_network_events_in_anchor": 19,
+      "A2_ipal_derived_rows": 9,
+      "A2_unknown_provenance_relations": 0,
+      "A2_true_duplicate_or_derived_inflation": 12,
+      "A2_multi_event_anchor_aggregation": 32,
+      "A3_local_storylines": 103,
+      "MIRAGE_rtu_asdu_bundles": 13,
+      "MIRAGE_cross_rtu_verified_bridges": 0,
+      "MIRAGE_bridged_components": 0,
+      "MIRAGE_competing_explanations": 2,
+      "E3_traceability_levels": {
+        "1_evidence_citation_presence": true,
+        "2_evidence_id_resolution": true,
+        "3_evidence_to_fact_anchor_consistency": true,
+        "4_full_lineage_consistency": true,
+        "synthesis_cited_evidence_id_count": 48,
+        "sqlite_unresolved_ids": [],
+        "timeline_row_check_failure_count": 0,
+        "behavioral_anchor_row_check_failure_count": 0
+      }
+    },
+    {
+      "scenario": "03-Rural",
+      "episode_id": "ev_94386ab3184c46c62ce3",
+      "observation_profile": "S4_periodic_measurement_only_window",
+      "B1_candidate_temporal_relations": 455,
+      "B1_unsubstantiated_temporal_candidates": 292,
+      "B1_explicit_evidence_constraint_conflicts": 163,
+      "B1_corroborated_same_device_candidates": 0,
+      "B1_topology_breakdown": {
+        "cross_device_candidate_count": 450,
+        "same_device_separate_asdu_candidate_count": 2,
+        "same_asdu_co_report_candidate_count": 3
+      },
+      "B2_applicability": "NOT_APPLICABLE_NO_CONTROL_COMMANDS",
+      "B2_verified_command_transitions": 0,
+      "B2_omitted_verified_non_command_anchors": 56,
+      "B2_omitted_cross_rtu_bridges": 0,
+      "A1_originally_supported": 0,
+      "A1_unsupported_promotions": 2,
+      "A1_ungated_spurious_cross_rtu_bridges": 2,
+      "A1_violation_breakdown": {
+        "quality_or_test_bit_violation": 0,
+        "persistence_insufficient_violation": 2,
+        "prior_state_baseline_missing_violation": 0,
+        "change_type_mismatch_violation": 0,
+        "magnitude_or_direction_conflict_violation": 2,
+        "non_complementary_or_disjoint_interval_violation": 0
+      },
+      "A2_raw_observations": 146,
+      "A2_distinct_source_containers": 55,
+      "A2_true_cross_vantage_mirror_duplicates": 34,
+      "A2_same_asdu_different_ioa_points": 1,
+      "A2_distinct_messages_in_same_tcp_session": 0,
+      "A2_distinct_time_network_events_in_anchor": 0,
+      "A2_ipal_derived_rows": 56,
+      "A2_unknown_provenance_relations": 0,
+      "A2_true_duplicate_or_derived_inflation": 91,
+      "A2_multi_event_anchor_aggregation": 0,
+      "A3_local_storylines": 124,
+      "MIRAGE_rtu_asdu_bundles": 55,
+      "MIRAGE_cross_rtu_verified_bridges": 0,
+      "MIRAGE_bridged_components": 0,
+      "MIRAGE_competing_explanations": 2,
+      "E3_traceability_levels": {
+        "1_evidence_citation_presence": true,
+        "2_evidence_id_resolution": true,
+        "3_evidence_to_fact_anchor_consistency": true,
+        "4_full_lineage_consistency": true,
+        "synthesis_cited_evidence_id_count": 94,
+        "sqlite_unresolved_ids": [],
+        "timeline_row_check_failure_count": 0,
+        "behavioral_anchor_row_check_failure_count": 0
+      }
+    }
+  ]
+}

@@ -1,9 +1,10 @@
-"""Task 5: Representative Real Sherlock Case Studies (C1-C7) & Synthetic Known-Answer Counterexamples.
+"""Task 5: Representative Real Sherlock Case Studies (C1-C7, 7 Categories / 11 Windows) & Synthetic Known-Answer Counterexamples (S-KA1..S-KA4).
 
-All 7 real Sherlock case categories are selected by explicit, pre-defined rules from the
-frozen 103-window dataset, with full `evidence_id` citations and epistemic boundaries.
-Synthetic known-answer counterexamples (S-KA1, S-KA2, S-KA3) are executed in isolated
-temporary SQLite databases and reported strictly separately from the 103 real windows.
+All 7 real Sherlock case categories (11 window instances total) are selected by explicit,
+pre-defined rules from the frozen 103-window dataset, with full `evidence_id` citations
+and epistemic boundaries. Synthetic known-answer counterexamples (S-KA1..S-KA4) are
+executed in isolated temporary SQLite databases and reported strictly separately from
+the 103 real windows.
 """
 from __future__ import annotations
 import tempfile
@@ -61,11 +62,12 @@ REPRESENTATIVE_CASE_SPECS = [
     },
     {
         "case_id": "C4_arp_and_iec104_link_disruption_uncertain_causality",
-        "category": "ARP burst and IEC-104 link disruptions with per-target precedence filtering and uncertain causality",
+        "category": "ARP burst and IEC-104 link disruptions with per-target precedence filtering, multi-event provenance separation, and uncertain causality",
         "selection_rule": (
             "Select `01-Basic` window `ev_cbe1e5bef23346604396`, where ARP traffic from `172.16.3.28` "
-            "precedes link loss on RTUs `172.16.3.10` and `172.16.3.9` within 15s, while first ARP to "
-            "`172.16.3.20` occurs 37.7s after its link change."
+            "precedes link loss on RTUs `172.16.3.10` and `172.16.3.9` within 15s (while first ARP to "
+            "`172.16.3.20` occurs 37.7s after its link change), and where `communication_change` anchors "
+            "aggregate distinct-time SYN/FIN events (`true_cross_vantage_mirror_duplicate_count = 0`)."
         ),
         "episodes": [
             ("01-Basic", "ev_cbe1e5bef23346604396"),
@@ -84,10 +86,11 @@ REPRESENTATIVE_CASE_SPECS = [
     },
     {
         "case_id": "C6_lineage_consistency_failure_diagnostic_downgrade",
-        "category": "Lineage consistency failure automatically downgrading final report to Diagnostic Only",
+        "category": "Lineage consistency failure automatically downgrading final report to Diagnostic Only (also the 46th window with unpaired COT=7 objects)",
         "selection_rule": (
             "Select `02-Semiurban` window `ev_5dd0102bf58bf2ce9487`, the single window in the 103-window "
-            "suite where `lineage_consistency.json` flags `time_outside_cited_sample` on `A007` (`EV-6e9e7ece8bf456f0`)."
+            "suite where `lineage_consistency.json` flags `time_outside_cited_sample` on `A007` (`EV-6e9e7ece8bf456f0`), "
+            "and which also contains 62 unpaired `COT=7` replies without a matching `COT=6` command."
         ),
         "episodes": [
             ("02-Semiurban", "ev_5dd0102bf58bf2ce9487"),
@@ -153,6 +156,7 @@ def extract_real_case_study(
             }
             for t in txs[:6]
         ],
+        "unpaired_control_message_count": int(tx_result.get("unpaired_control_message_count") or 0),
         "verified_anchor_count": len(ver_anchors),
         "quarantined_unverified_anchor_count": int(anchor_result.get("unverified_anchor_count") or 0),
         "sample_verified_anchors": [
@@ -170,11 +174,10 @@ def extract_real_case_study(
     baseline_relations = {
         "B1_temporal_only": {
             "candidate_temporal_relation_count": b1_result["candidate_temporal_relation_count"],
-            "conflicting_or_unsupported_count": b1_result["total_conflicting_or_unsupported_candidate_count"],
-            "cross_device_without_link_count": b1_result["lacking_device_or_session_support_count"],
-            "quality_or_test_bit_conflict_count": b1_result["quality_or_test_bit_conflict_count"],
-            "transient_not_sustained_count": b1_result["transient_not_sustained_conflict_count"],
-            "same_device_direction_or_type_conflict_count": b1_result["same_device_direction_or_type_conflict_count"],
+            "unsubstantiated_temporal_candidate_count": b1_result["unsubstantiated_temporal_candidate_count"],
+            "explicit_evidence_constraint_conflict_count": b1_result["explicit_evidence_constraint_conflict_count"],
+            "explicit_conflict_breakdown": b1_result["explicit_conflict_breakdown"],
+            "topology_breakdown": b1_result["topology_breakdown"],
         },
         "B2_protocol_only": {
             "applicability_status": b2_result["applicability_status"],
@@ -190,6 +193,7 @@ def extract_real_case_study(
         "quality_consistency_passed": quality_consistency.get("consistent"),
         "lineage_consistency_passed": lineage_consistency.get("consistent"),
         "lineage_consistency_issues": lineage_consistency.get("issues") or [],
+        "e3_traceability_levels": a3_result["with_full_synthesis"]["traceability_verification"],
         "verified_device_transitions": mirage_report.get("verified_device_transitions") or [],
         "rtu_asdu_bundle_count": len(bundles),
         "cross_rtu_verified_element_bridges": [
@@ -219,9 +223,9 @@ def extract_real_case_study(
     differences = {
         "vs_B1_temporal_only": (
             f"B1 emits {b1_result['candidate_temporal_relation_count']} candidate temporal links "
-            f"({b1_result['total_conflicting_or_unsupported_candidate_count']} violating device/quality/persistence/direction "
-            f"constraints); MIRAGE-OT restricts supported steps to {len(bridges)} cross-RTU bridges and "
-            f"{len(mirage_report.get('verified_device_transitions') or [])} verified command transitions."
+            f"({b1_result['unsubstantiated_temporal_candidate_count']} unsubstantiated cross-device/unverified candidates "
+            f"and {b1_result['explicit_evidence_constraint_conflict_count']} explicit quality/persistence/direction/same-ASDU "
+            f"conflicts); MIRAGE-OT keeps cross-device links unresolved and restricts supported bridges to {len(bridges)}."
         ),
         "vs_B2_protocol_only": (
             f"B2 is `{b2_result['applicability_status']}` and omits "
@@ -229,17 +233,21 @@ def extract_real_case_study(
             f"behavioral anchors and {len(bridges)} cross-RTU bridges."
         ),
         "vs_A1_no_behavioral_gate": (
-            f"Without the consistency gate, A1 promotes {a1_result['unsupported_promotion_total_count']} "
+            f"Counterfactual A1 promotes {a1_result['unsupported_promotion_total_count']} "
             f"unsupported relations ({a1_result['evidence_constraint_violation_breakdown']})."
         ),
         "vs_A2_no_provenance_dedup": (
-            f"Without provenance deduplication, A2 inflates {a2_result['distinct_source_container_count']} "
-            f"true source containers to {a2_result['raw_observation_count']} raw observations "
-            f"(inflation factor {a2_result['source_inflation_factor']}x)."
+            f"Counterfactual A2 counts {a2_result['raw_observation_count']} raw observations vs "
+            f"{a2_result['distinct_source_container_count']} message/event containers: "
+            f"true_mirror={a2_result['true_cross_vantage_mirror_duplicate_count']}, "
+            f"same_asdu_ioa={a2_result['same_asdu_different_ioa_point_count']}, "
+            f"same_tcp_session_msgs={a2_result['distinct_messages_in_same_tcp_session_count']}, "
+            f"diff_time_anchor_events={a2_result['distinct_time_network_events_in_anchor_count']}, "
+            f"ipal={a2_result['ipal_derived_observation_count']}."
         ),
         "vs_A3_no_incident_synthesis": (
-            f"Without Incident Synthesis, A3 leaves {a3_result['without_synthesis']['local_storyline_count']} "
-            f"fragmented local storylines without consolidating {len(bundles)} ASDU bundles, "
+            f"Without Incident Synthesis, A3 outputs {a3_result['without_synthesis']['local_storyline_count']} "
+            f"local storylines without consolidating {len(bundles)} ASDU bundles, "
             f"{len(bridges)} cross-RTU bridges, or {len(explanations)} competing explanations."
         ),
     }
@@ -294,7 +302,7 @@ def _row(eid: str, t: float, mod: str, ent: str, kind: str, val, *, vantage="n30
 
 
 def run_synthetic_known_answer_counterexamples() -> list[dict]:
-    """Run 3 synthetic known-answer counterexamples in isolated temporary DBs (reported separately from Sherlock)."""
+    """Run 4 synthetic known-answer counterexamples in isolated temporary DBs (reported separately from Sherlock)."""
     good_qds = {"iv": False, "nt": False, "sb": False, "bl": False, "ov": False}
     cases = []
 
@@ -307,7 +315,6 @@ def run_synthetic_known_answer_counterexamples() -> list[dict]:
         create(conn1)
         rows1 = []
         for i, (t, pf, pt) in enumerate([(990.0, 100.0, -100.0), (1005.0, 300.0, -40.0), (1015.0, 300.0, -40.0), (1025.0, 300.0, -40.0)]):
-            # line.1 from-side increases 100 -> 300 with good quality; to-side decreases |-100| -> |-40| AND has test bit set at step i==1
             rows1.append(_row(
                 f"EV-ska1-f-{i}", t, "network", "line.1:active_power_from", "iec104_asdu", pf,
                 ca_ioa="110.1", src="172.16.3.11",
@@ -342,15 +349,17 @@ def run_synthetic_known_answer_counterexamples() -> list[dict]:
             "synthetic_case_id": "S_KA1_test_bit_and_opposing_direction",
             "known_ground_truth": (
                 "`line.1:active_power_from` (RTU .11) increases 100->300, whereas `line.1:active_power_to` (RTU .12) "
-                "decreases in magnitude |-100|->|-40| and has COT test bit `T=1` at the step sample. Must NOT form a "
-                "supported transition or cross-RTU bridge."
+                "decreases in magnitude |-100|->|-40| and has COT test bit `T=1` at the step sample. Must be flagged as "
+                "`explicit_evidence_constraint_conflict` in B1 and rejected from bridges in MIRAGE-OT."
             ),
             "B1_temporal_only_candidates": b1_1["candidate_temporal_relation_count"],
+            "B1_explicit_constraint_conflicts": b1_1["explicit_evidence_constraint_conflict_count"],
             "A1_ungated_unsupported_promotions": a1_1["unsupported_promotion_total_count"],
             "MIRAGE_OT_supported_bridges": len(res1["incident_synthesis"]["verified_element_bridges"]),
             "MIRAGE_OT_sequential_rejected": len(res1["storylines"]["sequential_same_device_observations"]),
             "passed_known_answer": (
                 b1_1["candidate_temporal_relation_count"] == 1
+                and b1_1["explicit_evidence_constraint_conflict_count"] == 1
                 and a1_1["unsupported_promotion_total_count"] == 1
                 and len(res1["incident_synthesis"]["verified_element_bridges"]) == 0
             ),
@@ -389,27 +398,31 @@ def run_synthetic_known_answer_counterexamples() -> list[dict]:
             tx_result=res2["transactions"], anchor_result=res2["event_anchors"],
             mirage_event_graph=res2["event_graph"], mirage_storylines=res2["storylines"],
             mirage_synthesis=res2["incident_synthesis"],
+            db_path=db2_path,
         )
         cases.append({
             "synthetic_case_id": "S_KA2_mirror_and_same_asdu_and_ipal_duplication",
             "known_ground_truth": (
                 "One ASDU (`apci_tx=31`) from RTU `172.16.3.18` carries two objects (`bus.5` and `load.3`), "
-                "is mirrored at two vantages (`n302` and `n318`, 4 packet objects), and produces 2 IPAL rows "
-                "(6 raw observations total). True independent source container count is exactly 1."
+                "is mirrored at two vantages (`n302` and `n318`, 4 packet objects: 1 primary + 1 same-ASDU diff IOA + "
+                "2 true cross-vantage mirrors), and produces 2 IPAL rows (6 raw observations total). True container count is 1."
             ),
             "A2_naive_raw_observation_count": a2_2["raw_observation_count"],
-            "A2_mirror_duplicate_count": a2_2["mirror_duplicate_count"],
-            "A2_same_asdu_expansion_count": a2_2["same_asdu_multi_point_expansion_count"],
+            "A2_true_cross_vantage_mirror_duplicate_count": a2_2["true_cross_vantage_mirror_duplicate_count"],
+            "A2_same_asdu_different_ioa_point_count": a2_2["same_asdu_different_ioa_point_count"],
             "A2_ipal_derived_count": a2_2["ipal_derived_observation_count"],
             "MIRAGE_OT_distinct_source_container_count": a2_2["distinct_source_container_count"],
             "passed_known_answer": (
                 a2_2["raw_observation_count"] == 6
                 and a2_2["distinct_source_container_count"] == 1
-                and a2_2["falsely_counted_independent_source_count"] == 5
+                and a2_2["true_cross_vantage_mirror_duplicate_count"] == 2
+                and a2_2["same_asdu_different_ioa_point_count"] == 1
+                and a2_2["ipal_derived_observation_count"] == 2
+                and a2_2["true_duplicate_or_derived_source_inflation_count"] == 5
             ),
         })
 
-        # S-KA3: Cross-Device Unrelated Co-Occurrence vs True Cross-RTU Same-Line Transition
+        # S-KA3: Cross-Device Unsubstantiated Candidate vs True Cross-RTU Same-Line Transition
         db3_path = tmp_path / "ska3.sqlite"
         conn3 = connect(db3_path)
         create(conn3)
@@ -450,18 +463,72 @@ def run_synthetic_known_answer_counterexamples() -> list[dict]:
             "synthetic_case_id": "S_KA3_unverified_switch_vs_verified_cross_rtu_line_bridge",
             "known_ground_truth": (
                 "Unverified `switch.99:is_closed=0` (no prior baseline) occurs 4s before `line.4` drops to zero "
-                "at both `to` (RTU .18) and `from` (RTU .22) ends. Only `line.4` (`to` <-> `from`) is a corroborated "
-                "cross-RTU bridge; `switch.99 -> line.4` must remain an unresolved candidate branch."
+                "at both `to` (RTU .18) and `from` (RTU .22) ends. The 2 cross-device links from `switch.99` are "
+                "`unsubstantiated_temporal_candidates` (not proven false conflicts), while `line.4` (`to` <-> `from`) "
+                "is 1 `corroborated_same_device_candidate` forming 1 Cross-RTU Bridge."
             ),
             "B1_temporal_only_candidates": b1_3["candidate_temporal_relation_count"],
-            "B1_cross_device_unsupported_candidates": b1_3["lacking_device_or_session_support_count"],
+            "B1_unsubstantiated_candidates": b1_3["unsubstantiated_temporal_candidate_count"],
+            "B1_explicit_constraint_conflicts": b1_3["explicit_evidence_constraint_conflict_count"],
+            "B1_corroborated_same_device_candidates": b1_3["corroborated_same_device_candidate_count"],
             "MIRAGE_OT_verified_bridges": [b["bridged_device_stem"] for b in res3["incident_synthesis"]["verified_element_bridges"]],
             "MIRAGE_OT_unresolved_branches": len(res3["storylines"]["unresolved_branches"]),
             "passed_known_answer": (
                 b1_3["candidate_temporal_relation_count"] == 3
-                and b1_3["lacking_device_or_session_support_count"] == 2
+                and b1_3["unsubstantiated_temporal_candidate_count"] == 2
+                and b1_3["explicit_evidence_constraint_conflict_count"] == 0
+                and b1_3["corroborated_same_device_candidate_count"] == 1
                 and [b["bridged_device_stem"] for b in res3["incident_synthesis"]["verified_element_bridges"]] == ["line.4"]
-                and len(res3["storylines"]["unresolved_branches"]) == 2
+            ),
+        })
+
+        # S-KA4: Multi-event communication_change & ARP anchor on single vantage (must NOT be counted as mirror duplicates)
+        db4_path = tmp_path / "ska4.sqlite"
+        conn4 = connect(db4_path)
+        create(conn4)
+        rows4 = [
+            _row("EV-ska4-fin", 1005.0, "network", "172.16.1.2->172.16.3.10/TCP", "tcp_packet", None,
+                 vantage="n302", src="172.16.1.2", sport=56094, dst="172.16.3.10", dport=2404,
+                 payload={"tcp_flags": 0x11, "tcp_seq": 100}),
+            _row("EV-ska4-syn1", 1006.0, "network", "172.16.1.2->172.16.3.10/TCP", "tcp_packet", None,
+                 vantage="n302", src="172.16.1.2", sport=56736, dst="172.16.3.10", dport=2404,
+                 payload={"tcp_flags": 0x02, "tcp_seq": 200}),
+            _row("EV-ska4-syn2", 1007.0, "network", "172.16.1.2->172.16.3.10/TCP", "tcp_packet", None,
+                 vantage="n302", src="172.16.1.2", sport=56736, dst="172.16.3.10", dport=2404,
+                 payload={"tcp_flags": 0x02, "tcp_seq": 200}),
+            _row("EV-ska4-syn3", 1009.0, "network", "172.16.1.2->172.16.3.10/TCP", "tcp_packet", None,
+                 vantage="n302", src="172.16.1.2", sport=56752, dst="172.16.3.10", dport=2404,
+                 payload={"tcp_flags": 0x02, "tcp_seq": 300}),
+        ]
+        for r in rows4:
+            insert_evidence(conn4, r)
+        conn4.commit()
+        res4 = reconstruct_incident(
+            EvidenceDB(conn4, incident_start=1000.0, incident_end=1040.0),
+            1000.0, 1040.0, background_start=985.0, background_end=1000.0, llm=None, out_dir=tmp_path / "out4",
+        )
+        conn4.close()
+        a2_4 = run_ablation_without_provenance_dedup(
+            tx_result=res4["transactions"], anchor_result=res4["event_anchors"],
+            mirage_event_graph=res4["event_graph"], mirage_storylines=res4["storylines"],
+            mirage_synthesis=res4["incident_synthesis"],
+            db_path=db4_path,
+        )
+        cases.append({
+            "synthetic_case_id": "S_KA4_communication_anchor_multi_event_not_mirror_duplicate",
+            "known_ground_truth": (
+                "A `communication_change` anchor on `n302` cites 4 TCP packets at different times across 3 ephemeral "
+                "sessions (`56094` FIN, `56736` two SYN retries, `56752` SYN). Because all 4 packets are on `n302` at "
+                "different times, `true_cross_vantage_mirror_duplicate_count` must be 0, with 1 `distinct_messages_in_same_tcp_session_count` "
+                "and 2 `distinct_time_network_events_in_anchor_count`."
+            ),
+            "A2_true_cross_vantage_mirror_duplicate_count": a2_4["true_cross_vantage_mirror_duplicate_count"],
+            "A2_distinct_messages_in_same_tcp_session_count": a2_4["distinct_messages_in_same_tcp_session_count"],
+            "A2_distinct_time_network_events_in_anchor_count": a2_4["distinct_time_network_events_in_anchor_count"],
+            "passed_known_answer": (
+                a2_4["true_cross_vantage_mirror_duplicate_count"] == 0
+                and a2_4["distinct_messages_in_same_tcp_session_count"] == 1
+                and a2_4["distinct_time_network_events_in_anchor_count"] == 2
             ),
         })
 
