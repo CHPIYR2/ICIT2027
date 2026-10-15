@@ -6,6 +6,12 @@ from pathlib import Path
 from experiments.stage3.ablations.no_provenance_dedup import run_ablation_without_provenance_dedup
 from experiments.stage3.evaluation.case_studies import run_synthetic_known_answer_counterexamples
 from experiments.stage3.evaluation.metrics import dist_stats, paired_window_difference_stats
+from experiments.stage3.evaluation.physical_state_comparison import (
+    BRIDGE_REL_TOL,
+    classify_numeric,
+    classify_to_zero_post,
+    combine_sides,
+)
 from experiments.stage3.run_stage3 import verify_frozen_engine_integrity
 
 
@@ -91,3 +97,47 @@ def test_stage3_dist_stats_and_paired_window_difference():
     assert p["windows_where_baseline_exceeds_mirage"] == 3
     assert p["windows_tied"] == 1
     assert p["descriptive_bootstrap_95ci"][0] > 0
+
+
+def test_physical_comparison_separates_exact_tolerance_and_nan_semantics():
+    exact = classify_numeric(1.0, 1.0, 0.05, criterion="transaction_pre_numeric_rel_0.05")
+    assert exact["agreement_class"] == "exact_numeric"
+
+    tolerant = classify_numeric(100.0, 103.0, 0.05, criterion="transaction_pre_numeric_rel_0.05")
+    assert tolerant["agreement_class"] == "within_tolerance"
+
+    mismatch = classify_numeric(4.7134, 3.9929, BRIDGE_REL_TOL, criterion="to_zero_pre_numeric_rel_0.10")
+    assert mismatch["agreement_class"] == "numeric_mismatch"
+
+    missing = classify_numeric(1.0, None, BRIDGE_REL_TOL, criterion="to_zero_pre_numeric_rel_0.10")
+    assert missing["checked"] is False
+    assert missing["agreement_class"] == "unchecked_missing_physical"
+
+    semantic = classify_to_zero_post(0.0, float("nan"))
+    assert semantic["agreement_class"] == "semantic_deenergized_nan_vs_iec104_zero"
+    assert semantic["agreement_class"] != "exact_numeric"
+
+    numeric_zero = classify_to_zero_post(0.0, 0.0)
+    assert numeric_zero["agreement_class"] == "exact_numeric"
+
+
+def test_to_zero_does_not_treat_an_unchecked_or_mismatched_pre_value_as_agreement():
+    pre_mismatch = classify_numeric(
+        0.1746, -0.0918, BRIDGE_REL_TOL, criterion="to_zero_pre_numeric_rel_0.10"
+    )
+    post_semantic = classify_to_zero_post(0.0, float("nan"))
+    combined = combine_sides(pre_mismatch, post_semantic)
+    assert post_semantic["checked"] is True
+    assert combined["compatible"] is False
+    assert combined["agreement_class"] == "not_agreed"
+
+    unchecked_pre = classify_numeric(10.0, None, BRIDGE_REL_TOL, criterion="to_zero_pre_numeric_rel_0.10")
+    post_zero = classify_to_zero_post(0.0, 0.0)
+    blocked = combine_sides(unchecked_pre, post_zero)
+    assert blocked["agreement_class"] == "incomplete_unchecked"
+    assert blocked["compatible"] is False
+
+    pre_ok = classify_numeric(-807307.688, -807430.5532, BRIDGE_REL_TOL, criterion="to_zero_pre_numeric_rel_0.10")
+    agreed = combine_sides(pre_ok, post_zero)
+    assert agreed["compatible"] is True
+    assert agreed["numeric_agreement"] is True

@@ -109,14 +109,30 @@
 
 ## 3. Task 6 — Air-Gapped Post-Freeze Physical State Snapshot Comparison (`01-Basic` `test/physical.zip`)
 
-Executed strictly offline and read-only after all reconstruction outputs were frozen (`40,319` 1-second pandapower physical snapshots in `01-Basic/raw/test/physical.zip`):
+Executed strictly offline and read-only after reconstruction outputs were frozen (`40,319` 1-second snapshots in `01-Basic/raw/test/physical.zip`). `physical.zip` is not a reconstruction input. The calibrated record is `review_artifacts/stage3-audit-response-20261015/post_freeze_physical_state_evaluation.calibrated.json`. The earlier file `post_freeze_physical_state_evaluation.json` is kept as the 2026-10-15 audit record (`9/9`, `6/6`, `32/32`) and is not rewritten.
 
-1. **Verified Control-Command Transitions (`9 / 9 = 100.0%` Physical State/Measurement Value Agreement)**:
-   - All `9` transactions across the `6` `01-Basic` verified-command windows (`ev_e76705884b8fec84592a` `sgen.1`, `ev_1a2c7b07458620ddeb67` `switch.29` & `switch.30`, `ev_12dcd56b2f5e78144cfb` `sgen.10`, `ev_54569eab2d55482f6496` `switch.0`, `ev_343cc5effb0b1b22931b` `sgen.12`, `storage.1`, `sgen.6`, and `ev_0961f1c2da8a257e3ebc` `sgen.6`) match the simulator's physical pre-event and post-event state/measurement values.
-2. **Cross-RTU Verified Element Bridges (`6 / 6 = 100.0%` Physical Endpoint State Agreement across `32` Endpoint Attributes)**:
-   - All `5` Cross-RTU Bridges in `ev_564bebaa45f0686cf98d` (`line.0`, `line.1`, `line.3`, `line.4`, `line.12`) and `1` Cross-RTU Bridge in `ev_b15ac1c8e04d148f09cb` (`line.2`) match the simulator's physical endpoint changes (noting that pandapower outputs `0.0` for de-energized active/reactive power and `NaN` for de-energized island voltage/current, which the RTU encodes as `0.0` in IEC-104 `M_ME_NC_1`).
-3. **MITM Cross-Vantage Conflict Quarantine (`ev_52f5eee28f8b95e702fd`)**:
-   - In the physical simulator, `switch.21` opened once (`True -> False`) and `sgen.12` active power dropped to `0.0 W` and remained `0.0 W`. The `671` rapid oscillation anchors in network telemetry were artifacts of conflicting packets across mirror vantages (`n302` vs `n318`), which MIRAGE-OT's `_merge_iec_vantages()` flagged and quarantined out of supported spines.
+Comparison classes:
+
+- **Exact numeric:** `abs(Δ) ≤ 1e-3` or relative difference `≤ 1e-4`, with scale `max(1, |network value|)`.
+- **Within tolerance:** relative difference above the exact band and at most `5%` for verified transactions or `10%` for bridge points.
+- **Semantic `NaN` compatibility:** a simulator `NaN` with a network post-value within `1e-3` of zero. This is the de-energized-island encoding versus an IEC-104 zero. It is not numeric equality.
+- **`to_zero` pre-value:** the network pre-value is compared numerically. A finite physical pre-value that was not compared is not agreement.
+- **Alignment:** nearest snapshot only. `Δt = snapshot_time − target_time`. Values are not interpolated.
+
+1. **Verified control transactions (`9/9` compatible, all numeric):**
+   - `8` exact and `1` within `5%` (`ev_0961f1c2da8a257e3ebc` `sgen.6:active_power`). Maximum `|Δt|` is `0.730 s`. The six windows are `ev_e76705884b8fec84592a` (`sgen.1`), `ev_1a2c7b07458620ddeb67` (`switch.29`, `switch.30`), `ev_12dcd56b2f5e78144cfb` (`sgen.10`), `ev_54569eab2d55482f6496` (`switch.0`), `ev_343cc5effb0b1b22931b` (`sgen.12`, `storage.1`, `sgen.6`), and `ev_0961f1c2da8a257e3ebc` (`sgen.6`).
+   - Three `ev_0961f1c2` switch transactions remain `state_report_observed_no_pre_baseline`. The simulator shows a matching post-command change, and the reconstruction still withholds verification because the capture has no pre-command IEC-104 baseline.
+2. **Cross-RTU bridges (recalculated `4/6` fully compatible; attributes `29/32` compatible):**
+   - Of `32` endpoint attributes, `10` are exact, `10` are within `10%`, `9` are semantic `NaN` compatibility, and `3` are not agreed. Maximum `|Δt|` is `0.418 s`.
+   - Not agreed, all in `ev_564bebaa45f0686cf98d`, because the **pre-current** fails the `10%` test. The post-side `NaN` was checked and does not override that failure:
+     - `BRG-003` `line.4:current_from`: network `4.7134` versus physical `3.9929` (relative `0.153`); post is `NaN`.
+     - `BRG-005` `line.12:current_from`: network `0.1746` versus physical `-0.0918` (relative `0.266`, sign differs); post is `NaN`.
+     - `BRG-005` `line.12:current_to`: network `0.2937` versus physical `-0.133` (relative `0.427`, sign differs); post is `NaN`.
+   - Fully compatible bridges: `line.0`, `line.1`, and `line.3` in `ev_564bebaa45f0686cf98d`, and `line.2` in `ev_b15ac1c8e04d148f09cb`. `line.4` and `line.12` are not fully compatible.
+3. **Sampled physical state in `ev_52f5eee28f8b95e702fd` (not a 671-anchor replay):**
+   - Window `[1742944993.260, 1742945351.595)`. Three targets (`1742944990`, `1742945050`, `1742945300`) align to snapshots at `Δt` of `-0.865 s`, `-0.862 s`, and `-0.856 s`.
+   - `switch.21` is closed, closed, then open. `sgen.12` active power is `14000.40 W`, `14002.28 W`, then `0 W`.
+   - `anchors_compared_pointwise_to_physical_snapshots = 0`. The pattern is compatible with an opening between the second and third samples. It does not establish a single opening, continuous zero power, or that each of the `671` quarantined anchors is physically false. Those `671` anchors were quarantined by the frozen network reconstruction after cross-vantage payload conflicts.
 
 ---
 
