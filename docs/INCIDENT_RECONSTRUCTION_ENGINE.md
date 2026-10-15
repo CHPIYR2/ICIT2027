@@ -96,3 +96,19 @@ The old indexes lacked quality, T, P/N and S/E because parser `6a0c162` never re
 | `ev_0961` | `TX004` `sgen.6` | `measurement_observed_transition_unverified` | `verified_measurement_transition`, 1 `supported_inference` | 40004.5312 → 20000.6875 toward 20000.0 with decoded good quality, T=0, P/N=0. |
 | `ev_0961` | `TX001`–`TX003` switches | acceptance unknown, value unknown | accepted, values decoded, `state_report_observed_no_pre_baseline` | No IEC-104 value before the command. Still unresolved. |
 | `ev_12dcd56b` | `TX001` `sgen.10` | `measurement_observed_transition_unverified` | `verified_measurement_transition`, 1 `supported_inference` | 309980.938 → 269971.625 toward 270000.0 with decoded good quality, T=0, P/N=0. |
+
+## 7. Behavioral reconstruction round
+
+Details: `docs/BEHAVIORAL_RECONSTRUCTION.md`.
+
+1. **Quality inconsistency.** When `quality_consistency.json` reports `consistent=false`, the report status is
+   `diagnostic_only_quality_inconsistent`, verified transitions are moved to `withheld_verified_device_transitions`,
+   and the Markdown is titled "DIAGNOSTIC ONLY, NOT VERIFIED". Diagnostic artifacts are still written.
+2. **IPAL correspondence.** Same point and time without lineage is `temporal_correspondence /
+   temporally_aligned_same_point_stream` (`common_source_unconfirmed`), not `shared_source`. It is listed per
+   storyline under `temporal_correspondences` and never forms a step. The P0 test's `sgen.6` spine is now 3 nodes
+   and 2 steps instead of 4 and 3.
+3. **No-command windows.** `discover_event_anchors()` finds state reports, measurement steps, link activity and ARP
+   increases. Without a transaction they enter the graph and root behavioral storylines; cross-device links stay
+   `cross_device_temporal_candidate` (unresolved). New artifacts: `event_anchors.json`,
+   `behavioral_storylines.json`, `unresolved_branches.json`.

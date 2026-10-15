@@ -138,6 +138,7 @@ def build_investigation_report(
     event_graph: dict,
     storyline_result: dict,
     explanation: dict,
+    anchor_result: dict | None = None,
 ) -> dict:
     verified_claims = explanation["verification"].get("verified") or []
     rejected_claims = explanation["verification"].get("rejected") or []
@@ -192,8 +193,15 @@ def build_investigation_report(
                 f"@ {round(s_node['time'], 4)}) -> {se['target_fact_id']} ({t_node['entity']}={t_node.get('value')} "
                 f"@ {round(t_node['time'], 4)}) [src_ev={src_ev}; dst_ev={dst_ev}]"
             )
+        correspondence_rendered = [
+            f"Time-aligned IPAL row [{tc['edge_id']} | {tc['relation_type']} | level={tc['claim_level']} | "
+            f"common source NOT confirmed (no lineage)]: {tc['fact_id']} ({tc['entity']}={tc.get('value')} "
+            f"@ {round(tc['time'], 4)}) aligned with {tc['from_spine_fact_id']}; not an independent source"
+            for tc in sl.get("temporal_correspondences") or []
+        ]
         storyline_summaries.append({
             "storyline_id": sl["storyline_id"],
+            "storyline_kind": sl.get("storyline_kind", "transaction_or_observed_chain"),
             "transaction_id": sl["transaction_id"],
             "anchor_entity": sl["anchor_entity"],
             "completeness_status": sl["completeness_status"],
@@ -205,6 +213,7 @@ def build_investigation_report(
             "independent_support_edge_count": sl["independent_support_edge_count"],
             "steps_rendered": steps_rendered,
             "supporting_edges_rendered": supporting_rendered,
+            "temporal_correspondences_rendered": correspondence_rendered,
             "evidence_gaps": sl["evidence_gaps"],
         })
 
@@ -284,6 +293,7 @@ def build_investigation_report(
         })
 
     report = {
+        "report_status": "pending_quality_consistency_check",
         "incident_start": incident_start,
         "incident_end": incident_end,
         "transaction_summaries": tx_summaries,
@@ -306,9 +316,124 @@ def build_investigation_report(
         "competing_hypotheses": competing_hypotheses,
         "evidence_gaps": evidence_gaps,
         "unattached_observations": storyline_result["unattached_observations"],
+        "behavioral_reconstruction": behavioral_summary(
+            anchor_result, storyline_result, nodes_by_id, incident_start,
+        ),
     }
     report["markdown"] = render_investigation_markdown(report)
     return report
+
+
+def behavioral_summary(anchor_result: dict | None, storyline_result: dict, nodes_by_id: dict, t0: float) -> dict | None:
+    if not anchor_result:
+        return None
+    anchors = [
+        {
+            "anchor_id": a["anchor_id"], "rank": a["rank"], "anchor_type": a["anchor_type"],
+            "time": a["time"], "relative_time": round(a["time"] - t0, 3), "entity": a["entity"],
+            "rtu_ip": a.get("rtu_ip"), "observation": a["observation"],
+            "covered_by_transaction": a.get("covered_by_transaction", False),
+        }
+        for a in anchor_result["anchors"]
+    ]
+    chains = []
+    for sl in storyline_result["storylines"]:
+        if sl.get("storyline_kind") != "behavioral":
+            continue
+        supported = [
+            f"{st['edge_id']} {st['relation_type']}: {nodes_by_id[st['source_fact_id']]['entity']} "
+            f"(@+{round(nodes_by_id[st['source_fact_id']]['time'] - t0, 3)}s) -> "
+            f"{nodes_by_id[st['target_fact_id']]['entity']} (@+{round(nodes_by_id[st['target_fact_id']]['time'] - t0, 3)}s); "
+            f"independent_source={st['independent_support']}"
+            for st in sl["confirmed_and_supported_steps"]
+        ]
+        co_reported = [f"{c['entity']} ({c['anchor_id']}, {c['edge_id']})" for c in sl.get("co_reported_in_same_asdu") or []]
+        candidates = [
+            f"{b['edge_id']}: -> {b['candidate_entity']} (@+{round(b['candidate_time'] - t0, 3)}s)"
+            for b in sl["unresolved_cooccurrence_branches"]
+        ] + [
+            f"{b['edge_id']}: {b['from_entity']} (@+{round(b['from_time'] - t0, 3)}s) ->"
+            for b in sl.get("incoming_unresolved_branches") or []
+        ]
+        chains.append({
+            "storyline_id": sl["storyline_id"],
+            "anchor_ids": sl["anchor_ids"],
+            "anchor_types": sl["anchor_types"],
+            "completeness_status": sl["completeness_status"],
+            "start_relative": round(sl["start_time"] - t0, 3),
+            "reconstructed_behavior": sl["reconstructed_behavior"],
+            "supported_relations": supported,
+            "co_reported_in_same_asdu": co_reported,
+            "candidate_relations_unresolved": candidates,
+            "ipal_time_aligned_rows": [
+                f"{tc['entity']} ({tc['relation_type']}; common source not confirmed)"
+                for tc in sl.get("temporal_correspondences") or []
+            ],
+            "not_reconstructed": sl["not_reconstructed"],
+        })
+    return {
+        "behavioral_mode": anchor_result.get("behavioral_mode"),
+        "method": anchor_result["method"],
+        "inputs_not_used": anchor_result.get("inputs_not_used"),
+        "anchor_count": anchor_result["anchor_count"],
+        "anchors": anchors,
+        "chains": chains,
+        "unresolved_branch_count": len(storyline_result.get("unresolved_branches") or []),
+        "observation_inventory": anchor_result.get("observation_inventory"),
+    }
+
+
+def _render_behavioral(beh: dict, diagnostic: bool) -> list[str]:
+    lines = ["", "## 2A. Behavioral Incident Reconstruction (No Control Command)"]
+    if not beh["behavioral_mode"]:
+        lines.append(
+            f"- `{beh['anchor_count']}` event anchors found; a control transaction is present, so anchors are "
+            "listed in `event_anchors.json` and do not root storylines."
+        )
+        return lines
+    inv = beh.get("observation_inventory") or {}
+    lines.append(
+        f"- Method: `{beh['method']}`. Inputs not used: `{beh.get('inputs_not_used')}`. "
+        f"Control objects in window: `{inv.get('iec104_control_objects_in_window')}`."
+    )
+    lines.append(
+        f"- `{beh['anchor_count']}` event anchors, `{len(beh['chains'])}` behavioral storylines, "
+        f"`{beh['unresolved_branch_count']}` unresolved cross-device branches."
+    )
+    lines.extend(["", "### 2A.1 Event Anchors (by time)"])
+    for a in beh["anchors"]:
+        lines.append(
+            f"- **{a['anchor_id']}** (rank `{a['rank']}`, `{a['anchor_type']}`, +`{a['relative_time']}`s, "
+            f"RTU `{a['rtu_ip']}`): {a['observation']}"
+        )
+    lines.extend(["", "### 2A.2 Behavioral Storylines"])
+    for ch in beh["chains"]:
+        lines.append(
+            f"#### {ch['storyline_id']} — anchors `{ch['anchor_ids']}` (+`{ch['start_relative']}`s, "
+            f"status=`{ch['completeness_status']}`{', WITHHELD: quality inconsistent' if diagnostic else ''})"
+        )
+        lines.append(f"- **Reconstructed**: {ch['reconstructed_behavior']}")
+        lines.append(
+            "- **Evidence-supported relations**: "
+            + ("; ".join(ch["supported_relations"]) if ch["supported_relations"] else "none (single anchor)")
+        )
+        if ch["co_reported_in_same_asdu"]:
+            lines.append(
+                "- **Co-reported in the same ASDU (shared message, not a device relation)**: "
+                + ", ".join(ch["co_reported_in_same_asdu"])
+            )
+        if ch["candidate_relations_unresolved"]:
+            shown = ch["candidate_relations_unresolved"][:8]
+            more = len(ch["candidate_relations_unresolved"]) - len(shown)
+            lines.append(
+                f"- **Candidate relations (unresolved, time proximity only; "
+                f"{len(ch['candidate_relations_unresolved'])})**: " + "; ".join(shown)
+                + (f"; {more} more in `unresolved_branches.json`" if more else "")
+            )
+        if ch["ipal_time_aligned_rows"]:
+            lines.append("- **IPAL time-aligned rows (not independent)**: " + "; ".join(ch["ipal_time_aligned_rows"]))
+        lines.append(f"- **Not reconstructed**: {ch['not_reconstructed']}")
+    return lines
 
 
 def inference_gate_summary(tx: dict) -> dict:
@@ -334,9 +459,36 @@ def inference_gate_summary(tx: dict) -> dict:
     }
 
 
+def apply_quality_consistency(report: dict, quality_consistency: dict) -> dict:
+    """Withhold every verified claim when the phases disagree on quality; diagnostics stay."""
+    if quality_consistency.get("consistent"):
+        report["report_status"] = "quality_consistent"
+    else:
+        report["report_status"] = "diagnostic_only_quality_inconsistent"
+        report["withheld_verified_device_transitions"] = report["verified_device_transitions"]
+        report["verified_device_transitions"] = []
+        report["quality_consistency_issues"] = quality_consistency.get("issues") or []
+    report["markdown"] = render_investigation_markdown(report)
+    return report
+
+
 def render_investigation_markdown(report: dict) -> str:
+    diagnostic = report.get("report_status") == "diagnostic_only_quality_inconsistent"
     lines = [
-        "# Evidence-Grounded Incident Reconstruction Report",
+        "# Evidence-Grounded Incident Reconstruction Report"
+        + (" — DIAGNOSTIC ONLY, NOT VERIFIED" if diagnostic else ""),
+        "",
+        f"- **Report Status**: `{report.get('report_status')}`",
+    ]
+    if diagnostic:
+        lines.extend([
+            "- **Quality consistency failed**: transaction, graph, storyline and report disagree on quality. "
+            "No transition below is reported as verified; "
+            f"`{len(report.get('withheld_verified_device_transitions') or [])}` verified transition(s) withheld. "
+            "See `quality_consistency.json`.",
+            *(f"  - Issue: `{json.dumps(issue, ensure_ascii=False)}`" for issue in report.get("quality_consistency_issues") or []),
+        ])
+    lines += [
         "",
         f"- **Incident Window**: `{report['incident_start']}` to `{report['incident_end']}`",
         f"- **Reconstructed IEC-104 Transactions**: `{len(report['transaction_summaries'])}`",
@@ -357,7 +509,8 @@ def render_investigation_markdown(report: dict) -> str:
             f"over `{tx['session']}` at vantages `{tx['vantages']}`. "
             f"**Command Acceptance (`COT=7` P/N)**: `{tx['command_acceptance_status']}`; "
             f"**Device State Verification**: `{tx['device_state_change_status']}` "
-            f"(reason=`{tx['state_verification_reason']}`); "
+            f"(reason=`{tx['state_verification_reason']}`"
+            f"{'; WITHHELD: quality inconsistent' if diagnostic else ''}); "
             f"**Completeness**: `{tx['transaction_completeness']}`; "
             f"**Missing/Unverified Stages**: `{tx['missing_stages']}` "
             f"(`{', '.join(tx['evidence_ids'][:4])}`)."
@@ -371,11 +524,17 @@ def render_investigation_markdown(report: dict) -> str:
                 f"COT test bits=`{gate['test_bits']}`; failed=`{gate['failed_conditions']}`."
             )
 
+    if report.get("behavioral_reconstruction"):
+        lines.extend(_render_behavioral(report["behavioral_reconstruction"], diagnostic))
+
     lines.extend(["", "## 2. Key Findings & Reconstructed Storylines (Contiguous Directed Spines)"])
     for sl in report["storyline_summaries"]:
+        if sl.get("storyline_kind") == "behavioral":
+            continue
         lines.append(
             f"### {sl['storyline_id']} — Anchor `{sl['anchor_entity']}` "
-            f"(tx=`{sl['transaction_id']}`, status=`{sl['completeness_status']}`, "
+            f"(tx=`{sl['transaction_id']}`, status=`{sl['completeness_status']}`"
+            f"{' WITHHELD: quality inconsistent' if diagnostic else ''}, "
             f"contiguous_path=`{sl['spine_is_contiguous_directed_path']}`, "
             f"logical_nodes=`{sl['logical_observation_count']}`, "
             f"independent_sources=`{sl['independent_source_container_count']}`, "
@@ -386,6 +545,8 @@ def render_investigation_markdown(report: dict) -> str:
             lines.append(f"- {step_str}")
         for sup_str in sl["supporting_edges_rendered"]:
             lines.append(f"- {sup_str}")
+        for corr_str in sl.get("temporal_correspondences_rendered") or []:
+            lines.append(f"- {corr_str}")
         if sl["evidence_gaps"]:
             lines.append(f"- **Evidence Gaps**: `{sl['evidence_gaps']}`")
 

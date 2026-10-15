@@ -4,6 +4,8 @@ Given an indexed window DB (and optional LLM client), executes:
 1. Phase 1 (`reconstruct_transactions`): IEC-104 protocol transaction reconstruction.
 2. Phase 2 (`build_temporal_event_graph`): Event-level temporal graph with N-N, P-P, N-P edges.
 3. Phase 3 (`reconstruct_storylines`): Source-deduplicated bounded beam search storylines.
+   Without a control command, event anchors (`discover_event_anchors`) enter the graph
+   and root behavioral storylines.
 4. Phase 4 (`run_llm_explanation` + `build_investigation_report`): Typed-reference LLM
    explanation checked by `verify_claims` and rendered into `investigation_report.md`.
 """
@@ -14,9 +16,11 @@ import subprocess
 from pathlib import Path
 from ..graph.export import write_graph
 from ..postalert.pipeline import _db_fingerprint, export_lineage_bundle, prepare
+from .anchors import discover_event_anchors
+from .behavior import audit_anchor_lineage
 from .consistency import check_quality_consistency
 from .event_graph import build_temporal_event_graph
-from .report import build_investigation_report, run_llm_explanation
+from .report import apply_quality_consistency, build_investigation_report, run_llm_explanation
 from .storyline import reconstruct_storylines
 from .transactions import reconstruct_transactions
 
@@ -45,7 +49,15 @@ def reconstruct_incident(
         db, start, end, background_start=bg_start, background_end=bg_end, limit=selection_limit,
     )
     tx_result = reconstruct_transactions(db, start, end)
-    eg_result = build_temporal_event_graph(prepared["timeline"], prepared["lineage"], tx_result)
+    anchor_result = discover_event_anchors(
+        db, start, end, background_start=bg_start, transactions=tx_result.get("transactions"),
+    )
+    behavioral_mode = not tx_result.get("transactions")
+    anchor_result["behavioral_mode"] = behavioral_mode
+    eg_result = build_temporal_event_graph(
+        prepared["timeline"], prepared["lineage"], tx_result,
+        behavioral_anchors=anchor_result["anchors"] if behavioral_mode else None,
+    )
     sl_result = reconstruct_storylines(eg_result, tx_result)
     explanation = run_llm_explanation(
         db,
@@ -66,9 +78,16 @@ def reconstruct_incident(
         event_graph=eg_result,
         storyline_result=sl_result,
         explanation=explanation,
+        anchor_result=anchor_result,
     )
-    lineage_bundle = export_lineage_bundle(db, eg_result["nodes"], eg_result["fact_lineage"])
+    placed = eg_result["behavioral_anchor_facts"]
+    behavioral_fids = {fid for entry in placed.values() for fid in entry.values() if fid}
+    lineage_bundle = export_lineage_bundle(
+        db, [n for n in eg_result["nodes"] if n["fact_id"] not in behavioral_fids], eg_result["fact_lineage"],
+    )
+    lineage_bundle["behavioral_anchor_lineage"] = audit_anchor_lineage(db, anchor_result["anchors"], placed)
     quality_consistency = check_quality_consistency(tx_result, eg_result, sl_result, report)
+    report = apply_quality_consistency(report, quality_consistency)
     manifest = reconstruction_manifest(
         db,
         incident_start=start,
@@ -97,6 +116,19 @@ def reconstruct_incident(
         write_graph(eg_result["graph_object"], out_dir)
         (out_dir / "storylines.json").write_text(
             json.dumps(sl_result, indent=2, default=str), encoding="utf-8",
+        )
+        (out_dir / "event_anchors.json").write_text(
+            json.dumps(anchor_result, indent=2, default=str), encoding="utf-8",
+        )
+        (out_dir / "behavioral_storylines.json").write_text(
+            json.dumps(
+                [s for s in sl_result["storylines"] if s.get("storyline_kind") == "behavioral"],
+                indent=2, default=str,
+            ),
+            encoding="utf-8",
+        )
+        (out_dir / "unresolved_branches.json").write_text(
+            json.dumps(sl_result["unresolved_branches"], indent=2, default=str), encoding="utf-8",
         )
         (out_dir / "lineage.json").write_text(
             json.dumps(eg_result["fact_lineage"], indent=2, default=str), encoding="utf-8",
@@ -127,12 +159,13 @@ def reconstruct_incident(
     return {
         "manifest": manifest,
         "transactions": tx_result,
+        "event_anchors": anchor_result,
         "event_graph": public_event_graph,
         "storylines": sl_result,
         "lineage_bundle_summary": {
             k: lineage_bundle[k]
             for k in ("requested_count", "expected_with_parents", "exported_count", "missing_ids", "row_check_failures")
-        },
+        } | {"behavioral_anchor_lineage": lineage_bundle["behavioral_anchor_lineage"]},
         "explanation": explanation,
         "report": report,
         "quality_consistency": quality_consistency,

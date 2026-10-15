@@ -17,9 +17,12 @@ Key guarantees:
 2. Vantage-invariant `canonical_source_id`:
    - Every logical observation uses a canonical source identifier that does not
      multiply when a packet is mirrored at both `n302` and `n318`.
-3. Precise N-P shared-source relation types:
-   - Single-event derivation: `same_network_data_stream_ipal_derivation`
-   - Multi-sample window series alignment: `temporally_aligned_same_point_stream`
+3. N-P relations between IEC-104 and IPAL rows of one point:
+   - `shared_source` / `same_network_data_stream_ipal_derivation` only when the
+     IPAL row's parent lineage names that IEC-104 message.
+   - `temporal_correspondence` / `temporally_aligned_same_point_stream` when only
+     point and time agree; the common source is not confirmed and the edge never
+     forms a storyline step.
    Both carry `independent_support=False`.
 4. Complete endpoint provenance on every edge:
    - Every edge stores `source_evidence_ids`, `target_evidence_ids`, and their
@@ -27,6 +30,7 @@ Key guarantees:
 """
 from __future__ import annotations
 from ..graph.temporal import TemporalEvidenceGraph
+from .behavior import add_anchor_facts, add_behavioral_edges
 from .transactions import evaluate_command_effect_inference, feedback_gate_inputs, measurement_gate_inputs
 
 
@@ -101,6 +105,7 @@ def build_temporal_event_graph(
     tx_result: dict,
     *,
     cross_entity_horizon_sec: float = 10.0,
+    behavioral_anchors: list[dict] | None = None,
 ) -> dict:
     facts: list[dict] = []
     fact_lineage: dict[str, list[str]] = {}
@@ -379,6 +384,11 @@ def build_temporal_event_graph(
             observation=event["observation"],
         )
 
+    placed_anchors = add_anchor_facts(
+        behavioral_anchors or [],
+        lambda **kw: _add_fact(facts, fact_lineage, seen_fact_keys, **kw),
+    )
+
     facts.sort(key=lambda f: (f["time"], f["fact_id"]))
     facts_by_id = {f["fact_id"]: f for f in facts}
 
@@ -638,7 +648,7 @@ def build_temporal_event_graph(
 
     # Category 2b: Temporally aligned same-point data streams (N-P) and same IEC-104 frame (N-N)
     iec_facts = [f for f in facts if f["kind"] == "iec104_asdu"]
-    el_facts = [f for f in facts if f["kind"] == "electrical_update"]
+    el_facts = [f for f in facts if f["kind"] == "electrical_update" and f["role"] != "ipal_correspondence"]
     for nf in iec_facts:
         for ef in el_facts:
             if nf["entity"] == ef["entity"] and nf.get("ca_ioa") == ef.get("ca_ioa"):
@@ -655,11 +665,11 @@ def build_temporal_event_graph(
                         graph, edges, existing_pairs, facts_by_id, node_by_fid,
                         source_fid=nf["fact_id"],
                         target_fid=ef["fact_id"],
-                        relation_category="shared_source",
+                        relation_category="temporal_correspondence",
                         relation_type="temporally_aligned_same_point_stream",
-                        claim_level="observed_fact",
-                        verification_status="supported",
-                        graph_consistency_gate_status="direct_record_observation",
+                        claim_level="temporal_correspondence",
+                        verification_status="common_source_unconfirmed",
+                        graph_consistency_gate_status="no_lineage_temporal_correspondence_only",
                         independent_support=False,
                         temporal_condition="overlapping_window_same_ca_ioa",
                         support_basis=(
@@ -782,6 +792,11 @@ def build_temporal_event_graph(
                     )
                     cooc_count += 1
 
+    add_behavioral_edges(
+        placed_anchors, facts_by_id,
+        lambda **kw: _add_typed_edge(graph, edges, existing_pairs, facts_by_id, node_by_fid, **kw),
+    )
+
     connected_fids = {
         fid for e in edges for fid in (e["source_fact_id"], e["target_fact_id"])
     }
@@ -810,6 +825,7 @@ def build_temporal_event_graph(
         "edges": edges,
         "unconnected_observations": unconnected_facts,
         "fact_lineage": fact_lineage,
+        "behavioral_anchor_facts": placed_anchors,
     }
 
 

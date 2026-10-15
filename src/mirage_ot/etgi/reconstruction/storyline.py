@@ -29,6 +29,8 @@ SPINE_CATEGORIES = {
     "shared_source",
 }
 
+BEHAVIORAL_SPINE_CATEGORIES = {"direct_protocol_relation", "measurement_state_transition"}
+
 EDGE_WEIGHT = {
     "direct_protocol_relation": 3.0,
     "measurement_state_transition": 2.5,
@@ -47,8 +49,12 @@ def reconstruct_storylines(
     nodes_by_id = {n["fact_id"]: n for n in event_graph["nodes"]}
     adj_spine: dict[str, list[dict]] = {}
     adj_cooc: dict[str, list[dict]] = {}
+    adj_corr: dict[str, list[dict]] = {}
     for edge in event_graph["edges"]:
         src = edge["source_fact_id"]
+        if edge["relation_category"] == "temporal_correspondence":
+            adj_corr.setdefault(src, []).append(edge)
+            continue
         # Only verified/supported edges may form the contiguous spine; unresolved candidates stay off-spine
         if edge["relation_category"] in SPINE_CATEGORIES and edge.get("verification_status") == "supported":
             adj_spine.setdefault(src, []).append(edge)
@@ -91,8 +97,15 @@ def reconstruct_storylines(
                 supporting_edges=supporting_edges,
                 nodes_by_id=nodes_by_id,
                 tx=tx,
+                correspondences=_collect_temporal_correspondences(best_path["node_ids"], nodes_by_id, adj_corr),
             )
         )
+
+    behavioral = _behavioral_storylines(
+        event_graph, nodes_by_id, adj_cooc, adj_corr, used_fids,
+        first_index=len(storylines) + 1, beam_width=beam_width, max_depth=max_depth,
+    )
+    storylines.extend(behavioral)
 
     non_tx_roots = [
         n for n in event_graph["nodes"]
@@ -124,6 +137,7 @@ def reconstruct_storylines(
                 supporting_edges=[],
                 nodes_by_id=nodes_by_id,
                 tx=None,
+                correspondences=_collect_temporal_correspondences(best_path["node_ids"], nodes_by_id, adj_corr),
             )
         )
 
@@ -152,20 +166,30 @@ def reconstruct_storylines(
         if n["fact_id"] not in all_covered_fids
     ]
 
-    return {
-        "search_method": "source_deduplicated_bounded_beam_search",
-        "no_control_command_policy": {
+    candidate_edges = [e for e in event_graph["edges"] if e["relation_type"] == "cross_device_temporal_candidate"]
+    if any(_anchor_id(n) for n in event_graph["nodes"]):
+        policy = {
+            "status": "behavioral_anchor_search",
+            "behavior": (
+                "Storylines start at event anchors (state reports, measurement steps, link activity, ARP "
+                "activity). A spine step needs a supported relation: a direct protocol relation or the same "
+                "element reported in a separate ASDU. Facts carried by one ASDU are listed as co-reported. "
+                "Cross-device time proximity stays an unresolved branch."
+            ),
+        }
+    else:
+        policy = {
             "status": "limited_existing_search",
             "behavior": (
                 "Without a control-command anchor, storylines are formed only from supported "
                 "edges already in the graph, such as same-device attribute couplings. "
                 "Cross-entity time proximity stays unresolved and is not promoted into a spine."
             ),
-            "deferred": (
-                "A dedicated no-command reconstruction algorithm is not part of this round. "
-                "Isolated measurements and unresolved co-occurrences remain unattached."
-            ),
-        },
+            "deferred": "No event anchors were supplied; isolated observations remain unattached.",
+        }
+    return {
+        "search_method": "source_deduplicated_bounded_beam_search",
+        "no_control_command_policy": policy,
         "path_invariant_enforced": "contiguous_directed_spine_with_separate_supporting_evidence",
         "beam_width": beam_width,
         "max_depth": max_depth,
@@ -184,9 +208,141 @@ def reconstruct_storylines(
                 "partial_missing_cot10_but_verified_measurement_transition",
             )
         ),
+        "behavioral_storyline_count": len(behavioral),
         "storylines": storylines,
+        "unresolved_branches": [_branch_record(e, nodes_by_id) for e in candidate_edges],
         "unattached_observations": unattached,
     }
+
+
+def _anchor_id(node: dict) -> str | None:
+    if node.get("role") == "ipal_correspondence":
+        return None
+    return (node.get("protocol_meta") or {}).get("anchor_id")
+
+
+def _branch_record(edge: dict, nodes_by_id: dict[str, dict]) -> dict:
+    src, dst = nodes_by_id[edge["source_fact_id"]], nodes_by_id[edge["target_fact_id"]]
+    return {
+        "edge_id": edge["edge_id"],
+        "from_fact_id": src["fact_id"],
+        "from_anchor_id": _anchor_id(src),
+        "from_entity": src["entity"],
+        "from_time": src["time"],
+        "to_fact_id": dst["fact_id"],
+        "to_anchor_id": _anchor_id(dst),
+        "to_entity": dst["entity"],
+        "to_time": dst["time"],
+        "relation_type": edge["relation_type"],
+        "claim_level": edge["claim_level"],
+        "verification_status": edge["verification_status"],
+        "causal_status": "not_established",
+        "temporal_condition": edge["temporal_condition"],
+        "support_basis": edge["support_basis"],
+        "evidence_ids": edge["evidence_ids"],
+    }
+
+
+def _behavioral_storylines(
+    event_graph: dict,
+    nodes_by_id: dict[str, dict],
+    adj_cooc: dict[str, list[dict]],
+    adj_corr: dict[str, list[dict]],
+    used_fids: set[str],
+    *,
+    first_index: int,
+    beam_width: int,
+    max_depth: int,
+) -> list[dict]:
+    """One storyline per anchor group, rooted at the earliest anchor not yet on a spine."""
+    roots = sorted((n for n in event_graph["nodes"] if _anchor_id(n)), key=lambda n: (n["time"], n["fact_id"]))
+    if not roots:
+        return []
+    anchor_fids = {n["fact_id"] for n in roots}
+    adj_beh: dict[str, list[dict]] = {}
+    same_asdu: dict[str, list[dict]] = {}
+    incoming: dict[str, list[dict]] = {}
+    for edge in event_graph["edges"]:
+        src, dst = edge["source_fact_id"], edge["target_fact_id"]
+        if src not in anchor_fids or dst not in anchor_fids:
+            continue
+        if edge["relation_category"] in BEHAVIORAL_SPINE_CATEGORIES and edge["verification_status"] == "supported":
+            adj_beh.setdefault(src, []).append(edge)
+        elif edge["relation_type"] == "same_iec104_asdu":
+            same_asdu.setdefault(src, []).append(edge)
+            same_asdu.setdefault(dst, []).append(edge)
+        elif edge["relation_type"] == "cross_device_temporal_candidate":
+            incoming.setdefault(dst, []).append(edge)
+
+    out = []
+    for root in roots:
+        if root["fact_id"] in used_fids:
+            continue
+        open_adj = {
+            fid: [e for e in edges if e["target_fact_id"] not in used_fids]
+            for fid, edges in adj_beh.items()
+        }
+        best_path, alt_paths = _beam_search_spine(
+            root["fact_id"], nodes_by_id, open_adj, beam_width=beam_width, max_depth=max_depth,
+        )
+        used_fids.update(best_path["node_ids"])
+        spine = best_path["node_ids"]
+        story = _format_storyline(
+            f"SL{first_index + len(out):03d}", root, best_path, alt_paths,
+            _collect_competing_cooccurrence_branches(spine, nodes_by_id, adj_cooc),
+            context_nodes=[], supporting_edges=[], nodes_by_id=nodes_by_id, tx=None,
+            correspondences=_collect_temporal_correspondences(spine, nodes_by_id, adj_corr),
+        )
+        co_reported = []
+        for fid in spine:
+            for edge in same_asdu.get(fid, []):
+                other = edge["target_fact_id"] if edge["source_fact_id"] == fid else edge["source_fact_id"]
+                if other in spine or any(c["fact_id"] == other for c in co_reported):
+                    continue
+                onode = nodes_by_id[other]
+                co_reported.append({
+                    "edge_id": edge["edge_id"], "with_spine_fact_id": fid, "fact_id": other,
+                    "anchor_id": _anchor_id(onode), "entity": onode["entity"], "time": onode["time"],
+                    "relation_type": "same_iec104_asdu", "independent_support": False,
+                    "meaning": "carried by the same ASDU; no relation between the devices' changes is established",
+                })
+        incoming_branches = [
+            _branch_record(e, nodes_by_id)
+            for fid in spine for e in incoming.get(fid, [])
+            if e["source_fact_id"] not in spine
+        ]
+        spine_nodes = [nodes_by_id[f] for f in spine]
+        story.update({
+            "storyline_kind": "behavioral",
+            "anchor_ids": [_anchor_id(n) for n in spine_nodes],
+            "anchor_types": sorted({n["role"] for n in spine_nodes}),
+            "completeness_status": (
+                "behavioral_chain_with_supported_relations" if story["confirmed_and_supported_steps"]
+                else "behavioral_single_anchor"
+            ),
+            "co_reported_in_same_asdu": co_reported,
+            "incoming_unresolved_branches": incoming_branches,
+            "reconstructed_behavior": _describe_behavior(spine_nodes, story["confirmed_and_supported_steps"], co_reported),
+            "not_reconstructed": (
+                "Cause, the initiating actor, and any relation to devices outside this chain. Cross-device "
+                "links are listed only as unresolved branches; no grid topology is available."
+            ),
+        })
+        out.append(story)
+    return out
+
+
+def _describe_behavior(spine_nodes: list[dict], steps: list[dict], co_reported: list[dict]) -> str:
+    parts = [f"[{n['protocol_meta']['anchor_id']}] {n['observation'].rstrip('.')}" for n in spine_nodes]
+    text = " THEN ".join(parts)
+    if steps:
+        text += (
+            f". {len(steps)} supported relation(s): the same element reported again in a separate ASDU "
+            "(element identity from the data point map; not a cause)"
+        )
+    if co_reported:
+        text += f". Co-reported in the same ASDU: {', '.join(sorted({c['entity'] for c in co_reported}))}"
+    return text + "."
 
 
 def _beam_search_spine(
@@ -272,6 +428,32 @@ def _find_supporting_pre_edges(
     return out
 
 
+def _collect_temporal_correspondences(
+    spine_fids: list[str],
+    nodes_by_id: dict[str, dict],
+    adj_corr: dict[str, list[dict]],
+) -> list[dict]:
+    """IPAL rows aligned with a spine fact by point and time only; common source not confirmed."""
+    out = []
+    for fid in spine_fids:
+        for edge in adj_corr.get(fid, []):
+            tnode = nodes_by_id[edge["target_fact_id"]]
+            out.append({
+                "edge_id": edge["edge_id"],
+                "from_spine_fact_id": fid,
+                "fact_id": tnode["fact_id"],
+                "entity": tnode["entity"],
+                "time": tnode["time"],
+                "value": tnode.get("value"),
+                "relation_type": edge["relation_type"],
+                "claim_level": edge["claim_level"],
+                "common_source_status": "unconfirmed_no_lineage",
+                "counts_as_independent_source": False,
+                "evidence_ids": edge["evidence_ids"],
+            })
+    return out
+
+
 def _collect_competing_cooccurrence_branches(
     spine_fids: list[str],
     nodes_by_id: dict[str, dict],
@@ -332,6 +514,7 @@ def _format_storyline(
     supporting_edges: list[dict],
     nodes_by_id: dict[str, dict],
     tx: dict | None,
+    correspondences: list[dict] | None = None,
 ) -> dict:
     spine_nodes = [nodes_by_id[fid] for fid in best_path["node_ids"]]
     spine_edges = best_path["edges"]
@@ -487,6 +670,7 @@ def _format_storyline(
             for e in supporting_edges
         ],
         "unresolved_cooccurrence_branches": cooc_branches,
+        "temporal_correspondences": correspondences or [],
         "competing_hypotheses": competing,
         "evidence_gaps": gaps,
         "all_spine_evidence_ids": all_ev_ids,

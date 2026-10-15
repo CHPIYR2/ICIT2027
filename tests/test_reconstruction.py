@@ -368,8 +368,13 @@ def test_p0_storyline_contiguous_path_invariant_and_source_deduplication(tmp_pat
     assert sl["spine_is_contiguous_directed_path"] is True
     spine_nodes = sl["spine_fact_ids"]
     steps = sl["confirmed_and_supported_steps"]
-    assert len(spine_nodes) == 4
-    assert len(steps) == 3
+    assert len(spine_nodes) == 3
+    assert len(steps) == 2
+    assert all(st["relation_category"] != "temporal_correspondence" for st in steps)
+    (corr,) = sl["temporal_correspondences"]
+    assert corr["from_spine_fact_id"] == spine_nodes[-1]
+    assert corr["common_source_status"] == "unconfirmed_no_lineage"
+    assert corr["counts_as_independent_source"] is False
     for i, step in enumerate(steps):
         assert step["source_fact_id"] == spine_nodes[i]
         assert step["target_fact_id"] == spine_nodes[i + 1]
@@ -382,7 +387,7 @@ def test_p0_storyline_contiguous_path_invariant_and_source_deduplication(tmp_pat
     assert len(sl["supporting_evidence_edges"]) == 1
     assert sl["supporting_evidence_edges"][0]["relation_type"] == "pre_to_post_measurement_transition"
 
-    # Independent source container count on the 4-node spine is 3 (CMD, ACK, POST; IPAL shares POST's source)
+    # CMD, ACK and POST are independent containers; the time-aligned IPAL row is off the spine
     assert sl["independent_source_container_count"] == 3
     assert sl["total_independent_source_containers_with_supporting"] == 4
     assert sl["independent_support_edge_count"] == 2
@@ -882,3 +887,194 @@ def test_r4_consistency_checker_flags_a_graph_that_ignores_the_gate(tmp_path: Pa
     assert check["consistent"] is False
     assert "graph_inference_disagrees_with_transaction_gate" in issues
     assert "supported_inference_without_passed_gate" in issues
+
+
+MASTER = "172.16.1.2"
+
+
+def _iec(eid, t, entity, ca_ioa, value, *, rtu, tx, obj=0, type_id=13, cause="1", vantage="n302", quality=True):
+    return _row(eid, t, "network", entity, "iec104_asdu", value, vantage=vantage, ca_ioa=ca_ioa,
+                protocol_class="monitor", src_ip=rtu, src_port=2404, dst_ip=MASTER, dst_port=40000,
+                payload={"type_id": type_id, "cause": cause, "apci_tx": tx, "asdu_index": 0,
+                         "object_index": obj, "quality_good": quality, "cot_test": False})
+
+
+def _tcp(eid, t, src, sport, dst, dport, flags):
+    return _row(eid, t, "network", f"{src}->{dst}/TCP", "tcp_packet", None, src_ip=src, src_port=sport,
+                dst_ip=dst, dst_port=dport, payload={"tcp_flags": flags})
+
+
+def _behavioral_rows():
+    rtu_a, rtu_b, rtu_c = "172.16.3.18", "172.16.3.16", "172.16.3.22"
+    rows = []
+    for i, (t, p, cur, volt) in enumerate([(990.0, 100.0, 25.0, 0.98), (1005.0, 0.0, 0.0, 0.0), (1015.0, 0.0, 0.0, 0.0)]):
+        rows += [
+            _iec(f"EV-a-l3p-{i}", t, "line.3:p_to", "123.1", p, rtu=rtu_a, tx=10 + i, obj=0),
+            _iec(f"EV-a-l3i-{i}", t, "line.3:i_to", "123.2", cur, rtu=rtu_a, tx=10 + i, obj=1),
+            _iec(f"EV-a-b5v-{i}", t, "bus.5:voltage", "123.3", volt, rtu=rtu_a, tx=10 + i, obj=2),
+            _iec(f"EV-a-noise-{i}", t, "line.9:p", "123.4", [1e-7, 3e-7, 2e-7][i], rtu=rtu_a, tx=10 + i, obj=3),
+            _iec(f"EV-a-l7-{i}", t, "line.7:p", "123.5", [100.0, 300.0, 100.0][i], rtu=rtu_a, tx=10 + i, obj=4),
+            _iec(f"EV-a-l8-{i}", t, "line.8:p", "123.6", [100.0, 300.0, 305.0][i], rtu=rtu_a, tx=10 + i, obj=5),
+        ]
+    rows.append(_iec("EV-a-l3p-1-m", 1005.0002, "line.3:p_to", "123.1", 0.0, rtu=rtu_a, tx=11, obj=0, vantage="n318"))
+    for i, (t, p) in enumerate([(990.0, -100.0), (1010.0, 0.0), (1020.0, 0.0)]):
+        rows.append(_iec(f"EV-b-l3p-{i}", t, "line.3:p_from", "121.1", p, rtu=rtu_b, tx=50 + i))
+    rows += [
+        _iec("EV-b-sw13", 1001.0, "switch.13:is_closed", "121.9", 0.0, rtu=rtu_b, tx=60, type_id=1, cause="3"),
+        _row("EV-ipal-sw13", 1001.5, "electrical", "switch.13:closed", "electrical_update", 0.0, ca_ioa="121.8"),
+        _row("EV-ipal-l3p", 1005.2, "electrical", "line.3:p_to", "electrical_update", 0.0, ca_ioa="123.1"),
+        _iec("EV-b-sw14-gi", 990.0, "switch.14:is_closed", "121.7", 1.0, rtu=rtu_b, tx=61, type_id=1, cause="20"),
+        _iec("EV-b-sw14", 1003.0, "switch.14:is_closed", "121.7", 0.0, rtu=rtu_b, tx=62, type_id=1, cause="3"),
+        _tcp("EV-tcp-fin", 1020.0, MASTER, 40001, rtu_c, 2404, 0x11),
+        _tcp("EV-tcp-syn1", 1021.0, MASTER, 40002, rtu_c, 2404, 0x02),
+        _tcp("EV-tcp-syn2", 1022.0, MASTER, 40002, rtu_c, 2404, 0x02),
+        _tcp("EV-tcp-syn3", 1030.0, MASTER, 40003, rtu_c, 2404, 0x02),
+        _tcp("EV-tcp-synack", 1030.01, rtu_c, 2404, MASTER, 40003, 0x12),
+    ]
+    rows += [
+        _row(f"EV-arp28-{i:02d}", 1040.0 + i, "network", "172.16.3.28/ARP", "arp_packet", None,
+             src_ip="172.16.3.28", dst_ip="172.16.3.9", payload={"op": 2})
+        for i in range(12)
+    ]
+    rows += [
+        _row(f"EV-arp29-{i}", 1041.0 + i, "network", "172.16.3.29/ARP", "arp_packet", None,
+             src_ip="172.16.3.29", dst_ip="172.16.3.16", payload={"op": 1})
+        for i in range(2)
+    ]
+    return rows
+
+
+def _behavioral_db(tmp_path: Path):
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    for r in _behavioral_rows():
+        insert_evidence(conn, r)
+    conn.commit()
+    return EvidenceDB(conn, incident_start=1000.0, incident_end=1060.0)
+
+
+def test_behavioral_anchor_discovery_on_synthetic_rows(tmp_path: Path):
+    from mirage_ot.etgi.reconstruction.anchors import discover_event_anchors
+
+    res = discover_event_anchors(_behavioral_db(tmp_path), 1000.0, 1060.0, background_start=985.0)
+    by_entity = {a["entity"]: a for a in res["anchors"]}
+    assert res["observation_inventory"]["iec104_control_objects_in_window"] == 0
+
+    sw13 = by_entity["switch.13:is_closed"]
+    assert sw13["transition_status"] == "state_report_no_prior_value_in_window"
+    assert [r["evidence_id"] for r in sw13["ipal_rows"]] == ["EV-ipal-sw13"]
+    sw14 = by_entity["switch.14:is_closed"]
+    assert sw14["transition_status"] == "state_change_observed"
+    assert sw14["prior_evidence_ids"] == ["EV-b-sw14-gi"]
+
+    line3_a = by_entity["line.3:i_to,p_to"]
+    assert line3_a["step_kinds"] == ["to_zero"] and line3_a["sustained_in_later_samples"] is True
+    assert sorted(line3_a["evidence_ids"]) == ["EV-a-l3i-1", "EV-a-l3p-1", "EV-a-l3p-1-m"]
+    assert line3_a["vantages"] == ["n302", "n318"]
+    assert by_entity["bus.5:voltage"]["asdu_key"] == line3_a["asdu_key"]
+    assert "line.3:p_from" in by_entity
+
+    assert not any(e.startswith("line.9") for e in by_entity), "values below the magnitude floor are noise"
+    assert not any(e.startswith("line.7") for e in by_entity), "a level shift that reverts is not an anchor"
+    assert by_entity["line.8:p"]["step_kinds"] == ["level_shift"]
+
+    link = by_entity[f"{MASTER}<->172.16.3.22:2404/IEC104"]
+    assert link["event_kinds"] == ["connection_attempt_unanswered", "connection_established", "tcp_fin"]
+    unanswered = next(e for e in link["events"] if e["event"] == "connection_attempt_unanswered")
+    assert unanswered["syn_count"] == 2
+    assert link["time_end"] == 1030.01
+
+    assert by_entity["172.16.3.28/ARP"]["packet_count"] == 12
+    assert "172.16.3.29/ARP" not in by_entity
+    assert [a["anchor_id"] for a in res["anchors"]] == [f"A{i:03d}" for i in range(1, len(res["anchors"]) + 1)]
+
+
+def test_behavioral_graph_keeps_cross_device_relations_unresolved(tmp_path: Path):
+    from mirage_ot.etgi.reconstruction.anchors import discover_event_anchors
+    from mirage_ot.etgi.reconstruction.behavior import audit_anchor_lineage
+
+    db = _behavioral_db(tmp_path)
+    anchors = discover_event_anchors(db, 1000.0, 1060.0, background_start=985.0)["anchors"]
+    eg = build_temporal_event_graph([], {}, {"transactions": []}, behavioral_anchors=anchors)
+    nodes = {n["fact_id"]: n for n in eg["nodes"]}
+
+    def edges(rel):
+        return [e for e in eg["edges"] if e["relation_type"] == rel]
+
+    (same,) = edges("same_device_behavior_in_separate_asdu")
+    assert (nodes[same["source_fact_id"]]["entity"], nodes[same["target_fact_id"]]["entity"]) == ("line.3:i_to,p_to", "line.3:p_from")
+    assert same["verification_status"] == "supported" and same["independent_support"] is True
+
+    asdu = edges("same_iec104_asdu")
+    assert asdu and all(e["relation_category"] == "shared_source" and e["independent_support"] is False for e in asdu)
+    assert {"bus.5:voltage", "line.3:i_to,p_to"} <= {nodes[e[k]]["entity"] for e in asdu for k in ("source_fact_id", "target_fact_id")}
+
+    candidates = edges("cross_device_temporal_candidate")
+    assert candidates and all(e["verification_status"] == "unresolved" and e["causal_status"] == "not_established" for e in candidates)
+    assert any(nodes[e["source_fact_id"]]["entity"] == "switch.13:is_closed"
+               and nodes[e["target_fact_id"]]["entity"] == "line.3:i_to,p_to" for e in candidates)
+    for e in eg["edges"]:
+        s, t = nodes[e["source_fact_id"]], nodes[e["target_fact_id"]]
+        if e["verification_status"] == "supported" and e["relation_category"] != "shared_source":
+            assert s["device_stem"] == t["device_stem"], e
+
+    ipal = [e for e in eg["edges"] if e["relation_category"] == "temporal_correspondence"]
+    assert {e["relation_type"] for e in ipal} == {"temporally_aligned_same_point_stream", "temporally_aligned_same_device_ipal_row"}
+    assert all(e["verification_status"] == "common_source_unconfirmed" for e in ipal)
+    assert all(nodes[e["target_fact_id"]]["counts_as_independent_source"] is False for e in ipal)
+
+    audit = audit_anchor_lineage(db, anchors, eg["behavioral_anchor_facts"])
+    assert audit["missing_ids"] == [] and audit["row_check_failures"] == []
+    assert audit["checked_anchor_count"] == len(anchors)
+
+    sl = reconstruct_storylines(eg, {"transactions": []})
+    assert sl["no_control_command_policy"]["status"] == "behavioral_anchor_search"
+    stories = [s for s in sl["storylines"] if s["storyline_kind"] == "behavioral"]
+    assert sl["behavioral_storyline_count"] == len(stories)
+    covered = [a for s in stories for a in s["anchor_ids"]]
+    assert sorted(covered) == sorted(a["anchor_id"] for a in anchors), "each anchor sits on exactly one storyline"
+    (chain,) = [s for s in stories if s["confirmed_and_supported_steps"]]
+    assert [nodes[f]["entity"] for f in chain["spine_fact_ids"]] == ["line.3:i_to,p_to", "line.3:p_from"]
+    assert chain["completeness_status"] == "behavioral_chain_with_supported_relations"
+    assert "bus.5:voltage" in {c["entity"] for c in chain["co_reported_in_same_asdu"]}
+    assert chain["temporal_correspondences"][0]["common_source_status"] == "unconfirmed_no_lineage"
+    sw13 = next(s for s in stories if nodes[s["spine_fact_ids"][0]]["entity"] == "switch.13:is_closed")
+    assert sw13["completeness_status"] == "behavioral_single_anchor"
+    assert sw13["unresolved_cooccurrence_branches"]
+    assert all(b["verification_status"] == "unresolved" for b in sl["unresolved_branches"])
+
+
+def test_behavioral_engine_writes_anchor_storyline_and_branch_artifacts(tmp_path: Path):
+    db = _behavioral_db(tmp_path)
+    out = tmp_path / "out"
+    res = reconstruct_incident(db, 1000.0, 1060.0, background_start=985.0, background_end=1000.0, llm=None, out_dir=out)
+    assert res["event_anchors"]["behavioral_mode"] is True
+    for name in ("event_anchors.json", "behavioral_storylines.json", "unresolved_branches.json", "investigation_report.md"):
+        assert (out / name).exists(), name
+    assert res["lineage_bundle_summary"]["row_check_failures"] == []
+    assert res["lineage_bundle_summary"]["behavioral_anchor_lineage"]["row_check_failures"] == []
+    assert res["quality_consistency"]["consistent"] is True
+    md = (out / "investigation_report.md").read_text()
+    assert "## 2A. Behavioral Incident Reconstruction (No Control Command)" in md
+    assert "Candidate relations (unresolved, time proximity only" in md
+    assert "same_device_behavior_in_separate_asdu" in md
+
+
+def test_quality_inconsistent_report_is_diagnostic_only(tmp_path: Path, monkeypatch):
+    from mirage_ot.etgi.reconstruction import engine
+
+    issue = {"issue": "synthetic_disagreement", "transaction_id": "TX001"}
+    monkeypatch.setattr(engine, "check_quality_consistency", lambda *a, **k: {"consistent": False, "issues": [issue]})
+    res = _reconstruct(tmp_path, _sgen6_chain_rows())
+    report = res["report"]
+    assert report["report_status"] == "diagnostic_only_quality_inconsistent"
+    assert report["verified_device_transitions"] == []
+    assert report["withheld_verified_device_transitions"], "the verified transition is withheld, not lost"
+    assert report["quality_consistency_issues"] == [issue]
+    md = (tmp_path / "out" / "investigation_report.md").read_text()
+    assert md.startswith("# Evidence-Grounded Incident Reconstruction Report — DIAGNOSTIC ONLY, NOT VERIFIED")
+    assert "WITHHELD: quality inconsistent" in md
+    for name in ("transactions.json", "event_graph.json", "storylines.json", "quality_consistency.json"):
+        assert (tmp_path / "out" / name).exists(), name
+    saved = json.loads((tmp_path / "out" / "investigation_report.json").read_text())
+    assert saved["report_status"] == "diagnostic_only_quality_inconsistent"
