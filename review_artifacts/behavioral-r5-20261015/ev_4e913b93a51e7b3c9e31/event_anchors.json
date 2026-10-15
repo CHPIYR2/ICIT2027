@@ -1,0 +1,326 @@
+{
+  "method": "evidence_anchor_discovery",
+  "window": {
+    "start": 1742926251.1947885,
+    "end": 1742926421.521569,
+    "background_start": 1742926236.1947885
+  },
+  "parameters": {
+    "step_relative": 0.5,
+    "persist_relative": 0.1,
+    "magnitude_floor": 0.001,
+    "near_zero_relative": 1e-06,
+    "min_persist_samples": 2,
+    "min_persist_ratio": 0.8,
+    "max_pre_sample_gap_seconds": 30.0,
+    "vantage_merge_seconds": 0.5,
+    "arp_min_count": 10,
+    "arp_rate_factor": 5.0,
+    "gap_min_seconds": 25.0,
+    "gap_cadence_factor": 3.0
+  },
+  "inputs_not_used": [
+    "official event labels",
+    "attack type",
+    "malicious flags",
+    "physical.zip"
+  ],
+  "observation_inventory": {
+    "background_seconds": 15.0,
+    "window_seconds": 170.327,
+    "iec104_rows": {
+      "window": 7154,
+      "background": 508
+    },
+    "iec104_objects_after_vantage_merge_by_type_cot": {
+      "type13_cot1": 5198,
+      "type1_cot3": 1
+    },
+    "iec104_control_objects_in_window": 0,
+    "tcp_packets": {
+      "window": 3190,
+      "background": 256
+    },
+    "tcp_syn_fin_rst_segments": {
+      "window": 0,
+      "background": 0
+    },
+    "arp_packets": {
+      "window": 2,
+      "background": 0
+    },
+    "udp_packets": {
+      "window": 0,
+      "background": 0
+    },
+    "ipal_electrical_updates": {
+      "window": 4126,
+      "background": 265
+    }
+  },
+  "anchor_count": 4,
+  "verified_anchor_count": 1,
+  "unverified_anchor_count": 3,
+  "anchors": [
+    {
+      "anchor_type": "spontaneous_state_report",
+      "time": 1742926252.382188,
+      "entity": "sgen.0:is_connected",
+      "device_stem": "sgen.0",
+      "ca_ioa": "120.10060",
+      "rtu_ip": "172.16.3.15",
+      "asdu_key": "172.16.3.15|2404|172.16.1.2|43150|838|0",
+      "value": 0.0,
+      "prior_value": null,
+      "prior_time": null,
+      "prior_evidence_ids": [],
+      "pre_quality_good": null,
+      "pre_cot_test": null,
+      "quality_good": true,
+      "cot_test": false,
+      "sustained_in_later_samples": false,
+      "transition_status": "state_report_no_prior_value_in_window",
+      "verification_status": "unverified_observation",
+      "verification_issues": [
+        "no_prior_state_value_in_window"
+      ],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-49990bcfa3516086"
+      ],
+      "score": 3.5,
+      "observation": "sgen.0:is_connected (CA/IOA=120.10060) reported value 0.0 with COT=3 by RTU 172.16.3.15; prior IEC-104 value in window: not observed (state_report_no_prior_value_in_window; verification=unverified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-6ec9af22f41a73b3",
+          "entity": "sgen.0:connected",
+          "ca_ioa": "120.10020",
+          "time": 1742926252.858198,
+          "value": 0.0,
+          "match_basis": "same_device_other_attribute"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A001",
+      "rank": 2
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742926262.033628,
+      "entity": "sgen.0:active_power",
+      "device_stem": "sgen.0",
+      "ca_ioa": "120.10080",
+      "rtu_ip": "172.16.3.15",
+      "asdu_key": "172.16.3.15|2404|172.16.1.2|43150|839|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "sgen.0:active_power",
+          "attribute": "active_power",
+          "base_attribute": "active_power",
+          "endpoint_side": null,
+          "ca_ioa": "120.10080",
+          "step_kind": "to_zero",
+          "pre_value": 20000.4004,
+          "pre_time": 1742926245.33384,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-06d4d0009a0961ab"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742926262.033628,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 16.699788,
+          "evidence_ids": [
+            "EV-5f79e1b4ca26cc6a"
+          ],
+          "later_samples_consistent": 15,
+          "later_samples_total": 15,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-5f79e1b4ca26cc6a"
+      ],
+      "score": 3.75,
+      "observation": "sgen.0: 1 measurement(s) in one ASDU from RTU 172.16.3.15 changed active_power 20000.4004 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-883c1602d7781ac9",
+          "entity": "sgen.0:active_power",
+          "ca_ioa": "120.10080",
+          "time": 1742926262.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A002",
+      "rank": 1
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742926384.047055,
+      "entity": "line.14:current_to",
+      "device_stem": "line.14",
+      "ca_ioa": "131.10190",
+      "rtu_ip": "172.16.3.26",
+      "asdu_key": "172.16.3.26|2404|172.16.1.2|54802|1530|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.14:current_to",
+          "attribute": "current_to",
+          "base_attribute": "current",
+          "endpoint_side": "to",
+          "ca_ioa": "131.10190",
+          "step_kind": "level_shift",
+          "pre_value": 0.0099699581,
+          "pre_time": 1742926374.040713,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-d562b9f57b8095e5"
+          ],
+          "post_value": -0.270960242,
+          "post_time": 1742926384.047055,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.006342,
+          "evidence_ids": [
+            "EV-e58d910a8d27a718"
+          ],
+          "later_samples_consistent": 1,
+          "later_samples_total": 3,
+          "persistence_ratio": 0.3333,
+          "quality_ok": true,
+          "sustained": false,
+          "verification_status": "unverified_observation",
+          "verification_issues": [
+            "not_sustained_in_later_samples"
+          ]
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": false,
+      "verification_status": "unverified_observation",
+      "verification_issues": [
+        "not_sustained_in_later_samples"
+      ],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-e58d910a8d27a718"
+      ],
+      "score": 1.25,
+      "observation": "line.14: 1 measurement(s) in one ASDU from RTU 172.16.3.26 changed current_to 0.0099699581 -> -0.270960242 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-d07ae4fe716c527f",
+          "entity": "line.14:current_to",
+          "ca_ioa": "131.10190",
+          "time": 1742926384.858198,
+          "value": -0.2709602415561676,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A003",
+      "rank": 3
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742926403.091995,
+      "entity": "line.14:current_from",
+      "device_stem": "line.14",
+      "ca_ioa": "117.10110",
+      "rtu_ip": "172.16.3.12",
+      "asdu_key": "172.16.3.12|2404|172.16.1.2|55948|813|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.14:current_from",
+          "attribute": "current_from",
+          "base_attribute": "current",
+          "endpoint_side": "from",
+          "ca_ioa": "117.10110",
+          "step_kind": "level_shift",
+          "pre_value": -0.0392444469,
+          "pre_time": 1742926393.044061,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-56b50c425c53dfbd"
+          ],
+          "post_value": 0.254208267,
+          "post_time": 1742926403.091995,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.047934,
+          "evidence_ids": [
+            "EV-3f379267d8e5801c"
+          ],
+          "later_samples_consistent": 1,
+          "later_samples_total": 1,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": false,
+          "verification_status": "unverified_observation",
+          "verification_issues": [
+            "insufficient_post_samples"
+          ]
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": false,
+      "verification_status": "unverified_observation",
+      "verification_issues": [
+        "insufficient_post_samples"
+      ],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-3f379267d8e5801c"
+      ],
+      "score": 1.25,
+      "observation": "line.14: 1 measurement(s) in one ASDU from RTU 172.16.3.12 changed current_from -0.0392444469 -> 0.254208267 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['insufficient_post_samples']).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-bccfab8190e8d804",
+          "entity": "line.14:current_from",
+          "ca_ioa": "117.10110",
+          "time": 1742926403.858198,
+          "value": 0.2542082667350769,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A004",
+      "rank": 4
+    }
+  ],
+  "behavioral_mode": true
+}

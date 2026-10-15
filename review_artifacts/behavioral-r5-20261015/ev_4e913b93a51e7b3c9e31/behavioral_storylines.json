@@ -1,0 +1,422 @@
+[
+  {
+    "storyline_id": "SL001",
+    "transaction_id": null,
+    "anchor_fact_id": "BA001",
+    "anchor_entity": "sgen.0:is_connected",
+    "start_time": 1742926252.382188,
+    "end_time": 1742926252.382188,
+    "completeness_status": "behavioral_unverified_observation",
+    "command_acceptance_status": null,
+    "device_state_change_status": null,
+    "spine_is_contiguous_directed_path": true,
+    "spine_node_count": 1,
+    "spine_edge_count": 0,
+    "vantage_capture_count": 1,
+    "logical_observation_count": 1,
+    "independent_source_container_count": 1,
+    "total_independent_source_containers_with_supporting": 1,
+    "independent_support_edge_count": 0,
+    "supporting_evidence_edge_count": 0,
+    "source_deduplicated_score": 0.0,
+    "spine_fact_ids": [
+      "BA001"
+    ],
+    "spine_edge_ids": [],
+    "confirmed_and_supported_steps": [],
+    "context_observations": [],
+    "supporting_evidence_edges": [],
+    "unresolved_cooccurrence_branches": [],
+    "temporal_correspondences": [
+      {
+        "edge_id": "R0031",
+        "from_spine_fact_id": "BA001",
+        "fact_id": "BI001",
+        "entity": "sgen.0:connected",
+        "time": 1742926252.858198,
+        "value": 0.0,
+        "relation_type": "temporally_aligned_same_device_ipal_row",
+        "claim_level": "temporal_correspondence",
+        "common_source_status": "unconfirmed_no_lineage",
+        "counts_as_independent_source": false,
+        "evidence_ids": [
+          "EV-49990bcfa3516086",
+          "EV-6ec9af22f41a73b3"
+        ]
+      }
+    ],
+    "competing_hypotheses": [],
+    "evidence_gaps": [],
+    "all_spine_evidence_ids": [
+      "EV-49990bcfa3516086"
+    ],
+    "alternative_spine_paths": [],
+    "storyline_kind": "behavioral",
+    "anchor_ids": [
+      "A001"
+    ],
+    "anchor_types": [
+      "spontaneous_state_report"
+    ],
+    "anchor_verification_statuses": {
+      "A001": "unverified_observation"
+    },
+    "anchor_verification_issues": {
+      "A001": [
+        "no_prior_state_value_in_window"
+      ]
+    },
+    "co_reported_in_same_asdu": [],
+    "sequential_same_device_observations": [
+      {
+        "edge_id": "R0035",
+        "from_fact_id": "BA001",
+        "from_anchor_id": "A001",
+        "from_entity": "sgen.0:is_connected",
+        "from_time": 1742926252.382188,
+        "to_fact_id": "BA002",
+        "to_anchor_id": "A002",
+        "to_entity": "sgen.0:active_power",
+        "to_time": 1742926262.033628,
+        "device_stem": "sgen.0",
+        "relation_type": "same_entity_sequential_observation",
+        "claim_level": "sequential_observation",
+        "verification_status": "unverified",
+        "graph_consistency_gate_status": "failed_behavioral_consistency_gate",
+        "failed_conditions": [
+          "left_not_sustained",
+          "left_anchor_unverified",
+          "state_to_measurement_change_mismatch"
+        ],
+        "consistency_gate": {
+          "gate_passed": false,
+          "pair_mode": "spontaneous_state_report->measurement_step",
+          "same_device_stem": true,
+          "separate_asdu": true,
+          "temporal_window_ok": true,
+          "dt_seconds": 9.65144,
+          "transition_intervals_aligned": true,
+          "left_anchor_verified": false,
+          "right_anchor_verified": true,
+          "left_quality_good": true,
+          "right_quality_good": true,
+          "left_sustained": false,
+          "right_sustained": true,
+          "left_verification_issues": [
+            "no_prior_state_value_in_window"
+          ],
+          "right_verification_issues": [],
+          "attribute_compatible": true,
+          "matched_quantities": [
+            "active_power"
+          ],
+          "change_type_and_direction_compatible": false,
+          "independent_rtu_support": false,
+          "failed_conditions": [
+            "left_not_sustained",
+            "left_anchor_unverified",
+            "state_to_measurement_change_mismatch"
+          ],
+          "recommended_relation_category": "sequential_observation",
+          "recommended_relation_type": "same_entity_sequential_observation",
+          "recommended_claim_level": "sequential_observation",
+          "recommended_verification_status": "unverified"
+        },
+        "temporal_condition": "0 <= dt (9.651s) <= 15.0s",
+        "support_basis": "Sequential observations on sgen.0 in separate ASDUs (RTU 172.16.3.15 then 172.16.3.15), but behavioral transition consistency gate failed: ['left_not_sustained', 'left_anchor_unverified', 'state_to_measurement_change_mismatch']. Recorded as a sequential same-entity observation only, not a supported behavioral transition.",
+        "evidence_ids": [
+          "EV-49990bcfa3516086",
+          "EV-5f79e1b4ca26cc6a",
+          "EV-06d4d0009a0961ab"
+        ]
+      }
+    ],
+    "incoming_unresolved_branches": [],
+    "reconstructed_behavior": "[A001] sgen.0:is_connected (CA/IOA=120.10060) reported value 0.0 with COT=3 by RTU 172.16.3.15; prior IEC-104 value in window: not observed (state_report_no_prior_value_in_window; verification=unverified_observation). 1 same-device sequential observation(s) kept off-spine (failed behavioral consistency gate: [['left_not_sustained', 'left_anchor_unverified', 'state_to_measurement_change_mismatch']]).",
+    "not_reconstructed": "Cause, the initiating actor, and any relation to devices outside this chain. Cross-device links are listed only as unresolved branches; no grid topology is available."
+  },
+  {
+    "storyline_id": "SL002",
+    "transaction_id": null,
+    "anchor_fact_id": "BA002",
+    "anchor_entity": "sgen.0:active_power",
+    "start_time": 1742926262.033628,
+    "end_time": 1742926262.033628,
+    "completeness_status": "behavioral_single_anchor",
+    "command_acceptance_status": null,
+    "device_state_change_status": null,
+    "spine_is_contiguous_directed_path": true,
+    "spine_node_count": 1,
+    "spine_edge_count": 0,
+    "vantage_capture_count": 1,
+    "logical_observation_count": 1,
+    "independent_source_container_count": 1,
+    "total_independent_source_containers_with_supporting": 1,
+    "independent_support_edge_count": 0,
+    "supporting_evidence_edge_count": 0,
+    "source_deduplicated_score": 0.0,
+    "spine_fact_ids": [
+      "BA002"
+    ],
+    "spine_edge_ids": [],
+    "confirmed_and_supported_steps": [],
+    "context_observations": [],
+    "supporting_evidence_edges": [],
+    "unresolved_cooccurrence_branches": [],
+    "temporal_correspondences": [
+      {
+        "edge_id": "R0032",
+        "from_spine_fact_id": "BA002",
+        "fact_id": "BI002",
+        "entity": "sgen.0:active_power",
+        "time": 1742926262.858198,
+        "value": 0.0,
+        "relation_type": "temporally_aligned_same_point_stream",
+        "claim_level": "temporal_correspondence",
+        "common_source_status": "unconfirmed_no_lineage",
+        "counts_as_independent_source": false,
+        "evidence_ids": [
+          "EV-5f79e1b4ca26cc6a",
+          "EV-06d4d0009a0961ab",
+          "EV-883c1602d7781ac9"
+        ]
+      }
+    ],
+    "competing_hypotheses": [],
+    "evidence_gaps": [],
+    "all_spine_evidence_ids": [
+      "EV-5f79e1b4ca26cc6a",
+      "EV-06d4d0009a0961ab"
+    ],
+    "alternative_spine_paths": [],
+    "storyline_kind": "behavioral",
+    "anchor_ids": [
+      "A002"
+    ],
+    "anchor_types": [
+      "measurement_step"
+    ],
+    "anchor_verification_statuses": {
+      "A002": "verified_observation"
+    },
+    "anchor_verification_issues": {},
+    "co_reported_in_same_asdu": [],
+    "sequential_same_device_observations": [
+      {
+        "edge_id": "R0035",
+        "from_fact_id": "BA001",
+        "from_anchor_id": "A001",
+        "from_entity": "sgen.0:is_connected",
+        "from_time": 1742926252.382188,
+        "to_fact_id": "BA002",
+        "to_anchor_id": "A002",
+        "to_entity": "sgen.0:active_power",
+        "to_time": 1742926262.033628,
+        "device_stem": "sgen.0",
+        "relation_type": "same_entity_sequential_observation",
+        "claim_level": "sequential_observation",
+        "verification_status": "unverified",
+        "graph_consistency_gate_status": "failed_behavioral_consistency_gate",
+        "failed_conditions": [
+          "left_not_sustained",
+          "left_anchor_unverified",
+          "state_to_measurement_change_mismatch"
+        ],
+        "consistency_gate": {
+          "gate_passed": false,
+          "pair_mode": "spontaneous_state_report->measurement_step",
+          "same_device_stem": true,
+          "separate_asdu": true,
+          "temporal_window_ok": true,
+          "dt_seconds": 9.65144,
+          "transition_intervals_aligned": true,
+          "left_anchor_verified": false,
+          "right_anchor_verified": true,
+          "left_quality_good": true,
+          "right_quality_good": true,
+          "left_sustained": false,
+          "right_sustained": true,
+          "left_verification_issues": [
+            "no_prior_state_value_in_window"
+          ],
+          "right_verification_issues": [],
+          "attribute_compatible": true,
+          "matched_quantities": [
+            "active_power"
+          ],
+          "change_type_and_direction_compatible": false,
+          "independent_rtu_support": false,
+          "failed_conditions": [
+            "left_not_sustained",
+            "left_anchor_unverified",
+            "state_to_measurement_change_mismatch"
+          ],
+          "recommended_relation_category": "sequential_observation",
+          "recommended_relation_type": "same_entity_sequential_observation",
+          "recommended_claim_level": "sequential_observation",
+          "recommended_verification_status": "unverified"
+        },
+        "temporal_condition": "0 <= dt (9.651s) <= 15.0s",
+        "support_basis": "Sequential observations on sgen.0 in separate ASDUs (RTU 172.16.3.15 then 172.16.3.15), but behavioral transition consistency gate failed: ['left_not_sustained', 'left_anchor_unverified', 'state_to_measurement_change_mismatch']. Recorded as a sequential same-entity observation only, not a supported behavioral transition.",
+        "evidence_ids": [
+          "EV-49990bcfa3516086",
+          "EV-5f79e1b4ca26cc6a",
+          "EV-06d4d0009a0961ab"
+        ]
+      }
+    ],
+    "incoming_unresolved_branches": [],
+    "reconstructed_behavior": "[A002] sgen.0: 1 measurement(s) in one ASDU from RTU 172.16.3.15 changed active_power 20000.4004 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation). 1 same-device sequential observation(s) kept off-spine (failed behavioral consistency gate: [['left_not_sustained', 'left_anchor_unverified', 'state_to_measurement_change_mismatch']]).",
+    "not_reconstructed": "Cause, the initiating actor, and any relation to devices outside this chain. Cross-device links are listed only as unresolved branches; no grid topology is available."
+  },
+  {
+    "storyline_id": "SL003",
+    "transaction_id": null,
+    "anchor_fact_id": "BA003",
+    "anchor_entity": "line.14:current_to",
+    "start_time": 1742926384.047055,
+    "end_time": 1742926384.047055,
+    "completeness_status": "behavioral_unverified_observation",
+    "command_acceptance_status": null,
+    "device_state_change_status": null,
+    "spine_is_contiguous_directed_path": true,
+    "spine_node_count": 1,
+    "spine_edge_count": 0,
+    "vantage_capture_count": 1,
+    "logical_observation_count": 1,
+    "independent_source_container_count": 1,
+    "total_independent_source_containers_with_supporting": 1,
+    "independent_support_edge_count": 0,
+    "supporting_evidence_edge_count": 0,
+    "source_deduplicated_score": 0.0,
+    "spine_fact_ids": [
+      "BA003"
+    ],
+    "spine_edge_ids": [],
+    "confirmed_and_supported_steps": [],
+    "context_observations": [],
+    "supporting_evidence_edges": [],
+    "unresolved_cooccurrence_branches": [],
+    "temporal_correspondences": [
+      {
+        "edge_id": "R0033",
+        "from_spine_fact_id": "BA003",
+        "fact_id": "BI003",
+        "entity": "line.14:current_to",
+        "time": 1742926384.858198,
+        "value": -0.2709602415561676,
+        "relation_type": "temporally_aligned_same_point_stream",
+        "claim_level": "temporal_correspondence",
+        "common_source_status": "unconfirmed_no_lineage",
+        "counts_as_independent_source": false,
+        "evidence_ids": [
+          "EV-e58d910a8d27a718",
+          "EV-d562b9f57b8095e5",
+          "EV-d07ae4fe716c527f"
+        ]
+      }
+    ],
+    "competing_hypotheses": [],
+    "evidence_gaps": [],
+    "all_spine_evidence_ids": [
+      "EV-e58d910a8d27a718",
+      "EV-d562b9f57b8095e5"
+    ],
+    "alternative_spine_paths": [],
+    "storyline_kind": "behavioral",
+    "anchor_ids": [
+      "A003"
+    ],
+    "anchor_types": [
+      "measurement_step"
+    ],
+    "anchor_verification_statuses": {
+      "A003": "unverified_observation"
+    },
+    "anchor_verification_issues": {
+      "A003": [
+        "not_sustained_in_later_samples"
+      ]
+    },
+    "co_reported_in_same_asdu": [],
+    "sequential_same_device_observations": [],
+    "incoming_unresolved_branches": [],
+    "reconstructed_behavior": "[A003] line.14: 1 measurement(s) in one ASDU from RTU 172.16.3.26 changed current_to 0.0099699581 -> -0.270960242 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+    "not_reconstructed": "Cause, the initiating actor, and any relation to devices outside this chain. Cross-device links are listed only as unresolved branches; no grid topology is available."
+  },
+  {
+    "storyline_id": "SL004",
+    "transaction_id": null,
+    "anchor_fact_id": "BA004",
+    "anchor_entity": "line.14:current_from",
+    "start_time": 1742926403.091995,
+    "end_time": 1742926403.091995,
+    "completeness_status": "behavioral_unverified_observation",
+    "command_acceptance_status": null,
+    "device_state_change_status": null,
+    "spine_is_contiguous_directed_path": true,
+    "spine_node_count": 1,
+    "spine_edge_count": 0,
+    "vantage_capture_count": 1,
+    "logical_observation_count": 1,
+    "independent_source_container_count": 1,
+    "total_independent_source_containers_with_supporting": 1,
+    "independent_support_edge_count": 0,
+    "supporting_evidence_edge_count": 0,
+    "source_deduplicated_score": 0.0,
+    "spine_fact_ids": [
+      "BA004"
+    ],
+    "spine_edge_ids": [],
+    "confirmed_and_supported_steps": [],
+    "context_observations": [],
+    "supporting_evidence_edges": [],
+    "unresolved_cooccurrence_branches": [],
+    "temporal_correspondences": [
+      {
+        "edge_id": "R0034",
+        "from_spine_fact_id": "BA004",
+        "fact_id": "BI004",
+        "entity": "line.14:current_from",
+        "time": 1742926403.858198,
+        "value": 0.2542082667350769,
+        "relation_type": "temporally_aligned_same_point_stream",
+        "claim_level": "temporal_correspondence",
+        "common_source_status": "unconfirmed_no_lineage",
+        "counts_as_independent_source": false,
+        "evidence_ids": [
+          "EV-3f379267d8e5801c",
+          "EV-56b50c425c53dfbd",
+          "EV-bccfab8190e8d804"
+        ]
+      }
+    ],
+    "competing_hypotheses": [],
+    "evidence_gaps": [],
+    "all_spine_evidence_ids": [
+      "EV-3f379267d8e5801c",
+      "EV-56b50c425c53dfbd"
+    ],
+    "alternative_spine_paths": [],
+    "storyline_kind": "behavioral",
+    "anchor_ids": [
+      "A004"
+    ],
+    "anchor_types": [
+      "measurement_step"
+    ],
+    "anchor_verification_statuses": {
+      "A004": "unverified_observation"
+    },
+    "anchor_verification_issues": {
+      "A004": [
+        "insufficient_post_samples"
+      ]
+    },
+    "co_reported_in_same_asdu": [],
+    "sequential_same_device_observations": [],
+    "incoming_unresolved_branches": [],
+    "reconstructed_behavior": "[A004] line.14: 1 measurement(s) in one ASDU from RTU 172.16.3.12 changed current_from -0.0392444469 -> 0.254208267 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['insufficient_post_samples']).",
+    "not_reconstructed": "Cause, the initiating actor, and any relation to devices outside this chain. Cross-device links are listed only as unresolved branches; no grid topology is available."
+  }
+]

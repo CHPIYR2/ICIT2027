@@ -1,0 +1,115 @@
+{
+  "check_scope": "quality_and_behavioral_consistency",
+  "lineage_check_recorded_separately_in": "lineage_consistency.json",
+  "consistent": true,
+  "checks": [],
+  "behavioral_anchor_checks": [
+    {
+      "anchor_id": "A001",
+      "fact_id": "BA001",
+      "anchor_type": "spontaneous_state_report",
+      "verification_status": "unverified_observation",
+      "quality_good": true,
+      "sustained_in_later_samples": false,
+      "verification_issues": [
+        "no_prior_state_value_in_window"
+      ],
+      "matches_anchor_record": true
+    },
+    {
+      "anchor_id": "A002",
+      "fact_id": "BA002",
+      "anchor_type": "measurement_step",
+      "verification_status": "verified_observation",
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_issues": [],
+      "matches_anchor_record": true
+    },
+    {
+      "anchor_id": "A003",
+      "fact_id": "BA003",
+      "anchor_type": "measurement_step",
+      "verification_status": "unverified_observation",
+      "quality_good": true,
+      "sustained_in_later_samples": false,
+      "verification_issues": [
+        "not_sustained_in_later_samples"
+      ],
+      "matches_anchor_record": true
+    },
+    {
+      "anchor_id": "A004",
+      "fact_id": "BA004",
+      "anchor_type": "measurement_step",
+      "verification_status": "unverified_observation",
+      "quality_good": true,
+      "sustained_in_later_samples": false,
+      "verification_issues": [
+        "insufficient_post_samples"
+      ],
+      "matches_anchor_record": true
+    }
+  ],
+  "behavioral_edge_checks": [
+    {
+      "edge_id": "R0035",
+      "source_fact_id": "BA001",
+      "target_fact_id": "BA002",
+      "relation_type": "same_entity_sequential_observation",
+      "relation_category": "sequential_observation",
+      "verification_status": "unverified",
+      "graph_consistency_gate_status": "failed_behavioral_consistency_gate",
+      "stored_gate_passed": false,
+      "recheck_gate_passed": false,
+      "recheck_failed_conditions": [
+        "left_not_sustained",
+        "left_anchor_unverified",
+        "state_to_measurement_change_mismatch"
+      ]
+    }
+  ],
+  "behavioral_storyline_checks": [
+    {
+      "storyline_id": "SL001",
+      "anchor_ids": [
+        "A001"
+      ],
+      "completeness_status": "behavioral_unverified_observation",
+      "all_spine_anchors_verified": false,
+      "supported_step_count": 0,
+      "all_steps_passed_behavioral_gate": true
+    },
+    {
+      "storyline_id": "SL002",
+      "anchor_ids": [
+        "A002"
+      ],
+      "completeness_status": "behavioral_single_anchor",
+      "all_spine_anchors_verified": true,
+      "supported_step_count": 0,
+      "all_steps_passed_behavioral_gate": true
+    },
+    {
+      "storyline_id": "SL003",
+      "anchor_ids": [
+        "A003"
+      ],
+      "completeness_status": "behavioral_unverified_observation",
+      "all_spine_anchors_verified": false,
+      "supported_step_count": 0,
+      "all_steps_passed_behavioral_gate": true
+    },
+    {
+      "storyline_id": "SL004",
+      "anchor_ids": [
+        "A004"
+      ],
+      "completeness_status": "behavioral_unverified_observation",
+      "all_spine_anchors_verified": false,
+      "supported_step_count": 0,
+      "all_steps_passed_behavioral_gate": true
+    }
+  ],
+  "issues": []
+}

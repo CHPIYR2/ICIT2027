@@ -1,0 +1,1022 @@
+{
+  "method": "evidence_anchor_discovery",
+  "window": {
+    "start": 1742933403.2674494,
+    "end": 1742933529.526473,
+    "background_start": 1742933388.2674494
+  },
+  "parameters": {
+    "step_relative": 0.5,
+    "persist_relative": 0.1,
+    "magnitude_floor": 0.001,
+    "near_zero_relative": 1e-06,
+    "min_persist_samples": 2,
+    "min_persist_ratio": 0.8,
+    "max_pre_sample_gap_seconds": 30.0,
+    "vantage_merge_seconds": 0.5,
+    "arp_min_count": 10,
+    "arp_rate_factor": 5.0,
+    "gap_min_seconds": 25.0,
+    "gap_cadence_factor": 3.0
+  },
+  "inputs_not_used": [
+    "official event labels",
+    "attack type",
+    "malicious flags",
+    "physical.zip"
+  ],
+  "observation_inventory": {
+    "background_seconds": 15.0,
+    "window_seconds": 126.259,
+    "iec104_rows": {
+      "window": 5425,
+      "background": 521
+    },
+    "iec104_objects_after_vantage_merge_by_type_cot": {
+      "type13_cot1": 3721,
+      "type100_cot6": 2,
+      "type100_cot7": 2,
+      "type1_cot20": 4,
+      "type13_cot20": 18,
+      "type100_cot10": 2,
+      "type103_cot6": 2,
+      "type103_cot7": 2
+    },
+    "iec104_control_objects_in_window": 0,
+    "tcp_packets": {
+      "window": 2614,
+      "background": 257
+    },
+    "tcp_syn_fin_rst_segments": {
+      "window": 152,
+      "background": 0
+    },
+    "arp_packets": {
+      "window": 6,
+      "background": 0
+    },
+    "udp_packets": {
+      "window": 0,
+      "background": 0
+    },
+    "ipal_electrical_updates": {
+      "window": 2892,
+      "background": 330
+    }
+  },
+  "anchor_count": 2,
+  "verified_anchor_count": 2,
+  "unverified_anchor_count": 0,
+  "anchors": [
+    {
+      "anchor_type": "communication_change",
+      "time": 1742933403.2674494,
+      "time_end": 1742933524.75285,
+      "entity": "172.16.1.2<->172.16.3.22:2404/IEC104",
+      "device_stem": null,
+      "ca_ioa": null,
+      "rtu_ip": "172.16.3.22",
+      "master_ip": "172.16.1.2",
+      "event_kinds": [
+        "clock_synchronisation_cot6",
+        "clock_synchronisation_cot7",
+        "connection_attempt_unanswered",
+        "connection_established",
+        "general_interrogation_cot10",
+        "general_interrogation_cot6",
+        "general_interrogation_cot7",
+        "tcp_fin",
+        "telemetry_gap"
+      ],
+      "events": [
+        {
+          "event": "telemetry_gap",
+          "time": 1742933403.2674494,
+          "gap_seconds": 125.6,
+          "usual_cadence_seconds": 9.96,
+          "evidence_ids": []
+        },
+        {
+          "event": "tcp_fin",
+          "time": 1742933420.095311,
+          "session": "172.16.1.2:42140->172.16.3.22:2404",
+          "evidence_ids": [
+            "EV-35b6b6baef5a1648"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933421.105518,
+          "time_end": 1742933422.145422,
+          "session": "172.16.1.2:43170<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-3e777acdeb712c42",
+            "EV-ad1210245bcd4ebd"
+          ]
+        },
+        {
+          "event": "tcp_fin",
+          "time": 1742933421.121433,
+          "session": "172.16.1.2:42140->172.16.3.22:2404",
+          "evidence_ids": [
+            "EV-95bd006b7f3908c4"
+          ]
+        },
+        {
+          "event": "tcp_fin",
+          "time": 1742933423.105428,
+          "session": "172.16.1.2:42140->172.16.3.22:2404",
+          "evidence_ids": [
+            "EV-1bef457cc54edf22"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933424.117656,
+          "time_end": 1742933425.153421,
+          "session": "172.16.1.2:43180<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-cada7614410e0b8d",
+            "EV-c8649968b7492ca3"
+          ]
+        },
+        {
+          "event": "tcp_fin",
+          "time": 1742933427.074414,
+          "session": "172.16.1.2:42140->172.16.3.22:2404",
+          "evidence_ids": [
+            "EV-63bb75c9ba0cacb9"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933427.129896,
+          "time_end": 1742933428.162452,
+          "session": "172.16.1.2:43194<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-99429faf58cd95ab",
+            "EV-63a2243e4fcf0525"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933430.14272,
+          "time_end": 1742933431.170416,
+          "session": "172.16.1.2:50484<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-3cc34be27b27d6e1",
+            "EV-b853e81f68e3120a"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933433.154679,
+          "time_end": 1742933434.177414,
+          "session": "172.16.1.2:50500<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-d0e2b496bb448335",
+            "EV-7d663bb4039e28fe"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933436.165368,
+          "time_end": 1742933437.185418,
+          "session": "172.16.1.2:50506<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-39144dce98711537",
+            "EV-2fd425d70f12270e"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933439.176647,
+          "time_end": 1742933440.193411,
+          "session": "172.16.1.2:60280<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-42696f7c4eeb06eb",
+            "EV-525a2ba8c777987f"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933442.188673,
+          "time_end": 1742933443.201424,
+          "session": "172.16.1.2:60282<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-1ec75c36b00564b0",
+            "EV-1fdc813c66db3238"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933445.200892,
+          "time_end": 1742933446.21042,
+          "session": "172.16.1.2:60292<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-196f3aa44c8bb224",
+            "EV-f410bd00fc035b8f"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933448.213153,
+          "time_end": 1742933449.217421,
+          "session": "172.16.1.2:60296<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-0653939dd1fb1e9f",
+            "EV-89d0a6f313d1f3e8"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933451.223881,
+          "time_end": 1742933452.22642,
+          "session": "172.16.1.2:57566<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-168d7f5bfb455448",
+            "EV-5a2e9b9d6480e0f5"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933454.235673,
+          "time_end": 1742933455.297418,
+          "session": "172.16.1.2:57568<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-b198cf569f5e0a24",
+            "EV-7728ba3679674a28"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933457.246852,
+          "time_end": 1742933458.306425,
+          "session": "172.16.1.2:57582<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-fa13e0a5b06c3713",
+            "EV-60cf03fd2cccd4bf"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933460.25872,
+          "time_end": 1742933461.313425,
+          "session": "172.16.1.2:57470<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-65bef0e0fc1e70e8",
+            "EV-4ca727f287879df8"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933463.270662,
+          "time_end": 1742933464.321426,
+          "session": "172.16.1.2:57486<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-825f4a8d86bc7aa5",
+            "EV-131776dff61f8600"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933466.282659,
+          "time_end": 1742933467.330421,
+          "session": "172.16.1.2:57488<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-cfe3a11cd886b016",
+            "EV-db75a0941088e0b4"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933469.294632,
+          "time_end": 1742933470.338422,
+          "session": "172.16.1.2:41060<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-2e8c4aa0a5aa549e",
+            "EV-31c8aa1f80f476d0"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933472.306652,
+          "time_end": 1742933473.345419,
+          "session": "172.16.1.2:41064<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-379243291f768b21",
+            "EV-609aebc5e7256dcd"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933475.318659,
+          "time_end": 1742933476.353418,
+          "session": "172.16.1.2:41076<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-342adb855bef8758",
+            "EV-41e76d8addc28333"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933478.330651,
+          "time_end": 1742933479.36142,
+          "session": "172.16.1.2:41084<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-9cefbaf6b30c8e2d",
+            "EV-a6489aba2dc2375a"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933481.342653,
+          "time_end": 1742933482.369424,
+          "session": "172.16.1.2:59348<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-2fc5ac7d8f0e92c6",
+            "EV-ccc0bfd923003690"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933484.354653,
+          "time_end": 1742933485.377417,
+          "session": "172.16.1.2:59352<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-7ccba48ec0628041",
+            "EV-0499904d9523244f"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933487.366623,
+          "time_end": 1742933488.385415,
+          "session": "172.16.1.2:59368<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-6b4166019c3a10cf",
+            "EV-ad9317bd7f09662a"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933490.37863,
+          "time_end": 1742933491.393421,
+          "session": "172.16.1.2:47896<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-6210fb9aba7fd7f7",
+            "EV-68ff09f019ea38bb"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933493.390826,
+          "time_end": 1742933494.401426,
+          "session": "172.16.1.2:47902<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-509c6cbafcec1b5c",
+            "EV-a0b5e5242e7cf057"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933496.403099,
+          "time_end": 1742933497.409425,
+          "session": "172.16.1.2:47918<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-3e0b92dba4dceaf8",
+            "EV-7708da7d51fed3cd"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933499.415049,
+          "time_end": 1742933500.417417,
+          "session": "172.16.1.2:35638<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-fd9b66102d03e4a3",
+            "EV-e32a33a93fd70638"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933502.42668,
+          "time_end": 1742933503.489418,
+          "session": "172.16.1.2:35650<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-bf55a10b26097ec8",
+            "EV-af85b0f1bf94d88f"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933505.438651,
+          "time_end": 1742933506.498425,
+          "session": "172.16.1.2:35658<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-46ccbbeb62c29015",
+            "EV-99124dca155436d4"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933508.450639,
+          "time_end": 1742933509.505429,
+          "session": "172.16.1.2:35670<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-e60779d41a280d42",
+            "EV-99b16b1a6fdfb121"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933511.462666,
+          "time_end": 1742933512.513427,
+          "session": "172.16.1.2:60988<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-06f92fe62f566969",
+            "EV-f002c78b9a51744a"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933514.474959,
+          "time_end": 1742933515.52144,
+          "session": "172.16.1.2:32772<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-6424c7e5e564f6bf",
+            "EV-bfa1072edcd63ad6"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933517.486628,
+          "time_end": 1742933518.53043,
+          "session": "172.16.1.2:32776<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-5a0fc4896e3adaeb",
+            "EV-8b61f9762c2921b8"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933520.498689,
+          "time_end": 1742933521.537419,
+          "session": "172.16.1.2:34932<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-eea8dd81b5f708f6",
+            "EV-f2cae7082b9e8710"
+          ]
+        },
+        {
+          "event": "connection_established",
+          "time": 1742933523.51063,
+          "time_end": 1742933524.565383,
+          "session": "172.16.1.2:34946<->172.16.3.22:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-cbe861d1a2cb8a6c",
+            "EV-3bd5b603addf94da",
+            "EV-5a25e7d5859ab6f7"
+          ]
+        }
+      ],
+      "event_count": 45,
+      "interrogated_objects": 17,
+      "background_tcp_control_segments": 0,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "evidence_ids": [
+        "EV-35b6b6baef5a1648",
+        "EV-3e777acdeb712c42",
+        "EV-ad1210245bcd4ebd",
+        "EV-95bd006b7f3908c4",
+        "EV-1bef457cc54edf22",
+        "EV-cada7614410e0b8d",
+        "EV-c8649968b7492ca3",
+        "EV-63bb75c9ba0cacb9",
+        "EV-99429faf58cd95ab",
+        "EV-63a2243e4fcf0525",
+        "EV-3cc34be27b27d6e1",
+        "EV-b853e81f68e3120a"
+      ],
+      "score": 6.5,
+      "observation": "IEC-104 link 172.16.1.2 <-> 172.16.3.22: clock_synchronisation_cot6 x1, clock_synchronisation_cot7 x1, connection_attempt_unanswered x34, connection_established x1, general_interrogation_cot10 x1, general_interrogation_cot6 x1, general_interrogation_cot7 x1, tcp_fin x4, telemetry_gap x1; first at 1742933403.267 (verification=verified_observation).",
+      "covered_by_transaction": false,
+      "anchor_id": "A001",
+      "rank": 1
+    },
+    {
+      "anchor_type": "communication_change",
+      "time": 1742933418.227669,
+      "time_end": 1742933527.88587,
+      "entity": "172.16.1.2<->172.16.3.23:2404/IEC104",
+      "device_stem": null,
+      "ca_ioa": null,
+      "rtu_ip": "172.16.3.23",
+      "master_ip": "172.16.1.2",
+      "event_kinds": [
+        "clock_synchronisation_cot6",
+        "clock_synchronisation_cot7",
+        "connection_attempt_unanswered",
+        "connection_established",
+        "general_interrogation_cot10",
+        "general_interrogation_cot6",
+        "general_interrogation_cot7"
+      ],
+      "events": [
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933418.227669,
+          "time_end": 1742933419.265413,
+          "session": "172.16.1.2:50124<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-0e9d37abdca9c3c3",
+            "EV-c960837f9a6fe62b"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933421.239989,
+          "time_end": 1742933422.273417,
+          "session": "172.16.1.2:50466<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-4217cddd505acc34",
+            "EV-519d936c7db26521"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933424.252224,
+          "time_end": 1742933425.281417,
+          "session": "172.16.1.2:50468<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-52201475bed78e70",
+            "EV-36774a047646cb5d"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933427.264159,
+          "time_end": 1742933428.290412,
+          "session": "172.16.1.2:50476<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-9ad2d0d5c118dc5c",
+            "EV-b0a789bbb766f568"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933430.275642,
+          "time_end": 1742933431.297415,
+          "session": "172.16.1.2:43712<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-e3c5fc2ffec624e7",
+            "EV-2310843ef6d42da8"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933433.287667,
+          "time_end": 1742933434.306424,
+          "session": "172.16.1.2:43720<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-685645f4ec1e0863",
+            "EV-e269454eeb717481"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933436.299649,
+          "time_end": 1742933437.313424,
+          "session": "172.16.1.2:43728<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-bf5925669710844c",
+            "EV-2d503ef3489c5cdd"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933439.311882,
+          "time_end": 1742933440.321424,
+          "session": "172.16.1.2:51724<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-dbc4f09eeb0636bc",
+            "EV-b337ee932e2aef48"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933442.324149,
+          "time_end": 1742933443.329421,
+          "session": "172.16.1.2:51734<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-c5858011a5b1d359",
+            "EV-9f7a517a5a5165f4"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933445.335617,
+          "time_end": 1742933446.337416,
+          "session": "172.16.1.2:51738<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-a6ce667e19b841e4",
+            "EV-85444c4dd9c0a788"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933448.347661,
+          "time_end": 1742933449.409423,
+          "session": "172.16.1.2:51750<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-ce704aa4dee755b9",
+            "EV-d28ea78acd593d98"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933451.359026,
+          "time_end": 1742933452.418423,
+          "session": "172.16.1.2:51504<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-9278cc0b016e5e08",
+            "EV-a0c4d9d5c60d1e71"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933454.370725,
+          "time_end": 1742933455.425411,
+          "session": "172.16.1.2:51510<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-2cc86c0cca4b4c16",
+            "EV-4e24f58224e9311e"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933457.38274,
+          "time_end": 1742933458.433447,
+          "session": "172.16.1.2:51512<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-97fe798a89edb68f",
+            "EV-5b27a2471f1122b8"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933460.394699,
+          "time_end": 1742933461.44242,
+          "session": "172.16.1.2:43246<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-3e9d68293fb3fc05",
+            "EV-378c73dcd8cb7acd"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933463.406634,
+          "time_end": 1742933464.449419,
+          "session": "172.16.1.2:43258<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-9fe7793d65328250",
+            "EV-9cccaf6ad29fccff"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933466.417643,
+          "time_end": 1742933467.458415,
+          "session": "172.16.1.2:43274<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-5969a6a19d920b81",
+            "EV-d91da67528019b14"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933469.429601,
+          "time_end": 1742933470.465439,
+          "session": "172.16.1.2:54346<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-f3e1847cc39adf19",
+            "EV-3e414f72345aff4b"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933472.44164,
+          "time_end": 1742933473.473414,
+          "session": "172.16.1.2:54356<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-ce07ea76e85d5301",
+            "EV-c39a8709cc7b01da"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933475.453761,
+          "time_end": 1742933476.481421,
+          "session": "172.16.1.2:54362<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-2567e516d8a0e1b5",
+            "EV-30c641bdd86c3cab"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933478.465656,
+          "time_end": 1742933479.489419,
+          "session": "172.16.1.2:54374<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-4ddb194a7131d0de",
+            "EV-153bba3e807b610f"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933481.477612,
+          "time_end": 1742933482.497443,
+          "session": "172.16.1.2:37814<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-edf348a7c90fc270",
+            "EV-a517fea13a7d5ccb"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933484.489634,
+          "time_end": 1742933485.505413,
+          "session": "172.16.1.2:37828<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-c33d6ef619e25791",
+            "EV-62cdac60bcda79f2"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933487.501256,
+          "time_end": 1742933488.513426,
+          "session": "172.16.1.2:37836<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-a5dce3c0deb2bdb7",
+            "EV-867b33e2b8ac00d8"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933490.513257,
+          "time_end": 1742933491.522418,
+          "session": "172.16.1.2:35094<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-0e8eb54701a2aec5",
+            "EV-824febf0494d9528"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933493.524674,
+          "time_end": 1742933494.529426,
+          "session": "172.16.1.2:35100<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-34ae43edde0b930f",
+            "EV-8f6000bd769a3039"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933496.53665,
+          "time_end": 1742933497.53842,
+          "session": "172.16.1.2:35106<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-d35f679198550f11",
+            "EV-51a69bb91e6ee00e"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933499.548622,
+          "time_end": 1742933500.609416,
+          "session": "172.16.1.2:50620<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-330f390f683ea510",
+            "EV-18c099e9ffcdf2ef"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933502.560637,
+          "time_end": 1742933503.61742,
+          "session": "172.16.1.2:50622<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-71269f5d5fcd545e",
+            "EV-69e2c0b3b09d5026"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933505.572637,
+          "time_end": 1742933506.626416,
+          "session": "172.16.1.2:50628<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-e540dfd690fb975f",
+            "EV-64cde614ed92486c"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933508.584615,
+          "time_end": 1742933509.633418,
+          "session": "172.16.1.2:50634<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-fbc40d6d29e29733",
+            "EV-134e4bda0669c83e"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933511.596637,
+          "time_end": 1742933512.641433,
+          "session": "172.16.1.2:39566<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-ab271ce4440a117e",
+            "EV-b2dae038f225ab08"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933514.608649,
+          "time_end": 1742933515.650417,
+          "session": "172.16.1.2:39568<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-3826d42d5a267016",
+            "EV-c981d8ae3423de1b"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933517.620653,
+          "time_end": 1742933518.657414,
+          "session": "172.16.1.2:39574<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-cd0cf4476a4a5afb",
+            "EV-e8e006f368b5f943"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933520.632676,
+          "time_end": 1742933521.665445,
+          "session": "172.16.1.2:60388<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-2ed55b6597333c80",
+            "EV-566d14afea9fad29"
+          ]
+        },
+        {
+          "event": "connection_attempt_unanswered",
+          "time": 1742933523.644633,
+          "time_end": 1742933524.67342,
+          "session": "172.16.1.2:60400<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-5b74a782a784af38",
+            "EV-dc2c1659991d7cc1"
+          ]
+        },
+        {
+          "event": "connection_established",
+          "time": 1742933526.656328,
+          "time_end": 1742933527.700802,
+          "session": "172.16.1.2:60408<->172.16.3.23:2404",
+          "syn_count": 2,
+          "evidence_ids": [
+            "EV-f50f6b3e1cc49a7f",
+            "EV-4eab8bfd156d9bd1",
+            "EV-329d2b8705a6e7ea"
+          ]
+        },
+        {
+          "event": "general_interrogation_cot6",
+          "time": 1742933527.755291,
+          "ca": "65535",
+          "evidence_ids": [
+            "EV-fa88f5779994c2dd"
+          ]
+        },
+        {
+          "event": "general_interrogation_cot7",
+          "time": 1742933527.795423,
+          "ca": "128",
+          "evidence_ids": [
+            "EV-4330e20784be703b"
+          ]
+        },
+        {
+          "event": "general_interrogation_cot10",
+          "time": 1742933527.840882,
+          "ca": "128",
+          "evidence_ids": [
+            "EV-e176a2ec647ae1d9"
+          ]
+        }
+      ],
+      "event_count": 42,
+      "interrogated_objects": 5,
+      "background_tcp_control_segments": 0,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "evidence_ids": [
+        "EV-0e9d37abdca9c3c3",
+        "EV-c960837f9a6fe62b",
+        "EV-4217cddd505acc34",
+        "EV-519d936c7db26521",
+        "EV-52201475bed78e70",
+        "EV-36774a047646cb5d",
+        "EV-9ad2d0d5c118dc5c",
+        "EV-b0a789bbb766f568",
+        "EV-e3c5fc2ffec624e7",
+        "EV-2310843ef6d42da8",
+        "EV-685645f4ec1e0863",
+        "EV-e269454eeb717481"
+      ],
+      "score": 5.5,
+      "observation": "IEC-104 link 172.16.1.2 <-> 172.16.3.23: clock_synchronisation_cot6 x1, clock_synchronisation_cot7 x1, connection_attempt_unanswered x36, connection_established x1, general_interrogation_cot10 x1, general_interrogation_cot6 x1, general_interrogation_cot7 x1; first at 1742933418.228 (verification=verified_observation).",
+      "covered_by_transaction": false,
+      "anchor_id": "A002",
+      "rank": 2
+    }
+  ],
+  "behavioral_mode": true
+}

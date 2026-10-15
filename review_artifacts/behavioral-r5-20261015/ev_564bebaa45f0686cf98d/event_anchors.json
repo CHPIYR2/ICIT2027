@@ -1,0 +1,3439 @@
+{
+  "method": "evidence_anchor_discovery",
+  "window": {
+    "start": 1742922604.1942136,
+    "end": 1742922784.4018285,
+    "background_start": 1742922589.1942136
+  },
+  "parameters": {
+    "step_relative": 0.5,
+    "persist_relative": 0.1,
+    "magnitude_floor": 0.001,
+    "near_zero_relative": 1e-06,
+    "min_persist_samples": 2,
+    "min_persist_ratio": 0.8,
+    "max_pre_sample_gap_seconds": 30.0,
+    "vantage_merge_seconds": 0.5,
+    "arp_min_count": 10,
+    "arp_rate_factor": 5.0,
+    "gap_min_seconds": 25.0,
+    "gap_cadence_factor": 3.0
+  },
+  "inputs_not_used": [
+    "official event labels",
+    "attack type",
+    "malicious flags",
+    "physical.zip"
+  ],
+  "observation_inventory": {
+    "background_seconds": 15.0,
+    "window_seconds": 180.208,
+    "iec104_rows": {
+      "window": 7562,
+      "background": 806
+    },
+    "iec104_objects_after_vantage_merge_by_type_cot": {
+      "type1_cot3": 2,
+      "type13_cot1": 5490
+    },
+    "iec104_control_objects_in_window": 0,
+    "tcp_packets": {
+      "window": 3276,
+      "background": 340
+    },
+    "tcp_syn_fin_rst_segments": {
+      "window": 0,
+      "background": 0
+    },
+    "arp_packets": {
+      "window": 2,
+      "background": 0
+    },
+    "udp_packets": {
+      "window": 0,
+      "background": 0
+    },
+    "ipal_electrical_updates": {
+      "window": 3470,
+      "background": 447
+    }
+  },
+  "anchor_count": 32,
+  "verified_anchor_count": 23,
+  "unverified_anchor_count": 9,
+  "anchors": [
+    {
+      "anchor_type": "spontaneous_state_report",
+      "time": 1742922605.090231,
+      "entity": "switch.13:is_closed",
+      "device_stem": "switch.13",
+      "ca_ioa": "121.10200",
+      "rtu_ip": "172.16.3.16",
+      "asdu_key": "172.16.3.16|2404|172.16.1.2|41276|434|0",
+      "value": 0.0,
+      "prior_value": null,
+      "prior_time": null,
+      "prior_evidence_ids": [],
+      "pre_quality_good": null,
+      "pre_cot_test": null,
+      "quality_good": true,
+      "cot_test": false,
+      "sustained_in_later_samples": false,
+      "transition_status": "state_report_no_prior_value_in_window",
+      "verification_status": "unverified_observation",
+      "verification_issues": [
+        "no_prior_state_value_in_window"
+      ],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-be5dd3e888ca9c6e"
+      ],
+      "score": 3.5,
+      "observation": "switch.13:is_closed (CA/IOA=121.10200) reported value 0.0 with COT=3 by RTU 172.16.3.16; prior IEC-104 value in window: not observed (state_report_no_prior_value_in_window; verification=unverified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-e6135b0a516cb0cf",
+          "entity": "switch.13:closed",
+          "ca_ioa": "121.10190",
+          "time": 1742922605.858198,
+          "value": 0.0,
+          "match_basis": "same_device_other_attribute"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A001",
+      "rank": 24
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922608.584994,
+      "entity": "line.0:active_power_from",
+      "device_stem": "line.0",
+      "ca_ioa": "102.10050",
+      "rtu_ip": "172.16.2.3",
+      "asdu_key": "172.16.2.3|2404|172.16.1.2|42436|434|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.0:active_power_from",
+          "attribute": "active_power_from",
+          "base_attribute": "active_power",
+          "endpoint_side": "from",
+          "ca_ioa": "102.10050",
+          "step_kind": "level_shift",
+          "pre_value": -404472.344,
+          "pre_time": 1742922598.541183,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-16ebf802580c8e82",
+            "EV-df132f143042626f"
+          ],
+          "post_value": -1286776.25,
+          "post_time": 1742922608.584994,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.043811,
+          "evidence_ids": [
+            "EV-3c3cbb46e50d7d28",
+            "EV-dea3772f106a463b"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302",
+        "n303"
+      ],
+      "evidence_ids": [
+        "EV-3c3cbb46e50d7d28",
+        "EV-dea3772f106a463b"
+      ],
+      "score": 3.25,
+      "observation": "line.0: 1 measurement(s) in one ASDU from RTU 172.16.2.3 changed active_power_from -404472.344 -> -1286776.25 (level_shift; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-deaf92fe775fbfc2",
+          "entity": "line.0:active_power_from",
+          "ca_ioa": "102.10050",
+          "time": 1742922608.858198,
+          "value": -1286776.25,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A002",
+      "rank": 20
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922609.839651,
+      "entity": "bus.5:active_power,reactive_power,voltage,voltage_angle",
+      "device_stem": "bus.5",
+      "ca_ioa": "123.10030",
+      "rtu_ip": "172.16.3.18",
+      "asdu_key": "172.16.3.18|2404|172.16.1.2|37458|434|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "bus.5:active_power",
+          "attribute": "active_power",
+          "base_attribute": "active_power",
+          "endpoint_side": null,
+          "ca_ioa": "123.10030",
+          "step_kind": "to_zero",
+          "pre_value": 708101.188,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-c21efd1a1d2fd9d3"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-84daa0e68ef06102"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "bus.5:reactive_power",
+          "attribute": "reactive_power",
+          "base_attribute": "reactive_power",
+          "endpoint_side": null,
+          "ca_ioa": "123.10040",
+          "step_kind": "to_zero",
+          "pre_value": 182338.594,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-40cb04142c2a3aa4"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-8157ecd56e21ff99"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "bus.5:voltage",
+          "attribute": "voltage",
+          "base_attribute": "voltage",
+          "endpoint_side": null,
+          "ca_ioa": "123.10010",
+          "step_kind": "to_zero",
+          "pre_value": 0.986840606,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-5583e7bd062d2d5a"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-a31975970a90f34a"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "bus.5:voltage_angle",
+          "attribute": "voltage_angle",
+          "base_attribute": "voltage_angle",
+          "endpoint_side": null,
+          "ca_ioa": "123.10020",
+          "step_kind": "to_zero",
+          "pre_value": -150.196335,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-9059f41441a3c3ee"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-c6f55b8ae8880d1b"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-84daa0e68ef06102",
+        "EV-8157ecd56e21ff99",
+        "EV-a31975970a90f34a",
+        "EV-c6f55b8ae8880d1b"
+      ],
+      "score": 4.5,
+      "observation": "bus.5: 4 measurement(s) in one ASDU from RTU 172.16.3.18 changed active_power 708101.188 -> 0.0; reactive_power 182338.594 -> 0.0; voltage 0.986840606 -> 0.0; voltage_angle -150.196335 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-699879c5fd94d6a5",
+          "entity": "bus.5:reactive_power",
+          "ca_ioa": "123.10040",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-92b2113bb3d5304b",
+          "entity": "bus.5:voltage",
+          "ca_ioa": "123.10010",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-a7bcba1a07155c7c",
+          "entity": "bus.5:voltage_angle",
+          "ca_ioa": "123.10020",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-da7bf8e877c29b37",
+          "entity": "bus.5:active_power",
+          "ca_ioa": "123.10030",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A003",
+      "rank": 1
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922609.839651,
+      "entity": "line.3:active_power_to,current_to,reactive_power_to,voltage_to",
+      "device_stem": "line.3",
+      "ca_ioa": "123.10050",
+      "rtu_ip": "172.16.3.18",
+      "asdu_key": "172.16.3.18|2404|172.16.1.2|37458|434|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "line.3:active_power_to",
+          "attribute": "active_power_to",
+          "base_attribute": "active_power",
+          "endpoint_side": "to",
+          "ca_ioa": "123.10050",
+          "step_kind": "to_zero",
+          "pre_value": -807307.688,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-0edfe9bad6d53c27"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-bfef5819e801be66"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.3:current_to",
+          "attribute": "current_to",
+          "base_attribute": "current",
+          "endpoint_side": "to",
+          "ca_ioa": "123.10070",
+          "step_kind": "to_zero",
+          "pre_value": 25.1873264,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-158e15e633e2fad2"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-6a99c02e933fe11b"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.3:reactive_power_to",
+          "attribute": "reactive_power_to",
+          "base_attribute": "reactive_power",
+          "endpoint_side": "to",
+          "ca_ioa": "123.10060",
+          "step_kind": "to_zero",
+          "pre_value": -286850.781,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-0600ae84bad1ced3"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-b16579cd32ab22f0"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.3:voltage_to",
+          "attribute": "voltage_to",
+          "base_attribute": "voltage",
+          "endpoint_side": "to",
+          "ca_ioa": "123.10080",
+          "step_kind": "to_zero",
+          "pre_value": 0.986770332,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-376ef337d4dc689e"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-f39a6c06c5529b71"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-bfef5819e801be66",
+        "EV-6a99c02e933fe11b",
+        "EV-b16579cd32ab22f0",
+        "EV-f39a6c06c5529b71"
+      ],
+      "score": 4.5,
+      "observation": "line.3: 4 measurement(s) in one ASDU from RTU 172.16.3.18 changed active_power_to -807307.688 -> 0.0; current_to 25.1873264 -> 0.0; reactive_power_to -286850.781 -> 0.0; voltage_to 0.986770332 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-178c05b9e43e70d4",
+          "entity": "line.3:voltage_to",
+          "ca_ioa": "123.10080",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-783f965a9cdb695b",
+          "entity": "line.3:reactive_power_to",
+          "ca_ioa": "123.10060",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-a8bd70a5e30e4cb4",
+          "entity": "line.3:active_power_to",
+          "ca_ioa": "123.10050",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-fde536929465fc2c",
+          "entity": "line.3:current_to",
+          "ca_ioa": "123.10070",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A004",
+      "rank": 2
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922609.839651,
+      "entity": "line.4:active_power_from,current_from,reactive_power_from,voltage_from",
+      "device_stem": "line.4",
+      "ca_ioa": "123.10090",
+      "rtu_ip": "172.16.3.18",
+      "asdu_key": "172.16.3.18|2404|172.16.1.2|37458|434|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "line.4:active_power_from",
+          "attribute": "active_power_from",
+          "base_attribute": "active_power",
+          "endpoint_side": "from",
+          "ca_ioa": "123.10090",
+          "step_kind": "to_zero",
+          "pre_value": 99090.8516,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-7ef0b8958c74204c"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-5b1890a70bf8109b"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.4:current_from",
+          "attribute": "current_from",
+          "base_attribute": "current",
+          "endpoint_side": "from",
+          "ca_ioa": "123.10110",
+          "step_kind": "to_zero",
+          "pre_value": 4.71337461,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-e451eda1aff1b7c6"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-9419dfe4ce1fb46e"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.4:reactive_power_from",
+          "attribute": "reactive_power_from",
+          "base_attribute": "reactive_power",
+          "endpoint_side": "from",
+          "ca_ioa": "123.10100",
+          "step_kind": "to_zero",
+          "pre_value": 104518.406,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-73473547d303d0a0"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-119c4262b52616ff"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.4:voltage_from",
+          "attribute": "voltage_from",
+          "base_attribute": "voltage",
+          "endpoint_side": "from",
+          "ca_ioa": "123.10120",
+          "step_kind": "to_zero",
+          "pre_value": 0.986770332,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-86a9235a3746743b"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-515edee0d79d31df"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-5b1890a70bf8109b",
+        "EV-9419dfe4ce1fb46e",
+        "EV-119c4262b52616ff",
+        "EV-515edee0d79d31df"
+      ],
+      "score": 4.5,
+      "observation": "line.4: 4 measurement(s) in one ASDU from RTU 172.16.3.18 changed active_power_from 99090.8516 -> 0.0; current_from 4.71337461 -> 0.0; reactive_power_from 104518.406 -> 0.0; voltage_from 0.986770332 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-11c4d56a81b29544",
+          "entity": "line.4:active_power_from",
+          "ca_ioa": "123.10090",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-468558d7cdd0152d",
+          "entity": "line.4:current_from",
+          "ca_ioa": "123.10110",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-919c3e5480f141c8",
+          "entity": "line.4:reactive_power_from",
+          "ca_ioa": "123.10100",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-a2de22b93a22a159",
+          "entity": "line.4:voltage_from",
+          "ca_ioa": "123.10120",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A005",
+      "rank": 3
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922609.839651,
+      "entity": "load.3:active_power,reactive_power",
+      "device_stem": "load.3",
+      "ca_ioa": "123.10190",
+      "rtu_ip": "172.16.3.18",
+      "asdu_key": "172.16.3.18|2404|172.16.1.2|37458|434|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "load.3:active_power",
+          "attribute": "active_power",
+          "base_attribute": "active_power",
+          "endpoint_side": null,
+          "ca_ioa": "123.10190",
+          "step_kind": "to_zero",
+          "pre_value": 171291.688,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-b8c687677dea9bcc"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-39c0739e7b12edb2"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "load.3:reactive_power",
+          "attribute": "reactive_power",
+          "base_attribute": "reactive_power",
+          "endpoint_side": null,
+          "ca_ioa": "123.10200",
+          "step_kind": "to_zero",
+          "pre_value": 182332.359,
+          "pre_time": 1742922599.869927,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-2069018debef1270"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922609.839651,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.969724,
+          "evidence_ids": [
+            "EV-45707581bc55f7ac"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-39c0739e7b12edb2",
+        "EV-45707581bc55f7ac"
+      ],
+      "score": 4.0,
+      "observation": "load.3: 2 measurement(s) in one ASDU from RTU 172.16.3.18 changed active_power 171291.688 -> 0.0; reactive_power 182332.359 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-97066f9b0b6816b5",
+          "entity": "load.3:active_power",
+          "ca_ioa": "123.10190",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-cede80e202219691",
+          "entity": "load.3:reactive_power",
+          "ca_ioa": "123.10200",
+          "time": 1742922609.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A006",
+      "rank": 9
+    },
+    {
+      "anchor_type": "spontaneous_state_report",
+      "time": 1742922610.240294,
+      "entity": "switch.14:is_closed",
+      "device_stem": "switch.14",
+      "ca_ioa": "121.10220",
+      "rtu_ip": "172.16.3.16",
+      "asdu_key": "172.16.3.16|2404|172.16.1.2|41276|435|0",
+      "value": 0.0,
+      "prior_value": null,
+      "prior_time": null,
+      "prior_evidence_ids": [],
+      "pre_quality_good": null,
+      "pre_cot_test": null,
+      "quality_good": true,
+      "cot_test": false,
+      "sustained_in_later_samples": false,
+      "transition_status": "state_report_no_prior_value_in_window",
+      "verification_status": "unverified_observation",
+      "verification_issues": [
+        "no_prior_state_value_in_window"
+      ],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-1929828afe2e1a48"
+      ],
+      "score": 3.5,
+      "observation": "switch.14:is_closed (CA/IOA=121.10220) reported value 0.0 with COT=3 by RTU 172.16.3.16; prior IEC-104 value in window: not observed (state_report_no_prior_value_in_window; verification=unverified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-02b9f39fd1f01282",
+          "entity": "switch.14:closed",
+          "ca_ioa": "121.10210",
+          "time": 1742922610.858198,
+          "value": 0.0,
+          "match_basis": "same_device_other_attribute"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A007",
+      "rank": 25
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922610.745007,
+      "entity": "line.0:active_power_to",
+      "device_stem": "line.0",
+      "ca_ioa": "118.10050",
+      "rtu_ip": "172.16.3.13",
+      "asdu_key": "172.16.3.13|2404|172.16.1.2|55080|434|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.0:active_power_to",
+          "attribute": "active_power_to",
+          "base_attribute": "active_power",
+          "endpoint_side": "to",
+          "ca_ioa": "118.10050",
+          "step_kind": "level_shift",
+          "pre_value": 409277.281,
+          "pre_time": 1742922600.787236,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-aedb4aa434d2a433",
+            "EV-c614a974954fc372"
+          ],
+          "post_value": 1294192.0,
+          "post_time": 1742922610.745007,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957771,
+          "evidence_ids": [
+            "EV-d0ebc674e5e5f30c",
+            "EV-7d6b819e7f3d4f63"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302",
+        "n321"
+      ],
+      "evidence_ids": [
+        "EV-d0ebc674e5e5f30c",
+        "EV-7d6b819e7f3d4f63"
+      ],
+      "score": 3.25,
+      "observation": "line.0: 1 measurement(s) in one ASDU from RTU 172.16.3.13 changed active_power_to 409277.281 -> 1294192.0 (level_shift; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-2cdceb1a6bd9a3d6",
+          "entity": "line.0:active_power_to",
+          "ca_ioa": "118.10050",
+          "time": 1742922610.858198,
+          "value": 1294192.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A008",
+      "rank": 21
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922610.745007,
+      "entity": "line.1:active_power_from",
+      "device_stem": "line.1",
+      "ca_ioa": "118.10090",
+      "rtu_ip": "172.16.3.13",
+      "asdu_key": "172.16.3.13|2404|172.16.1.2|55080|434|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.1:active_power_from",
+          "attribute": "active_power_from",
+          "base_attribute": "active_power",
+          "endpoint_side": "from",
+          "ca_ioa": "118.10090",
+          "step_kind": "level_shift",
+          "pre_value": -409277.281,
+          "pre_time": 1742922600.787236,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-a321ef0c5e55e908",
+            "EV-a1c8041531814bc4"
+          ],
+          "post_value": -1294192.0,
+          "post_time": 1742922610.745007,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957771,
+          "evidence_ids": [
+            "EV-4baf725f280851a4",
+            "EV-3b0751371369bcf0"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302",
+        "n321"
+      ],
+      "evidence_ids": [
+        "EV-4baf725f280851a4",
+        "EV-3b0751371369bcf0"
+      ],
+      "score": 3.25,
+      "observation": "line.1: 1 measurement(s) in one ASDU from RTU 172.16.3.13 changed active_power_from -409277.281 -> -1294192.0 (level_shift; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-2a0ed8babe3f1ee6",
+          "entity": "line.1:active_power_from",
+          "ca_ioa": "118.10090",
+          "time": 1742922610.858198,
+          "value": -1294192.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A009",
+      "rank": 22
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922610.978524,
+      "entity": "line.1:active_power_to",
+      "device_stem": "line.1",
+      "ca_ioa": "119.10050",
+      "rtu_ip": "172.16.3.14",
+      "asdu_key": "172.16.3.14|2404|172.16.1.2|60636|433|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.1:active_power_to",
+          "attribute": "active_power_to",
+          "base_attribute": "active_power",
+          "endpoint_side": "to",
+          "ca_ioa": "119.10050",
+          "step_kind": "level_shift",
+          "pre_value": 419253.438,
+          "pre_time": 1742922601.022197,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-124724ab69696e0d"
+          ],
+          "post_value": 1307723.25,
+          "post_time": 1742922610.978524,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.956327,
+          "evidence_ids": [
+            "EV-d852dab86b4e7efb"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-d852dab86b4e7efb"
+      ],
+      "score": 3.25,
+      "observation": "line.1: 1 measurement(s) in one ASDU from RTU 172.16.3.14 changed active_power_to 419253.438 -> 1307723.25 (level_shift; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-1b4b06d636fd366b",
+          "entity": "line.1:active_power_to",
+          "ca_ioa": "119.10050",
+          "time": 1742922611.858198,
+          "value": 1307723.25,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A010",
+      "rank": 23
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922610.978524,
+      "entity": "line.2:active_power_from,reactive_power_from",
+      "device_stem": "line.2",
+      "ca_ioa": "119.10090",
+      "rtu_ip": "172.16.3.14",
+      "asdu_key": "172.16.3.14|2404|172.16.1.2|60636|433|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.2:active_power_from",
+          "attribute": "active_power_from",
+          "base_attribute": "active_power",
+          "endpoint_side": "from",
+          "ca_ioa": "119.10090",
+          "step_kind": "level_shift",
+          "pre_value": 890665.0,
+          "pre_time": 1742922601.022197,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-a611f74950cb0dc4"
+          ],
+          "post_value": 0.025852792,
+          "post_time": 1742922610.978524,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.956327,
+          "evidence_ids": [
+            "EV-99ceaa9a519bf6c0"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.2:reactive_power_from",
+          "attribute": "reactive_power_from",
+          "base_attribute": "reactive_power",
+          "endpoint_side": "from",
+          "ca_ioa": "119.10100",
+          "step_kind": "level_shift",
+          "pre_value": 375148.594,
+          "pre_time": 1742922601.022197,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-798160fc7f7d95ef"
+          ],
+          "post_value": -11679.9746,
+          "post_time": 1742922610.978524,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.956327,
+          "evidence_ids": [
+            "EV-ea3a832bcfd072e7"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-99ceaa9a519bf6c0",
+        "EV-ea3a832bcfd072e7"
+      ],
+      "score": 3.5,
+      "observation": "line.2: 2 measurement(s) in one ASDU from RTU 172.16.3.14 changed active_power_from 890665.0 -> 0.025852792; reactive_power_from 375148.594 -> -11679.9746 (level_shift; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-59e60ae93919f568",
+          "entity": "line.2:reactive_power_from",
+          "ca_ioa": "119.10100",
+          "time": 1742922611.858198,
+          "value": -11679.974609375,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-87fd0afadbec25b6",
+          "entity": "line.2:active_power_from",
+          "ca_ioa": "119.10090",
+          "time": 1742922611.858198,
+          "value": 0.025852791965007782,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A011",
+      "rank": 19
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922611.855588,
+      "entity": "sgen.1:active_power",
+      "device_stem": "sgen.1",
+      "ca_ioa": "122.10080",
+      "rtu_ip": "172.16.3.17",
+      "asdu_key": "172.16.3.17|2404|172.16.1.2|33402|434|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "sgen.1:active_power",
+          "attribute": "active_power",
+          "base_attribute": "active_power",
+          "endpoint_side": null,
+          "ca_ioa": "122.10080",
+          "step_kind": "to_zero",
+          "pre_value": 20004.0,
+          "pre_time": 1742922601.79838,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-8b7f58dc3df2eaed"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.855588,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.057208,
+          "evidence_ids": [
+            "EV-f969c5f8a10a6e07"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-f969c5f8a10a6e07"
+      ],
+      "score": 3.75,
+      "observation": "sgen.1: 1 measurement(s) in one ASDU from RTU 172.16.3.17 changed active_power 20004.0 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-d6b1bdf10dab9240",
+          "entity": "sgen.1:active_power",
+          "ca_ioa": "122.10080",
+          "time": 1742922611.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A012",
+      "rank": 14
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922611.965719,
+      "entity": "bus.6:active_power,reactive_power,voltage,voltage_angle",
+      "device_stem": "bus.6",
+      "ca_ioa": "127.10030",
+      "rtu_ip": "172.16.3.22",
+      "asdu_key": "172.16.3.22|2404|172.16.1.2|42140|434|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "bus.6:active_power",
+          "attribute": "active_power",
+          "base_attribute": "active_power",
+          "endpoint_side": null,
+          "ca_ioa": "127.10030",
+          "step_kind": "to_zero",
+          "pre_value": 99135.8828,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-c9a71a4f1aeea5e8"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-5ece22ffa46d5ca3"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "bus.6:reactive_power",
+          "attribute": "reactive_power",
+          "base_attribute": "reactive_power",
+          "endpoint_side": null,
+          "ca_ioa": "127.10040",
+          "step_kind": "to_zero",
+          "pre_value": 137365.672,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-51fc11a8a7d50eac"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-09ca5573406fa16b"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "bus.6:voltage",
+          "attribute": "voltage",
+          "base_attribute": "voltage",
+          "endpoint_side": null,
+          "ca_ioa": "127.10010",
+          "step_kind": "to_zero",
+          "pre_value": 0.986320436,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-292d36d24b2638c1"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-334351512d5cc262"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "bus.6:voltage_angle",
+          "attribute": "voltage_angle",
+          "base_attribute": "voltage_angle",
+          "endpoint_side": null,
+          "ca_ioa": "127.10020",
+          "step_kind": "to_zero",
+          "pre_value": -150.200974,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-db0bc5e568a80278"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-79ac1a597b20495c"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-5ece22ffa46d5ca3",
+        "EV-09ca5573406fa16b",
+        "EV-334351512d5cc262",
+        "EV-79ac1a597b20495c"
+      ],
+      "score": 4.5,
+      "observation": "bus.6: 4 measurement(s) in one ASDU from RTU 172.16.3.22 changed active_power 99135.8828 -> 0.0; reactive_power 137365.672 -> 0.0; voltage 0.986320436 -> 0.0; voltage_angle -150.200974 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-181ca8963fc9d6dd",
+          "entity": "bus.6:voltage_angle",
+          "ca_ioa": "127.10020",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-849b4b11acbdc943",
+          "entity": "bus.6:voltage",
+          "ca_ioa": "127.10010",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-a71175d9c9921256",
+          "entity": "bus.6:active_power",
+          "ca_ioa": "127.10030",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-adf01d06184933a1",
+          "entity": "bus.6:reactive_power",
+          "ca_ioa": "127.10040",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A013",
+      "rank": 4
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922611.965719,
+      "entity": "line.12:active_power_from,current_from,reactive_power_from,voltage_from",
+      "device_stem": "line.12",
+      "ca_ioa": "127.10090",
+      "rtu_ip": "172.16.3.22",
+      "asdu_key": "172.16.3.22|2404|172.16.1.2|42140|434|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "line.12:active_power_from",
+          "attribute": "active_power_from",
+          "base_attribute": "active_power",
+          "endpoint_side": "from",
+          "ca_ioa": "127.10090",
+          "step_kind": "to_zero",
+          "pre_value": 0.00151802436,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-415af3ce99926f29"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-1b16f72022d1d7ca"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.12:current_from",
+          "attribute": "current_from",
+          "base_attribute": "current",
+          "endpoint_side": "from",
+          "ca_ioa": "127.10110",
+          "step_kind": "to_zero",
+          "pre_value": 0.174583644,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-fcc5f070cbe5a5ff"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-6f5888a4501b357a"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.12:reactive_power_from",
+          "attribute": "reactive_power_from",
+          "base_attribute": "reactive_power",
+          "endpoint_side": "from",
+          "ca_ioa": "127.10100",
+          "step_kind": "to_zero",
+          "pre_value": -4434.68311,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-74ea1aaf33260154"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-5a65b5e9b99480d0"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.12:voltage_from",
+          "attribute": "voltage_from",
+          "base_attribute": "voltage",
+          "endpoint_side": "from",
+          "ca_ioa": "127.10120",
+          "step_kind": "to_zero",
+          "pre_value": 0.986235857,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-cdba530e0f5cbfdb"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-07aae70fc1f68b21"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-1b16f72022d1d7ca",
+        "EV-6f5888a4501b357a",
+        "EV-5a65b5e9b99480d0",
+        "EV-07aae70fc1f68b21"
+      ],
+      "score": 4.5,
+      "observation": "line.12: 4 measurement(s) in one ASDU from RTU 172.16.3.22 changed active_power_from 0.00151802436 -> 0.0; current_from 0.174583644 -> 0.0; reactive_power_from -4434.68311 -> 0.0; voltage_from 0.986235857 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-5314f06d62617833",
+          "entity": "line.12:voltage_from",
+          "ca_ioa": "127.10120",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-6afd192ba96c35da",
+          "entity": "line.12:current_from",
+          "ca_ioa": "127.10110",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-a8136504ca023e0a",
+          "entity": "line.12:active_power_from",
+          "ca_ioa": "127.10090",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-ed7ae1c9a9bcfa88",
+          "entity": "line.12:reactive_power_from",
+          "ca_ioa": "127.10100",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A014",
+      "rank": 5
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922611.965719,
+      "entity": "line.4:active_power_to,current_to,reactive_power_to,voltage_to",
+      "device_stem": "line.4",
+      "ca_ioa": "127.10050",
+      "rtu_ip": "172.16.3.22",
+      "asdu_key": "172.16.3.22|2404|172.16.1.2|42140|434|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "line.4:active_power_to",
+          "attribute": "active_power_to",
+          "base_attribute": "active_power",
+          "endpoint_side": "to",
+          "ca_ioa": "127.10050",
+          "step_kind": "to_zero",
+          "pre_value": -99147.8125,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-3edf330ee9527ac4"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-4d1b23faa7123462"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.4:current_to",
+          "attribute": "current_to",
+          "base_attribute": "current",
+          "endpoint_side": "to",
+          "ca_ioa": "127.10070",
+          "step_kind": "to_zero",
+          "pre_value": 4.96761036,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-f0a9538369abbdcb"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-6920e4fc1d64f76f"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.4:reactive_power_to",
+          "attribute": "reactive_power_to",
+          "base_attribute": "reactive_power",
+          "endpoint_side": "to",
+          "ca_ioa": "127.10060",
+          "step_kind": "to_zero",
+          "pre_value": -132919.047,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-fdec5f2ee486eb74"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-947a2146e8ebf4d6"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.4:voltage_to",
+          "attribute": "voltage_to",
+          "base_attribute": "voltage",
+          "endpoint_side": "to",
+          "ca_ioa": "127.10080",
+          "step_kind": "to_zero",
+          "pre_value": 0.986235857,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-5ebffae3692fbf08"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-f017369cc3f031d8"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-4d1b23faa7123462",
+        "EV-6920e4fc1d64f76f",
+        "EV-947a2146e8ebf4d6",
+        "EV-f017369cc3f031d8"
+      ],
+      "score": 4.5,
+      "observation": "line.4: 4 measurement(s) in one ASDU from RTU 172.16.3.22 changed active_power_to -99147.8125 -> 0.0; current_to 4.96761036 -> 0.0; reactive_power_to -132919.047 -> 0.0; voltage_to 0.986235857 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-49e0d597788ef3e4",
+          "entity": "line.4:voltage_to",
+          "ca_ioa": "127.10080",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-57e146615c63e026",
+          "entity": "line.4:reactive_power_to",
+          "ca_ioa": "127.10060",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-5b22e8706e629937",
+          "entity": "line.4:current_to",
+          "ca_ioa": "127.10070",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-f6c2132799c8a2cd",
+          "entity": "line.4:active_power_to",
+          "ca_ioa": "127.10050",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A015",
+      "rank": 6
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922611.965719,
+      "entity": "load.4:active_power,reactive_power",
+      "device_stem": "load.4",
+      "ca_ioa": "127.10190",
+      "rtu_ip": "172.16.3.22",
+      "asdu_key": "172.16.3.22|2404|172.16.1.2|42140|434|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "load.4:active_power",
+          "attribute": "active_power",
+          "base_attribute": "active_power",
+          "endpoint_side": null,
+          "ca_ioa": "127.10190",
+          "step_kind": "to_zero",
+          "pre_value": 129152.992,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-255476fe65ab1f0f"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-e8200ad75587b0a6"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "load.4:reactive_power",
+          "attribute": "reactive_power",
+          "base_attribute": "reactive_power",
+          "endpoint_side": null,
+          "ca_ioa": "127.10200",
+          "step_kind": "to_zero",
+          "pre_value": 137353.719,
+          "pre_time": 1742922602.008158,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-455905184806fce7"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922611.965719,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.957561,
+          "evidence_ids": [
+            "EV-73745f25cc5749b9"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-e8200ad75587b0a6",
+        "EV-73745f25cc5749b9"
+      ],
+      "score": 4.0,
+      "observation": "load.4: 2 measurement(s) in one ASDU from RTU 172.16.3.22 changed active_power 129152.992 -> 0.0; reactive_power 137353.719 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-07ef9d22506be750",
+          "entity": "load.4:reactive_power",
+          "ca_ioa": "127.10200",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-34dd9ff95f82651f",
+          "entity": "load.4:active_power",
+          "ca_ioa": "127.10190",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A016",
+      "rank": 10
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922612.038353,
+      "entity": "line.12:current_to,voltage_to",
+      "device_stem": "line.12",
+      "ca_ioa": "129.10110",
+      "rtu_ip": "172.16.3.24",
+      "asdu_key": "172.16.3.24|2404|172.16.1.2|47958|434|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "line.12:current_to",
+          "attribute": "current_to",
+          "base_attribute": "current",
+          "endpoint_side": "to",
+          "ca_ioa": "129.10110",
+          "step_kind": "to_zero",
+          "pre_value": 0.293723464,
+          "pre_time": 1742922602.081932,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-d345e17775f39f82"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922612.038353,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.956421,
+          "evidence_ids": [
+            "EV-7b00c3a198756009"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.12:voltage_to",
+          "attribute": "voltage_to",
+          "base_attribute": "voltage",
+          "endpoint_side": "to",
+          "ca_ioa": "129.10120",
+          "step_kind": "to_zero",
+          "pre_value": 0.986236811,
+          "pre_time": 1742922602.081932,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-cb804ec9bdafbc8c"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922612.038353,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.956421,
+          "evidence_ids": [
+            "EV-b688c59c18ef4daf"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-7b00c3a198756009",
+        "EV-b688c59c18ef4daf"
+      ],
+      "score": 4.0,
+      "observation": "line.12: 2 measurement(s) in one ASDU from RTU 172.16.3.24 changed current_to 0.293723464 -> 0.0; voltage_to 0.986236811 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-021ae3ad674c8876",
+          "entity": "line.12:voltage_to",
+          "ca_ioa": "129.10120",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-734a9c4eff86da36",
+          "entity": "line.12:current_to",
+          "ca_ioa": "129.10110",
+          "time": 1742922612.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A017",
+      "rank": 11
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922613.336751,
+      "entity": "sgen.3:active_power",
+      "device_stem": "sgen.3",
+      "ca_ioa": "128.10080",
+      "rtu_ip": "172.16.3.23",
+      "asdu_key": "172.16.3.23|2404|172.16.1.2|37324|434|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "sgen.3:active_power",
+          "attribute": "active_power",
+          "base_attribute": "active_power",
+          "endpoint_side": null,
+          "ca_ioa": "128.10080",
+          "step_kind": "to_zero",
+          "pre_value": 30001.4434,
+          "pre_time": 1742922603.277159,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-7c695f7f050e2538"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922613.336751,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.059592,
+          "evidence_ids": [
+            "EV-243a91ad27ec8c7c"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-243a91ad27ec8c7c"
+      ],
+      "score": 3.75,
+      "observation": "sgen.3: 1 measurement(s) in one ASDU from RTU 172.16.3.23 changed active_power 30001.4434 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-2ecc44fda692e443",
+          "entity": "sgen.3:active_power",
+          "ca_ioa": "128.10080",
+          "time": 1742922613.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A018",
+      "rank": 15
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922613.725154,
+      "entity": "storage.0:active_power",
+      "device_stem": "storage.0",
+      "ca_ioa": "126.10080",
+      "rtu_ip": "172.16.3.21",
+      "asdu_key": "172.16.3.21|2404|172.16.1.2|39476|434|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "storage.0:active_power",
+          "attribute": "active_power",
+          "base_attribute": "active_power",
+          "endpoint_side": null,
+          "ca_ioa": "126.10080",
+          "step_kind": "to_zero",
+          "pre_value": 599974.438,
+          "pre_time": 1742922603.764427,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-ac20224763e1f973"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922613.725154,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.960727,
+          "evidence_ids": [
+            "EV-b835919f4e426a21"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-b835919f4e426a21"
+      ],
+      "score": 3.75,
+      "observation": "storage.0: 1 measurement(s) in one ASDU from RTU 172.16.3.21 changed active_power 599974.438 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-930f1b1645f7a9a2",
+          "entity": "storage.0:active_power",
+          "ca_ioa": "126.10080",
+          "time": 1742922613.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A019",
+      "rank": 16
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922613.932709,
+      "entity": "sgen.2:active_power",
+      "device_stem": "sgen.2",
+      "ca_ioa": "124.10080",
+      "rtu_ip": "172.16.3.19",
+      "asdu_key": "172.16.3.19|2404|172.16.1.2|44700|580|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "sgen.2:active_power",
+          "attribute": "active_power",
+          "base_attribute": "active_power",
+          "endpoint_side": null,
+          "ca_ioa": "124.10080",
+          "step_kind": "to_zero",
+          "pre_value": 30002.1094,
+          "pre_time": 1742922603.871722,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-b106a98ae559f146"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922613.932709,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.060987,
+          "evidence_ids": [
+            "EV-17a86982f26d25da"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-17a86982f26d25da"
+      ],
+      "score": 3.75,
+      "observation": "sgen.2: 1 measurement(s) in one ASDU from RTU 172.16.3.19 changed active_power 30002.1094 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-3101fc549e76c459",
+          "entity": "sgen.2:active_power",
+          "ca_ioa": "124.10080",
+          "time": 1742922614.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A020",
+      "rank": 17
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922613.940325,
+      "entity": "sgen.9:active_power",
+      "device_stem": "sgen.9",
+      "ca_ioa": "125.10080",
+      "rtu_ip": "172.16.3.20",
+      "asdu_key": "172.16.3.20|2404|172.16.1.2|47728|434|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "sgen.9:active_power",
+          "attribute": "active_power",
+          "base_attribute": "active_power",
+          "endpoint_side": null,
+          "ca_ioa": "125.10080",
+          "step_kind": "to_zero",
+          "pre_value": 32997.2422,
+          "pre_time": 1742922603.879945,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-95cd55897d1618c8"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922613.940325,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.06038,
+          "evidence_ids": [
+            "EV-61d369721e81c6c4"
+          ],
+          "later_samples_consistent": 17,
+          "later_samples_total": 17,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-61d369721e81c6c4"
+      ],
+      "score": 3.75,
+      "observation": "sgen.9: 1 measurement(s) in one ASDU from RTU 172.16.3.20 changed active_power 32997.2422 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-faab151e1e442422",
+          "entity": "sgen.9:active_power",
+          "ca_ioa": "125.10080",
+          "time": 1742922614.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A021",
+      "rank": 18
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922614.889598,
+      "entity": "bus.4:active_power,reactive_power,voltage,voltage_angle",
+      "device_stem": "bus.4",
+      "ca_ioa": "121.10030",
+      "rtu_ip": "172.16.3.16",
+      "asdu_key": "172.16.3.16|2404|172.16.1.2|41276|436|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "bus.4:active_power",
+          "attribute": "active_power",
+          "base_attribute": "active_power",
+          "endpoint_side": null,
+          "ca_ioa": "121.10030",
+          "step_kind": "to_zero",
+          "pre_value": 81636.1016,
+          "pre_time": 1742922599.736432,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-eaab5f3240f9784e"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922614.889598,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 15.153166,
+          "evidence_ids": [
+            "EV-e320a67f57ab5c12"
+          ],
+          "later_samples_consistent": 16,
+          "later_samples_total": 16,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "bus.4:reactive_power",
+          "attribute": "reactive_power",
+          "base_attribute": "reactive_power",
+          "endpoint_side": null,
+          "ca_ioa": "121.10040",
+          "step_kind": "to_zero",
+          "pre_value": 108174.773,
+          "pre_time": 1742922599.736432,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-421fc3e56409d81e"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922614.889598,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 15.153166,
+          "evidence_ids": [
+            "EV-1c5a7f7c731cfc03"
+          ],
+          "later_samples_consistent": 16,
+          "later_samples_total": 16,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "bus.4:voltage",
+          "attribute": "voltage",
+          "base_attribute": "voltage",
+          "endpoint_side": null,
+          "ca_ioa": "121.10010",
+          "step_kind": "to_zero",
+          "pre_value": 0.987894058,
+          "pre_time": 1742922599.736432,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-e68c8c21e00e8b92"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922614.889598,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 15.153166,
+          "evidence_ids": [
+            "EV-0799b416a8436bc7"
+          ],
+          "later_samples_consistent": 16,
+          "later_samples_total": 16,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "bus.4:voltage_angle",
+          "attribute": "voltage_angle",
+          "base_attribute": "voltage_angle",
+          "endpoint_side": null,
+          "ca_ioa": "121.10020",
+          "step_kind": "to_zero",
+          "pre_value": -150.160477,
+          "pre_time": 1742922599.736432,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-50cde7ffb4dcddb1"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922614.889598,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 15.153166,
+          "evidence_ids": [
+            "EV-03166cbd39d35cbe"
+          ],
+          "later_samples_consistent": 16,
+          "later_samples_total": 16,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-e320a67f57ab5c12",
+        "EV-1c5a7f7c731cfc03",
+        "EV-0799b416a8436bc7",
+        "EV-03166cbd39d35cbe"
+      ],
+      "score": 4.5,
+      "observation": "bus.4: 4 measurement(s) in one ASDU from RTU 172.16.3.16 changed active_power 81636.1016 -> 0.0; reactive_power 108174.773 -> 0.0; voltage 0.987894058 -> 0.0; voltage_angle -150.160477 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-0a7921ddbf7966b1",
+          "entity": "bus.4:voltage",
+          "ca_ioa": "121.10010",
+          "time": 1742922615.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-4ece84f4ed8000d3",
+          "entity": "bus.4:voltage_angle",
+          "ca_ioa": "121.10020",
+          "time": 1742922615.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-baefea5afd7d44c5",
+          "entity": "bus.4:active_power",
+          "ca_ioa": "121.10030",
+          "time": 1742922615.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-f6aa9beed9dcc5a3",
+          "entity": "bus.4:reactive_power",
+          "ca_ioa": "121.10040",
+          "time": 1742922615.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A022",
+      "rank": 7
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922614.889598,
+      "entity": "line.2:active_power_to,reactive_power_to",
+      "device_stem": "line.2",
+      "ca_ioa": "121.10050",
+      "rtu_ip": "172.16.3.16",
+      "asdu_key": "172.16.3.16|2404|172.16.1.2|41276|436|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "line.2:active_power_to",
+          "attribute": "active_power_to",
+          "base_attribute": "active_power",
+          "endpoint_side": "to",
+          "ca_ioa": "121.10050",
+          "step_kind": "to_zero",
+          "pre_value": -889465.25,
+          "pre_time": 1742922599.736432,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-73b9502c6b73dcd8"
+          ],
+          "post_value": 1.73980695e-07,
+          "post_time": 1742922614.889598,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 15.153166,
+          "evidence_ids": [
+            "EV-57694d9bd865c1c5"
+          ],
+          "later_samples_consistent": 16,
+          "later_samples_total": 16,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.2:reactive_power_to",
+          "attribute": "reactive_power_to",
+          "base_attribute": "reactive_power",
+          "endpoint_side": "to",
+          "ca_ioa": "121.10060",
+          "step_kind": "to_zero",
+          "pre_value": -385417.406,
+          "pre_time": 1742922599.736432,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-69bc06499c722a75"
+          ],
+          "post_value": -2.94909455e-07,
+          "post_time": 1742922614.889598,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 15.153166,
+          "evidence_ids": [
+            "EV-ea6cc40dc344bd20"
+          ],
+          "later_samples_consistent": 16,
+          "later_samples_total": 16,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-57694d9bd865c1c5",
+        "EV-ea6cc40dc344bd20"
+      ],
+      "score": 4.0,
+      "observation": "line.2: 2 measurement(s) in one ASDU from RTU 172.16.3.16 changed active_power_to -889465.25 -> 1.73980695e-07; reactive_power_to -385417.406 -> -2.94909455e-07 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-32e242df322fcf2a",
+          "entity": "line.2:reactive_power_to",
+          "ca_ioa": "121.10060",
+          "time": 1742922615.858198,
+          "value": -2.949094550785958e-07,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-f6ee503394372807",
+          "entity": "line.2:active_power_to",
+          "ca_ioa": "121.10050",
+          "time": 1742922615.858198,
+          "value": 1.7398069473983924e-07,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A023",
+      "rank": 12
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922614.889598,
+      "entity": "line.3:active_power_from,current_from,reactive_power_from,voltage_from",
+      "device_stem": "line.3",
+      "ca_ioa": "121.10090",
+      "rtu_ip": "172.16.3.16",
+      "asdu_key": "172.16.3.16|2404|172.16.1.2|41276|436|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "line.3:active_power_from",
+          "attribute": "active_power_from",
+          "base_attribute": "active_power",
+          "endpoint_side": "from",
+          "ca_ioa": "121.10090",
+          "step_kind": "to_zero",
+          "pre_value": 807834.312,
+          "pre_time": 1742922599.736432,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-a908a77813897faf"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922614.889598,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 15.153166,
+          "evidence_ids": [
+            "EV-69a4bc3302b8506c"
+          ],
+          "later_samples_consistent": 16,
+          "later_samples_total": 16,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.3:current_from",
+          "attribute": "current_from",
+          "base_attribute": "current",
+          "endpoint_side": "from",
+          "ca_ioa": "121.10110",
+          "step_kind": "to_zero",
+          "pre_value": 25.0116825,
+          "pre_time": 1742922599.736432,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-413430b0cb39de97"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922614.889598,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 15.153166,
+          "evidence_ids": [
+            "EV-857e0bfe8bc951af"
+          ],
+          "later_samples_consistent": 16,
+          "later_samples_total": 16,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.3:reactive_power_from",
+          "attribute": "reactive_power_from",
+          "base_attribute": "reactive_power",
+          "endpoint_side": "from",
+          "ca_ioa": "121.10100",
+          "step_kind": "to_zero",
+          "pre_value": 277235.562,
+          "pre_time": 1742922599.736432,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-d05f32c0cce138c4"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922614.889598,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 15.153166,
+          "evidence_ids": [
+            "EV-6fea061edb1a2751"
+          ],
+          "later_samples_consistent": 16,
+          "later_samples_total": 16,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "line.3:voltage_from",
+          "attribute": "voltage_from",
+          "base_attribute": "voltage",
+          "endpoint_side": "from",
+          "ca_ioa": "121.10120",
+          "step_kind": "to_zero",
+          "pre_value": 0.987630486,
+          "pre_time": 1742922599.736432,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-2b6dfee890076411"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922614.889598,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 15.153166,
+          "evidence_ids": [
+            "EV-c8c28bf332000c8d"
+          ],
+          "later_samples_consistent": 16,
+          "later_samples_total": 16,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-69a4bc3302b8506c",
+        "EV-857e0bfe8bc951af",
+        "EV-6fea061edb1a2751",
+        "EV-c8c28bf332000c8d"
+      ],
+      "score": 4.5,
+      "observation": "line.3: 4 measurement(s) in one ASDU from RTU 172.16.3.16 changed active_power_from 807834.312 -> 0.0; current_from 25.0116825 -> 0.0; reactive_power_from 277235.562 -> 0.0; voltage_from 0.987630486 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-51cb3e25f4d40d25",
+          "entity": "line.3:voltage_from",
+          "ca_ioa": "121.10120",
+          "time": 1742922615.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-57828867d0e9392a",
+          "entity": "line.3:current_from",
+          "ca_ioa": "121.10110",
+          "time": 1742922615.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-d6556b5c805e9f1b",
+          "entity": "line.3:reactive_power_from",
+          "ca_ioa": "121.10100",
+          "time": 1742922615.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-e43193111d2c7ba6",
+          "entity": "line.3:active_power_from",
+          "ca_ioa": "121.10090",
+          "time": 1742922615.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A024",
+      "rank": 8
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922614.889598,
+      "entity": "load.2:active_power,reactive_power",
+      "device_stem": "load.2",
+      "ca_ioa": "121.10250",
+      "rtu_ip": "172.16.3.16",
+      "asdu_key": "172.16.3.16|2404|172.16.1.2|41276|436|0",
+      "step_kinds": [
+        "to_zero"
+      ],
+      "points": [
+        {
+          "entity": "load.2:active_power",
+          "attribute": "active_power",
+          "base_attribute": "active_power",
+          "endpoint_side": null,
+          "ca_ioa": "121.10250",
+          "step_kind": "to_zero",
+          "pre_value": 101632.0,
+          "pre_time": 1742922599.736432,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-55d4bf707da42baf"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922614.889598,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 15.153166,
+          "evidence_ids": [
+            "EV-973f34903537d082"
+          ],
+          "later_samples_consistent": 16,
+          "later_samples_total": 16,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        },
+        {
+          "entity": "load.2:reactive_power",
+          "attribute": "reactive_power",
+          "base_attribute": "reactive_power",
+          "endpoint_side": null,
+          "ca_ioa": "121.10260",
+          "step_kind": "to_zero",
+          "pre_value": 108181.867,
+          "pre_time": 1742922599.736432,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-e3fccd4eee48553b"
+          ],
+          "post_value": 0.0,
+          "post_time": 1742922614.889598,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 15.153166,
+          "evidence_ids": [
+            "EV-588f0d3132a51667"
+          ],
+          "later_samples_consistent": 16,
+          "later_samples_total": 16,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": true,
+          "verification_status": "verified_observation",
+          "verification_issues": []
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": true,
+      "verification_status": "verified_observation",
+      "verification_issues": [],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-973f34903537d082",
+        "EV-588f0d3132a51667"
+      ],
+      "score": 4.0,
+      "observation": "load.2: 2 measurement(s) in one ASDU from RTU 172.16.3.16 changed active_power 101632.0 -> 0.0; reactive_power 108181.867 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-04ced890b8102faf",
+          "entity": "load.2:active_power",
+          "ca_ioa": "121.10250",
+          "time": 1742922615.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        },
+        {
+          "evidence_id": "EV-3e19199e76a599d5",
+          "entity": "load.2:reactive_power",
+          "ca_ioa": "121.10260",
+          "time": 1742922615.858198,
+          "value": 0.0,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A025",
+      "rank": 13
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922620.625473,
+      "entity": "line.14:current_from",
+      "device_stem": "line.14",
+      "ca_ioa": "117.10110",
+      "rtu_ip": "172.16.3.12",
+      "asdu_key": "172.16.3.12|2404|172.16.1.2|55948|435|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.14:current_from",
+          "attribute": "current_from",
+          "base_attribute": "current",
+          "endpoint_side": "from",
+          "ca_ioa": "117.10110",
+          "step_kind": "level_shift",
+          "pre_value": 0.0377547406,
+          "pre_time": 1742922610.576585,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-896f542221b79d57"
+          ],
+          "post_value": 0.162688628,
+          "post_time": 1742922620.625473,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.048888,
+          "evidence_ids": [
+            "EV-012055dff7afe2bc"
+          ],
+          "later_samples_consistent": 2,
+          "later_samples_total": 16,
+          "persistence_ratio": 0.125,
+          "quality_ok": true,
+          "sustained": false,
+          "verification_status": "unverified_observation",
+          "verification_issues": [
+            "not_sustained_in_later_samples"
+          ]
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": false,
+      "verification_status": "unverified_observation",
+      "verification_issues": [
+        "not_sustained_in_later_samples"
+      ],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-012055dff7afe2bc"
+      ],
+      "score": 1.25,
+      "observation": "line.14: 1 measurement(s) in one ASDU from RTU 172.16.3.12 changed current_from 0.0377547406 -> 0.162688628 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-07c1f9cacf09fd6b",
+          "entity": "line.14:current_from",
+          "ca_ioa": "117.10110",
+          "time": 1742922620.858198,
+          "value": 0.16268862783908844,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A026",
+      "rank": 26
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922660.137348,
+      "entity": "line.13:current_from",
+      "device_stem": "line.13",
+      "ca_ioa": "114.10110",
+      "rtu_ip": "172.16.3.9",
+      "asdu_key": "172.16.3.9|2404|172.16.1.2|54426|439|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.13:current_from",
+          "attribute": "current_from",
+          "base_attribute": "current",
+          "endpoint_side": "from",
+          "ca_ioa": "114.10110",
+          "step_kind": "level_shift",
+          "pre_value": -0.230362222,
+          "pre_time": 1742922650.073245,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-43a0461f444dfdc5",
+            "EV-2398e55ac5b126c9"
+          ],
+          "post_value": 0.186112463,
+          "post_time": 1742922660.137348,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.064103,
+          "evidence_ids": [
+            "EV-fa95d3410329b2d3",
+            "EV-af3901eaa196dd20"
+          ],
+          "later_samples_consistent": 1,
+          "later_samples_total": 12,
+          "persistence_ratio": 0.0833,
+          "quality_ok": true,
+          "sustained": false,
+          "verification_status": "unverified_observation",
+          "verification_issues": [
+            "not_sustained_in_later_samples"
+          ]
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": false,
+      "verification_status": "unverified_observation",
+      "verification_issues": [
+        "not_sustained_in_later_samples"
+      ],
+      "vantages": [
+        "n302",
+        "n318"
+      ],
+      "evidence_ids": [
+        "EV-fa95d3410329b2d3",
+        "EV-af3901eaa196dd20"
+      ],
+      "score": 1.25,
+      "observation": "line.13: 1 measurement(s) in one ASDU from RTU 172.16.3.9 changed current_from -0.230362222 -> 0.186112463 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-50e70a1d3730d404",
+          "entity": "line.13:current_from",
+          "ca_ioa": "114.10110",
+          "time": 1742922660.858198,
+          "value": 0.18611246347427368,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A027",
+      "rank": 27
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922701.079488,
+      "entity": "line.2:current_from",
+      "device_stem": "line.2",
+      "ca_ioa": "119.10110",
+      "rtu_ip": "172.16.3.14",
+      "asdu_key": "172.16.3.14|2404|172.16.1.2|60636|442|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.2:current_from",
+          "attribute": "current_from",
+          "base_attribute": "current",
+          "endpoint_side": "from",
+          "ca_ioa": "119.10110",
+          "step_kind": "level_shift",
+          "pre_value": -0.0559787415,
+          "pre_time": 1742922691.025815,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-4a003b5dd39cfdce"
+          ],
+          "post_value": 0.440343618,
+          "post_time": 1742922701.079488,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.053673,
+          "evidence_ids": [
+            "EV-318e793307c8d8d4"
+          ],
+          "later_samples_consistent": 4,
+          "later_samples_total": 8,
+          "persistence_ratio": 0.5,
+          "quality_ok": true,
+          "sustained": false,
+          "verification_status": "unverified_observation",
+          "verification_issues": [
+            "not_sustained_in_later_samples"
+          ]
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": false,
+      "verification_status": "unverified_observation",
+      "verification_issues": [
+        "not_sustained_in_later_samples"
+      ],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-318e793307c8d8d4"
+      ],
+      "score": 1.25,
+      "observation": "line.2: 1 measurement(s) in one ASDU from RTU 172.16.3.14 changed current_from -0.0559787415 -> 0.440343618 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-1c3c0f2ac79c6b2e",
+          "entity": "line.2:current_from",
+          "ca_ioa": "119.10110",
+          "time": 1742922701.858198,
+          "value": 0.44034361839294434,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A028",
+      "rank": 28
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922704.921757,
+      "entity": "line.2:current_to",
+      "device_stem": "line.2",
+      "ca_ioa": "121.10070",
+      "rtu_ip": "172.16.3.16",
+      "asdu_key": "172.16.3.16|2404|172.16.1.2|41276|445|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.2:current_to",
+          "attribute": "current_to",
+          "base_attribute": "current",
+          "endpoint_side": "to",
+          "ca_ioa": "121.10070",
+          "step_kind": "level_shift",
+          "pre_value": 0.0991576016,
+          "pre_time": 1742922694.863056,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-8963e8730469679b"
+          ],
+          "post_value": 0.341973454,
+          "post_time": 1742922704.921757,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.058701,
+          "evidence_ids": [
+            "EV-89ae92e7ad7e3921"
+          ],
+          "later_samples_consistent": 1,
+          "later_samples_total": 7,
+          "persistence_ratio": 0.1429,
+          "quality_ok": true,
+          "sustained": false,
+          "verification_status": "unverified_observation",
+          "verification_issues": [
+            "not_sustained_in_later_samples"
+          ]
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": false,
+      "verification_status": "unverified_observation",
+      "verification_issues": [
+        "not_sustained_in_later_samples"
+      ],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-89ae92e7ad7e3921"
+      ],
+      "score": 1.25,
+      "observation": "line.2: 1 measurement(s) in one ASDU from RTU 172.16.3.16 changed current_to 0.0991576016 -> 0.341973454 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-93222dd05d5c0d6c",
+          "entity": "line.2:current_to",
+          "ca_ioa": "121.10070",
+          "time": 1742922705.858198,
+          "value": 0.3419734537601471,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A029",
+      "rank": 29
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922730.642557,
+      "entity": "line.14:current_from",
+      "device_stem": "line.14",
+      "ca_ioa": "117.10110",
+      "rtu_ip": "172.16.3.12",
+      "asdu_key": "172.16.3.12|2404|172.16.1.2|55948|446|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.14:current_from",
+          "attribute": "current_from",
+          "base_attribute": "current",
+          "endpoint_side": "from",
+          "ca_ioa": "117.10110",
+          "step_kind": "level_shift",
+          "pre_value": -0.0788047463,
+          "pre_time": 1742922720.697209,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-a9eb1dc3624c7b2a"
+          ],
+          "post_value": 0.194510803,
+          "post_time": 1742922730.642557,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 9.945348,
+          "evidence_ids": [
+            "EV-5334ae5022a11b39"
+          ],
+          "later_samples_consistent": 1,
+          "later_samples_total": 5,
+          "persistence_ratio": 0.2,
+          "quality_ok": true,
+          "sustained": false,
+          "verification_status": "unverified_observation",
+          "verification_issues": [
+            "not_sustained_in_later_samples"
+          ]
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": false,
+      "verification_status": "unverified_observation",
+      "verification_issues": [
+        "not_sustained_in_later_samples"
+      ],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-5334ae5022a11b39"
+      ],
+      "score": 1.25,
+      "observation": "line.14: 1 measurement(s) in one ASDU from RTU 172.16.3.12 changed current_from -0.0788047463 -> 0.194510803 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-85340f7b4922bd7b",
+          "entity": "line.14:current_from",
+          "ca_ioa": "117.10110",
+          "time": 1742922730.858198,
+          "value": 0.1945108026266098,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A030",
+      "rank": 30
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922741.636443,
+      "entity": "line.14:current_to",
+      "device_stem": "line.14",
+      "ca_ioa": "131.10190",
+      "rtu_ip": "172.16.3.26",
+      "asdu_key": "172.16.3.26|2404|172.16.1.2|54802|802|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.14:current_to",
+          "attribute": "current_to",
+          "base_attribute": "current",
+          "endpoint_side": "to",
+          "ca_ioa": "131.10190",
+          "step_kind": "level_shift",
+          "pre_value": 0.187230974,
+          "pre_time": 1742922731.630739,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-6b37f34641e363bd"
+          ],
+          "post_value": -0.168108597,
+          "post_time": 1742922741.636443,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.005704,
+          "evidence_ids": [
+            "EV-5f67fa11e1d9c937"
+          ],
+          "later_samples_consistent": 1,
+          "later_samples_total": 4,
+          "persistence_ratio": 0.25,
+          "quality_ok": true,
+          "sustained": false,
+          "verification_status": "unverified_observation",
+          "verification_issues": [
+            "not_sustained_in_later_samples"
+          ]
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": false,
+      "verification_status": "unverified_observation",
+      "verification_issues": [
+        "not_sustained_in_later_samples"
+      ],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-5f67fa11e1d9c937"
+      ],
+      "score": 1.25,
+      "observation": "line.14: 1 measurement(s) in one ASDU from RTU 172.16.3.26 changed current_to 0.187230974 -> -0.168108597 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-b450a48b4f3b6bc4",
+          "entity": "line.14:current_to",
+          "ca_ioa": "131.10190",
+          "time": 1742922741.858198,
+          "value": -0.16810859739780426,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A031",
+      "rank": 31
+    },
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742922770.727018,
+      "entity": "line.14:current_from",
+      "device_stem": "line.14",
+      "ca_ioa": "117.10110",
+      "rtu_ip": "172.16.3.12",
+      "asdu_key": "172.16.3.12|2404|172.16.1.2|55948|450|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.14:current_from",
+          "attribute": "current_from",
+          "base_attribute": "current",
+          "endpoint_side": "from",
+          "ca_ioa": "117.10110",
+          "step_kind": "level_shift",
+          "pre_value": 0.0877045244,
+          "pre_time": 1742922760.681147,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-f83d07d37931d22f"
+          ],
+          "post_value": 0.573374391,
+          "post_time": 1742922770.727018,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.045871,
+          "evidence_ids": [
+            "EV-391d852736998e33"
+          ],
+          "later_samples_consistent": 1,
+          "later_samples_total": 1,
+          "persistence_ratio": 1.0,
+          "quality_ok": true,
+          "sustained": false,
+          "verification_status": "unverified_observation",
+          "verification_issues": [
+            "insufficient_post_samples"
+          ]
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": false,
+      "verification_status": "unverified_observation",
+      "verification_issues": [
+        "insufficient_post_samples"
+      ],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-391d852736998e33"
+      ],
+      "score": 1.25,
+      "observation": "line.14: 1 measurement(s) in one ASDU from RTU 172.16.3.12 changed current_from 0.0877045244 -> 0.573374391 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['insufficient_post_samples']).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-40a11fbcea1d64a3",
+          "entity": "line.14:current_from",
+          "ca_ioa": "117.10110",
+          "time": 1742922770.858198,
+          "value": 0.5733743906021118,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A032",
+      "rank": 32
+    }
+  ],
+  "behavioral_mode": true
+}
