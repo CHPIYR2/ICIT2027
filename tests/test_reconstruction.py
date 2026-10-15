@@ -1476,8 +1476,9 @@ def test_incident_synthesis_without_bridges_builds_arp_and_link_candidate_scenar
     assert "arp_address_interference_preceding_iec104_session_loss_hypothesis" in classes
     assert "concurrent_l2_link_disturbance_and_arp_re_resolution_hypothesis" in classes
     precedence = next(e for e in syn["competing_explanations"] if e["hypothesis_class"].startswith("arp_address"))
-    assert precedence["eligibility_gate"] == "passed_target_overlap_and_temporal_order"
+    assert precedence["eligibility_gate"] == "passed_per_target_arp_overlap_and_temporal_order"
     assert precedence["eligible_arp_link_pairs"]
+    assert all(p["timestamp_basis"] == "per_target_first_arp_packet" for p in precedence["eligible_arp_link_pairs"])
 
 
 def test_cross_rtu_bridge_rejects_same_rtu_and_inconsistent_endpoints(tmp_path: Path):
@@ -1521,6 +1522,9 @@ def test_cross_rtu_bridge_rejects_same_rtu_and_inconsistent_endpoints(tmp_path: 
     other_bundle = next(b["bundle_id"] for b in original["rtu_asdu_bundles"] if b["bundle_id"] != bridge["from_bundle_id"])
     assert "synthesis_bridge_bundle_endpoint_mismatch" in issues_for(lambda br: br.update(from_bundle_id=other_bundle))
     assert "synthesis_bridge_not_cross_rtu" in issues_for(lambda br: br.update(from_rtu_ip=br["to_rtu_ip"]))
+    # Distinct RTU IP that does NOT match the underlying graph node / bundle RTU IP must also be rejected
+    assert "synthesis_bridge_rtu_ip_mismatch" in issues_for(lambda br: br.update(from_rtu_ip="172.16.3.99"))
+    assert "synthesis_bridge_rtu_ip_mismatch" in issues_for(lambda br: br.update(to_rtu_ip="172.16.3.98"))
     other_anchor = next(
         aid for b in original["rtu_asdu_bundles"] for aid in b["member_anchor_ids"] if aid != bridge["from_anchor_id"]
     )
@@ -1552,3 +1556,64 @@ def test_arp_precedence_hypothesis_requires_overlap_and_order(tmp_path: Path):
     assert ledger["arp_container_count"] == 1
     assert ledger["tcp_link_container_count"] == 1
     assert ledger["iec104_asdu_container_count"] == 0
+
+
+def test_arp_precedence_uses_per_target_first_packet_and_degrades_when_missing(tmp_path: Path):
+    """Per-target first ARP time filters out late-targeted RTUs; missing per-target times degrade to weak co-occurrence."""
+    from mirage_ot.etgi.reconstruction.synthesis import synthesize_incident_scenario
+
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    # ARP anchor starts at 1001.0 targeting .10 (10 packets), and only targets .20 at 1045.0 (2 packets),
+    # while .10 link changes at 1007.0 and .20 link changes at 1008.0.
+    rows = [
+        _row(f"EV-arp10-{i:02d}", 1001.0 + i * 0.2, "network", "172.16.3.28/ARP", "arp_packet", None,
+             src_ip="172.16.3.28", dst_ip="172.16.3.10", payload={"op": 2})
+        for i in range(10)
+    ] + [
+        _row(f"EV-arp20-{i:02d}", 1045.0 + i * 0.2, "network", "172.16.3.28/ARP", "arp_packet", None,
+             src_ip="172.16.3.28", dst_ip="172.16.3.20", payload={"op": 2})
+        for i in range(2)
+    ] + [
+        _tcp("EV-fin-10", 1007.0, MASTER, 56094, "172.16.3.10", 2404, 0x11),
+        _tcp("EV-syn-10", 1008.0, MASTER, 56736, "172.16.3.10", 2404, 0x02),
+        _tcp("EV-fin-20", 1008.0, MASTER, 51454, "172.16.3.20", 2404, 0x11),
+        _tcp("EV-syn-20", 1009.0, MASTER, 51456, "172.16.3.20", 2404, 0x02),
+    ]
+    for r in rows:
+        insert_evidence(conn, r)
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000.0, incident_end=1060.0)
+    res = reconstruct_incident(db, 1000.0, 1060.0, background_start=985.0, background_end=1000.0, llm=None, out_dir=tmp_path / "out")
+    syn = res["incident_synthesis"]
+    prec = next(
+        e for e in syn["competing_explanations"]
+        if e["hypothesis_class"] == "arp_address_interference_preceding_iec104_session_loss_hypothesis"
+    )
+    # Only .10 passes per-target precedence; .20 (first ARP at 1045.0 > link change at 1008.0) is excluded!
+    assert prec["anchoring_verified_evidence"]["overlapping_target_rtu_ips"] == ["172.16.3.10"]
+    assert [p["rtu_ip"] for p in prec["eligible_arp_link_pairs"]] == ["172.16.3.10"]
+    assert [p["rtu_ip"] for p in prec["ineligible_arp_link_pairs"]] == ["172.16.3.20"]
+    assert prec["ineligible_arp_link_pairs"][0]["arp_before_link"] is False
+
+    # When per-target ARP timestamps are absent on the anchor, only the weaker co-occurrence claim is emitted
+    stripped_anchors = copy.deepcopy(res["event_anchors"])
+    for a in stripped_anchors["anchors"]:
+        a.pop("target_first_seen", None)
+        a.pop("target_first_evidence_ids", None)
+    degraded_syn = synthesize_incident_scenario(
+        incident_start=1000.0,
+        incident_end=1060.0,
+        tx_result=res["transactions"],
+        anchor_result=stripped_anchors,
+        event_graph=res["event_graph"],
+        storyline_result=res["storylines"],
+    )
+    deg_classes = [e["hypothesis_class"] for e in degraded_syn["competing_explanations"]]
+    assert "arp_address_interference_preceding_iec104_session_loss_hypothesis" not in deg_classes
+    assert "arp_and_iec104_link_temporal_cooccurrence_without_per_target_timestamp" in deg_classes
+    weak_exp = next(
+        e for e in degraded_syn["competing_explanations"]
+        if e["hypothesis_class"] == "arp_and_iec104_link_temporal_cooccurrence_without_per_target_timestamp"
+    )
+    assert weak_exp["eligibility_gate"] == "degraded_missing_per_target_arp_timestamp"

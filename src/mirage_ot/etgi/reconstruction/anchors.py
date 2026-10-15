@@ -731,9 +731,19 @@ def _arp_anchors(rows, start, end, background_start) -> list[dict]:
             continue
         ops = {"request": 0, "reply": 0}
         targets: dict[str, int] = {}
+        target_first_seen: dict[str, float] = {}
+        target_first_evidence_ids: dict[str, str] = {}
         for row in item["window"]:
             ops["reply" if row["payload"].get("op") == 2 else "request"] += 1
-            targets[row.get("dst_ip")] = targets.get(row.get("dst_ip"), 0) + 1
+            dst = row.get("dst_ip")
+            targets[dst] = targets.get(dst, 0) + 1
+            if dst and dst not in target_first_seen:
+                target_first_seen[dst] = row["timestamp"]
+                target_first_evidence_ids[dst] = row["evidence_id"]
+        cited_ids = list(dict.fromkeys([
+            *(target_first_evidence_ids[k] for k in sorted(target_first_evidence_ids)),
+            *(row["evidence_id"] for row in item["window"][:6]),
+        ]))
         anchors.append({
             "anchor_type": "arp_activity_increase",
             "time": item["window"][0]["timestamp"],
@@ -746,9 +756,11 @@ def _arp_anchors(rows, start, end, background_start) -> list[dict]:
             "background_count": item["background"],
             "ops": ops,
             "targets": targets,
+            "target_first_seen": target_first_seen,
+            "target_first_evidence_ids": target_first_evidence_ids,
             "verification_status": "verified_observation",
             "verification_issues": [],
-            "evidence_ids": [row["evidence_id"] for row in item["window"][:6]],
+            "evidence_ids": cited_ids,
             "score": 1.0 + min(1.0, count / 100),
             "observation": (
                 f"ARP from {host}: {count} packets in window ({ops['request']} requests, {ops['reply']} replies) "

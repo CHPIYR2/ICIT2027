@@ -128,6 +128,7 @@ def add_anchor_facts(anchors: list[dict], add_fact) -> dict[str, dict]:
                 "quality_good": anchor.get("quality_good"),
                 "sustained_in_later_samples": anchor.get("sustained_in_later_samples"),
                 "arp_targets": anchor.get("targets"),
+                "arp_target_first_seen": anchor.get("target_first_seen"),
             },
             observation=anchor["observation"],
             device_stem=anchor.get("device_stem"),
@@ -520,9 +521,16 @@ def add_behavioral_edges(placed: dict[str, dict], facts_by_id: dict[str, dict], 
                 for arp, other in ((lm, rm), (rm, lm)):
                     hit = {other.get("rtu_ip"), other.get("master_ip")} & set(arp.get("arp_targets") or {})
                     if hit:
+                        first_seen = arp.get("arp_target_first_seen") or {}
+                        timing = [
+                            f"{h} first ARP at {round(first_seen[h], 3)}"
+                            for h in sorted(hit) if h in first_seen
+                        ]
                         context.append(
                             f"ARP from {arp['host_ip']} addressed {sorted(hit)} "
-                            f"({sum(arp['arp_targets'][h] for h in hit)} packets)"
+                            f"({sum(arp['arp_targets'][h] for h in hit)} packets"
+                            + (f"; {', '.join(timing)}" if timing else "")
+                            + ")"
                         )
                 add_edge(
                     source_fid=left["fact_id"], target_fid=right["fact_id"],

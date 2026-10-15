@@ -376,7 +376,7 @@ def check_quality_consistency(
                     "from_bundle_id": br.get("from_bundle_id"),
                     "to_bundle_id": br.get("to_bundle_id"),
                 })
-            if not br.get("from_rtu_ip") or br.get("from_rtu_ip") == br.get("to_rtu_ip"):
+            if not br.get("from_rtu_ip") or not br.get("to_rtu_ip") or br.get("from_rtu_ip") == br.get("to_rtu_ip"):
                 bridge_violations.append(br.get("bridge_id"))
                 issues.append({
                     "bridge_id": br.get("bridge_id"),
@@ -388,6 +388,29 @@ def check_quality_consistency(
             dst_node = nodes.get(edge["target_fact_id"]) if edge else None
             src_anchor = (src_node.get("protocol_meta") or {}).get("anchor_id") if src_node else None
             dst_anchor = (dst_node.get("protocol_meta") or {}).get("anchor_id") if dst_node else None
+            src_rtu = (src_node.get("protocol_meta") or {}).get("rtu_ip") if src_node else None
+            dst_rtu = (dst_node.get("protocol_meta") or {}).get("rtu_ip") if dst_node else None
+            bundle_from_rtu = (from_bundle or {}).get("rtu_ip")
+            bundle_to_rtu = (to_bundle or {}).get("rtu_ip")
+            if (
+                src_node is None
+                or dst_node is None
+                or from_bundle is None
+                or to_bundle is None
+                or br.get("from_rtu_ip") != src_rtu
+                or br.get("to_rtu_ip") != dst_rtu
+                or br.get("from_rtu_ip") != bundle_from_rtu
+                or br.get("to_rtu_ip") != bundle_to_rtu
+            ):
+                bridge_violations.append(br.get("bridge_id"))
+                issues.append({
+                    "bridge_id": br.get("bridge_id"),
+                    "edge_id": eid,
+                    "issue": "synthesis_bridge_rtu_ip_mismatch",
+                    "bridge_rtus": [br.get("from_rtu_ip"), br.get("to_rtu_ip")],
+                    "graph_rtus": [src_rtu, dst_rtu],
+                    "bundle_rtus": [bundle_from_rtu, bundle_to_rtu],
+                })
             if (
                 edge is None
                 or br.get("from_fact_id") != edge.get("source_fact_id")

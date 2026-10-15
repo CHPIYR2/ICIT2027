@@ -718,12 +718,14 @@ def _build_candidate_scenario_phases(
             anc = anchors_by_id.get(aid) or {}
             if anc.get("anchor_type") == "arp_activity_increase":
                 targets = dict(anc.get("targets") or {})
+                first_seen = dict(anc.get("target_first_seen") or {})
                 overlap = sorted(set(targets) & set(rtu_ips))
                 arp_details.append({
                     "anchor_id": aid,
                     "host_ip": anc.get("host_ip"),
                     "packet_count": anc.get("packet_count"),
                     "targets": targets,
+                    "target_first_seen": first_seen,
                     "arp_target_overlap_rtu_ips": overlap,
                 })
 
@@ -869,24 +871,54 @@ def _build_source_dependency_ledger(
 
 
 def _arp_link_precedence(arp: dict, comm: dict) -> dict:
-    """A precedence claim needs target overlap, ARP before the link change, and the horizon."""
+    """Precedence uses the target RTU's first ARP packet time; without it, only weak co-occurrence is allowed."""
     rtu = comm.get("rtu_ip")
     targets = set((arp.get("targets") or {}))
     overlap = bool(rtu) and rtu in targets
-    arp_time = float(arp["time"])
+    first_seen = arp.get("target_first_seen") if isinstance(arp.get("target_first_seen"), dict) else {}
+    first_ev = arp.get("target_first_evidence_ids") if isinstance(arp.get("target_first_evidence_ids"), dict) else {}
+    target_arp_time = float(first_seen[rtu]) if (overlap and rtu in first_seen and first_seen[rtu] is not None) else None
+    anchor_arp_time = float(arp["time"])
     link_time = float(comm["time"])
-    arp_before_link = arp_time <= link_time
-    dt = round(link_time - arp_time, 6)
-    within_horizon = arp_before_link and 0.0 <= dt <= HORIZON_SECONDS
+
+    if target_arp_time is not None:
+        arp_before_link = target_arp_time <= link_time
+        dt = round(link_time - target_arp_time, 6)
+        within_horizon = arp_before_link and 0.0 <= dt <= HORIZON_SECONDS
+        return {
+            "arp_anchor_id": arp.get("anchor_id"),
+            "communication_anchor_id": comm.get("anchor_id"),
+            "rtu_ip": rtu,
+            "target_overlap": overlap,
+            "timestamp_basis": "per_target_first_arp_packet",
+            "per_target_timestamp_available": True,
+            "target_first_arp_time": target_arp_time,
+            "target_first_arp_evidence_id": first_ev.get(rtu),
+            "link_change_time": link_time,
+            "arp_before_link": arp_before_link,
+            "dt_seconds": dt,
+            "within_horizon": within_horizon,
+            "eligible": overlap and within_horizon,
+            "weak_cooccurrence_only": False,
+        }
+
+    anchor_dt = round(link_time - anchor_arp_time, 6)
+    weak_overlap = overlap and (0.0 <= anchor_dt <= HORIZON_SECONDS or abs(anchor_dt) <= HORIZON_SECONDS)
     return {
         "arp_anchor_id": arp.get("anchor_id"),
         "communication_anchor_id": comm.get("anchor_id"),
         "rtu_ip": rtu,
         "target_overlap": overlap,
-        "arp_before_link": arp_before_link,
-        "dt_seconds": dt,
-        "within_horizon": within_horizon,
-        "eligible": overlap and within_horizon,
+        "timestamp_basis": "arp_anchor_start_fallback_no_per_target_time",
+        "per_target_timestamp_available": False,
+        "target_first_arp_time": None,
+        "target_first_arp_evidence_id": None,
+        "link_change_time": link_time,
+        "arp_before_link": None,
+        "dt_seconds": anchor_dt,
+        "within_horizon": False,
+        "eligible": False,
+        "weak_cooccurrence_only": weak_overlap,
     }
 
 
@@ -1043,42 +1075,83 @@ def _build_competing_explanations(
             arp_ids = [a["anchor_id"] for a in arp_anchors]
             arp_hosts = sorted({a.get("host_ip") for a in arp_anchors if a.get("host_ip")})
             arp_evs = list(dict.fromkeys(eid for a in arp_anchors for eid in (a.get("evidence_ids") or [])[:3]))
-            eligible = [
-                pair for arp in arp_anchors for comm in comm_anchors
-                if (pair := _arp_link_precedence(arp, comm))["eligible"]
+            evaluated_pairs = [
+                _arp_link_precedence(arp, comm)
+                for arp in arp_anchors for comm in comm_anchors
             ]
-            overlap_rtus = sorted({pair["rtu_ip"] for pair in eligible})
+            eligible = [pair for pair in evaluated_pairs if pair["eligible"]]
+            weak_pairs = [pair for pair in evaluated_pairs if pair.get("weak_cooccurrence_only")]
+            rejected_pairs = [pair for pair in evaluated_pairs if not pair["eligible"]]
+            overlap_rtus = sorted({pair["rtu_ip"] for pair in eligible if pair.get("rtu_ip")})
             if eligible:
                 explanations.append({
                     "explanation_id": f"EXP-{len(explanations) + 1:03d}",
-                    "scope": [*arp_ids, *comm_ids],
+                    "scope": [*arp_ids, *[p["communication_anchor_id"] for p in eligible]],
                     "hypothesis_class": "arp_address_interference_preceding_iec104_session_loss_hypothesis",
                     "verification_status": "unresolved_competing_hypothesis",
                     "causal_status": "not_established",
-                    "eligibility_gate": "passed_target_overlap_and_temporal_order",
+                    "eligibility_gate": "passed_per_target_arp_overlap_and_temporal_order",
                     "eligible_arp_link_pairs": eligible,
+                    "ineligible_arp_link_pairs": rejected_pairs,
                     "anchoring_verified_evidence": {
                         "arp_anchor_ids": arp_ids,
-                        "communication_anchor_ids": comm_ids,
+                        "communication_anchor_ids": [p["communication_anchor_id"] for p in eligible],
                         "arp_source_hosts": arp_hosts,
                         "overlapping_target_rtu_ips": overlap_rtus,
+                        "per_target_first_arp_evidence_ids": [
+                            p["target_first_arp_evidence_id"] for p in eligible if p.get("target_first_arp_evidence_id")
+                        ],
                         "evidence_ids": [*arp_evs, *comm_evs][:10],
                     },
                     "unverified_or_candidate_links_assumed": cand_ids,
                     "explanation_summary": (
-                        f"Host(s) {arp_hosts} emitted elevated ARP traffic ({arp_ids}) whose targets include RTU "
-                        f"IP(s) {overlap_rtus}, and those IEC-104 links changed only after the ARP activity and "
-                        f"within {HORIZON_SECONDS:.0f}s. This is an unresolved candidate for L2 ARP cache "
-                        "interference; the pairs are listed in eligible_arp_link_pairs."
+                        f"Host(s) {arp_hosts} sent ARP traffic ({arp_ids}) whose per-target first packet to RTU "
+                        f"IP(s) {overlap_rtus} occurred before those IEC-104 links changed and within "
+                        f"{HORIZON_SECONDS:.0f}s (`eligible_arp_link_pairs`). Other link(s) "
+                        f"{[p['rtu_ip'] for p in rejected_pairs]} did not satisfy per-target precedence and are "
+                        "excluded from this precedence claim."
                     ),
                     "alternative_comparison": (
-                        f"Target overlap and time order hold for {overlap_rtus}, but candidate edges {cand_ids} "
+                        f"Per-target ARP precedence holds for {overlap_rtus}, but candidate edges {cand_ids} "
                         "remain unresolved. ARP counts do not prove MAC spoofing."
                     ),
                     "missing_disambiguating_evidence": [
                         f"ARP payload sender-MAC to sender-IP binding audit for {arp_hosts} vs legitimate MACs of {overlap_rtus} and master",
                         "Managed switch CAM/ARP table logs and port-security counters at n302/n318",
                         f"TCP stack reset/timeout logs on master 172.16.1.2 and RTUs {overlap_rtus}",
+                    ],
+                })
+            elif weak_pairs:
+                weak_rtus = sorted({pair["rtu_ip"] for pair in weak_pairs if pair.get("rtu_ip")})
+                explanations.append({
+                    "explanation_id": f"EXP-{len(explanations) + 1:03d}",
+                    "scope": [*arp_ids, *comm_ids],
+                    "hypothesis_class": "arp_and_iec104_link_temporal_cooccurrence_without_per_target_timestamp",
+                    "verification_status": "unresolved_competing_hypothesis",
+                    "causal_status": "not_established",
+                    "eligibility_gate": "degraded_missing_per_target_arp_timestamp",
+                    "evaluated_arp_link_pairs": evaluated_pairs,
+                    "anchoring_verified_evidence": {
+                        "arp_anchor_ids": arp_ids,
+                        "communication_anchor_ids": comm_ids,
+                        "arp_source_hosts": arp_hosts,
+                        "target_overlap_rtu_ips_without_per_target_time": weak_rtus,
+                        "evidence_ids": [*arp_evs, *comm_evs][:10],
+                    },
+                    "unverified_or_candidate_links_assumed": cand_ids,
+                    "explanation_summary": (
+                        f"ARP activity {arp_ids} from {arp_hosts} lists target RTU IP(s) {weak_rtus} in the same "
+                        f"window as IEC-104 link changes {comm_ids}, but per-target first ARP packet timestamps "
+                        "are unavailable. Only a weak window-level temporal association is recorded; precedence "
+                        "for individual RTUs is not claimed."
+                    ),
+                    "alternative_comparison": (
+                        "Withholds the stronger precedence hypothesis because anchor-start time cannot substitute "
+                        "for the first ARP packet actually directed at each disrupted RTU."
+                    ),
+                    "missing_disambiguating_evidence": [
+                        f"Per-target first ARP packet timestamps and evidence IDs for {weak_rtus}",
+                        "Managed switch CAM/ARP table logs and port-security counters",
                     ],
                 })
             else:
@@ -1089,6 +1162,7 @@ def _build_competing_explanations(
                     "verification_status": "unresolved_competing_hypothesis",
                     "causal_status": "not_established",
                     "eligibility_gate": "failed_target_overlap_or_temporal_order",
+                    "evaluated_arp_link_pairs": evaluated_pairs,
                     "anchoring_verified_evidence": {
                         "arp_anchor_ids": arp_ids,
                         "communication_anchor_ids": comm_ids,
@@ -1098,8 +1172,8 @@ def _build_competing_explanations(
                     "unverified_or_candidate_links_assumed": cand_ids,
                     "explanation_summary": (
                         f"ARP activity {arp_ids} and IEC-104 link changes {comm_ids} were both observed. "
-                        "No pair has ARP target overlap with the affected RTU, ARP before the link change, and a "
-                        f"gap of at most {HORIZON_SECONDS:.0f}s. No precedence between them is claimed."
+                        "No pair has per-target ARP overlap with the affected RTU before the link change and "
+                        f"within {HORIZON_SECONDS:.0f}s. No precedence between them is claimed."
                     ),
                     "alternative_comparison": (
                         "A general co-observation only. It does not say the ARP activity came first or addressed "
@@ -1107,7 +1181,7 @@ def _build_competing_explanations(
                     ),
                     "missing_disambiguating_evidence": [
                         "ARP target addresses that match the RTU whose IEC-104 session changed",
-                        "Timestamps showing the ARP activity before that session change and inside the horizon",
+                        "Per-target ARP timestamps before that session change and inside the horizon",
                     ],
                 })
             explanations.append({
