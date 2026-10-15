@@ -1,0 +1,141 @@
+{
+  "method": "evidence_anchor_discovery",
+  "window": {
+    "start": 1742928231.189216,
+    "end": 1742928261.2682297,
+    "background_start": 1742928216.189216
+  },
+  "parameters": {
+    "step_relative": 0.5,
+    "persist_relative": 0.1,
+    "magnitude_floor": 0.001,
+    "near_zero_relative": 1e-06,
+    "min_persist_samples": 2,
+    "min_persist_ratio": 0.8,
+    "max_pre_sample_gap_seconds": 30.0,
+    "vantage_merge_seconds": 0.5,
+    "arp_min_count": 10,
+    "arp_rate_factor": 5.0,
+    "gap_min_seconds": 25.0,
+    "gap_cadence_factor": 3.0
+  },
+  "inputs_not_used": [
+    "official event labels",
+    "attack type",
+    "malicious flags",
+    "physical.zip"
+  ],
+  "observation_inventory": {
+    "background_seconds": 15.0,
+    "window_seconds": 30.079,
+    "iec104_rows": {
+      "window": 1265,
+      "background": 514
+    },
+    "iec104_objects_after_vantage_merge_by_type_cot": {
+      "type50_cot6": 1,
+      "type50_cot7": 1,
+      "type13_cot1": 918
+    },
+    "iec104_control_objects_in_window": 2,
+    "tcp_packets": {
+      "window": 564,
+      "background": 281
+    },
+    "tcp_syn_fin_rst_segments": {
+      "window": 0,
+      "background": 0
+    },
+    "arp_packets": {
+      "window": 0,
+      "background": 0
+    },
+    "udp_packets": {
+      "window": 0,
+      "background": 0
+    },
+    "ipal_electrical_updates": {
+      "window": 673,
+      "background": 266
+    }
+  },
+  "anchor_count": 1,
+  "verified_anchor_count": 0,
+  "unverified_anchor_count": 1,
+  "anchors": [
+    {
+      "anchor_type": "measurement_step",
+      "time": 1742928234.303031,
+      "entity": "line.14:current_from",
+      "device_stem": "line.14",
+      "ca_ioa": "117.10110",
+      "rtu_ip": "172.16.3.12",
+      "asdu_key": "172.16.3.12|2404|172.16.1.2|55948|996|0",
+      "step_kinds": [
+        "level_shift"
+      ],
+      "points": [
+        {
+          "entity": "line.14:current_from",
+          "attribute": "current_from",
+          "base_attribute": "current",
+          "endpoint_side": "from",
+          "ca_ioa": "117.10110",
+          "step_kind": "level_shift",
+          "pre_value": 0.14405942,
+          "pre_time": 1742928224.254192,
+          "pre_quality_good": true,
+          "pre_cot_test": false,
+          "pre_evidence_ids": [
+            "EV-533d5e86c19202b4"
+          ],
+          "post_value": -0.266279042,
+          "post_time": 1742928234.303031,
+          "post_quality_good": true,
+          "post_cot_test": false,
+          "pre_sample_gap_seconds": 10.048839,
+          "evidence_ids": [
+            "EV-60f9e30200e82192"
+          ],
+          "later_samples_consistent": 1,
+          "later_samples_total": 2,
+          "persistence_ratio": 0.5,
+          "quality_ok": true,
+          "sustained": false,
+          "verification_status": "unverified_observation",
+          "verification_issues": [
+            "not_sustained_in_later_samples"
+          ]
+        }
+      ],
+      "quality_good": true,
+      "sustained_in_later_samples": false,
+      "verification_status": "unverified_observation",
+      "verification_issues": [
+        "not_sustained_in_later_samples"
+      ],
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-60f9e30200e82192"
+      ],
+      "score": 1.25,
+      "observation": "line.14: 1 measurement(s) in one ASDU from RTU 172.16.3.12 changed current_from 0.14405942 -> -0.266279042 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+      "ipal_rows": [
+        {
+          "evidence_id": "EV-4c5e290cf4d33bfd",
+          "entity": "line.14:current_from",
+          "ca_ioa": "117.10110",
+          "time": 1742928234.858198,
+          "value": -0.26627904176712036,
+          "match_basis": "same_ca_ioa"
+        }
+      ],
+      "covered_by_transaction": false,
+      "anchor_id": "A001",
+      "rank": 1
+    }
+  ],
+  "behavioral_mode": false
+}

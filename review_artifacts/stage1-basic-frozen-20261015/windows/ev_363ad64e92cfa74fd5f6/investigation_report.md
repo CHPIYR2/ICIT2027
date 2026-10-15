@@ -1,0 +1,111 @@
+# Evidence-Grounded Incident Reconstruction Report
+
+- **Report Status**: `quality_consistent`
+- **Quality & Behavioral Consistency (`quality_consistency.json`)**: `consistent`
+- **Evidence Lineage Audit (`lineage_consistency.json`)**: `consistent`
+
+- **Incident Window**: `1742933041.2301736` to `1742933111.3787377`
+- **Reconstructed IEC-104 Transactions**: `4`
+- **Reconstructed Event Storylines**: `6`
+- **Verified Same-Device Transitions (Consistency Gate Passed)**: `0`
+- **Unverified Protocol State Reports (Value Undecoded or No Pre-Baseline)**: `3`
+- **LLM Claim Verifier Output (Separate from Graph Gate)**: `0` verified, `0` withheld
+
+## 1. Incident Sequence & Protocol Transactions
+- **TX001** (`1742933041.3486`–`1742933041.7864`): `C_SC_NA_1 (Single command)` on `switch.1:closed` (`CA/IOA=129.10130`, value=`1.0`) over `172.16.1.2:47958 -> 172.16.3.24:2404` at vantages `['n302']`. **Command Acceptance (`COT=7` P/N)**: `accepted_by_rtu`; **Device State Verification**: `state_report_observed_no_pre_baseline` (reason=`missing_pre_command_baseline,pre_test_bit_unknown`); **Completeness**: `partial_state_report_observed_transition_unverified`; **Missing/Unverified Stages**: `['activation_termination_cot10', 'unverified_state_transition:missing_pre_command_baseline,pre_test_bit_unknown']` (`EV-05458ea28b5e97d7, EV-4dbc8ff6093fff9e, EV-737178e07e1da307, EV-2bd652a318bd0232`).
+  - Inference gate (`state_report`): passed=`False`; pre IV=`None` other flags=`None`; post IV=`False` other flags=`[]`; COT test bits=`{'command': False, 'confirmation': False, 'pre': None, 'post': False}`; failed=`['missing_pre_command_baseline', 'pre_test_bit_unknown']`.
+- **TX002** (`1742933051.3503`–`1742933051.3918`): `C_SC_NA_1 (Single command)` on `switch.0:closed` (`CA/IOA=127.10130`, value=`1.0`) over `172.16.1.2:42140 -> 172.16.3.22:2404` at vantages `['n302']`. **Command Acceptance (`COT=7` P/N)**: `accepted_by_rtu`; **Device State Verification**: `no_state_change_observed` (reason=`no_post_command_feedback_observed`); **Completeness**: `confirmation_observed_only_no_state_report`; **Missing/Unverified Stages**: `['activation_termination_cot10', 'post_command_state_or_measurement_change']` (`EV-0417e54e13670e67, EV-adb6344388f82ced, EV-f7a4fe5d1afd8feb, EV-f4eb714eb379d7d6`).
+- **TX003** (`1742933061.3519`–`1742933061.6937`): `C_SC_NA_1 (Single command)` on `switch.17:closed` (`CA/IOA=127.10150`, value=`0.0`) over `172.16.1.2:42140 -> 172.16.3.22:2404` at vantages `['n302']`. **Command Acceptance (`COT=7` P/N)**: `accepted_by_rtu`; **Device State Verification**: `state_report_observed_no_pre_baseline` (reason=`missing_pre_command_baseline,pre_test_bit_unknown`); **Completeness**: `partial_state_report_observed_transition_unverified`; **Missing/Unverified Stages**: `['activation_termination_cot10', 'unverified_state_transition:missing_pre_command_baseline,pre_test_bit_unknown']` (`EV-1d2a4b95216553d3, EV-3f1cc77d6b1e9093, EV-a07e469627569efb, EV-a583a646098c4db2`).
+  - Inference gate (`state_report`): passed=`False`; pre IV=`None` other flags=`None`; post IV=`False` other flags=`[]`; COT test bits=`{'command': False, 'confirmation': False, 'pre': None, 'post': False}`; failed=`['missing_pre_command_baseline', 'pre_test_bit_unknown']`.
+- **TX004** (`1742933071.3812`–`1742933072.0315`): `C_SC_NA_1 (Single command)` on `switch.16:closed` (`CA/IOA=123.10150`, value=`0.0`) over `172.16.1.2:37458 -> 172.16.3.18:2404` at vantages `['n302']`. **Command Acceptance (`COT=7` P/N)**: `accepted_by_rtu`; **Device State Verification**: `state_report_observed_no_pre_baseline` (reason=`missing_pre_command_baseline,pre_test_bit_unknown`); **Completeness**: `partial_state_report_observed_transition_unverified`; **Missing/Unverified Stages**: `['activation_termination_cot10', 'unverified_state_transition:missing_pre_command_baseline,pre_test_bit_unknown']` (`EV-26e99ed0e5cd5d65, EV-6cdcee03331009a6, EV-d1148db58ce2c8f3, EV-beb6656f18c6a95c`).
+  - Inference gate (`state_report`): passed=`False`; pre IV=`None` other flags=`None`; post IV=`False` other flags=`[]`; COT test bits=`{'command': False, 'confirmation': False, 'pre': None, 'post': False}`; failed=`['missing_pre_command_baseline', 'pre_test_bit_unknown']`.
+
+## 2A. Behavioral Incident Reconstruction (No Control Command)
+- `26` event anchors found; a control transaction is present, so anchors are listed in `event_anchors.json` and do not root storylines.
+
+## 2B. Incident Scenario Synthesis (Four-Layer Epistemic Integration)
+- **Scenario Status**: `synthesized_consistent`
+- **Layer 1 Partition**: `0` supported multi-node chains, `0` verified single-anchor chains, `0` sequential same-entity observations (gate failed), `0` quarantined unverified observations (`0` unverified COT=3 precursor reports).
+- **Layer 2 Bundles & Bridges**: `0` source bundles (each counted as `1` container), `0` cross-RTU verified element bridges, `0` same-RTU supported relations (not cross-RTU support), `0` multi-bundle bridged components.
+- **Layer 3 Candidate Phases**: `1` candidate scenario phases (all cross-device links kept `unresolved`).
+- **Layer 4 Source Dependency Ledger**: `0` IEC-104 ASDU, `0` TCP link, `0` ARP, `11` composite containers across `3` RTU(s) (`['172.16.3.18', '172.16.3.22', '172.16.3.24']`), `0` co-reported same-ASDU points collapsed, mirror vantages `['n302']`, `43` IPAL rows excluded (`weight=0`).
+
+### 2B.2 Layer 3 — Candidate Scenario Phases (Cross-Device Links Unresolved)
+- **PHS-001** (`+0.118s`..`+30.801s`, profile=`protocol_command_transactions`): bundles=`[]`, verified_bridges=`[]`, sequential_same_device=`[]`, unverified_precursors=`[]`, RTUs=`['172.16.3.18', '172.16.3.22', '172.16.3.24']`, ARP=`[]`, unresolved_candidates=`16`.
+
+### 2B.3 Layer 4 — Evidence-Anchored Competing Explanations & Missing Evidence
+- **EXP-001** (`command_induced_device_transition_hypothesis`, status=`unresolved_competing_hypothesis`, causal_status=`not_established`): Observed IEC-104 control activation(s) ['TX001', 'TX002', 'TX003', 'TX004'] on the SCADA network, with 0 transaction(s) passing pre/post setpoint/state consistency checks. Consistent with RTU execution of the received IEC-104 command(s).
+  - **Anchored by**: `{'transaction_ids': ['TX001', 'TX002', 'TX003', 'TX004'], 'verified_transition_transaction_ids': [], 'evidence_ids': ['EV-05458ea28b5e97d7', 'EV-4dbc8ff6093fff9e', 'EV-737178e07e1da307', 'EV-2bd652a318bd0232', 'EV-0417e54e13670e67', 'EV-adb6344388f82ced', 'EV-f7a4fe5d1afd8feb', 'EV-f4eb714eb379d7d6']}`
+  - **Unverified/candidate links required**: `['TX001', 'TX002', 'TX003', 'TX004']`
+  - **Alternative comparison**: Competes with coincidence or unverified physical actuation where protocol confirmation (COT=7) or telemetry shifts occur without independent physical sensor verification.
+  - **Missing disambiguating evidence**: `['Independent out-of-band physical process sensor or PMU log not derived from IEC-104', 'Master station operator/application audit log identifying the initiating process', 'Pre-command IEC-104 state baseline (COT=20/COT=1) for switch transactions']`
+
+## 2. Key Findings & Reconstructed Storylines (Contiguous Directed Spines)
+### SL001 — Anchor `switch.1:closed` (tx=`TX001`, status=`partial_state_report_observed_transition_unverified`, contiguous_path=`True`, logical_nodes=`3`, independent_sources=`3`, independent_edges=`2`, vantage_captures=`3`)
+- Step 1 [R0001 | N-N | iec104_command_confirmation | level=observed_fact | gate=direct_record_observation | independent_evidence]: EF001 (switch.1:closed @ 1742933041.3486) -> EF002 (switch.1:closed @ 1742933041.3859) [src_ev=EV-05458ea28b5e97d7, EV-4dbc8ff6093fff9e; dst_ev=EV-737178e07e1da307, EV-2bd652a318bd0232]
+- Step 2 [R0002 | N-N | subsequent_same_device_state_report | level=observed_fact | gate=direct_record_observation | independent_evidence]: EF002 (switch.1:closed @ 1742933041.3859) -> EF003 (switch.1:is_closed @ 1742933041.7864) [src_ev=EV-737178e07e1da307, EV-2bd652a318bd0232; dst_ev=EV-2731fd34e1c4285a, EV-9cb8086c9e22d51c]
+- Time-aligned IPAL row [R0014 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: EF004 (switch.1:closed=1.0 @ 1742933041.8582) aligned with EF001; not an independent source
+- Time-aligned IPAL row [R0015 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: EF004 (switch.1:closed=1.0 @ 1742933041.8582) aligned with EF002; not an independent source
+- **Evidence Gaps**: `['activation_termination_cot10', 'unverified_state_transition:missing_pre_command_baseline,pre_test_bit_unknown']`
+### SL002 — Anchor `switch.0:closed` (tx=`TX002`, status=`incomplete_confirmation_observed_without_state_report`, contiguous_path=`True`, logical_nodes=`2`, independent_sources=`2`, independent_edges=`1`, vantage_captures=`2`)
+- Step 1 [R0004 | N-N | iec104_command_confirmation | level=observed_fact | gate=direct_record_observation | independent_evidence]: EF005 (switch.0:closed @ 1742933051.3503) -> EF006 (switch.0:closed @ 1742933051.3918) [src_ev=EV-0417e54e13670e67, EV-adb6344388f82ced; dst_ev=EV-f7a4fe5d1afd8feb, EV-f4eb714eb379d7d6]
+- **Evidence Gaps**: `['activation_termination_cot10', 'post_command_state_or_measurement_change']`
+### SL003 — Anchor `switch.17:closed` (tx=`TX003`, status=`partial_state_report_observed_transition_unverified`, contiguous_path=`True`, logical_nodes=`3`, independent_sources=`3`, independent_edges=`2`, vantage_captures=`3`)
+- Step 1 [R0005 | N-N | iec104_command_confirmation | level=observed_fact | gate=direct_record_observation | independent_evidence]: EF007 (switch.17:closed @ 1742933061.3519) -> EF008 (switch.17:closed @ 1742933061.3934) [src_ev=EV-1d2a4b95216553d3, EV-3f1cc77d6b1e9093; dst_ev=EV-a07e469627569efb, EV-a583a646098c4db2]
+- Step 2 [R0006 | N-N | subsequent_same_device_state_report | level=observed_fact | gate=direct_record_observation | independent_evidence]: EF008 (switch.17:closed @ 1742933061.3934) -> EF009 (switch.17:is_closed @ 1742933061.6937) [src_ev=EV-a07e469627569efb, EV-a583a646098c4db2; dst_ev=EV-42a2a701fd06e202, EV-37f10d67b3809bdd]
+- Time-aligned IPAL row [R0017 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: EF010 (switch.17:closed=0.0 @ 1742933061.8582) aligned with EF007; not an independent source
+- Time-aligned IPAL row [R0018 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: EF010 (switch.17:closed=0.0 @ 1742933061.8582) aligned with EF008; not an independent source
+- **Evidence Gaps**: `['activation_termination_cot10', 'unverified_state_transition:missing_pre_command_baseline,pre_test_bit_unknown']`
+### SL004 — Anchor `switch.16:closed` (tx=`TX004`, status=`partial_state_report_observed_transition_unverified`, contiguous_path=`True`, logical_nodes=`3`, independent_sources=`3`, independent_edges=`2`, vantage_captures=`3`)
+- Step 1 [R0008 | N-N | iec104_command_confirmation | level=observed_fact | gate=direct_record_observation | independent_evidence]: EF011 (switch.16:closed @ 1742933071.3812) -> EF012 (switch.16:closed @ 1742933071.4308) [src_ev=EV-26e99ed0e5cd5d65, EV-6cdcee03331009a6; dst_ev=EV-d1148db58ce2c8f3, EV-beb6656f18c6a95c]
+- Step 2 [R0009 | N-N | subsequent_same_device_state_report | level=observed_fact | gate=direct_record_observation | independent_evidence]: EF012 (switch.16:closed @ 1742933071.4308) -> EF013 (switch.16:is_closed @ 1742933072.0315) [src_ev=EV-d1148db58ce2c8f3, EV-beb6656f18c6a95c; dst_ev=EV-df7cd4ecaabf0494, EV-f1bebb6f09cd2799]
+- Time-aligned IPAL row [R0019 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: EF014 (switch.16:closed=0.0 @ 1742933071.8582) aligned with EF011; not an independent source
+- Time-aligned IPAL row [R0020 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: EF014 (switch.16:closed=0.0 @ 1742933071.8582) aligned with EF012; not an independent source
+- **Evidence Gaps**: `['activation_termination_cot10', 'unverified_state_transition:missing_pre_command_baseline,pre_test_bit_unknown']`
+### SL005 — Anchor `line.12:active_power_from` (tx=`None`, status=`observed_state_or_session_chain`, contiguous_path=`True`, logical_nodes=`4`, independent_sources=`4`, independent_edges=`1`, vantage_captures=`56`)
+- Step 1 [R0021 | N-N | same_iec104_frame | level=observed_fact | gate=direct_record_observation | shared_source_not_double_counted]: TL013 (line.12:active_power_from @ 1742933048.8029) -> TL014 (line.12:current_from @ 1742933048.8029) [src_ev=EV-8a630a19a5946de5, EV-619d994c5261881c; dst_ev=EV-b491b4db4e924d6d, EV-e98ec473475d6673]
+- Step 2 [R0028 | N-N | same_device_attribute_coupling | level=observed_fact | gate=direct_record_observation | independent_evidence]: TL014 (line.12:current_from @ 1742933048.8029) -> TL015 (line.12:active_power_to @ 1742933048.935) [src_ev=EV-b491b4db4e924d6d, EV-e98ec473475d6673; dst_ev=EV-3b7d3a6deb200eb0, EV-63011b132ad1aa97]
+- Step 3 [R0022 | N-N | same_iec104_frame | level=observed_fact | gate=direct_record_observation | shared_source_not_double_counted]: TL015 (line.12:active_power_to @ 1742933048.935) -> TL016 (line.12:reactive_power_to @ 1742933048.935) [src_ev=EV-3b7d3a6deb200eb0, EV-63011b132ad1aa97; dst_ev=EV-617117717e998e67, EV-f70896ebebcab8ab]
+- Time-aligned IPAL row [R0016 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: TL017 (line.12:current_from=22.87931251525879 @ 1742933048.8582) aligned with TL014; not an independent source
+### SL006 — Anchor `line.12:current_from` (tx=`None`, status=`observed_state_or_session_chain`, contiguous_path=`True`, logical_nodes=`3`, independent_sources=`3`, independent_edges=`2`, vantage_captures=`20`)
+- Step 1 [R0030 | P-P | same_device_attribute_coupling | level=observed_fact | gate=direct_record_observation | independent_evidence]: TL017 (line.12:current_from @ 1742933048.8582) -> TL019 (line.12:reactive_power_from @ 1742933048.8582) [src_ev=EV-ba56353cd9e71093, EV-3b15d5a34f6adbeb; dst_ev=EV-1b237097de990801, EV-c2c848191f59c160]
+- Step 2 [R0032 | P-P | same_device_attribute_coupling | level=observed_fact | gate=direct_record_observation | independent_evidence]: TL019 (line.12:reactive_power_from @ 1742933048.8582) -> TL018 (line.12:current_to @ 1742933049.8582) [src_ev=EV-1b237097de990801, EV-c2c848191f59c160; dst_ev=EV-5963c1e53759b2ab, EV-2514fee9d07e8e6e]
+
+## 3. Observed Network & Electrical Impact (Epistemically Stratified)
+### 3.1 Verified Same-Device Measurement/State Transitions (Consistency Gate Passed)
+- No post-command device transition passed all pre/post and target consistency checks.
+
+### 3.2 Protocol State Reports Observed Without Verified Transition (Value Undecoded or No Pre-Baseline)
+- [TX001 | state_report_observed_no_pre_baseline] Observed subsequent M_SP_NA_1 (COT=3) state report message on switch.1:is_closed (CA/IOA=129.10140, value_present=True, value=1.0) at 1742933041.7864 [ev=EV-2731fd34e1c4285a]; nearby IPAL state table row has value=1.0 (network-derived). Reason transition is NOT confirmed: missing_pre_command_baseline,pre_test_bit_unknown.
+- [TX003 | state_report_observed_no_pre_baseline] Observed subsequent M_SP_NA_1 (COT=3) state report message on switch.17:is_closed (CA/IOA=127.10160, value_present=True, value=0.0) at 1742933061.6937 [ev=EV-42a2a701fd06e202]; nearby IPAL state table row has value=0.0 (network-derived). Reason transition is NOT confirmed: missing_pre_command_baseline,pre_test_bit_unknown.
+- [TX004 | state_report_observed_no_pre_baseline] Observed subsequent M_SP_NA_1 (COT=3) state report message on switch.16:is_closed (CA/IOA=123.10160, value_present=True, value=0.0) at 1742933072.0315 [ev=EV-df7cd4ecaabf0494]; nearby IPAL state table row has value=0.0 (network-derived). Reason transition is NOT confirmed: missing_pre_command_baseline,pre_test_bit_unknown.
+
+### 3.3 Candidate Cross-Entity Co-occurring Changes (Unresolved Hypotheses, Not Causal Proof)
+- [SL001 / R0034 | cross_entity_temporal_cooccurrence] (level=temporal_cooccurrence, status=unresolved, gate=unresolved_cooccurrence, causal_status=not_established): line.14:current_from (TL021) at 1742933047.8582 after EF001 (0 <= dt (6.5096s) <= 10.0s) [src_ev=EV-05458ea28b5e97d7, EV-4dbc8ff6093fff9e; dst_ev=EV-344bfeb14b522837, EV-2b3de0574a34292b].
+- [SL001 / R0035 | cross_entity_temporal_cooccurrence] (level=temporal_cooccurrence, status=unresolved, gate=unresolved_cooccurrence, causal_status=not_established): line.9:active_power_from (TL022) at 1742933047.8582 after EF001 (0 <= dt (6.5096s) <= 10.0s) [src_ev=EV-05458ea28b5e97d7, EV-4dbc8ff6093fff9e; dst_ev=EV-911c942b7215a8b3, EV-8037aef93f7a16aa].
+- [SL001 / R0036 | cross_entity_temporal_cooccurrence] (level=temporal_cooccurrence, status=unresolved, gate=unresolved_cooccurrence, causal_status=not_established): line.12:active_power_from (TL013) at 1742933048.8029 after EF001 (0 <= dt (7.4543s) <= 10.0s) [src_ev=EV-05458ea28b5e97d7, EV-4dbc8ff6093fff9e; dst_ev=EV-8a630a19a5946de5, EV-619d994c5261881c].
+- [SL001 / R0037 | cross_entity_temporal_cooccurrence] (level=temporal_cooccurrence, status=unresolved, gate=unresolved_cooccurrence, causal_status=not_established): line.12:current_from (TL014) at 1742933048.8029 after EF001 (0 <= dt (7.4543s) <= 10.0s) [src_ev=EV-05458ea28b5e97d7, EV-4dbc8ff6093fff9e; dst_ev=EV-b491b4db4e924d6d, EV-e98ec473475d6673].
+
+## 4. Alternative Explanations & Competing Hypotheses
+- **[SL001 | competing_cross_entity_cooccurrences | status=`unresolved`]**: Multiple distinct grid measurements (line.14:current_from, line.9:active_power_from, line.12:active_power_from, line.12:current_from) changed within the time horizon after switch.1:closed. Without an independent physical topology/power-flow model in the loop, these remain competing unresolved temporal co-occurrences rather than confirmed causal effects.
+- **[SL001 | state_report_without_verified_before_after_values | status=`unresolved`]**: A subsequent M_SP_NA_1 (COT=3) state report was observed for switch.1, but state_report_observed_no_pre_baseline (missing_pre_command_baseline,pre_test_bit_unknown). Therefore a state transition cannot be confirmed from protocol values alone.
+- **[SL002 | confirmation_without_state_report | status=`unresolved`]**: RTU 172.16.3.22 sent COT=7 on switch.0:closed (acceptance_status=accepted_by_rtu), but no subsequent COT=3 state report or IPAL new state update occurred. Alternative explanations: (a) the switch/point was already in the target state, or (b) physical actuation did not occur or was not reported within the window.
+- **[SL003 | state_report_without_verified_before_after_values | status=`unresolved`]**: A subsequent M_SP_NA_1 (COT=3) state report was observed for switch.17, but state_report_observed_no_pre_baseline (missing_pre_command_baseline,pre_test_bit_unknown). Therefore a state transition cannot be confirmed from protocol values alone.
+- **[SL004 | state_report_without_verified_before_after_values | status=`unresolved`]**: A subsequent M_SP_NA_1 (COT=3) state report was observed for switch.16, but state_report_observed_no_pre_baseline (missing_pre_command_baseline,pre_test_bit_unknown). Therefore a state transition cannot be confirmed from protocol values alone.
+
+## 5. Unresolved Questions, Evidence Gaps & Unattached Observations
+- **Evidence Gap**: `{"scope": "TX001", "entity": "switch.1:closed", "missing_stages": ["activation_termination_cot10", "unverified_state_transition:missing_pre_command_baseline,pre_test_bit_unknown"]}`
+- **Evidence Gap**: `{"scope": "TX002", "entity": "switch.0:closed", "missing_stages": ["activation_termination_cot10", "post_command_state_or_measurement_change"]}`
+- **Evidence Gap**: `{"scope": "TX003", "entity": "switch.17:closed", "missing_stages": ["activation_termination_cot10", "unverified_state_transition:missing_pre_command_baseline,pre_test_bit_unknown"]}`
+- **Evidence Gap**: `{"scope": "TX004", "entity": "switch.16:closed", "missing_stages": ["activation_termination_cot10", "unverified_state_transition:missing_pre_command_baseline,pre_test_bit_unknown"]}`
+- **Unattached Observations (`14` nodes not on a storyline spine)**:
+  - `TL003` (`1742933041.6709`, `network`, `communication`): `172.16.3.16:2404->172.16.1.2:41276/TCP` (`not_on_confirmed_storyline_spine`) [`EV-80c11f186ef9b3c7, EV-66554af980bde376`]
+  - `TL004` (`1742933041.6750`, `network`, `communication`): `172.16.1.2:41276->172.16.3.16:2404/TCP` (`not_on_confirmed_storyline_spine`) [`EV-aca33cad44caea33, EV-bccc75235b875a8d`]
+  - `EF004` (`1742933041.8582`, `electrical`, `electrical_state_update`): `switch.1:closed` (`not_on_confirmed_storyline_spine`) [`EV-7624979875bffd7b`]
+  - `TL005` (`1742933042.5278`, `network`, `communication`): `172.16.3.8:2404->172.16.1.2:50438/TCP` (`not_on_confirmed_storyline_spine`) [`EV-e7a62a447ed2f966, EV-223118147fafa0cd`]
+  - `TL007` (`1742933042.5499`, `network`, `communication`): `172.16.1.2:50438->172.16.3.8:2404/TCP` (`not_on_confirmed_storyline_spine`) [`EV-a1d896eab2f03fa8, EV-fdbc7b175333dcbb`]
+  - `TL001` (`1742933043.1185`, `network`, `communication`): `172.16.3.11:2404->172.16.1.2:39462/TCP` (`not_on_confirmed_storyline_spine`) [`EV-37c65b1f16126d8c, EV-67f8b0667d511004`]
+  - `TL002` (`1742933043.1626`, `network`, `communication`): `172.16.1.2:39462->172.16.3.11:2404/TCP` (`not_on_confirmed_storyline_spine`) [`EV-1783574f1affcbd4, EV-05568f5c055b6b0e`]
+  - `TL021` (`1742933047.8582`, `electrical`, `electrical_change`): `line.14:current_from` (`not_on_confirmed_storyline_spine`) [`EV-344bfeb14b522837, EV-2b3de0574a34292b`]
+  - `TL022` (`1742933047.8582`, `electrical`, `electrical_change`): `line.9:active_power_from` (`not_on_confirmed_storyline_spine`) [`EV-911c942b7215a8b3, EV-8037aef93f7a16aa`]
+  - `TL020` (`1742933048.8582`, `electrical`, `electrical_change`): `line.5:reactive_power_to` (`not_on_confirmed_storyline_spine`) [`EV-e01009793bc3cd39, EV-3e121417788cfcaf`]

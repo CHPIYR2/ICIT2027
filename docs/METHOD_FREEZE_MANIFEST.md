@@ -124,11 +124,13 @@ For every evaluated window across `01-Basic`, `02-Semiurban`, and `03-Rural`, th
 
 All three Sherlock v3 archives are present, intact, and verified against the project handoff MD5 checksums:
 
-| Archive | Compressed Size | Uncompressed Size | MD5 Checksum | `discover_members()` Verification |
+| Archive | Exact Compressed Bytes (`GiB` $2^{30}$ / `GB` $10^9$) | Exact Uncompressed Bytes (`GiB` $2^{30}$ / `GB` $10^9$) | MD5 Checksum | `discover_members()` Verification |
 | --- | ---: | ---: | --- | --- |
-| `01-Basic.zip` | `0.65 GB` (`698,668,450 B`) | `0.84 GB` | `c482e0dc7e56b063b357d8b03be5cce6` (Match) | `test` (4 PCAPs, 1 state.gz, 1 map) & `train` (4 PCAPs, 1 state.gz, 1 map) OK |
-| `02-Semiurban.zip` | `5.94 GB` (`6,374,977,927 B`) | `7.28 GB` | `0f7d3eb61e478d05f4b431ae99d45564` (Match) | `test` (6 PCAPs, 1 state.gz, 1 map) & `train` (6 PCAPs, 1 state.gz, 1 map) OK |
-| `03-Rural.zip` | `1.74 GB` (`1,871,218,378 B`) | `2.34 GB` | `0cc7807bd5a76ea5bc85a1da6fd6c061` (Match) | `test` (8 PCAPs, 1 state.gz, 1 map) OK |
+| `01-Basic.zip` | `703,191,516 B` (`0.6549 GiB` / `0.7032 GB`) | `899,785,684 B` (`0.8380 GiB` / `0.8998 GB`) | `c482e0dc7e56b063b357d8b03be5cce6` (Match) | `test` (4 PCAPs, 1 state.gz, 1 map) & `train` (4 PCAPs, 1 state.gz, 1 map) OK |
+| `02-Semiurban.zip` | `6,375,875,182 B` (`5.9380 GiB` / `6.3759 GB`) | `7,812,778,716 B` (`7.2762 GiB` / `7.8128 GB`) | `0f7d3eb61e478d05f4b431ae99d45564` (Match) | `test` (6 PCAPs, 1 state.gz, 1 map) & `train` (6 PCAPs, 1 state.gz, 1 map) OK |
+| `03-Rural.zip` | `1,866,012,065 B` (`1.7379 GiB` / `1.8660 GB`) | `2,508,796,032 B` (`2.3365 GiB` / `2.5088 GB`) | `0cc7807bd5a76ea5bc85a1da6fd6c061` (Match) | `test` (8 PCAPs, 1 state.gz, 1 map) OK |
+
+> **Document Revision Note (Size Reconciliation)**: `configs/etgi/method_freeze.v1.json` (`a0a4b86`) recorded the exact `stat().st_size` byte counts (`703,191,516`, `6,375,875,182`, and `1,866,012,065`), whereas the Markdown table in the initial draft of `docs/METHOD_FREEZE_MANIFEST.md` (`a0a4b86`) listed back-multiplied 2-decimal GiB approximations (`0.65 * 2^30 = 698,668,450`, `5.94 * 2^30 = 6,374,977,927`, `1.74 * 2^30 = 1,871,218,378`). The table above reconciles the Markdown text to the exact `stat().st_size` and `ZipInfo.file_size` sums and explicitly reports both binary `GiB` ($2^{30}$) and decimal `GB` ($10^9$). The underlying raw Sherlock v3 ZIP files were never modified and their MD5 digests are unchanged.
 
 ### 4.2 Compute Time & Disk Space Estimation
 

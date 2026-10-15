@@ -1,0 +1,457 @@
+{
+  "synthesis_version": "1.1",
+  "scenario_status": "synthesized_consistent",
+  "behavioral_mode": true,
+  "window": {
+    "start": 1742926251.1947885,
+    "end": 1742926421.521569,
+    "duration_seconds": 170.327
+  },
+  "inputs_not_used": [
+    "official event labels",
+    "attack type",
+    "malicious flags",
+    "physical.zip"
+  ],
+  "epistemic_guarantees": {
+    "promotes_cooccurrence_to_supported": false,
+    "promotes_same_asdu_co_report_to_topology_or_causality": false,
+    "counts_same_asdu_as_independent": false,
+    "counts_mirror_vantages_as_independent": false,
+    "counts_ipal_as_independent": false,
+    "allows_unverified_anchors_in_supported_bridges": false,
+    "allows_same_rtu_relation_as_cross_rtu_bridge": false
+  },
+  "local_storyline_partition": {
+    "counts": {
+      "supported_multi_node_storyline_count": 0,
+      "verified_single_anchor_storyline_count": 1,
+      "protocol_partial_or_unverified_storyline_count": 2,
+      "sequential_same_device_observation_count": 1,
+      "quarantined_unverified_observation_count": 3,
+      "unverified_precursor_state_report_count": 1
+    },
+    "supported_multi_node_storylines": [],
+    "verified_single_anchor_storylines": [
+      {
+        "storyline_id": "SL002",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A002"
+        ],
+        "spine_fact_ids": [
+          "BA002"
+        ],
+        "spine_entities": [
+          "sgen.0:active_power"
+        ],
+        "start_time": 1742926262.033628,
+        "end_time": 1742926262.033628,
+        "start_relative_s": 10.839,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A002] sgen.0: 1 measurement(s) in one ASDU from RTU 172.16.3.15 changed active_power 20000.4004 -> 0.0 (to_zero; quality good=True; sustained=True; verification=verified_observation). 1 same-device sequential observation(s) kept off-spine (failed behavioral consistency gate: [['left_not_sustained', 'left_anchor_unverified', 'state_to_measurement_change_mismatch']]).",
+        "evidence_ids": [
+          "EV-5f79e1b4ca26cc6a",
+          "EV-06d4d0009a0961ab"
+        ]
+      }
+    ],
+    "protocol_partial_or_unverified_storylines": [
+      {
+        "storyline_id": "SL005",
+        "storyline_kind": "transaction_or_observed_chain",
+        "transaction_id": null,
+        "anchor_ids": [],
+        "spine_fact_ids": [
+          "TL014",
+          "TL017"
+        ],
+        "spine_entities": [
+          "line.12:current_to",
+          "line.12:current_from"
+        ],
+        "start_time": 1742926254.858198,
+        "end_time": 1742926414.858198,
+        "start_relative_s": 3.663,
+        "completeness_status": "observed_state_or_session_chain",
+        "independent_source_container_count": 2,
+        "independent_support_edge_count": 1,
+        "supported_step_count": 1,
+        "reconstructed_behavior": null,
+        "evidence_ids": [
+          "EV-508f51b8a75b85e0",
+          "EV-40dad601a12c491f",
+          "EV-4dd99278e18e817c",
+          "EV-7f2bae022c561151",
+          "EV-6c9218e93258db7b",
+          "EV-285a8c65908ff789",
+          "EV-b6d846a602a54ed2",
+          "EV-0a66a15ef8ac879f"
+        ]
+      },
+      {
+        "storyline_id": "SL006",
+        "storyline_kind": "transaction_or_observed_chain",
+        "transaction_id": null,
+        "anchor_ids": [],
+        "spine_fact_ids": [
+          "TL016",
+          "TL015"
+        ],
+        "spine_entities": [
+          "line.14:current_from",
+          "line.14:current_to"
+        ],
+        "start_time": 1742926253.858198,
+        "end_time": 1742926414.858198,
+        "start_relative_s": 2.663,
+        "completeness_status": "observed_state_or_session_chain",
+        "independent_source_container_count": 2,
+        "independent_support_edge_count": 1,
+        "supported_step_count": 1,
+        "reconstructed_behavior": null,
+        "evidence_ids": [
+          "EV-f94297fa1a923c71",
+          "EV-7fc4dec25dee6ed6",
+          "EV-f89c30e7a07ece57",
+          "EV-40acf48eac56e31b",
+          "EV-d5befe0a70619096",
+          "EV-798ad97c72ab1274",
+          "EV-60c36315ff43442d",
+          "EV-42eaaf5faaa8bffa"
+        ]
+      }
+    ],
+    "sequential_same_device_observations": [
+      {
+        "edge_id": "R0035",
+        "from_anchor_id": "A001",
+        "to_anchor_id": "A002",
+        "from_fact_id": "BA001",
+        "to_fact_id": "BA002",
+        "device_stem": "sgen.0",
+        "from_entity": "sgen.0:is_connected",
+        "to_entity": "sgen.0:active_power",
+        "from_relative_s": 1.187,
+        "to_relative_s": 10.839,
+        "relation_type": "same_entity_sequential_observation",
+        "claim_level": "sequential_observation",
+        "verification_status": "unverified",
+        "failed_conditions": [
+          "left_not_sustained",
+          "left_anchor_unverified",
+          "state_to_measurement_change_mismatch"
+        ],
+        "evidence_ids": [
+          "EV-49990bcfa3516086",
+          "EV-5f79e1b4ca26cc6a",
+          "EV-06d4d0009a0961ab"
+        ]
+      }
+    ],
+    "unverified_precursor_state_reports": [
+      {
+        "anchor_id": "A001",
+        "storyline_id": "SL001",
+        "fact_id": "BA001",
+        "time": 1742926252.382188,
+        "relative_time_s": 1.187,
+        "entity": "sgen.0:is_connected",
+        "ca_ioa": "120.10060",
+        "reported_value": 0.0,
+        "rtu_ip": "172.16.3.15",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "no_prior_state_value_in_window"
+        ],
+        "epistemic_note": "Spontaneous COT=3 state report observed in network telemetry, but no prior IEC-104 state value exists in the window to prove a state change. Retained as an unverified precursor observation only; cannot form a Verified Element Bridge.",
+        "evidence_ids": [
+          "EV-49990bcfa3516086"
+        ]
+      }
+    ],
+    "quarantined_unverified_observations": [
+      {
+        "storyline_id": "SL001",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A001"
+        ],
+        "spine_fact_ids": [
+          "BA001"
+        ],
+        "spine_entities": [
+          "sgen.0:is_connected"
+        ],
+        "start_time": 1742926252.382188,
+        "end_time": 1742926252.382188,
+        "start_relative_s": 1.187,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A001] sgen.0:is_connected (CA/IOA=120.10060) reported value 0.0 with COT=3 by RTU 172.16.3.15; prior IEC-104 value in window: not observed (state_report_no_prior_value_in_window; verification=unverified_observation). 1 same-device sequential observation(s) kept off-spine (failed behavioral consistency gate: [['left_not_sustained', 'left_anchor_unverified', 'state_to_measurement_change_mismatch']]).",
+        "evidence_ids": [
+          "EV-49990bcfa3516086"
+        ],
+        "anchor_id": "A001",
+        "anchor_type": "spontaneous_state_report",
+        "rtu_ip": "172.16.3.15",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "no_prior_state_value_in_window"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['no_prior_state_value_in_window']."
+      },
+      {
+        "storyline_id": "SL003",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A003"
+        ],
+        "spine_fact_ids": [
+          "BA003"
+        ],
+        "spine_entities": [
+          "line.14:current_to"
+        ],
+        "start_time": 1742926384.047055,
+        "end_time": 1742926384.047055,
+        "start_relative_s": 132.852,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A003] line.14: 1 measurement(s) in one ASDU from RTU 172.16.3.26 changed current_to 0.0099699581 -> -0.270960242 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-e58d910a8d27a718",
+          "EV-d562b9f57b8095e5"
+        ],
+        "anchor_id": "A003",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.26",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL004",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A004"
+        ],
+        "spine_fact_ids": [
+          "BA004"
+        ],
+        "spine_entities": [
+          "line.14:current_from"
+        ],
+        "start_time": 1742926403.091995,
+        "end_time": 1742926403.091995,
+        "start_relative_s": 151.897,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A004] line.14: 1 measurement(s) in one ASDU from RTU 172.16.3.12 changed current_from -0.0392444469 -> 0.254208267 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['insufficient_post_samples']).",
+        "evidence_ids": [
+          "EV-3f379267d8e5801c",
+          "EV-56b50c425c53dfbd"
+        ],
+        "anchor_id": "A004",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.12",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "insufficient_post_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['insufficient_post_samples']."
+      }
+    ]
+  },
+  "rtu_asdu_bundles": [
+    {
+      "bundle_id": "BND-001",
+      "asdu_container_id": "SRC-ASDU-172.16.3.15|2404|172.16.1.2|43150|839|0",
+      "container_kind": "iec104_asdu",
+      "rtu_ip": "172.16.3.15",
+      "master_ip": null,
+      "host_ip": null,
+      "time": 1742926262.033628,
+      "time_end": 1742926262.033628,
+      "relative_time_s": 10.839,
+      "member_anchor_ids": [
+        "A002"
+      ],
+      "member_fact_ids": [
+        "BA002"
+      ],
+      "member_entities": [
+        "sgen.0:active_power"
+      ],
+      "member_device_stems": [
+        "sgen.0"
+      ],
+      "member_anchor_types": [
+        "measurement_step"
+      ],
+      "co_reported_same_asdu_edge_ids": [],
+      "all_members_verified": true,
+      "independent_source_count": 1,
+      "vantages": [
+        "n302"
+      ],
+      "evidence_ids": [
+        "EV-5f79e1b4ca26cc6a"
+      ],
+      "co_reporting_semantics": "shared_asdu_container_co_report_only_not_topological_or_causal"
+    }
+  ],
+  "verified_element_bridges": [],
+  "same_rtu_supported_relations": [],
+  "bridged_bundle_components": [],
+  "candidate_scenario_phases": [
+    {
+      "phase_id": "PHS-001",
+      "phase_profile": "localized_measurement_or_state_observations",
+      "start_time": 1742926252.382188,
+      "end_time": 1742926262.033628,
+      "start_relative_s": 1.187,
+      "end_relative_s": 10.839,
+      "transaction_ids": [],
+      "verified_bundle_ids": [
+        "BND-001"
+      ],
+      "verified_storyline_ids": [
+        "SL002"
+      ],
+      "verified_anchor_ids": [
+        "A002"
+      ],
+      "verified_bridge_ids": [],
+      "sequential_same_device_edge_ids": [
+        "R0035"
+      ],
+      "unverified_precursor_anchor_ids": [
+        "A001"
+      ],
+      "observed_host_and_link_context": {
+        "rtu_ips": [
+          "172.16.3.15"
+        ],
+        "master_ips": [],
+        "arp_activity": []
+      },
+      "unresolved_cross_device_candidate_count": 0,
+      "unresolved_cross_device_candidates": [],
+      "epistemic_boundary": "Phase PHS-001 groups 1 verified bundle(s) and 0 transaction(s) within +1.187s..+10.839s. 0 element bridge(s) are supported; all 0 cross-device candidate relation(s) remain strictly unresolved (causal_status=not_established)."
+    }
+  ],
+  "source_dependency_ledger": {
+    "verified_anchor_count": 1,
+    "quarantined_unverified_anchor_count": 3,
+    "iec104_asdu_container_ids": [
+      "SRC-ASDU-172.16.3.15|2404|172.16.1.2|43150|839|0"
+    ],
+    "iec104_asdu_container_count": 1,
+    "tcp_link_container_ids": [],
+    "tcp_link_container_count": 0,
+    "arp_container_ids": [],
+    "arp_container_count": 0,
+    "composite_event_container_ids": [],
+    "composite_event_container_count": 0,
+    "verified_source_container_count": 1,
+    "distinct_rtu_ips": [
+      "172.16.3.15"
+    ],
+    "distinct_rtu_count": 1,
+    "distinct_master_ips": [],
+    "distinct_arp_host_ips": [],
+    "co_reported_same_asdu_reduction_count": 0,
+    "mirror_vantages_observed": [
+      "n302"
+    ],
+    "raw_vantage_capture_count": 1,
+    "unique_verified_evidence_id_count": 1,
+    "ipal_correspondence_fact_count": 11,
+    "ipal_correspondence_edge_count": 11,
+    "ipal_correspondence_row_count": 4,
+    "ipal_independent_source_weight": 0,
+    "accounting_rules": {
+      "same_asdu_multi_ioa": "counted_as_one_container_not_independent_per_point",
+      "mirror_vantage_captures": "deduplicated_across_n302_and_n318",
+      "ipal_state_updates": "weight_zero_temporal_correspondence_only",
+      "unverified_observations": "quarantined_excluded_from_verified_containers"
+    }
+  },
+  "competing_explanations": [
+    {
+      "explanation_id": "EXP-001",
+      "scope": [
+        "A001",
+        "A002"
+      ],
+      "hypothesis_class": "local_device_disconnection_with_unverified_prior_state_hypothesis",
+      "verification_status": "unresolved_competing_hypothesis",
+      "causal_status": "not_established",
+      "anchoring_verified_evidence": {
+        "verified_anchor_ids": [
+          "A002"
+        ],
+        "sequential_edge_id": "R0035",
+        "device_stem": "sgen.0",
+        "evidence_ids": [
+          "EV-49990bcfa3516086",
+          "EV-5f79e1b4ca26cc6a",
+          "EV-06d4d0009a0961ab"
+        ]
+      },
+      "unverified_or_candidate_links_assumed": [
+        "A001",
+        "R0035"
+      ],
+      "explanation_summary": "On sgen.0, a spontaneous COT=3 state report (A001: sgen.0:is_connected) preceded a verified measurement drop to zero (A002: sgen.0:active_power), recorded as sequential observation R0035 because A001 failed ['left_not_sustained', 'left_anchor_unverified', 'state_to_measurement_change_mismatch'].",
+      "alternative_comparison": "Assumes the COT=3 report reflects an actual disconnection from a prior connected state (1.0 -> 0.0), which is not provable from in-window IEC-104 traffic alone.",
+      "missing_disambiguating_evidence": [
+        "Pre-window IEC-104 state baseline (COT=20) for sgen.0:is_connected",
+        "Local RTU sgen.0 breaker/controller event log"
+      ]
+    },
+    {
+      "explanation_id": "EXP-002",
+      "scope": [
+        "A002"
+      ],
+      "hypothesis_class": "uncommanded_output_drop_with_redundant_state_report_hypothesis",
+      "verification_status": "unresolved_competing_hypothesis",
+      "causal_status": "not_established",
+      "anchoring_verified_evidence": {
+        "verified_anchor_ids": [
+          "A002"
+        ],
+        "device_stem": "sgen.0",
+        "evidence_ids": [
+          "EV-49990bcfa3516086",
+          "EV-5f79e1b4ca26cc6a",
+          "EV-06d4d0009a0961ab"
+        ]
+      },
+      "unverified_or_candidate_links_assumed": [],
+      "explanation_summary": "Only the measurement step A002 (sgen.0:active_power -> 0.0) is a verified transition; the earlier COT=3 report A001 could be a redundant status re-transmission or unverified telemetry frame without a physical state transition.",
+      "alternative_comparison": "Relies strictly on the verified measurement step A002 without promoting the unverified COT=3 state report A001.",
+      "missing_disambiguating_evidence": [
+        "Out-of-band physical meter for sgen.0",
+        "Pre-window IEC-104 state history prior to background_start"
+      ]
+    }
+  ]
+}

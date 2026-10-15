@@ -1,0 +1,1143 @@
+{
+  "report_status": "quality_consistent",
+  "incident_start": 1742928231.189216,
+  "incident_end": 1742928261.2682297,
+  "transaction_summaries": [
+    {
+      "transaction_id": "TX001",
+      "start_time": 1742928231.201491,
+      "end_time": 1742928237.415248,
+      "entity": "sgen.1:target_active_power",
+      "ca_ioa": "122.10040",
+      "type_name": "C_SE_NC_1 (Setpoint command, short float)",
+      "commanded_value": 15000.0,
+      "session": "172.16.1.2:33402 -> 172.16.3.17:2404",
+      "vantages": [
+        "n302"
+      ],
+      "command_acceptance_status": "accepted_by_rtu",
+      "device_state_change_status": "verified_measurement_transition",
+      "state_verification_reason": "pre_to_post_shift_and_setpoint_match_verified",
+      "transaction_completeness": "partial_no_cot10_but_verified_measurement_transition",
+      "missing_stages": [
+        "activation_termination_cot10"
+      ],
+      "inference_gate": {
+        "basis": "measurement_transition",
+        "gate_passed": true,
+        "failed_conditions": [],
+        "pre_quality_invalid": false,
+        "post_quality_invalid": false,
+        "pre_quality_flags_set": [],
+        "post_quality_flags_set": [],
+        "test_bits": {
+          "command": false,
+          "confirmation": false,
+          "pre": false,
+          "post": false
+        },
+        "quality_uncertainty": []
+      },
+      "evidence_ids": [
+        "EV-9c83f12c8b0c4c2f",
+        "EV-bb6c0d35de4b0d52",
+        "EV-e8ce5554cc42318c",
+        "EV-c12bd6819a2b2092",
+        "EV-fd365583d8937e96",
+        "EV-44a49141baaa56e6"
+      ]
+    }
+  ],
+  "storyline_summaries": [
+    {
+      "storyline_id": "SL001",
+      "storyline_kind": "transaction_or_observed_chain",
+      "transaction_id": "TX001",
+      "anchor_entity": "sgen.1:target_active_power",
+      "completeness_status": "partial_missing_cot10_but_verified_measurement_transition",
+      "spine_is_contiguous_directed_path": true,
+      "spine_fact_ids": [
+        "EF001",
+        "EF002",
+        "EF004"
+      ],
+      "vantage_capture_count": 3,
+      "logical_observation_count": 3,
+      "independent_source_container_count": 3,
+      "independent_support_edge_count": 2,
+      "steps_rendered": [
+        "Step 1 [R0001 | N-N | iec104_command_confirmation | level=observed_fact | gate=direct_record_observation | independent_evidence]: EF001 (sgen.1:target_active_power @ 1742928231.2015) -> EF002 (sgen.1:target_active_power @ 1742928231.2643) [src_ev=EV-9c83f12c8b0c4c2f, EV-bb6c0d35de4b0d52; dst_ev=EV-e8ce5554cc42318c, EV-c12bd6819a2b2092]",
+        "Step 2 [R0003 | N-N | command_to_device_state_transition | level=supported_inference | gate=passed_noncausal_inference_gate | independent_evidence]: EF002 (sgen.1:target_active_power @ 1742928231.2643) -> EF004 (sgen.1:active_power @ 1742928237.4152) [src_ev=EV-e8ce5554cc42318c, EV-c12bd6819a2b2092; dst_ev=EV-d1b519b062899fc7, EV-56b422da31eeb916]"
+      ],
+      "supporting_edges_rendered": [
+        "Supporting Edge [R0002 | N-N | pre_to_post_measurement_transition | level=observed_fact]: EF003 (sgen.1:active_power=19999.3438 @ 1742928227.3674) -> EF004 (sgen.1:active_power=15001.9707 @ 1742928237.4152) [src_ev=EV-fd365583d8937e96, EV-44a49141baaa56e6; dst_ev=EV-d1b519b062899fc7, EV-56b422da31eeb916]"
+      ],
+      "temporal_correspondences_rendered": [
+        "Time-aligned IPAL row [R0007 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: EF005 (sgen.1:target_active_power=15000.0 @ 1742928231.8582) aligned with EF001; not an independent source",
+        "Time-aligned IPAL row [R0008 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: EF005 (sgen.1:target_active_power=15000.0 @ 1742928231.8582) aligned with EF002; not an independent source",
+        "Time-aligned IPAL row [R0015 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: EF006 (sgen.1:active_power=15001.970703125 @ 1742928237.8582) aligned with EF004; not an independent source"
+      ],
+      "evidence_gaps": [
+        "activation_termination_cot10"
+      ]
+    },
+    {
+      "storyline_id": "SL002",
+      "storyline_kind": "transaction_or_observed_chain",
+      "transaction_id": null,
+      "anchor_entity": "line.12:current_to",
+      "completeness_status": "observed_state_or_session_chain",
+      "spine_is_contiguous_directed_path": true,
+      "spine_fact_ids": [
+        "TL014",
+        "TL017"
+      ],
+      "vantage_capture_count": 6,
+      "logical_observation_count": 2,
+      "independent_source_container_count": 2,
+      "independent_support_edge_count": 1,
+      "steps_rendered": [
+        "Step 1 [R0022 | P-P | same_device_attribute_coupling | level=observed_fact | gate=direct_record_observation | independent_evidence]: TL014 (line.12:current_to @ 1742928235.8582) -> TL017 (line.12:current_from @ 1742928235.8582) [src_ev=EV-afa644610e9ad279, EV-d273ea314021db17; dst_ev=EV-9f6a1bdd4d1dd3ce, EV-5b9341f93a905c05]"
+      ],
+      "supporting_edges_rendered": [],
+      "temporal_correspondences_rendered": [],
+      "evidence_gaps": []
+    },
+    {
+      "storyline_id": "SL003",
+      "storyline_kind": "transaction_or_observed_chain",
+      "transaction_id": null,
+      "anchor_entity": "line.12:current_from",
+      "completeness_status": "observed_state_or_session_chain",
+      "spine_is_contiguous_directed_path": true,
+      "spine_fact_ids": [
+        "TL013",
+        "TL010"
+      ],
+      "vantage_capture_count": 12,
+      "logical_observation_count": 2,
+      "independent_source_container_count": 2,
+      "independent_support_edge_count": 1,
+      "steps_rendered": [
+        "Step 1 [R0021 | N-N | same_device_attribute_coupling | level=observed_fact | gate=direct_record_observation | independent_evidence]: TL013 (line.12:current_from @ 1742928235.6377) -> TL010 (line.12:current_to @ 1742928235.7888) [src_ev=EV-7eafeb1490cdd32a, EV-742f8354c360f293; dst_ev=EV-7e21d52997ec0561, EV-c54ae2b0f2149c2f]"
+      ],
+      "supporting_edges_rendered": [],
+      "temporal_correspondences_rendered": [
+        "Time-aligned IPAL row [R0013 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: TL017 (line.12:current_from=0.3092058002948761 @ 1742928235.8582) aligned with TL013; not an independent source",
+        "Time-aligned IPAL row [R0014 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: TL014 (line.12:current_to=-0.25940656661987305 @ 1742928235.8582) aligned with TL010; not an independent source"
+      ],
+      "evidence_gaps": []
+    },
+    {
+      "storyline_id": "SL004",
+      "storyline_kind": "transaction_or_observed_chain",
+      "transaction_id": null,
+      "anchor_entity": "line.13:current_from",
+      "completeness_status": "observed_state_or_session_chain",
+      "spine_is_contiguous_directed_path": true,
+      "spine_fact_ids": [
+        "TL022",
+        "TL024"
+      ],
+      "vantage_capture_count": 18,
+      "logical_observation_count": 2,
+      "independent_source_container_count": 2,
+      "independent_support_edge_count": 1,
+      "steps_rendered": [
+        "Step 1 [R0017 | N-N | same_device_attribute_coupling | level=observed_fact | gate=direct_record_observation | independent_evidence]: TL022 (line.13:current_from @ 1742928233.7522) -> TL024 (line.13:current_to @ 1742928238.4932) [src_ev=EV-73bfde5d2fb5d023, EV-4143dd5fa10fc0ee; dst_ev=EV-f44ee5a8224bfb65, EV-dcfa6bc4e0c5703d]"
+      ],
+      "supporting_edges_rendered": [],
+      "temporal_correspondences_rendered": [
+        "Time-aligned IPAL row [R0010 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: TL018 (line.13:current_from=-0.12367453426122665 @ 1742928233.8582) aligned with TL022; not an independent source",
+        "Time-aligned IPAL row [R0016 | temporally_aligned_same_point_stream | level=temporal_correspondence | common source NOT confirmed (no lineage)]: TL020 (line.13:current_to=0.1944163292646408 @ 1742928238.8582) aligned with TL024; not an independent source"
+      ],
+      "evidence_gaps": []
+    },
+    {
+      "storyline_id": "SL005",
+      "storyline_kind": "transaction_or_observed_chain",
+      "transaction_id": null,
+      "anchor_entity": "line.13:current_from",
+      "completeness_status": "observed_state_or_session_chain",
+      "spine_is_contiguous_directed_path": true,
+      "spine_fact_ids": [
+        "TL018",
+        "TL020"
+      ],
+      "vantage_capture_count": 6,
+      "logical_observation_count": 2,
+      "independent_source_container_count": 2,
+      "independent_support_edge_count": 1,
+      "steps_rendered": [
+        "Step 1 [R0018 | P-P | same_device_attribute_coupling | level=observed_fact | gate=direct_record_observation | independent_evidence]: TL018 (line.13:current_from @ 1742928233.8582) -> TL020 (line.13:current_to @ 1742928238.8582) [src_ev=EV-852d376966287a13, EV-3722f2e1853a9b42; dst_ev=EV-3879743c94a25dd6, EV-9fb9681cafa941dc]"
+      ],
+      "supporting_edges_rendered": [],
+      "temporal_correspondences_rendered": [],
+      "evidence_gaps": []
+    },
+    {
+      "storyline_id": "SL006",
+      "storyline_kind": "transaction_or_observed_chain",
+      "transaction_id": null,
+      "anchor_entity": "line.14:current_from",
+      "completeness_status": "observed_state_or_session_chain",
+      "spine_is_contiguous_directed_path": true,
+      "spine_fact_ids": [
+        "TL019",
+        "TL015"
+      ],
+      "vantage_capture_count": 6,
+      "logical_observation_count": 2,
+      "independent_source_container_count": 2,
+      "independent_support_edge_count": 1,
+      "steps_rendered": [
+        "Step 1 [R0020 | P-P | same_device_attribute_coupling | level=observed_fact | gate=direct_record_observation | independent_evidence]: TL019 (line.14:current_from @ 1742928234.8582) -> TL015 (line.14:current_to @ 1742928235.8582) [src_ev=EV-4c5e290cf4d33bfd, EV-687add7f278a1f19; dst_ev=EV-0b3eae7f49d47383, EV-e0c88e05cc38f901]"
+      ],
+      "supporting_edges_rendered": [],
+      "temporal_correspondences_rendered": [],
+      "evidence_gaps": []
+    }
+  ],
+  "verified_llm_claims": [],
+  "withheld_rejected_llm_claim_count": 0,
+  "verified_device_transitions": [
+    "[TX001 | verified_measurement_transition] Controlled point sgen.1:active_power (CA/IOA=122.10080) shifted from pre-command baseline 19999.3438 (@ 1742928227.3674, pre_ev=EV-fd365583d8937e96, EV-44a49141baaa56e6) to 15001.9707 (@ 1742928237.4152, post_ev=EV-d1b519b062899fc7), matching commanded setpoint 15000.0. Non-causal protocol/measurement alignment."
+  ],
+  "unverified_protocol_state_reports": [],
+  "unresolved_cooccurring_changes": [
+    "[SL001 / R0023 | cross_entity_temporal_cooccurrence] (level=temporal_cooccurrence, status=unresolved, gate=unresolved_cooccurrence, causal_status=not_established): bus.0:voltage_angle (TL012) at 1742928232.1948 after EF001 (0 <= dt (0.9933s) <= 10.0s) [src_ev=EV-9c83f12c8b0c4c2f, EV-bb6c0d35de4b0d52; dst_ev=EV-f4d1f3c6820f22cb, EV-2a9b4c88e1e068bd].",
+    "[SL001 / R0024 | cross_entity_temporal_cooccurrence] (level=temporal_cooccurrence, status=unresolved, gate=unresolved_cooccurrence, causal_status=not_established): bus.0:voltage_angle (TL016) at 1742928232.8582 after EF001 (0 <= dt (1.6567s) <= 10.0s) [src_ev=EV-9c83f12c8b0c4c2f, EV-bb6c0d35de4b0d52; dst_ev=EV-33b8b34c5318506c, EV-07f5d70aabe7fd23].",
+    "[SL001 / R0025 | cross_entity_temporal_cooccurrence] (level=temporal_cooccurrence, status=unresolved, gate=unresolved_cooccurrence, causal_status=not_established): line.13:current_from (TL022) at 1742928233.7522 after EF001 (0 <= dt (2.5507s) <= 10.0s) [src_ev=EV-9c83f12c8b0c4c2f, EV-bb6c0d35de4b0d52; dst_ev=EV-73bfde5d2fb5d023, EV-4143dd5fa10fc0ee].",
+    "[SL001 / R0026 | cross_entity_temporal_cooccurrence] (level=temporal_cooccurrence, status=unresolved, gate=unresolved_cooccurrence, causal_status=not_established): line.13:current_from (TL018) at 1742928233.8582 after EF001 (0 <= dt (2.6567s) <= 10.0s) [src_ev=EV-9c83f12c8b0c4c2f, EV-bb6c0d35de4b0d52; dst_ev=EV-852d376966287a13, EV-3722f2e1853a9b42]."
+  ],
+  "competing_hypotheses": [
+    {
+      "storyline_id": "SL001",
+      "hypothesis_type": "competing_cross_entity_cooccurrences",
+      "status": "unresolved",
+      "causal_status": "not_established",
+      "candidate_entities": [
+        "bus.0:voltage_angle",
+        "bus.0:voltage_angle",
+        "line.13:current_from",
+        "line.13:current_from"
+      ],
+      "explanation": "Multiple distinct grid measurements (bus.0:voltage_angle, bus.0:voltage_angle, line.13:current_from, line.13:current_from) changed within the time horizon after sgen.1:target_active_power. Without an independent physical topology/power-flow model in the loop, these remain competing unresolved temporal co-occurrences rather than confirmed causal effects."
+    }
+  ],
+  "evidence_gaps": [
+    {
+      "scope": "TX001",
+      "entity": "sgen.1:target_active_power",
+      "missing_stages": [
+        "activation_termination_cot10"
+      ]
+    }
+  ],
+  "unattached_observations": [
+    {
+      "fact_id": "EF005",
+      "time": 1742928231.858198,
+      "entity": "sgen.1:target_active_power",
+      "ca_ioa": "122.10040",
+      "modality": "electrical",
+      "role": "electrical_state_update",
+      "observation": "IPAL electrical_update on sgen.1:target_active_power (CA/IOA=122.10040) = 15000.0 (network-derived state table, not an independent physical sensor)",
+      "evidence_ids": [
+        "EV-f9445e96af002a77"
+      ],
+      "reason": "not_on_confirmed_storyline_spine"
+    },
+    {
+      "fact_id": "TL003",
+      "time": 1742928232.194769,
+      "entity": "172.16.2.2:2404->172.16.1.2:36624/TCP",
+      "ca_ioa": null,
+      "modality": "network",
+      "role": "communication",
+      "observation": "tcp_packet 172.16.2.2:2404->172.16.1.2:36624/TCP packets=6 frame_bytes=66.0..126.0B vantage n303",
+      "evidence_ids": [
+        "EV-1cb19f8857325441",
+        "EV-cc3bdea238cf372a",
+        "EV-24beb9e80f76809a",
+        "EV-599728eb4e4c4d6c"
+      ],
+      "reason": "not_on_confirmed_storyline_spine"
+    },
+    {
+      "fact_id": "TL012",
+      "time": 1742928232.194769,
+      "entity": "bus.0:voltage_angle",
+      "ca_ioa": "101.10020",
+      "modality": "network",
+      "role": "electrical_report",
+      "observation": "iec104_asdu bus.0:voltage_angle ca_ioa=101.10020 measurement=0.000193838321->0.000310336589 (min=-0.000353634125, max=0.000310336589) vantage n303,n302",
+      "evidence_ids": [
+        "EV-f4d1f3c6820f22cb",
+        "EV-2a9b4c88e1e068bd",
+        "EV-14225159050b3d2a",
+        "EV-6dadfe5d26db644f"
+      ],
+      "reason": "not_on_confirmed_storyline_spine"
+    },
+    {
+      "fact_id": "TL005",
+      "time": 1742928232.208836,
+      "entity": "172.16.1.2:36624->172.16.2.2:2404/TCP",
+      "ca_ioa": null,
+      "modality": "network",
+      "role": "communication",
+      "observation": "tcp_packet 172.16.1.2:36624->172.16.2.2:2404/TCP packets=6 frame_bytes=66.0..72.0B vantage n302",
+      "evidence_ids": [
+        "EV-3575640815d24012",
+        "EV-8220a76506e55302",
+        "EV-fd41256b79af8765",
+        "EV-42d88c8d8855690d"
+      ],
+      "reason": "not_on_confirmed_storyline_spine"
+    },
+    {
+      "fact_id": "TL007",
+      "time": 1742928232.327919,
+      "entity": "172.16.2.3:2404->172.16.1.2:42436/TCP",
+      "ca_ioa": null,
+      "modality": "network",
+      "role": "communication",
+      "observation": "tcp_packet 172.16.2.3:2404->172.16.1.2:42436/TCP packets=6 frame_bytes=66.0..174.0B vantage n303",
+      "evidence_ids": [
+        "EV-f30c9cbead9a4862",
+        "EV-8147da700b781118",
+        "EV-65563bdbbef3f167",
+        "EV-337728773fc9c763"
+      ],
+      "reason": "not_on_confirmed_storyline_spine"
+    },
+    {
+      "fact_id": "TL025",
+      "time": 1742928232.342019,
+      "entity": "172.16.1.2:42436->172.16.2.3:2404/TCP",
+      "ca_ioa": null,
+      "modality": "network",
+      "role": "communication",
+      "observation": "tcp_packet 172.16.1.2:42436->172.16.2.3:2404/TCP packets=6 frame_bytes=66.0..72.0B vantage n302",
+      "evidence_ids": [
+        "EV-55e7099dc153d37d",
+        "EV-34a558decc8297e5",
+        "EV-dfb12609af8edb99",
+        "EV-ef2a635508ad474b"
+      ],
+      "reason": "not_on_confirmed_storyline_spine"
+    },
+    {
+      "fact_id": "TL016",
+      "time": 1742928232.858198,
+      "entity": "bus.0:voltage_angle",
+      "ca_ioa": "101.10020",
+      "modality": "electrical",
+      "role": "electrical_change",
+      "observation": "electrical_update bus.0:voltage_angle ca_ioa=101.10020 measurement=0.00019383832113817334->0.00031033658888190985 (min=-0.0003536341246217489, max=0.00031033658888190985) vantage n302-state",
+      "evidence_ids": [
+        "EV-33b8b34c5318506c",
+        "EV-07f5d70aabe7fd23",
+        "EV-3a2f7f90a42bb7e5"
+      ],
+      "reason": "not_on_confirmed_storyline_spine"
+    },
+    {
+      "fact_id": "TL001",
+      "time": 1742928233.752214,
+      "entity": "172.16.3.9:2404->172.16.1.2:54426/TCP",
+      "ca_ioa": null,
+      "modality": "network",
+      "role": "communication",
+      "observation": "tcp_packet 172.16.3.9:2404->172.16.1.2:54426/TCP packets=12 frame_bytes=66.0..190.0B vantage n318",
+      "evidence_ids": [
+        "EV-b178c62d2042ff7e",
+        "EV-d656d111c22d2af6",
+        "EV-d4b53fdc02055cf5",
+        "EV-7d4863d9eca3292f"
+      ],
+      "reason": "not_on_confirmed_storyline_spine"
+    },
+    {
+      "fact_id": "TL002",
+      "time": 1742928233.796396,
+      "entity": "172.16.1.2:54426->172.16.3.9:2404/TCP",
+      "ca_ioa": null,
+      "modality": "network",
+      "role": "communication",
+      "observation": "tcp_packet 172.16.1.2:54426->172.16.3.9:2404/TCP packets=12 frame_bytes=66.0..72.0B vantage n318",
+      "evidence_ids": [
+        "EV-83ed2adb3812a77a",
+        "EV-5f0d40f1f3520146",
+        "EV-33b127cdbf2eb50c",
+        "EV-e65dc672677e04eb"
+      ],
+      "reason": "not_on_confirmed_storyline_spine"
+    },
+    {
+      "fact_id": "TL023",
+      "time": 1742928234.303031,
+      "entity": "line.14:current_from",
+      "ca_ioa": "117.10110",
+      "modality": "network",
+      "role": "electrical_report",
+      "observation": "iec104_asdu line.14:current_from ca_ioa=117.10110 measurement=-0.266279042->-0.0658975616 (min=-0.266279042, max=-0.0658975616) vantage n302",
+      "evidence_ids": [
+        "EV-60f9e30200e82192",
+        "EV-4c665ef609aa0913",
+        "EV-722bbcfef2175e28",
+        "EV-f6e63c8e49a3d751"
+      ],
+      "reason": "not_on_confirmed_storyline_spine"
+    },
+    {
+      "fact_id": "TL011",
+      "time": 1742928235.260432,
+      "entity": "line.14:current_to",
+      "ca_ioa": "131.10190",
+      "modality": "network",
+      "role": "electrical_report",
+      "observation": "iec104_asdu line.14:current_to ca_ioa=131.10190 measurement=-0.0269639902->0.135916129 (min=-0.154685378, max=0.135916129) vantage n302",
+      "evidence_ids": [
+        "EV-d3f0ec6279e0cfcb",
+        "EV-420e616d57cf3d9d",
+        "EV-2b172709c758e082",
+        "EV-7d478aea7ecd50a6"
+      ],
+      "reason": "not_on_confirmed_storyline_spine"
+    },
+    {
+      "fact_id": "EF006",
+      "time": 1742928237.858198,
+      "entity": "sgen.1:active_power",
+      "ca_ioa": "122.10080",
+      "modality": "electrical",
+      "role": "electrical_state_update",
+      "observation": "IPAL electrical_update on sgen.1:active_power (CA/IOA=122.10080) = 15001.970703125 (network-derived state table, not an independent physical sensor)",
+      "evidence_ids": [
+        "EV-1e32c6927605583b"
+      ],
+      "reason": "not_on_confirmed_storyline_spine"
+    }
+  ],
+  "behavioral_reconstruction": {
+    "behavioral_mode": false,
+    "method": "evidence_anchor_discovery",
+    "inputs_not_used": [
+      "official event labels",
+      "attack type",
+      "malicious flags",
+      "physical.zip"
+    ],
+    "anchor_count": 1,
+    "verified_anchor_count": 0,
+    "unverified_anchor_count": 1,
+    "supported_chain_count": 0,
+    "verified_single_anchor_count": 0,
+    "unverified_observation_storyline_count": 0,
+    "sequential_same_device_observation_count": 0,
+    "anchors": [
+      {
+        "anchor_id": "A001",
+        "rank": 1,
+        "anchor_type": "measurement_step",
+        "time": 1742928234.303031,
+        "relative_time": 3.114,
+        "entity": "line.14:current_from",
+        "rtu_ip": "172.16.3.12",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "observation": "line.14: 1 measurement(s) in one ASDU from RTU 172.16.3.12 changed current_from 0.14405942 -> -0.266279042 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "covered_by_transaction": false
+      }
+    ],
+    "chains": [],
+    "unresolved_branch_count": 0,
+    "observation_inventory": {
+      "background_seconds": 15.0,
+      "window_seconds": 30.079,
+      "iec104_rows": {
+        "window": 1265,
+        "background": 514
+      },
+      "iec104_objects_after_vantage_merge_by_type_cot": {
+        "type50_cot6": 1,
+        "type50_cot7": 1,
+        "type13_cot1": 918
+      },
+      "iec104_control_objects_in_window": 2,
+      "tcp_packets": {
+        "window": 564,
+        "background": 281
+      },
+      "tcp_syn_fin_rst_segments": {
+        "window": 0,
+        "background": 0
+      },
+      "arp_packets": {
+        "window": 0,
+        "background": 0
+      },
+      "udp_packets": {
+        "window": 0,
+        "background": 0
+      },
+      "ipal_electrical_updates": {
+        "window": 673,
+        "background": 266
+      }
+    }
+  },
+  "incident_synthesis": {
+    "synthesis_version": "1.1",
+    "scenario_status": "synthesized_consistent",
+    "behavioral_mode": false,
+    "window": {
+      "start": 1742928231.189216,
+      "end": 1742928261.2682297,
+      "duration_seconds": 30.079
+    },
+    "inputs_not_used": [
+      "official event labels",
+      "attack type",
+      "malicious flags",
+      "physical.zip"
+    ],
+    "epistemic_guarantees": {
+      "promotes_cooccurrence_to_supported": false,
+      "promotes_same_asdu_co_report_to_topology_or_causality": false,
+      "counts_same_asdu_as_independent": false,
+      "counts_mirror_vantages_as_independent": false,
+      "counts_ipal_as_independent": false,
+      "allows_unverified_anchors_in_supported_bridges": false,
+      "allows_same_rtu_relation_as_cross_rtu_bridge": false
+    },
+    "local_storyline_partition": {
+      "counts": {
+        "supported_multi_node_storyline_count": 1,
+        "verified_single_anchor_storyline_count": 0,
+        "protocol_partial_or_unverified_storyline_count": 5,
+        "sequential_same_device_observation_count": 0,
+        "quarantined_unverified_observation_count": 0,
+        "unverified_precursor_state_report_count": 0
+      },
+      "supported_multi_node_storylines": [
+        {
+          "storyline_id": "SL001",
+          "storyline_kind": "transaction_or_observed_chain",
+          "transaction_id": "TX001",
+          "anchor_ids": [],
+          "spine_fact_ids": [
+            "EF001",
+            "EF002",
+            "EF004"
+          ],
+          "spine_entities": [
+            "sgen.1:target_active_power",
+            "sgen.1:target_active_power",
+            "sgen.1:active_power"
+          ],
+          "start_time": 1742928231.201491,
+          "end_time": 1742928237.415248,
+          "start_relative_s": 0.012,
+          "completeness_status": "partial_missing_cot10_but_verified_measurement_transition",
+          "independent_source_container_count": 3,
+          "independent_support_edge_count": 2,
+          "supported_step_count": 2,
+          "reconstructed_behavior": null,
+          "evidence_ids": [
+            "EV-fd365583d8937e96",
+            "EV-44a49141baaa56e6",
+            "EV-9c83f12c8b0c4c2f",
+            "EV-bb6c0d35de4b0d52",
+            "EV-e8ce5554cc42318c",
+            "EV-c12bd6819a2b2092",
+            "EV-d1b519b062899fc7",
+            "EV-56b422da31eeb916"
+          ]
+        }
+      ],
+      "verified_single_anchor_storylines": [],
+      "protocol_partial_or_unverified_storylines": [
+        {
+          "storyline_id": "SL002",
+          "storyline_kind": "transaction_or_observed_chain",
+          "transaction_id": null,
+          "anchor_ids": [],
+          "spine_fact_ids": [
+            "TL014",
+            "TL017"
+          ],
+          "spine_entities": [
+            "line.12:current_to",
+            "line.12:current_from"
+          ],
+          "start_time": 1742928235.858198,
+          "end_time": 1742928255.858198,
+          "start_relative_s": 4.669,
+          "completeness_status": "observed_state_or_session_chain",
+          "independent_source_container_count": 2,
+          "independent_support_edge_count": 1,
+          "supported_step_count": 1,
+          "reconstructed_behavior": null,
+          "evidence_ids": [
+            "EV-afa644610e9ad279",
+            "EV-d273ea314021db17",
+            "EV-60241ada6aeb22f3",
+            "EV-9f6a1bdd4d1dd3ce",
+            "EV-5b9341f93a905c05",
+            "EV-54248f3abf0a95a4"
+          ]
+        },
+        {
+          "storyline_id": "SL003",
+          "storyline_kind": "transaction_or_observed_chain",
+          "transaction_id": null,
+          "anchor_ids": [],
+          "spine_fact_ids": [
+            "TL013",
+            "TL010"
+          ],
+          "spine_entities": [
+            "line.12:current_from",
+            "line.12:current_to"
+          ],
+          "start_time": 1742928235.637709,
+          "end_time": 1742928255.794482,
+          "start_relative_s": 4.448,
+          "completeness_status": "observed_state_or_session_chain",
+          "independent_source_container_count": 2,
+          "independent_support_edge_count": 1,
+          "supported_step_count": 1,
+          "reconstructed_behavior": null,
+          "evidence_ids": [
+            "EV-7eafeb1490cdd32a",
+            "EV-742f8354c360f293",
+            "EV-f984c4a1e1298958",
+            "EV-f2a88d9249ae6e95",
+            "EV-7e21d52997ec0561",
+            "EV-c54ae2b0f2149c2f",
+            "EV-3e0f074b02241184",
+            "EV-8d6af6da082b258b"
+          ]
+        },
+        {
+          "storyline_id": "SL004",
+          "storyline_kind": "transaction_or_observed_chain",
+          "transaction_id": null,
+          "anchor_ids": [],
+          "spine_fact_ids": [
+            "TL022",
+            "TL024"
+          ],
+          "spine_entities": [
+            "line.13:current_from",
+            "line.13:current_to"
+          ],
+          "start_time": 1742928233.752214,
+          "end_time": 1742928258.512059,
+          "start_relative_s": 2.563,
+          "completeness_status": "observed_state_or_session_chain",
+          "independent_source_container_count": 2,
+          "independent_support_edge_count": 1,
+          "supported_step_count": 1,
+          "reconstructed_behavior": null,
+          "evidence_ids": [
+            "EV-73bfde5d2fb5d023",
+            "EV-4143dd5fa10fc0ee",
+            "EV-b846a02ee3179dc7",
+            "EV-19ec81bba44d0eaa",
+            "EV-f44ee5a8224bfb65",
+            "EV-dcfa6bc4e0c5703d",
+            "EV-36e14aec09c76464",
+            "EV-8532451b0058ba51"
+          ]
+        },
+        {
+          "storyline_id": "SL005",
+          "storyline_kind": "transaction_or_observed_chain",
+          "transaction_id": null,
+          "anchor_ids": [],
+          "spine_fact_ids": [
+            "TL018",
+            "TL020"
+          ],
+          "spine_entities": [
+            "line.13:current_from",
+            "line.13:current_to"
+          ],
+          "start_time": 1742928233.858198,
+          "end_time": 1742928258.858198,
+          "start_relative_s": 2.669,
+          "completeness_status": "observed_state_or_session_chain",
+          "independent_source_container_count": 2,
+          "independent_support_edge_count": 1,
+          "supported_step_count": 1,
+          "reconstructed_behavior": null,
+          "evidence_ids": [
+            "EV-852d376966287a13",
+            "EV-3722f2e1853a9b42",
+            "EV-7883e860351fb96d",
+            "EV-3879743c94a25dd6",
+            "EV-9fb9681cafa941dc",
+            "EV-e832d3d164afa8f9"
+          ]
+        },
+        {
+          "storyline_id": "SL006",
+          "storyline_kind": "transaction_or_observed_chain",
+          "transaction_id": null,
+          "anchor_ids": [],
+          "spine_fact_ids": [
+            "TL019",
+            "TL015"
+          ],
+          "spine_entities": [
+            "line.14:current_from",
+            "line.14:current_to"
+          ],
+          "start_time": 1742928234.858198,
+          "end_time": 1742928255.858198,
+          "start_relative_s": 3.669,
+          "completeness_status": "observed_state_or_session_chain",
+          "independent_source_container_count": 2,
+          "independent_support_edge_count": 1,
+          "supported_step_count": 1,
+          "reconstructed_behavior": null,
+          "evidence_ids": [
+            "EV-4c5e290cf4d33bfd",
+            "EV-687add7f278a1f19",
+            "EV-7c8466d4486d5b90",
+            "EV-0b3eae7f49d47383",
+            "EV-e0c88e05cc38f901",
+            "EV-2419fa77af390784"
+          ]
+        }
+      ],
+      "sequential_same_device_observations": [],
+      "unverified_precursor_state_reports": [],
+      "quarantined_unverified_observations": []
+    },
+    "rtu_asdu_bundles": [],
+    "verified_element_bridges": [],
+    "same_rtu_supported_relations": [],
+    "bridged_bundle_components": [],
+    "candidate_scenario_phases": [
+      {
+        "phase_id": "PHS-001",
+        "phase_profile": "protocol_command_transactions",
+        "start_time": 1742928231.201491,
+        "end_time": 1742928237.415248,
+        "start_relative_s": 0.012,
+        "end_relative_s": 6.226,
+        "transaction_ids": [
+          "TX001"
+        ],
+        "verified_bundle_ids": [],
+        "verified_storyline_ids": [
+          "SL001"
+        ],
+        "verified_anchor_ids": [],
+        "verified_bridge_ids": [],
+        "sequential_same_device_edge_ids": [],
+        "unverified_precursor_anchor_ids": [],
+        "observed_host_and_link_context": {
+          "rtu_ips": [
+            "172.16.3.17"
+          ],
+          "master_ips": [
+            "172.16.1.2"
+          ],
+          "arp_activity": []
+        },
+        "unresolved_cross_device_candidate_count": 16,
+        "unresolved_cross_device_candidates": [
+          {
+            "edge_id": "R0023",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "bus.0:voltage_angle",
+            "dt_seconds": 0.993,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "bus.0:voltage_angle changed 0.993s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-f4d1f3c6820f22cb",
+              "EV-2a9b4c88e1e068bd"
+            ]
+          },
+          {
+            "edge_id": "R0024",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "bus.0:voltage_angle",
+            "dt_seconds": 1.657,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "bus.0:voltage_angle changed 1.657s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-33b8b34c5318506c",
+              "EV-07f5d70aabe7fd23"
+            ]
+          },
+          {
+            "edge_id": "R0025",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "line.13:current_from",
+            "dt_seconds": 2.551,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "line.13:current_from changed 2.551s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-73bfde5d2fb5d023",
+              "EV-4143dd5fa10fc0ee"
+            ]
+          },
+          {
+            "edge_id": "R0026",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "line.13:current_from",
+            "dt_seconds": 2.657,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "line.13:current_from changed 2.657s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-852d376966287a13",
+              "EV-3722f2e1853a9b42"
+            ]
+          },
+          {
+            "edge_id": "R0027",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "line.14:current_from",
+            "dt_seconds": 3.102,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "line.14:current_from changed 3.102s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-60f9e30200e82192",
+              "EV-4c665ef609aa0913"
+            ]
+          },
+          {
+            "edge_id": "R0028",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "line.14:current_from",
+            "dt_seconds": 3.657,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "line.14:current_from changed 3.657s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-4c5e290cf4d33bfd",
+              "EV-687add7f278a1f19"
+            ]
+          },
+          {
+            "edge_id": "R0029",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "line.14:current_to",
+            "dt_seconds": 4.059,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "line.14:current_to changed 4.059s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-d3f0ec6279e0cfcb",
+              "EV-420e616d57cf3d9d"
+            ]
+          },
+          {
+            "edge_id": "R0030",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "line.12:current_from",
+            "dt_seconds": 4.436,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "line.12:current_from changed 4.436s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-7eafeb1490cdd32a",
+              "EV-742f8354c360f293"
+            ]
+          },
+          {
+            "edge_id": "R0031",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "line.12:current_to",
+            "dt_seconds": 4.587,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "line.12:current_to changed 4.587s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-7e21d52997ec0561",
+              "EV-c54ae2b0f2149c2f"
+            ]
+          },
+          {
+            "edge_id": "R0032",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "line.12:current_to",
+            "dt_seconds": 4.657,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "line.12:current_to changed 4.657s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-afa644610e9ad279",
+              "EV-d273ea314021db17"
+            ]
+          },
+          {
+            "edge_id": "R0033",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "line.14:current_to",
+            "dt_seconds": 4.657,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "line.14:current_to changed 4.657s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-0b3eae7f49d47383",
+              "EV-e0c88e05cc38f901"
+            ]
+          },
+          {
+            "edge_id": "R0034",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "line.12:current_from",
+            "dt_seconds": 4.657,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "line.12:current_from changed 4.657s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-9f6a1bdd4d1dd3ce",
+              "EV-5b9341f93a905c05"
+            ]
+          },
+          {
+            "edge_id": "R0035",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "line.13:current_to",
+            "dt_seconds": 7.292,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "line.13:current_to changed 7.292s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-f44ee5a8224bfb65",
+              "EV-dcfa6bc4e0c5703d"
+            ]
+          },
+          {
+            "edge_id": "R0036",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "line.13:current_to",
+            "dt_seconds": 7.657,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "line.13:current_to changed 7.657s after sgen.1:target_active_power (command_activation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-9c83f12c8b0c4c2f",
+              "EV-bb6c0d35de4b0d52",
+              "EV-3879743c94a25dd6",
+              "EV-9fb9681cafa941dc"
+            ]
+          },
+          {
+            "edge_id": "R0037",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "bus.0:voltage_angle",
+            "dt_seconds": 0.93,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "bus.0:voltage_angle changed 0.93s after sgen.1:target_active_power (command_confirmation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-e8ce5554cc42318c",
+              "EV-c12bd6819a2b2092",
+              "EV-f4d1f3c6820f22cb",
+              "EV-2a9b4c88e1e068bd"
+            ]
+          },
+          {
+            "edge_id": "R0038",
+            "from_anchor_id": null,
+            "to_anchor_id": null,
+            "from_entity": "sgen.1:target_active_power",
+            "to_entity": "bus.0:voltage_angle",
+            "dt_seconds": 1.594,
+            "relation_type": "cross_entity_temporal_cooccurrence",
+            "claim_level": "temporal_cooccurrence",
+            "verification_status": "unresolved",
+            "causal_status": "not_established",
+            "support_basis": "bus.0:voltage_angle changed 1.594s after sgen.1:target_active_power (command_confirmation). Time proximity across distinct grid elements is a candidate co-occurrence hypothesis only, NOT a supported inference and NOT proof of causation.",
+            "evidence_ids": [
+              "EV-e8ce5554cc42318c",
+              "EV-c12bd6819a2b2092",
+              "EV-33b8b34c5318506c",
+              "EV-07f5d70aabe7fd23"
+            ]
+          }
+        ],
+        "epistemic_boundary": "Phase PHS-001 groups 0 verified bundle(s) and 1 transaction(s) within +0.012s..+6.226s. 0 element bridge(s) are supported; all 16 cross-device candidate relation(s) remain strictly unresolved (causal_status=not_established)."
+      }
+    ],
+    "source_dependency_ledger": {
+      "verified_anchor_count": 0,
+      "quarantined_unverified_anchor_count": 1,
+      "iec104_asdu_container_ids": [],
+      "iec104_asdu_container_count": 0,
+      "tcp_link_container_ids": [],
+      "tcp_link_container_count": 0,
+      "arp_container_ids": [],
+      "arp_container_count": 0,
+      "composite_event_container_ids": [
+        "SRC-MSG-9c83f12c",
+        "SRC-MSG-d1b519b0",
+        "SRC-MSG-e8ce5554",
+        "SRC-MSG-fd365583"
+      ],
+      "composite_event_container_count": 4,
+      "verified_source_container_count": 4,
+      "distinct_rtu_ips": [
+        "172.16.3.17"
+      ],
+      "distinct_rtu_count": 1,
+      "distinct_master_ips": [
+        "172.16.1.2"
+      ],
+      "distinct_arp_host_ips": [],
+      "co_reported_same_asdu_reduction_count": 0,
+      "mirror_vantages_observed": [
+        "n302"
+      ],
+      "raw_vantage_capture_count": 10,
+      "unique_verified_evidence_id_count": 10,
+      "ipal_correspondence_fact_count": 9,
+      "ipal_correspondence_edge_count": 10,
+      "ipal_correspondence_row_count": 1,
+      "ipal_independent_source_weight": 0,
+      "accounting_rules": {
+        "same_asdu_multi_ioa": "counted_as_one_container_not_independent_per_point",
+        "mirror_vantage_captures": "deduplicated_across_n302_and_n318",
+        "ipal_state_updates": "weight_zero_temporal_correspondence_only",
+        "unverified_observations": "quarantined_excluded_from_verified_containers"
+      }
+    },
+    "competing_explanations": [
+      {
+        "explanation_id": "EXP-001",
+        "scope": [
+          "TX001"
+        ],
+        "hypothesis_class": "command_induced_device_transition_hypothesis",
+        "verification_status": "unresolved_competing_hypothesis",
+        "causal_status": "not_established",
+        "anchoring_verified_evidence": {
+          "transaction_ids": [
+            "TX001"
+          ],
+          "verified_transition_transaction_ids": [
+            "TX001"
+          ],
+          "evidence_ids": [
+            "EV-9c83f12c8b0c4c2f",
+            "EV-bb6c0d35de4b0d52",
+            "EV-e8ce5554cc42318c",
+            "EV-c12bd6819a2b2092"
+          ]
+        },
+        "unverified_or_candidate_links_assumed": [],
+        "explanation_summary": "Observed IEC-104 control activation(s) ['TX001'] on the SCADA network, with 1 transaction(s) passing pre/post setpoint/state consistency checks. Consistent with RTU execution of the received IEC-104 command(s).",
+        "alternative_comparison": "Competes with coincidence or unverified physical actuation where protocol confirmation (COT=7) or telemetry shifts occur without independent physical sensor verification.",
+        "missing_disambiguating_evidence": [
+          "Independent out-of-band physical process sensor or PMU log not derived from IEC-104",
+          "Master station operator/application audit log identifying the initiating process"
+        ]
+      }
+    ]
+  },
+  "quality_consistency_status": "consistent",
+  "lineage_consistency_status": "consistent"
+}

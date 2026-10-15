@@ -1,0 +1,682 @@
+{
+  "synthesis_version": "1.1",
+  "scenario_status": "synthesized_consistent",
+  "behavioral_mode": true,
+  "window": {
+    "start": 1742940856.249995,
+    "end": 1742941406.864951,
+    "duration_seconds": 550.615
+  },
+  "inputs_not_used": [
+    "official event labels",
+    "attack type",
+    "malicious flags",
+    "physical.zip"
+  ],
+  "epistemic_guarantees": {
+    "promotes_cooccurrence_to_supported": false,
+    "promotes_same_asdu_co_report_to_topology_or_causality": false,
+    "counts_same_asdu_as_independent": false,
+    "counts_mirror_vantages_as_independent": false,
+    "counts_ipal_as_independent": false,
+    "allows_unverified_anchors_in_supported_bridges": false,
+    "allows_same_rtu_relation_as_cross_rtu_bridge": false
+  },
+  "local_storyline_partition": {
+    "counts": {
+      "supported_multi_node_storyline_count": 0,
+      "verified_single_anchor_storyline_count": 1,
+      "protocol_partial_or_unverified_storyline_count": 0,
+      "sequential_same_device_observation_count": 0,
+      "quarantined_unverified_observation_count": 14,
+      "unverified_precursor_state_report_count": 0
+    },
+    "supported_multi_node_storylines": [],
+    "verified_single_anchor_storylines": [
+      {
+        "storyline_id": "SL001",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A001"
+        ],
+        "spine_fact_ids": [
+          "BA001"
+        ],
+        "spine_entities": [
+          "172.16.3.11/ARP"
+        ],
+        "start_time": 1742940857.784495,
+        "end_time": 1742940857.918559,
+        "start_relative_s": 1.535,
+        "completeness_status": "behavioral_single_anchor",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A001] ARP from 172.16.3.11: 12 packets in window (12 requests, 0 replies) to ['172.16.3.18', '172.16.3.20', '172.16.3.28']; 0 in background (verification=verified_observation).",
+        "evidence_ids": [
+          "EV-cec1dc5ea9830caa",
+          "EV-2b37379d9057dd3f",
+          "EV-7ee21b5bc415c5f1",
+          "EV-1ed510d49dfac0a5"
+        ]
+      }
+    ],
+    "protocol_partial_or_unverified_storylines": [],
+    "sequential_same_device_observations": [],
+    "unverified_precursor_state_reports": [],
+    "quarantined_unverified_observations": [
+      {
+        "storyline_id": "SL002",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A002"
+        ],
+        "spine_fact_ids": [
+          "BA002"
+        ],
+        "spine_entities": [
+          "line.4:current_to"
+        ],
+        "start_time": 1742940909.466434,
+        "end_time": 1742940909.466434,
+        "start_relative_s": 53.216,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A002] line.4: 1 measurement(s) in one ASDU from RTU 172.16.3.22 changed current_to 0.0311952736 -> -0.300520152 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-7a3c007861a8f01a",
+          "EV-2c85700f528423af"
+        ],
+        "anchor_id": "A002",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.22",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL003",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A003"
+        ],
+        "spine_fact_ids": [
+          "BA003"
+        ],
+        "spine_entities": [
+          "line.13:current_from"
+        ],
+        "start_time": 1742940921.884437,
+        "end_time": 1742940921.884437,
+        "start_relative_s": 65.634,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A003] line.13: 1 measurement(s) in one ASDU from RTU 172.16.3.9 changed current_from 0.318877041 -> 0.117757946 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-2977fd30fc8a9bff",
+          "EV-fff3ad85b7f8e207",
+          "EV-7f97e08dabf60830",
+          "EV-bafd978b1e828bd5"
+        ],
+        "anchor_id": "A003",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.9",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL004",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A004"
+        ],
+        "spine_fact_ids": [
+          "BA004"
+        ],
+        "spine_entities": [
+          "line.11:current_from"
+        ],
+        "start_time": 1742940978.242589,
+        "end_time": 1742940978.242589,
+        "start_relative_s": 121.993,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A004] line.11: 1 measurement(s) in one ASDU from RTU 172.16.3.11 changed current_from 0.0129206283 -> 0.191258579 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-dde003cf2a32bb08",
+          "EV-055222b5cfaff770"
+        ],
+        "anchor_id": "A004",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.11",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL005",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A005"
+        ],
+        "spine_fact_ids": [
+          "BA005"
+        ],
+        "spine_entities": [
+          "line.4:current_to"
+        ],
+        "start_time": 1742941009.543447,
+        "end_time": 1742941009.543447,
+        "start_relative_s": 153.293,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A005] line.4: 1 measurement(s) in one ASDU from RTU 172.16.3.22 changed current_to 0.5 -> 0.0424250774 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-91a74cbeb56aa8a7",
+          "EV-13aec6212d32fb3a"
+        ],
+        "anchor_id": "A005",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.22",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL006",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A006"
+        ],
+        "spine_fact_ids": [
+          "BA006"
+        ],
+        "spine_entities": [
+          "line.11:current_to"
+        ],
+        "start_time": 1742941022.56284,
+        "end_time": 1742941022.56284,
+        "start_relative_s": 166.313,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A006] line.11: 1 measurement(s) in one ASDU from RTU 172.16.3.12 changed current_to 0.25705871 -> -0.459528834 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-7525edee8b6d6ada",
+          "EV-05583ec4f15f832e"
+        ],
+        "anchor_id": "A006",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.12",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL007",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A007"
+        ],
+        "spine_fact_ids": [
+          "BA007"
+        ],
+        "spine_entities": [
+          "line.13:current_from"
+        ],
+        "start_time": 1742941091.984001,
+        "end_time": 1742941091.984001,
+        "start_relative_s": 235.734,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A007] line.13: 1 measurement(s) in one ASDU from RTU 172.16.3.9 changed current_from 0.0925605968 -> 0.377396315 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-cfb71500b3a2c0f9",
+          "EV-0f66d1c0f6d33f54",
+          "EV-e4f20945148c56e7",
+          "EV-09025e5d5fe9e907"
+        ],
+        "anchor_id": "A007",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.9",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL008",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A008"
+        ],
+        "spine_fact_ids": [
+          "BA008"
+        ],
+        "spine_entities": [
+          "line.4:current_to"
+        ],
+        "start_time": 1742941259.675742,
+        "end_time": 1742941259.675742,
+        "start_relative_s": 403.426,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A008] line.4: 1 measurement(s) in one ASDU from RTU 172.16.3.22 changed current_to 0.179985419 -> -0.0560054071 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-27543a11b38c7814",
+          "EV-18588a5e0e5a2065"
+        ],
+        "anchor_id": "A008",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.22",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL009",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A009"
+        ],
+        "spine_fact_ids": [
+          "BA009"
+        ],
+        "spine_entities": [
+          "line.13:current_to"
+        ],
+        "start_time": 1742941276.958396,
+        "end_time": 1742941276.958396,
+        "start_relative_s": 420.708,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A009] line.13: 1 measurement(s) in one ASDU from RTU 172.16.3.16 changed current_to 0.180731222 -> -0.432608038 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-fdfeb675b01ad51a",
+          "EV-b1368588ce90d853"
+        ],
+        "anchor_id": "A009",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.16",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL010",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A010"
+        ],
+        "spine_fact_ids": [
+          "BA010"
+        ],
+        "spine_entities": [
+          "line.10:current_from"
+        ],
+        "start_time": 1742941311.590451,
+        "end_time": 1742941311.590451,
+        "start_relative_s": 455.34,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A010] line.10: 1 measurement(s) in one ASDU from RTU 172.16.2.4 changed current_from 0.345893085 -> 0.730269432 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-66eddeb8cc7066c0",
+          "EV-93b27fdbd6c493c5",
+          "EV-35faf0dd2c1a9cd8",
+          "EV-dc057231a6374206"
+        ],
+        "anchor_id": "A010",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.2.4",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL011",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A011"
+        ],
+        "spine_fact_ids": [
+          "BA011"
+        ],
+        "spine_entities": [
+          "line.13:current_to"
+        ],
+        "start_time": 1742941317.000897,
+        "end_time": 1742941317.000897,
+        "start_relative_s": 460.751,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A011] line.13: 1 measurement(s) in one ASDU from RTU 172.16.3.16 changed current_to -0.0287365634 -> 0.0850577727 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-e06095f33a18c900",
+          "EV-2bdfd878dde70ac1"
+        ],
+        "anchor_id": "A011",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.16",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL012",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A012"
+        ],
+        "spine_fact_ids": [
+          "BA012"
+        ],
+        "spine_entities": [
+          "line.13:current_to"
+        ],
+        "start_time": 1742941337.021203,
+        "end_time": 1742941337.021203,
+        "start_relative_s": 480.771,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A012] line.13: 1 measurement(s) in one ASDU from RTU 172.16.3.16 changed current_to 0.0789418891 -> -0.37457633 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-d305548a2c5d27a6",
+          "EV-acb0d7f8f9cfc564"
+        ],
+        "anchor_id": "A012",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.16",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL013",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A013"
+        ],
+        "spine_fact_ids": [
+          "BA013"
+        ],
+        "spine_entities": [
+          "line.13:current_from"
+        ],
+        "start_time": 1742941362.171869,
+        "end_time": 1742941362.171869,
+        "start_relative_s": 505.922,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A013] line.13: 1 measurement(s) in one ASDU from RTU 172.16.3.9 changed current_from -0.0136902006 -> 0.323304713 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-787f68e6b8fa3663",
+          "EV-b2963098da9fe505",
+          "EV-beb332491ea4bb33",
+          "EV-0bc275c90f67349f"
+        ],
+        "anchor_id": "A013",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.9",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL014",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A014"
+        ],
+        "spine_fact_ids": [
+          "BA014"
+        ],
+        "spine_entities": [
+          "line.4:current_to"
+        ],
+        "start_time": 1742941379.782472,
+        "end_time": 1742941379.782472,
+        "start_relative_s": 523.532,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A014] line.4: 1 measurement(s) in one ASDU from RTU 172.16.3.22 changed current_to -0.0992443711 -> 0.124717578 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['not_sustained_in_later_samples']).",
+        "evidence_ids": [
+          "EV-b1da4c1b9446f387",
+          "EV-93f9aea82426851f"
+        ],
+        "anchor_id": "A014",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.22",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "not_sustained_in_later_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['not_sustained_in_later_samples']."
+      },
+      {
+        "storyline_id": "SL015",
+        "storyline_kind": "behavioral",
+        "transaction_id": null,
+        "anchor_ids": [
+          "A015"
+        ],
+        "spine_fact_ids": [
+          "BA015"
+        ],
+        "spine_entities": [
+          "line.11:current_from"
+        ],
+        "start_time": 1742941388.454504,
+        "end_time": 1742941388.454504,
+        "start_relative_s": 532.205,
+        "completeness_status": "behavioral_unverified_observation",
+        "independent_source_container_count": 1,
+        "independent_support_edge_count": 0,
+        "supported_step_count": 0,
+        "reconstructed_behavior": "[A015] line.11: 1 measurement(s) in one ASDU from RTU 172.16.3.11 changed current_from 0.039640937 -> 0.30446586 (level_shift; quality good=True; sustained=False; verification=unverified_observation; issues=['insufficient_post_samples']).",
+        "evidence_ids": [
+          "EV-a8263ade67e36091",
+          "EV-0dcd08347f81599f"
+        ],
+        "anchor_id": "A015",
+        "anchor_type": "measurement_step",
+        "rtu_ip": "172.16.3.11",
+        "verification_status": "unverified_observation",
+        "verification_issues": [
+          "insufficient_post_samples"
+        ],
+        "quarantine_reason": "Excluded from RTU ASDU bundles and Verified Element Bridges because anchor verification failed: ['insufficient_post_samples']."
+      }
+    ]
+  },
+  "rtu_asdu_bundles": [
+    {
+      "bundle_id": "BND-001",
+      "asdu_container_id": "SRC-ARP_ACTIVITY_INCREASE-172.16.3.11/ARP",
+      "container_kind": "network_link_or_arp",
+      "rtu_ip": null,
+      "master_ip": null,
+      "host_ip": "172.16.3.11",
+      "time": 1742940857.784495,
+      "time_end": 1742940857.918559,
+      "relative_time_s": 1.535,
+      "member_anchor_ids": [
+        "A001"
+      ],
+      "member_fact_ids": [
+        "BA001"
+      ],
+      "member_entities": [
+        "172.16.3.11/ARP"
+      ],
+      "member_device_stems": [],
+      "member_anchor_types": [
+        "arp_activity_increase"
+      ],
+      "co_reported_same_asdu_edge_ids": [],
+      "all_members_verified": true,
+      "independent_source_count": 1,
+      "vantages": [],
+      "evidence_ids": [
+        "EV-cec1dc5ea9830caa",
+        "EV-2b37379d9057dd3f",
+        "EV-7ee21b5bc415c5f1",
+        "EV-1ed510d49dfac0a5",
+        "EV-e8fd2f500f935d96",
+        "EV-1508d240af093fc5",
+        "EV-c903750de19bc82b"
+      ],
+      "co_reporting_semantics": "shared_asdu_container_co_report_only_not_topological_or_causal"
+    }
+  ],
+  "verified_element_bridges": [],
+  "same_rtu_supported_relations": [],
+  "bridged_bundle_components": [],
+  "candidate_scenario_phases": [
+    {
+      "phase_id": "PHS-001",
+      "phase_profile": "localized_measurement_or_state_observations",
+      "start_time": 1742940857.784495,
+      "end_time": 1742940857.918559,
+      "start_relative_s": 1.535,
+      "end_relative_s": 1.669,
+      "transaction_ids": [],
+      "verified_bundle_ids": [
+        "BND-001"
+      ],
+      "verified_storyline_ids": [
+        "SL001"
+      ],
+      "verified_anchor_ids": [
+        "A001"
+      ],
+      "verified_bridge_ids": [],
+      "sequential_same_device_edge_ids": [],
+      "unverified_precursor_anchor_ids": [],
+      "observed_host_and_link_context": {
+        "rtu_ips": [],
+        "master_ips": [],
+        "arp_activity": [
+          {
+            "anchor_id": "A001",
+            "host_ip": "172.16.3.11",
+            "packet_count": 12,
+            "targets": {
+              "172.16.3.28": 4,
+              "172.16.3.20": 4,
+              "172.16.3.18": 4
+            },
+            "target_first_seen": {
+              "172.16.3.28": 1742940857.784495,
+              "172.16.3.20": 1742940857.817129,
+              "172.16.3.18": 1742940857.822169
+            },
+            "arp_target_overlap_rtu_ips": []
+          }
+        ]
+      },
+      "unresolved_cross_device_candidate_count": 0,
+      "unresolved_cross_device_candidates": [],
+      "epistemic_boundary": "Phase PHS-001 groups 1 verified bundle(s) and 0 transaction(s) within +1.535s..+1.669s. 0 element bridge(s) are supported; all 0 cross-device candidate relation(s) remain strictly unresolved (causal_status=not_established)."
+    }
+  ],
+  "source_dependency_ledger": {
+    "verified_anchor_count": 1,
+    "quarantined_unverified_anchor_count": 14,
+    "iec104_asdu_container_ids": [],
+    "iec104_asdu_container_count": 0,
+    "tcp_link_container_ids": [],
+    "tcp_link_container_count": 0,
+    "arp_container_ids": [
+      "SRC-ARP_ACTIVITY_INCREASE-172.16.3.11/ARP"
+    ],
+    "arp_container_count": 1,
+    "composite_event_container_ids": [],
+    "composite_event_container_count": 0,
+    "verified_source_container_count": 1,
+    "distinct_rtu_ips": [],
+    "distinct_rtu_count": 0,
+    "distinct_master_ips": [],
+    "distinct_arp_host_ips": [
+      "172.16.3.11"
+    ],
+    "co_reported_same_asdu_reduction_count": 0,
+    "mirror_vantages_observed": [],
+    "raw_vantage_capture_count": 7,
+    "unique_verified_evidence_id_count": 7,
+    "ipal_correspondence_fact_count": 18,
+    "ipal_correspondence_edge_count": 18,
+    "ipal_correspondence_row_count": 14,
+    "ipal_independent_source_weight": 0,
+    "accounting_rules": {
+      "same_asdu_multi_ioa": "counted_as_one_container_not_independent_per_point",
+      "mirror_vantage_captures": "deduplicated_across_n302_and_n318",
+      "ipal_state_updates": "weight_zero_temporal_correspondence_only",
+      "unverified_observations": "quarantined_excluded_from_verified_containers"
+    }
+  },
+  "competing_explanations": []
+}
