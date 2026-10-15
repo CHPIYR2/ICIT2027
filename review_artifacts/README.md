@@ -1,6 +1,8 @@
 # MIRAGE-OT Review Artifacts
 
-Synthesis reliability outputs for `ev_564bebaa45f0686cf98d` and `ev_cbe1e5bef23346604396` are in `review_artifacts/synthesis/` (generating commit `286f4c2341234a244538048644be5112e42de8a1`). The R5 behavioral artifacts below are unchanged.
+- **Method-Freeze Synthesis outputs (`2981fb0`)**: `review_artifacts/synthesis-method-freeze-20261015/` (per-target first ARP timestamp precedence and bridge RTU IP exact alignment check).
+- **Earlier Synthesis reliability outputs (`286f4c2`)**: `review_artifacts/synthesis/` (preserved unchanged).
+- **R5 Behavioral Reconstruction outputs (`2083eb7`)**: `review_artifacts/behavioral-r5-20261015/` (preserved unchanged).
 
 # MIRAGE-OT Review Artifacts (`behavioral-r5-20261015`)
 

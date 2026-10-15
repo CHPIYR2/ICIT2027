@@ -1,0 +1,227 @@
+{
+  "manifest_version": "1.0.0",
+  "method_name": "MIRAGE-OT Evidence-Grounded Post-Alert Incident Reconstruction & Four-Layer Synthesis Engine",
+  "freeze_status": "FROZEN_FOR_CROSS_SCENARIO_EVALUATION",
+  "git_branch": "mirage-ot",
+  "frozen_engine_git_commit": "2981fb062b127218a34f23f2ff0292e4ca8cfea7",
+  "code_sha256": "d43d9867ce847df169e13345e4c3461cd99fd5167292a85cedaaa553d93e5bb3",
+  "evidence_code_sha256": "032c6977ac0507e9c442b37e4e78455d0ab6d1a21b1efe751a0ccf37242a3b85",
+  "module_hashes": {
+    "postalert/__init__.py": "14fd0d5ba584ee7c718e5552578844ccdff4d5caa4ae17ec5e2ff91236dccd13",
+    "postalert/author_pilot_eval.py": "eb71bd2ab7450bbc26a7ecbd891203f9e60d0cdf0e70e6161fd44d374cbeec09",
+    "postalert/eval_t3.py": "309086b886ee9abfc116a7e0f4e6b9184bf89b84b75f441863596ce29119c98e",
+    "postalert/evaluate.py": "11c5d75932d2afdebf172cb4696fb5cbd59e9d7af73bebc816e9cf26dc0b8128",
+    "postalert/explain.py": "5a51c6da0dd333504eca16f17a011030652a3a3fb425887a8d335d40b88d85a9",
+    "postalert/pilot_pool.py": "c951b2b8b27e36c4b270839f424c5bd3f2aebecb7726bf6f00b0f73ff25fa2a9",
+    "postalert/pipeline.py": "3ccd73e2ba9bac653e9741b038b0cd3a69e92534d87524610e5f5e427a752aa0",
+    "postalert/position_bias.py": "8f8b77100f0e873bbccceb22e69f0c0321e33a3948c7e20d256bd56724dec995",
+    "postalert/relations.py": "1469cd855121c047b9f72a2dbe9e3c37efa9f37de6590cf20b577141dc24b99f",
+    "postalert/runner.py": "7265ef0bcc55607f02d20d397f72e6c26276eca813c01afdfeaaad58803f80aa",
+    "postalert/select.py": "a63c4f70258b6ab7cb1ed8bd200bb4b490096a1d9a801bb4dffa062c4438f704",
+    "postalert/timeline.py": "55e5ea6a75452dee45e503aaf5ce3b19b61241804bfa9024ae33d0cc12ee7f18",
+    "postalert/verify.py": "87474464284bcc745f0078d55020a3b7e7fa8483f64062cf671f5f6c5aca968d",
+    "reconstruction/__init__.py": "bc3a2fe2f9c3066cfab3f4a7f45608c5d6701a2d7b2e10f964be7e1c15b40409",
+    "reconstruction/anchors.py": "65c12ee679e986d829005f6bc28292958ab941c4059923eec45d64600357139f",
+    "reconstruction/behavior.py": "db98618f2db4017a11fa6909e993ebe9fe5bb2fcc0253fafb31f87963461e459",
+    "reconstruction/consistency.py": "f9addfb77cc6adb8fcfcc5da9c0658e335453de92ed089bb8c3c7dca5f5aa2c1",
+    "reconstruction/engine.py": "a0e99d95e7faa6c483313628fa225ee032a5d6e5bd968f6cadbc1dedb5a2af37",
+    "reconstruction/event_graph.py": "d4a570aa0b4924bbdc0b108114a9af07082bafdb6a5efe821d296e52433ff883",
+    "reconstruction/report.py": "4285ec7239f5c6cacceb119a022a40372c59f0e61b70d0c6d8db58a8802166f4",
+    "reconstruction/storyline.py": "c01b1a9be706d224a1faabac88ed6d1e96dc9450068ea0a52aca4064a944bd70",
+    "reconstruction/synthesis.py": "d040a767322d820b41e1b36df87630d0b87974ff0f6ce98d7d9af968e9660392",
+    "reconstruction/transactions.py": "d77dcd6bddfeb7c805229392dd83acf88879f1a7143b789c938cda1c8be8e850"
+  },
+  "evidence_module_hashes": {
+    "evidence/__init__.py": "ffb0641ecc25ec06ede8717ee5b4bbaf461537d268eae56eeee9d2bd2bcdc457",
+    "evidence/field_audit.py": "2712fa9a87cd9ab1d33d10d618024b9439935c686d69648763b7929e926fe37d",
+    "evidence/iec104.py": "1ffaf03f3f1ed49026411b5abb581f57696358ec11c1cbe47448d4eef9b7de86",
+    "evidence/iec104_raw.py": "0e06d7813de4565400ba4031c0ae196032ddb824528b8957f5dc6cd647104a34",
+    "evidence/index.py": "11a8bb73f72c0b71d69f398c701a5626b51a9e3fce5c060ee17819ef79aaa016",
+    "evidence/queries.py": "9d2fb070bb5a59a48205f6b114676583680da13a8b7c5815576c2639cca4583e",
+    "evidence/store.py": "a85ae489b228dbf4dc06968449c4b53798a1ab12c7308fd1dbe00ca3029650f3"
+  },
+  "frozen_parameters": {
+    "evidence_indexing": {
+      "context_seconds_before_start": 15.0,
+      "context_seconds_after_end": 15.0,
+      "modalities": "both",
+      "decoder_preference": [
+        "ipal-transcriber",
+        "tshark"
+      ],
+      "required_quality_bits": {
+        "state_types_1_2_3_4_30_31": [
+          "iv",
+          "nt",
+          "sb",
+          "bl"
+        ],
+        "measurement_types_9_10_11_12_13_14_34_35_36": [
+          "iv",
+          "nt",
+          "sb",
+          "bl",
+          "ov"
+        ]
+      }
+    },
+    "phase1_protocol_transactions": {
+      "pre_context_sec": 15.0,
+      "post_feedback_sec": 15.0,
+      "confirm_window_sec": 5.0,
+      "termination_window_sec": 10.0,
+      "retransmit_window_sec": 0.5,
+      "cross_vantage_transit_sec": 0.05
+    },
+    "event_anchor_discovery": {
+      "state_types": [
+        1,
+        3,
+        30,
+        31
+      ],
+      "measurement_types": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        34,
+        35,
+        36
+      ],
+      "step_relative": 0.5,
+      "persist_relative": 0.1,
+      "magnitude_floor": 0.001,
+      "near_zero_relative": 1e-06,
+      "min_persist_samples": 2,
+      "min_persist_ratio": 0.8,
+      "max_pre_sample_gap_seconds": 30.0,
+      "vantage_merge_seconds": 0.5,
+      "arp_min_count": 10,
+      "arp_rate_factor": 5.0,
+      "gap_min_seconds": 25.0,
+      "gap_cadence_factor": 3.0
+    },
+    "phase2_temporal_graph_and_behavioral_gate": {
+      "cross_entity_horizon_sec": 10.0,
+      "behavioral_horizon_seconds": 15.0,
+      "max_candidates_per_anchor": 6,
+      "min_level_shift_ratio_agreement": 0.5
+    },
+    "phase3_storyline_search": {
+      "beam_width": 4,
+      "max_depth": 6,
+      "selection_limit": 24
+    },
+    "phase4_incident_synthesis": {
+      "synthesis_version": "1.1",
+      "phase_gap_seconds": 15.0,
+      "cross_rtu_bridge_requires_distinct_bundles_and_distinct_rtus": true,
+      "arp_precedence_requires_per_target_first_packet_before_link_within_horizon": true,
+      "ipal_independent_source_weight": 0
+    },
+    "report_and_consistency_gate": {
+      "default_explanation_mode": "deterministic_only",
+      "requires_quality_consistency": true,
+      "requires_lineage_consistency": true
+    }
+  },
+  "strict_input_isolation": {
+    "allowed_window_specification_fields": [
+      "episode_id",
+      "scenario",
+      "recording",
+      "start",
+      "end"
+    ],
+    "prohibited_inputs": [
+      "events.json",
+      "events.jsonl",
+      "official event descriptions / attack family labels",
+      "malicious packet/state flags",
+      "physical.zip",
+      "external grid topology files not present in raw telemetry"
+    ]
+  },
+  "upstream_datasets": {
+    "01-Basic.zip": {
+      "md5": "c482e0dc7e56b063b357d8b03be5cce6",
+      "compressed_bytes": 703191516,
+      "recordings": {
+        "test": {
+          "pcaps": 4,
+          "point_map_entries": 500,
+          "windows": 28
+        },
+        "train": {
+          "pcaps": 4,
+          "point_map_entries": 500,
+          "windows": 7
+        }
+      }
+    },
+    "02-Semiurban.zip": {
+      "md5": "0f7d3eb61e478d05f4b431ae99d45564",
+      "compressed_bytes": 6375875182,
+      "recordings": {
+        "test": {
+          "pcaps": 6,
+          "point_map_entries": 3640,
+          "windows": 39
+        },
+        "train": {
+          "pcaps": 6,
+          "point_map_entries": 3640,
+          "windows": 9
+        }
+      }
+    },
+    "03-Rural.zip": {
+      "md5": "0cc7807bd5a76ea5bc85a1da6fd6c061",
+      "compressed_bytes": 1866012065,
+      "recordings": {
+        "test": {
+          "pcaps": 8,
+          "point_map_entries": 1908,
+          "windows": 36
+        }
+      }
+    }
+  },
+  "per_window_recorded_metrics_schema": [
+    "episode_id",
+    "scenario",
+    "recording",
+    "window_start",
+    "window_end",
+    "window_duration_s",
+    "observation_profile",
+    "anchor_count_total",
+    "anchor_count_verified",
+    "anchor_count_unverified",
+    "anchor_counts_by_type",
+    "transaction_count_total",
+    "transaction_count_accepted",
+    "transaction_count_verified_transition",
+    "storyline_count_total",
+    "storyline_count_supported_multi_node",
+    "storyline_count_verified_single_anchor",
+    "storyline_count_unverified_observation",
+    "sequential_same_device_observation_count",
+    "rtu_asdu_bundle_count",
+    "cross_rtu_verified_element_bridge_count",
+    "same_rtu_supported_relation_count",
+    "bridged_bundle_component_count",
+    "candidate_scenario_phase_count",
+    "competing_explanation_count",
+    "competing_explanation_classes",
+    "unresolved_cross_device_branch_count",
+    "source_ledger_counts_by_container_family",
+    "quality_consistency_passed",
+    "lineage_consistency_passed",
+    "final_report_status",
+    "reconstruction_failure_or_abstention_reasons"
+  ]
+}
