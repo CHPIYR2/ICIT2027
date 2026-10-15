@@ -73,6 +73,12 @@ def main(argv=None) -> None:
     peval.add_argument("--pilot-dir", type=Path, default=Path("runs/etgi/t3-pilot-pool-20261015"))
     peval.add_argument("--out", type=Path, required=True)
     peval.add_argument("--endpoint", default="http://127.0.0.1:11434")
+    audit = commands.add_parser("field-audit")
+    audit.add_argument("--db", type=Path, required=True, help="index under audit (its pcap-slices are re-read)")
+    audit.add_argument("--legacy-db", type=Path, help="earlier index of the same window")
+    audit.add_argument("--legacy-commit", default="6a0c162", help="commit whose iec104.py built --legacy-db")
+    audit.add_argument("--legacy-slices", type=Path, help="slices used by --legacy-db, for byte comparison")
+    audit.add_argument("--out", type=Path, required=True)
     recon = commands.add_parser("reconstruct")
     recon.add_argument("--db", type=Path, required=True)
     recon.add_argument("--out", type=Path, required=True)
@@ -150,6 +156,9 @@ def main(argv=None) -> None:
         summary = run_protocol(args.protocol, args.out, endpoint=args.endpoint)
         print(json.dumps({"out": str(args.out), "code_sha256": summary["code_sha256"],
                           "bundles": summary["bundles"]}, indent=2, default=str))
+        return
+    if args.command == "field-audit":
+        _field_audit(args)
         return
     if args.command == "index":
         meta = index_window(
@@ -262,6 +271,36 @@ def _run_with_budget(db, llm, name, out, *, limitations, questions, args) -> dic
         return run_named(db, llm, name, out, limitations=limitations, questions=questions)
     finally:
         harness.preset = original
+
+
+def _field_audit(args) -> None:
+    import hashlib
+    from .evidence import field_audit, iec104
+    from .evidence.store import get_meta
+    conn, meta = open_indexed(args.db)
+    meta.update(archive=get_meta(conn, "archive"), members=get_meta(conn, "members"))
+    conn.close()
+    slices = args.db.parent / "pcap-slices"
+    pipelines = [{"label": "current_parser_and_db", "parser": iec104, "db": args.db}]
+    if args.legacy_db:
+        legacy = field_audit.load_parser_from_git(Path.cwd(), args.legacy_commit)
+        pipelines.insert(0, {"label": f"legacy_{args.legacy_commit}_parser_and_db", "parser": legacy,
+                             "db": args.legacy_db})
+    result = field_audit.audit_slices(slices, pipelines)
+    if args.legacy_slices:
+        result["legacy_slice_sha256"] = {
+            p.stem: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(args.legacy_slices.glob("*.pcap"))
+        }
+        result["slices_identical_to_legacy"] = result["legacy_slice_sha256"] == result["slice_sha256"]
+    dbs = {"current": args.db, **({"legacy": args.legacy_db} if args.legacy_db else {})}
+    result["ipal_lineage"] = field_audit.audit_ipal_lineage(
+        Path(meta["archive"]), meta["members"]["state"], float(meta["indexed_start"]),
+        float(meta["indexed_end"]), dbs,
+    )
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(result, indent=2, default=str), encoding="utf-8")
+    print(json.dumps({"out": str(args.out), "raw": result["raw"],
+                      "slices_identical_to_legacy": result.get("slices_identical_to_legacy")}, indent=2))
 
 
 if __name__ == "__main__":

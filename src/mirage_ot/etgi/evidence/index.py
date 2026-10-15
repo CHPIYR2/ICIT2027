@@ -189,6 +189,7 @@ def _index_state(conn, archive, member, initial, by_entity, by_ioa, start, end, 
                     "ca_ioa_candidates": ioas,
                     "collapsed_alias": alias,
                     "physical_trust": "network-reported-not-simulator-truth",
+                    "packet_lineage": "not_present_in_ipal_state_source",
                 },
             })
             counts["electrical_new" if status == "new" else "electrical_initial"] += 1
@@ -297,7 +298,12 @@ def _index_iec104(conn, archive, members, by_ioa, packet_index, start, end, coun
                 if parent is None:
                     counts["iec104_unmatched"] += 1
                     fingerprint = fingerprint or evidence_id("unmatched", member, obj["timestamp"], obj["ca_ioa"], obj["type_id"])
-                row_id = evidence_id(member, obj["timestamp"], obj["ca_ioa"], obj["type_id"], obj["ioa"], obj["alignment"])
+                row_id = evidence_id(member, obj["timestamp"], obj["ca_ioa"], obj["type_id"], obj["ioa"],
+                                     obj["alignment"], obj.get("frame_number"), obj.get("asdu_index"),
+                                     obj.get("object_index"))
+                not_aligned = sorted(
+                    field for field, status in (obj.get("field_alignment") or {}).items() if status != "aligned"
+                )
                 insert_evidence(conn, {
                     "evidence_id": row_id,
                     "timestamp": obj["timestamp"],
@@ -334,6 +340,13 @@ def _index_iec104(conn, archive, members, by_ioa, packet_index, start, end, coun
                         "sq": obj.get("sq"),
                         "select_execute": obj.get("select_execute"),
                         "quality_invalid": obj.get("quality_invalid"),
+                        "quality_flags": obj.get("quality_flags"),
+                        "quality_good": obj.get("quality_good"),
+                        "frame_number": obj.get("frame_number"),
+                        "asdu_index": obj.get("asdu_index"),
+                        "object_index": obj.get("object_index"),
+                        "numix": obj.get("numix"),
+                        "fields_not_aligned": not_aligned,
                         "packet_match": "unique" if parent else "unmatched_or_ambiguous",
                     },
                 })

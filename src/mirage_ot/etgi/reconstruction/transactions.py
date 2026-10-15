@@ -287,6 +287,7 @@ def collapse_multi_vantage_messages(
         cot_tst = payload.get("cot_test") if isinstance(payload.get("cot_test"), bool) else None
         se_mode = payload.get("select_execute")
         q_inv = payload.get("quality_invalid") if isinstance(payload.get("quality_invalid"), bool) else None
+        q_flags = payload.get("quality_flags") if isinstance(payload.get("quality_flags"), dict) else None
         apci_tx = _int_or_none(payload.get("apci_tx"))
         apci_rx = _int_or_none(payload.get("apci_rx"))
 
@@ -310,6 +311,8 @@ def collapse_multi_vantage_messages(
             "cot_test": cot_tst,
             "select_execute": se_mode,
             "quality_invalid": q_inv,
+            "quality_flags": q_flags,
+            "quality_other_flags_set": _other_quality_flags_set(q_flags),
             "apci_tx": apci_tx,
             "apci_rx": apci_rx,
             "direction": _direction(first),
@@ -344,7 +347,7 @@ def _rows_payload_consistent(r1: dict, r2: dict) -> bool:
         return False
     p1 = r1.get("payload") if isinstance(r1.get("payload"), dict) else {}
     p2 = r2.get("payload") if isinstance(r2.get("payload"), dict) else {}
-    for key in ("cot_negative", "cot_test", "select_execute", "quality_invalid", "apci_tx"):
+    for key in ("cot_negative", "cot_test", "select_execute", "quality_invalid", "quality_flags", "apci_tx"):
         if p1.get(key) is not None and p2.get(key) is not None and p1.get(key) != p2.get(key):
             return False
     return True
@@ -487,14 +490,20 @@ def evaluate_command_effect_inference(
     post_command_value: float | None,
     pre_quality_invalid: bool | None = None,
     post_quality_invalid: bool | None = None,
+    pre_quality_flags_set: list[str] | None = None,
+    post_quality_flags_set: list[str] | None = None,
+    test_bits: dict | None = None,
     same_rtu_and_ca: bool = True,
     same_device_stem: bool = True,
 ) -> dict:
     """Testable consistency gate for upgrading a command-to-state transition to `supported_inference`.
 
-    Invalid quality on the pre-command or post-command measurement blocks the upgrade.
-    Missing quality is recorded as uncertainty and also blocks the upgrade: an absent
-    IV/QDS bit is not treated as a valid measurement.
+    Quality must be decoded and good on both the pre-command and post-command value:
+    IV clear, and NT/SB/BL/OV decoded and clear. A missing bit is recorded as
+    uncertainty and blocks the upgrade. The COT test bit must be decoded and clear on
+    the command, its confirmation, and both measurements; a test-mode exchange is not
+    an operational control effect. A COT=7 whose P/N bit was not decoded does not
+    establish acceptance.
     """
     failed = []
     uncertainties = []
@@ -506,22 +515,39 @@ def evaluate_command_effect_inference(
         failed.append("command_rejected_by_negative_confirmation")
     elif command_acceptance_status == "unconfirmed_missing_cot7":
         failed.append("command_missing_cot7_confirmation")
+    elif command_acceptance_status == "confirmation_observed_acceptance_unknown":
+        failed.append("command_acceptance_unknown")
+        uncertainties.append("cot7_pn_bit_not_decoded")
     if not command_value_present or commanded_value is None:
         failed.append("command_value_unknown")
-    if not pre_value_present or pre_command_value is None:
-        failed.append("missing_pre_command_baseline")
-    elif pre_quality_invalid is True:
-        failed.append("pre_value_quality_invalid")
-    elif pre_quality_invalid is None:
-        failed.append("pre_quality_unknown")
-        uncertainties.append("pre_quality_not_decoded")
-    if not post_value_present or post_command_value is None:
-        failed.append("post_state_or_measurement_value_unknown")
-    elif post_quality_invalid is True:
-        failed.append("post_value_quality_invalid")
-    elif post_quality_invalid is None:
-        failed.append("post_quality_unknown")
-        uncertainties.append("post_quality_not_decoded")
+    for side, present, value, invalid, flags in (
+        ("pre", pre_value_present, pre_command_value, pre_quality_invalid, pre_quality_flags_set),
+        ("post", post_value_present, post_command_value, post_quality_invalid, post_quality_flags_set),
+    ):
+        if not present or value is None:
+            failed.append("missing_pre_command_baseline" if side == "pre"
+                          else "post_state_or_measurement_value_unknown")
+        elif invalid is True:
+            failed.append(f"{side}_value_quality_invalid")
+        elif invalid is None:
+            failed.append(f"{side}_quality_unknown")
+            uncertainties.append(f"{side}_quality_not_decoded")
+        elif flags is None:
+            failed.append(f"{side}_quality_flags_unknown")
+            uncertainties.append(f"{side}_nt_sb_bl_ov_not_decoded")
+        elif flags:
+            failed.append(f"{side}_value_quality_not_good:{','.join(sorted(flags))}")
+    if test_bits is None:
+        failed.append("test_bits_unknown")
+        uncertainties.append("cot_test_bits_not_supplied")
+    else:
+        for role in ("command", "confirmation", "pre", "post"):
+            bit = test_bits.get(role)
+            if bit is True:
+                failed.append(f"{role}_test_bit_set")
+            elif bit is None:
+                failed.append(f"{role}_test_bit_unknown")
+                uncertainties.append(f"{role}_cot_test_not_decoded")
 
     shifted = False
     direction_ok = False
@@ -558,11 +584,70 @@ def evaluate_command_effect_inference(
         "matches_commanded_setpoint": matches_target,
         "pre_quality_invalid": pre_quality_invalid,
         "post_quality_invalid": post_quality_invalid,
+        "pre_quality_flags_set": pre_quality_flags_set,
+        "post_quality_flags_set": post_quality_flags_set,
+        "test_bits": test_bits,
         "quality_uncertainty": uncertainties,
         "failed_conditions": failed,
         "recommended_claim_level": "supported_inference" if passed else "unresolved",
         "recommended_verification_status": "supported" if passed else "unresolved",
     }
+
+
+def measurement_gate_inputs(tx: dict, mt: dict) -> dict:
+    """Gate arguments for a setpoint -> measurement transition. Shared by Phase 1 and Phase 2."""
+    return {
+        "command_acceptance_status": tx.get("command_acceptance_status"),
+        "command_value_present": bool(tx.get("value_present")),
+        "commanded_value": tx.get("commanded_value"),
+        "pre_value_present": mt.get("pre_command_value") is not None,
+        "pre_command_value": mt.get("pre_command_value"),
+        "pre_quality_invalid": mt.get("pre_quality_invalid"),
+        "pre_quality_flags_set": mt.get("pre_quality_flags_set"),
+        "post_value_present": mt.get("post_command_value") is not None,
+        "post_command_value": mt.get("post_command_value"),
+        "post_quality_invalid": mt.get("post_quality_invalid"),
+        "post_quality_flags_set": mt.get("post_quality_flags_set"),
+        "test_bits": mt.get("test_bits"),
+    }
+
+
+def feedback_gate_inputs(tx: dict, fb: dict) -> dict:
+    """Gate arguments for a command -> spontaneous state report. Shared by Phase 1 and Phase 2."""
+    return {
+        "command_acceptance_status": tx.get("command_acceptance_status"),
+        "command_value_present": bool(tx.get("value_present")),
+        "commanded_value": tx.get("commanded_value"),
+        "pre_value_present": fb.get("pre_state_value") is not None,
+        "pre_command_value": fb.get("pre_state_value"),
+        "pre_quality_invalid": fb.get("pre_quality_invalid"),
+        "pre_quality_flags_set": fb.get("pre_quality_flags_set"),
+        "post_value_present": bool(fb.get("value_present")),
+        "post_command_value": fb.get("value"),
+        "post_quality_invalid": fb.get("quality_invalid"),
+        "post_quality_flags_set": fb.get("quality_other_flags_set"),
+        "test_bits": fb.get("test_bits"),
+    }
+
+
+def _test_bits(tx: dict, pre: dict | None, post: dict | None) -> dict:
+    ack = tx.get("activation_confirmation")
+    return {
+        "command": tx["command_activation"].get("cot_test"),
+        "confirmation": ack.get("cot_test") if ack else None,
+        "pre": pre.get("cot_test") if pre else None,
+        "post": post.get("cot_test") if post else None,
+    }
+
+
+def _other_quality_flags_set(flags) -> list[str] | None:
+    """NT/SB/BL/OV bits that are set. None if any of them was not decoded."""
+    if not isinstance(flags, dict):
+        return None
+    others = {k: v for k, v in flags.items() if k != "iv"}
+    if not others or any(v is None for v in others.values()):
+        return None
+    return sorted(k for k, v in others.items() if v)
 
 
 def _finalize_transaction(
@@ -588,27 +673,18 @@ def _finalize_transaction(
                 if pm["entity"] == m["entity"] and pm["src_ip"] == tx["rtu_ip"]
                 and pm["value_present"] and (cmd_time - 15.0) <= pm["timestamp"] < cmd_time
             ]
-            pre_val = pre_sp[-1]["value"] if pre_sp else None
-            pre_quality = pre_sp[-1].get("quality_invalid") if pre_sp else None
-            gate = evaluate_command_effect_inference(
-                command_acceptance_status=tx["command_acceptance_status"],
-                command_value_present=tx["value_present"],
-                commanded_value=tx["commanded_value"],
-                pre_value_present=bool(pre_sp),
-                pre_command_value=pre_val,
-                pre_quality_invalid=pre_quality,
-                post_value_present=m["value_present"],
-                post_command_value=m["value"],
-                post_quality_invalid=m.get("quality_invalid"),
-                same_rtu_and_ca=True,
-                same_device_stem=True,
-            )
-            tx["protocol_state_feedback"].append({
+            pre = pre_sp[-1] if pre_sp else None
+            record = {
                 **m,
-                "pre_state_value": pre_val,
-                "pre_quality_invalid": pre_quality,
-                "consistency_gate": gate,
-            })
+                "pre_state_value": pre["value"] if pre else None,
+                "pre_quality_invalid": pre.get("quality_invalid") if pre else None,
+                "pre_quality_flags_set": pre.get("quality_other_flags_set") if pre else None,
+                "test_bits": _test_bits(tx, pre, m),
+            }
+            record["consistency_gate"] = evaluate_command_effect_inference(
+                **feedback_gate_inputs(tx, record), same_rtu_and_ca=True, same_device_stem=True,
+            )
+            tx["protocol_state_feedback"].append(record)
             tx["end_time"] = max(tx["end_time"], m["timestamp_end"])
             tx["all_evidence_ids"] = list(dict.fromkeys([
                 *tx["all_evidence_ids"], *m["evidence_ids"], *m["parent_evidence_ids"],
@@ -632,31 +708,31 @@ def _finalize_transaction(
         ]
         if post_msgs:
             first_post = post_msgs[0]
-            pre_val = pre_msgs[-1]["value"] if pre_msgs else None
-            pre_quality = pre_msgs[-1].get("quality_invalid") if pre_msgs else None
+            pre = pre_msgs[-1] if pre_msgs else None
+            pre_val = pre["value"] if pre else None
             post_val = first_post["value"]
             cmd_val = tx["commanded_value"]
+            gate_fields = {
+                "pre_command_value": pre_val,
+                "post_command_value": post_val,
+                "pre_quality_invalid": pre.get("quality_invalid") if pre else None,
+                "pre_quality_flags_set": pre.get("quality_other_flags_set") if pre else None,
+                "post_quality_invalid": first_post.get("quality_invalid"),
+                "post_quality_flags_set": first_post.get("quality_other_flags_set"),
+                "test_bits": _test_bits(tx, pre, first_post),
+            }
             gate = evaluate_command_effect_inference(
-                command_acceptance_status=tx["command_acceptance_status"],
-                command_value_present=tx["value_present"],
-                commanded_value=cmd_val,
-                pre_value_present=bool(pre_msgs),
-                pre_command_value=pre_val,
-                pre_quality_invalid=pre_quality,
-                post_value_present=first_post["value_present"],
-                post_command_value=post_val,
-                post_quality_invalid=first_post.get("quality_invalid"),
+                **measurement_gate_inputs(tx, gate_fields),
                 same_rtu_and_ca=(first_post["src_ip"] == tx["rtu_ip"] and first_post["ca"] == tx["ca"]),
                 same_device_stem=(first_post["device_stem"] == tx["device_stem"]),
             )
             tx["measurement_transition"] = {
+                **gate_fields,
                 "measurement_entity": meas_entity,
                 "ca_ioa": first_post["ca_ioa"],
                 "pre_command_value": pre_val,
                 "pre_command_time": pre_msgs[-1]["timestamp"] if pre_msgs else None,
                 "pre_command_time_end": pre_msgs[-1]["timestamp_end"] if pre_msgs else None,
-                "pre_quality_invalid": pre_quality,
-                "post_quality_invalid": first_post.get("quality_invalid"),
                 "pre_command_canonical_source_id": pre_msgs[-1]["canonical_source_id"] if pre_msgs else None,
                 "pre_command_evidence_ids": (
                     [*pre_msgs[-1]["evidence_ids"], *pre_msgs[-1]["parent_evidence_ids"]] if pre_msgs else []

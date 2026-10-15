@@ -3,10 +3,13 @@
 Key guarantees:
 1. Independent Consistency Gate on `command_to_device_state_transition`:
    - `build_temporal_event_graph()` invokes `evaluate_command_effect_inference()`
-     directly on the actual pre-command, command, and post-command values/flags.
+     directly on the actual pre-command, command, and post-command values/flags,
+     with the same quality flags and COT test bits as the transaction phase
+     (`measurement_gate_inputs` / `feedback_gate_inputs`).
    - Only when all gate conditions hold (`shifted_from_pre_baseline`,
-     `direction_matches_target`, `matches_commanded_setpoint`, valid pre/post
-     values, and non-rejected command) is the edge set to
+     `direction_matches_target`, `matches_commanded_setpoint`, decoded and good
+     pre/post quality, decoded and clear test bits, and a decoded P/N acceptance)
+     is the edge set to
      `claim_level="supported_inference"` (`graph_consistency_gate_status="passed_noncausal_inference_gate"`).
    - Otherwise the edge is kept at `claim_level="unresolved"`,
      `verification_status="unresolved"` (`graph_consistency_gate_status="failed_gate_kept_unresolved"`),
@@ -24,7 +27,7 @@ Key guarantees:
 """
 from __future__ import annotations
 from ..graph.temporal import TemporalEvidenceGraph
-from .transactions import evaluate_command_effect_inference
+from .transactions import evaluate_command_effect_inference, feedback_gate_inputs, measurement_gate_inputs
 
 
 def _reject_if_transaction_rejected(recheck: dict, stored: dict | None) -> dict:
@@ -130,7 +133,7 @@ def build_temporal_event_graph(
             transaction_id=tx_id,
             protocol_meta={
                 "type_id": cmd["type_id"], "cot": cmd["cot"], "tcp_seq": cmd.get("tcp_seq"),
-                "select_execute": cmd.get("select_execute"),
+                "select_execute": cmd.get("select_execute"), "cot_test": cmd.get("cot_test"),
                 "src_ip": cmd["src_ip"], "dst_ip": cmd["dst_ip"],
                 "src_port": cmd["src_port"], "dst_port": cmd["dst_port"],
             },
@@ -170,7 +173,8 @@ def build_temporal_event_graph(
                 source_containers=[ack_src_id],
                 transaction_id=tx_id,
                 protocol_meta={
-                    "type_id": ack["type_id"], "cot": ack["cot"], "cot_negative": cot_neg,
+                    "type_id": ack["type_id"], "cot": ack["cot"], "cot_negative": cot_neg, "cot_test": ack.get("cot_test"),
+                    "select_execute": ack.get("select_execute"),
                     "tcp_seq": ack.get("tcp_seq"),
                     "src_ip": ack["src_ip"], "dst_ip": ack["dst_ip"],
                     "src_port": ack["src_port"], "dst_port": ack["dst_port"],
@@ -211,6 +215,9 @@ def build_temporal_event_graph(
                     "pre_state_value": fb.get("pre_state_value"),
                     "pre_quality_invalid": fb.get("pre_quality_invalid"),
                     "post_quality_invalid": fb.get("quality_invalid"),
+                    "pre_quality_flags_set": fb.get("pre_quality_flags_set"),
+                    "post_quality_flags_set": fb.get("quality_other_flags_set"),
+                    "test_bits": fb.get("test_bits"),
                 },
                 observation=(
                     f"IEC-104 {fb['type_name']} COT={fb['cot']} ({fb['cot_name']}) state report message on "
@@ -242,7 +249,9 @@ def build_temporal_event_graph(
                     evidence_ids=list(mt["pre_command_evidence_ids"]),
                     source_containers=[pre_src_id],
                     transaction_id=tx_id,
-                protocol_meta={"type_id": 13, "cot": 1, "quality_invalid": mt.get("pre_quality_invalid")},
+                protocol_meta={"type_id": 13, "cot": 1, "quality_invalid": mt.get("pre_quality_invalid"),
+                               "quality_flags_set": mt.get("pre_quality_flags_set"),
+                               "cot_test": (mt.get("test_bits") or {}).get("pre")},
                 observation=(
                     f"Pre-command IEC-104 measurement baseline on {mt['measurement_entity']} "
                         f"(CA/IOA={mt['ca_ioa']}) = {mt['pre_command_value']}"
@@ -271,7 +280,9 @@ def build_temporal_event_graph(
                 evidence_ids=post_ev,
                 source_containers=[post_src_id],
                 transaction_id=tx_id,
-                protocol_meta={"type_id": 13, "cot": 1, "quality_invalid": mt.get("post_quality_invalid")},
+                protocol_meta={"type_id": 13, "cot": 1, "quality_invalid": mt.get("post_quality_invalid"),
+                           "quality_flags_set": mt.get("post_quality_flags_set"),
+                           "cot_test": (mt.get("test_bits") or {}).get("post")},
                 observation=(
                     f"Post-command IEC-104 measurement on {mt['measurement_entity']} "
                     f"(CA/IOA={mt['ca_ioa']}) = {mt['post_command_value']} "
@@ -422,16 +433,16 @@ def build_temporal_event_graph(
             fb_meta = fb_node.get("protocol_meta") or {}
             pre_state_val = fb_meta.get("pre_state_value")
             stored_gate = fb_records[fb_index].get("consistency_gate") if fb_index < len(fb_records) else None
-            fb_gate = _reject_if_transaction_rejected(evaluate_command_effect_inference(
-                command_acceptance_status=tx.get("command_acceptance_status"),
-                command_value_present=bool(tx.get("value_present")),
-                commanded_value=tx.get("commanded_value"),
+            fb_record = fb_records[fb_index] if fb_index < len(fb_records) else {}
+            fb_inputs = feedback_gate_inputs(tx, fb_record)
+            fb_inputs.update(
                 pre_value_present=(pre_state_val is not None),
                 pre_command_value=pre_state_val,
-                pre_quality_invalid=fb_meta.get("pre_quality_invalid"),
                 post_value_present=bool(fb_node.get("value_present")),
                 post_command_value=fb_node.get("value"),
-                post_quality_invalid=fb_meta.get("post_quality_invalid"),
+            )
+            fb_gate = _reject_if_transaction_rejected(evaluate_command_effect_inference(
+                **fb_inputs,
                 same_rtu_and_ca=True,
                 same_device_stem=(fb_node.get("device_stem") == tx.get("device_stem")),
             ), stored_gate)
@@ -497,15 +508,7 @@ def build_temporal_event_graph(
             cmd_val = tx.get("commanded_value")
             # Re-evaluate consistency gate directly from actual values AND honor explicit False flags if overridden
             recheck_gate = _reject_if_transaction_rejected(evaluate_command_effect_inference(
-                command_acceptance_status=tx.get("command_acceptance_status"),
-                command_value_present=bool(tx.get("value_present")),
-                commanded_value=cmd_val,
-                pre_value_present=(pre_val is not None),
-                pre_command_value=pre_val,
-                pre_quality_invalid=mt.get("pre_quality_invalid"),
-                post_value_present=(post_val is not None),
-                post_command_value=post_val,
-                post_quality_invalid=mt.get("post_quality_invalid"),
+                **measurement_gate_inputs(tx, mt),
                 same_rtu_and_ca=(post_node.get("ca_ioa", "").split(".")[0] == str(tx.get("ca"))),
                 same_device_stem=(post_node.get("device_stem") == tx.get("device_stem")),
             ), mt.get("consistency_gate"))

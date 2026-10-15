@@ -14,6 +14,7 @@ import subprocess
 from pathlib import Path
 from ..graph.export import write_graph
 from ..postalert.pipeline import _db_fingerprint, export_lineage_bundle, prepare
+from .consistency import check_quality_consistency
 from .event_graph import build_temporal_event_graph
 from .report import build_investigation_report, run_llm_explanation
 from .storyline import reconstruct_storylines
@@ -67,6 +68,7 @@ def reconstruct_incident(
         explanation=explanation,
     )
     lineage_bundle = export_lineage_bundle(db, eg_result["nodes"], eg_result["fact_lineage"])
+    quality_consistency = check_quality_consistency(tx_result, eg_result, sl_result, report)
     manifest = reconstruction_manifest(
         db,
         incident_start=start,
@@ -115,6 +117,9 @@ def reconstruct_incident(
         (out_dir / "investigation_report.md").write_text(
             report["markdown"], encoding="utf-8",
         )
+        (out_dir / "quality_consistency.json").write_text(
+            json.dumps(quality_consistency, indent=2, default=str), encoding="utf-8",
+        )
         (out_dir / "run_manifest.json").write_text(
             json.dumps(manifest, indent=2, default=str), encoding="utf-8",
         )
@@ -130,6 +135,7 @@ def reconstruct_incident(
         },
         "explanation": explanation,
         "report": report,
+        "quality_consistency": quality_consistency,
     }
 
 
@@ -145,6 +151,14 @@ def reconstruction_manifest(db, **config) -> dict:
             file_hashes[rel] = hashlib.sha256(data).hexdigest()
             digest.update(rel.encode("utf-8"))
             digest.update(data)
+    evidence_digest = hashlib.sha256()
+    evidence_hashes = {}
+    for path in sorted((recon_dir.parent / "evidence").glob("*.py")):
+        rel = f"evidence/{path.name}"
+        data = path.read_bytes()
+        evidence_hashes[rel] = hashlib.sha256(data).hexdigest()
+        evidence_digest.update(rel.encode("utf-8"))
+        evidence_digest.update(data)
     git_commit, dirty_sha = _git_state(recon_dir)
     config_sha = hashlib.sha256(json.dumps(config, sort_keys=True, default=str).encode("utf-8")).hexdigest()
     return {
@@ -152,6 +166,8 @@ def reconstruction_manifest(db, **config) -> dict:
         "git_dirty_diff_sha256": dirty_sha,
         "code_sha256": digest.hexdigest(),
         "module_hashes": file_hashes,
+        "evidence_code_sha256": evidence_digest.hexdigest(),
+        "evidence_module_hashes": evidence_hashes,
         "config": config,
         "config_sha256": config_sha,
         "db_fingerprint": _db_fingerprint(db),
@@ -165,7 +181,8 @@ def _git_state(cwd: Path) -> tuple[str, str]:
             ["git", "rev-parse", "HEAD"], cwd=repo_root, text=True, stderr=subprocess.DEVNULL
         ).strip()
         diff = subprocess.check_output(
-            ["git", "diff", "HEAD", "--", "src/mirage_ot/etgi/postalert", "src/mirage_ot/etgi/reconstruction"],
+            ["git", "diff", "HEAD", "--", "src/mirage_ot/etgi/postalert", "src/mirage_ot/etgi/reconstruction",
+             "src/mirage_ot/etgi/evidence"],
             cwd=repo_root,
             stderr=subprocess.DEVNULL,
         )

@@ -77,3 +77,22 @@ The indexed databases still have no decoded `quality_invalid`. R3 therefore does
 | `ev_3e4d` | transactions | 0 `supported_inference`; switch.30 `no_state_change_observed` | unchanged claim levels | Quality was already not supporting an inference. IPAL derivation edges 2 → 0. |
 | `ev_12dcd56b` | `TX001` `sgen.10` | `verified_measurement_transition`, 1 `supported_inference` | `measurement_observed_transition_unverified`, 0 `supported_inference` | 309980.938 → 269971.625 toward 270000.0 remains visible, but quality is unknown. |
 | `ev_12dcd56b` | `SL001` | verified 4-node protocol spine, 3 independent sources | command, confirmation, two IPAL updates. `independent_source_container_count=2` | Unverified measurement edge leaves the spine. Both IPAL rows are non-independent. |
+
+## 5. R4 IEC-104 evidence reindexing
+
+R4 fixes the evidence layer, not the engine. Details and the field audit are in `docs/R4_EVIDENCE_REINDEX_REVIEW.md`.
+
+1. **ASDU versus object fields.** `split_fields()` reads type id, COT (cause, P/N, T), SQ, NumIx, OA and CA once per ASDU. Value, SIQ/DIQ/QDS bits and S/E are read per information object. A count mismatch leaves the field unknown for that frame; it is not shifted or broadcast.
+2. **Gate inputs.** `evaluate_command_effect_inference()` also requires NT/SB/BL/OV decoded and clear, T decoded and clear on command, confirmation, pre and post, and a decoded P/N. Transaction and event graph build these inputs with the same helpers (`measurement_gate_inputs`, `feedback_gate_inputs`).
+3. **Consistency file.** Each run writes `quality_consistency.json`, comparing the transaction gate with the graph edge, graph node quality, storyline status and report summary. The report lists each transaction's gate inputs and failed conditions. The manifest adds `evidence_code_sha256`.
+4. **Audit.** `etgi field-audit` traces each raw object through tshark, the parser and the database, and checks IPAL records for a packet reference.
+
+## 6. R3 to R4 on two reindexed Basic windows
+
+The old indexes lacked quality, T, P/N and S/E because parser `6a0c162` never requested those tshark fields. The raw packets contain them. In the two reindexed windows all values are clear (IV/NT/SB/BL/OV/T/P-N all 0; Execute only). IPAL state records hold no packet reference, so IPAL stays temporal correspondence.
+
+| Event | Scope | R3 | R4 | Reason |
+| --- | --- | --- | --- | --- |
+| `ev_0961` | `TX004` `sgen.6` | `measurement_observed_transition_unverified` | `verified_measurement_transition`, 1 `supported_inference` | 40004.5312 → 20000.6875 toward 20000.0 with decoded good quality, T=0, P/N=0. |
+| `ev_0961` | `TX001`–`TX003` switches | acceptance unknown, value unknown | accepted, values decoded, `state_report_observed_no_pre_baseline` | No IEC-104 value before the command. Still unresolved. |
+| `ev_12dcd56b` | `TX001` `sgen.10` | `measurement_observed_transition_unverified` | `verified_measurement_transition`, 1 `supported_inference` | 309980.938 → 269971.625 toward 270000.0 with decoded good quality, T=0, P/N=0. |

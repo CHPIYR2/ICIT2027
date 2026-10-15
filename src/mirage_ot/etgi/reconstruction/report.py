@@ -160,6 +160,7 @@ def build_investigation_report(
             "state_verification_reason": tx.get("state_verification_reason"),
             "transaction_completeness": tx["transaction_completeness"],
             "missing_stages": tx["missing_stages"],
+            "inference_gate": inference_gate_summary(tx),
             "evidence_ids": tx["all_evidence_ids"][:6],
         })
 
@@ -310,6 +311,29 @@ def build_investigation_report(
     return report
 
 
+def inference_gate_summary(tx: dict) -> dict:
+    """The gate record that decided this transaction's state status, with its quality inputs."""
+    mt = tx.get("measurement_transition")
+    fb = (tx.get("protocol_state_feedback") or [None])[0]
+    if mt is not None:
+        basis, gate = "measurement_transition", mt.get("consistency_gate") or {}
+    elif fb is not None:
+        basis, gate = "state_report", fb.get("consistency_gate") or {}
+    else:
+        return {"basis": None, "gate_passed": None}
+    return {
+        "basis": basis,
+        "gate_passed": gate.get("gate_passed"),
+        "failed_conditions": gate.get("failed_conditions") or [],
+        "pre_quality_invalid": gate.get("pre_quality_invalid"),
+        "post_quality_invalid": gate.get("post_quality_invalid"),
+        "pre_quality_flags_set": gate.get("pre_quality_flags_set"),
+        "post_quality_flags_set": gate.get("post_quality_flags_set"),
+        "test_bits": gate.get("test_bits"),
+        "quality_uncertainty": gate.get("quality_uncertainty") or [],
+    }
+
+
 def render_investigation_markdown(report: dict) -> str:
     lines = [
         "# Evidence-Grounded Incident Reconstruction Report",
@@ -338,6 +362,14 @@ def render_investigation_markdown(report: dict) -> str:
             f"**Missing/Unverified Stages**: `{tx['missing_stages']}` "
             f"(`{', '.join(tx['evidence_ids'][:4])}`)."
         )
+        gate = tx.get("inference_gate") or {}
+        if gate.get("basis"):
+            lines.append(
+                f"  - Inference gate (`{gate['basis']}`): passed=`{gate['gate_passed']}`; "
+                f"pre IV=`{gate['pre_quality_invalid']}` other flags=`{gate['pre_quality_flags_set']}`; "
+                f"post IV=`{gate['post_quality_invalid']}` other flags=`{gate['post_quality_flags_set']}`; "
+                f"COT test bits=`{gate['test_bits']}`; failed=`{gate['failed_conditions']}`."
+            )
 
     lines.extend(["", "## 2. Key Findings & Reconstructed Storylines (Contiguous Directed Spines)"])
     for sl in report["storyline_summaries"]:

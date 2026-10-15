@@ -4,9 +4,11 @@ import copy
 import json
 from pathlib import Path
 from mirage_ot.etgi.agent.ollama import LLMTurn
-from mirage_ot.etgi.evidence import iec104
+import struct
+from mirage_ot.etgi.evidence import iec104, iec104_raw
 from mirage_ot.etgi.evidence.queries import EvidenceDB
 from mirage_ot.etgi.evidence.store import connect, create, insert_evidence
+from mirage_ot.etgi.reconstruction.consistency import check_quality_consistency
 from mirage_ot.etgi.reconstruction.engine import reconstruct_incident
 from mirage_ot.etgi.reconstruction.event_graph import build_temporal_event_graph
 from mirage_ot.etgi.reconstruction.storyline import reconstruct_storylines
@@ -14,6 +16,9 @@ from mirage_ot.etgi.reconstruction.transactions import (
     evaluate_command_effect_inference,
     reconstruct_transactions,
 )
+
+
+GOOD_QDS = {"iv": False, "nt": False, "sb": False, "bl": False, "ov": False}
 
 
 class ScriptedLLM:
@@ -317,32 +322,39 @@ def test_p1_cross_vantage_payload_conflict_and_distinct_seq_commands(tmp_path: P
     assert vals == [100.0, 999.0]
 
 
-def test_p0_storyline_contiguous_path_invariant_and_source_deduplication(tmp_path: Path):
-    """P0-4 & P1-6: Every storyline spine must be a contiguous path; pre-baseline stays in supporting_evidence_edges."""
-    conn = connect(tmp_path / "evidence.sqlite")
-    create(conn)
-    rows = [
+def _sgen6_chain_rows(*, pre=None, cmd=None, ack=None, post=None):
+    """Decoded sgen.6 setpoint chain; keyword payloads override single packets."""
+    return [
         _row("EV-premeas000000000", 995.0, "network", "sgen.6:active_power", "iec104_asdu", 40000.0,
              ca_ioa="111.10080", protocol_class="monitor",
              src_ip="172.16.3.6", src_port=2404, dst_ip="172.16.1.2", dst_port=41978,
-             payload={"type_id": 13, "cause": "1", "quality_invalid": False}),
+             payload={"type_id": 13, "cause": "1", "quality_invalid": False, "quality_flags": GOOD_QDS, "cot_test": False,
+                      **(pre or {})}),
         _row("EV-setcmd0000000000", 1002.0, "network", "sgen.6:target_active_power", "iec104_asdu", 20000.0,
              ca_ioa="111.10040", protocol_class="control",
              src_ip="172.16.1.2", src_port=41978, dst_ip="172.16.3.6", dst_port=2404,
-             payload={"type_id": 50, "cause": "6", "cot_negative": False}),
+             payload={"type_id": 50, "cause": "6", "cot_negative": False, "cot_test": False, **(cmd or {})}),
         _row("EV-setack0000000000", 1002.04, "network", "sgen.6:target_active_power", "iec104_asdu", 20000.0,
              ca_ioa="111.10040", protocol_class="control",
              src_ip="172.16.3.6", src_port=2404, dst_ip="172.16.1.2", dst_port=41978,
-             payload={"type_id": 50, "cause": "7", "cot_negative": False}),
+             payload={"type_id": 50, "cause": "7", "cot_negative": False, "cot_test": False, **(ack or {})}),
         _row("EV-postmeas00000000", 1005.0, "network", "sgen.6:active_power", "iec104_asdu", 20001.0,
              ca_ioa="111.10080", protocol_class="monitor",
              src_ip="172.16.3.6", src_port=2404, dst_ip="172.16.1.2", dst_port=41978,
-             payload={"type_id": 13, "cause": "1", "quality_invalid": False}),
+             payload={"type_id": 13, "cause": "1", "quality_invalid": False, "quality_flags": GOOD_QDS, "cot_test": False,
+                      **(post or {})}),
         _row("EV-ipalpost00000000", 1005.5, "electrical", "sgen.6:active_power", "electrical_update", 20001.0,
              ca_ioa="111.10080", update_status="new"),
         _row("EV-line7el000000000", 1006.0, "electrical", "line.7:active_power_from", "electrical_update", 318000.0,
              ca_ioa="106.10090", update_status="new"),
     ]
+
+
+def test_p0_storyline_contiguous_path_invariant_and_source_deduplication(tmp_path: Path):
+    """P0-4 & P1-6: Every storyline spine must be a contiguous path; pre-baseline stays in supporting_evidence_edges."""
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    rows = _sgen6_chain_rows()
     for r in rows:
         insert_evidence(conn, r)
     conn.commit()
@@ -703,3 +715,170 @@ def test_r3_no_control_command_storyline_is_limited():
     assert sl2["storyline_count"] == 0
     assert "deferred" in sl2["no_control_command_policy"]
 
+
+
+def _gate(**overrides):
+    args = dict(
+        command_acceptance_status="accepted_by_rtu", command_value_present=True, commanded_value=20000.0,
+        pre_value_present=True, pre_command_value=40000.0, post_value_present=True, post_command_value=20001.0,
+        pre_quality_invalid=False, post_quality_invalid=False,
+        pre_quality_flags_set=[], post_quality_flags_set=[],
+        test_bits={"command": False, "confirmation": False, "pre": False, "post": False},
+    )
+    args.update(overrides)
+    return evaluate_command_effect_inference(**args)
+
+
+def test_r4_gate_requires_decoded_quality_flags_test_bits_and_acceptance():
+    assert _gate()["gate_passed"] is True
+    cases = {
+        "command_acceptance_unknown": dict(command_acceptance_status="confirmation_observed_acceptance_unknown"),
+        "pre_quality_flags_unknown": dict(pre_quality_flags_set=None),
+        "post_value_quality_not_good:sb": dict(post_quality_flags_set=["sb"]),
+        "post_value_quality_invalid": dict(post_quality_invalid=True),
+        "test_bits_unknown": dict(test_bits=None),
+        "command_test_bit_set": dict(test_bits={"command": True, "confirmation": False, "pre": False, "post": False}),
+        "confirmation_test_bit_set": dict(test_bits={"command": False, "confirmation": True, "pre": False, "post": False}),
+        "post_test_bit_set": dict(test_bits={"command": False, "confirmation": False, "pre": False, "post": True}),
+        "post_test_bit_unknown": dict(test_bits={"command": False, "confirmation": False, "pre": False, "post": None}),
+    }
+    for expected, override in cases.items():
+        gate = _gate(**override)
+        assert gate["gate_passed"] is False, expected
+        assert expected in gate["failed_conditions"], (expected, gate["failed_conditions"])
+
+
+def test_r4_quality_good_is_unknown_when_any_bit_is_missing():
+    assert iec104.quality_good({"iv": False, "nt": False, "sb": False, "bl": False, "ov": False}) is True
+    assert iec104.quality_good({"iv": False, "nt": None, "sb": False, "bl": False, "ov": False}) is None
+    assert iec104.quality_good({"iv": False, "nt": None, "sb": True, "bl": False, "ov": False}) is False
+    assert iec104.quality_good(None) is None
+
+
+def _frame(**fields):
+    base = {"frame.time_epoch": "1000.0", "frame.number": "7", "ip.src": "172.16.3.6", "ip.dst": "172.16.1.2",
+            "tcp.srcport": "2404", "tcp.dstport": "41978"}
+    base.update({f"iec60870_asdu.{k}" if not k.startswith(("iec60870", "frame")) else k: v for k, v in fields.items()})
+    return base
+
+
+def test_r4_two_asdus_in_one_frame_keep_their_own_header_and_quality():
+    row = _frame(**{
+        "iec60870_104.type": "0x00,0x00", "iec60870_104.tx": "4,5", "iec60870_104.rx": "9,9",
+        "typeid": "13,50", "causetx": "3,6", "nega": "False,False", "test": "False,True", "sq": "False,False",
+        "addr": "111,111", "numix": "1,1", "oa": "0,0", "ioa": "10080,10040", "float": "1.5,20000.0",
+        "qds.iv": "True", "qds.nt": "False", "qds.sb": "False", "qds.bl": "False", "qds.ov": "False",
+        "qos.se": "False",
+    })
+    meas, cmd = iec104.split_fields(row)
+    assert (meas["type_id"], meas["cause"], meas["cot_test"], meas["value"], meas["apci_tx"]) == (13, "3", False, 1.5, 4)
+    assert meas["quality_flags"] == {"iv": True, "nt": False, "sb": False, "bl": False, "ov": False}
+    assert meas["quality_good"] is False and meas["select_execute"] is None
+    assert (cmd["type_id"], cmd["cause"], cmd["cot_test"], cmd["value"], cmd["apci_tx"]) == (50, "6", True, 20000.0, 5)
+    assert cmd["quality_flags"] is None and cmd["quality_invalid"] is None
+    assert cmd["select_execute"] == "execute"
+
+
+def test_r4_per_object_quality_count_mismatch_is_not_broadcast_or_shifted():
+    row = _frame(**{
+        "typeid": "13", "causetx": "1", "nega": "False", "test": "False", "sq": "False", "addr": "111",
+        "numix": "2", "ioa": "10080,10090", "float": "1.5,2.5",
+        "qds.iv": "False", "qds.nt": "False,False", "qds.sb": "False,False", "qds.bl": "False,False",
+        "qds.ov": "False,False",
+    })
+    objs = iec104.split_fields(row)
+    assert [o["value"] for o in objs] == [1.5, 2.5]
+    assert all(o["quality_invalid"] is None and o["quality_good"] is None for o in objs)
+    assert all(o["field_alignment"]["iec60870_asdu.qds.iv"] == "count_mismatch_not_shifted" for o in objs)
+    assert all(o["quality_flags"]["nt"] is False for o in objs)
+
+
+def test_r4_missing_quality_bits_stay_unknown():
+    row = _frame(**{
+        "typeid": "13", "causetx": "1", "nega": "False", "test": "False", "sq": "False", "addr": "111",
+        "numix": "1", "ioa": "10080", "float": "1.5", "qds.iv": "False",
+    })
+    (obj,) = iec104.split_fields(row)
+    assert obj["quality_invalid"] is False
+    assert obj["quality_flags"] == {"iv": False, "nt": None, "sb": None, "bl": None, "ov": None}
+    assert obj["quality_good"] is None
+    assert obj["field_alignment"]["iec60870_asdu.qds.nt"] == "not_decoded_by_tshark"
+
+
+def _apdu(type_id: int, cot: int, ca: int, objects: bytes, count: int, *, tx: int = 1, sq: bool = False) -> bytes:
+    asdu = bytes([type_id, (0x80 if sq else 0) | count, cot, 0]) + struct.pack("<H", ca) + objects
+    control = struct.pack("<HH", tx << 1, 0)
+    return bytes([0x68, len(control) + len(asdu)]) + control + asdu
+
+
+def _ioa(value: int) -> bytes:
+    return struct.pack("<I", value)[:3]
+
+
+def test_r4_raw_decoder_reads_per_object_quality_and_cot_bits():
+    meas = _apdu(13, 0x03 | 0x80, 111,
+                 _ioa(10080) + struct.pack("<f", 1.5) + bytes([0x80])
+                 + _ioa(10090) + struct.pack("<f", 2.5) + bytes([0x10]), 2)
+    cmd = _apdu(45, 0x07 | 0x40, 110, _ioa(10130) + bytes([0x81]), 1, tx=2)
+    objs, status = iec104_raw.decode_apdus(meas + cmd)
+    assert status == "complete"
+    m1, m2, c = objs
+    assert (m1["cot_test"], m1["cot_negative"], m1["cause"], m1["value"]) == (True, False, 3, 1.5)
+    assert m1["quality_flags"] == {"iv": True, "nt": False, "sb": False, "bl": False, "ov": False}
+    assert m2["quality_flags"] == {"iv": False, "nt": False, "sb": False, "bl": True, "ov": False}
+    assert (c["type_id"], c["cause"], c["cot_negative"], c["cot_test"]) == (45, 7, True, False)
+    assert (c["value"], c["select_execute"], c["quality_flags"], c["asdu_index"]) == (1.0, "select", None, 1)
+
+
+def test_r4_raw_decoder_does_not_invent_truncated_objects():
+    apdu = bytearray(_apdu(13, 0x03, 111, _ioa(10080) + struct.pack("<f", 1.5) + bytes([0x00]), 2))
+    objs, status = iec104_raw.decode_apdus(bytes(apdu))
+    assert status == "truncated_information_object"
+    assert [o["ioa"] for o in objs] == [10080]
+
+
+def _reconstruct(tmp_path: Path, rows):
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    for r in rows:
+        insert_evidence(conn, r)
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000.0, incident_end=1020.0)
+    return reconstruct_incident(db, 1000.0, 1020.0, background_start=985.0, background_end=1000.0,
+                                llm=None, out_dir=tmp_path / "out")
+
+
+def test_r4_test_bit_or_flag_blocks_verification_in_every_phase(tmp_path: Path):
+    variants = {
+        "command_test_bit_set": dict(cmd={"cot_test": True}),
+        "post_test_bit_set": dict(post={"cot_test": True}),
+        "post_value_quality_not_good:nt": dict(post={"quality_flags": {**GOOD_QDS, "nt": True}}),
+        "pre_quality_flags_unknown": dict(pre={"quality_flags": {**GOOD_QDS, "ov": None}}),
+        "command_acceptance_unknown": dict(ack={"cot_negative": None}),
+    }
+    for expected, override in variants.items():
+        res = _reconstruct(tmp_path / expected, _sgen6_chain_rows(**override))
+        tx = res["transactions"]["transactions"][0]
+        gate = tx["measurement_transition"]["consistency_gate"]
+        assert gate["gate_passed"] is False and expected in gate["failed_conditions"], (expected, gate)
+        assert tx["device_state_change_status"] != "verified_measurement_transition"
+        assert not any(e["claim_level"] == "supported_inference" for e in res["event_graph"]["edges"]), expected
+        story = res["storylines"]["storylines"][0]
+        assert all(st["claim_level"] != "supported_inference" for st in story["confirmed_and_supported_steps"])
+        summary = res["report"]["transaction_summaries"][0]["inference_gate"]
+        assert summary["gate_passed"] is False and expected in summary["failed_conditions"]
+        assert res["quality_consistency"]["consistent"] is True, res["quality_consistency"]["issues"]
+        assert (tmp_path / expected / "out" / "quality_consistency.json").exists()
+
+
+def test_r4_consistency_checker_flags_a_graph_that_ignores_the_gate(tmp_path: Path):
+    res = _reconstruct(tmp_path, _sgen6_chain_rows(post={"cot_test": True}))
+    graph = copy.deepcopy(res["event_graph"])
+    for edge in graph["edges"]:
+        if edge["relation_category"] == "inference_hypothesis":
+            edge["claim_level"] = "supported_inference"
+    check = check_quality_consistency(res["transactions"], graph, res["storylines"], res["report"])
+    issues = {i["issue"] for i in check["issues"]}
+    assert check["consistent"] is False
+    assert "graph_inference_disagrees_with_transaction_gate" in issues
+    assert "supported_inference_without_passed_gate" in issues
