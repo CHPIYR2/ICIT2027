@@ -22,6 +22,7 @@ from .consistency import build_lineage_consistency_record, check_quality_consist
 from .event_graph import build_temporal_event_graph
 from .report import apply_quality_consistency, build_investigation_report, run_llm_explanation
 from .storyline import reconstruct_storylines
+from .synthesis import synthesize_incident_scenario
 from .transactions import reconstruct_transactions
 
 
@@ -59,6 +60,14 @@ def reconstruct_incident(
         behavioral_anchors=anchor_result["anchors"] if behavioral_mode else None,
     )
     sl_result = reconstruct_storylines(eg_result, tx_result)
+    incident_synthesis = synthesize_incident_scenario(
+        incident_start=start,
+        incident_end=end,
+        tx_result=tx_result,
+        anchor_result=anchor_result,
+        event_graph=eg_result,
+        storyline_result=sl_result,
+    )
     explanation = run_llm_explanation(
         db,
         llm,
@@ -79,6 +88,7 @@ def reconstruct_incident(
         storyline_result=sl_result,
         explanation=explanation,
         anchor_result=anchor_result,
+        incident_synthesis=incident_synthesis,
     )
     placed = eg_result["behavioral_anchor_facts"]
     behavioral_fids = {fid for entry in placed.values() for fid in entry.values() if fid}
@@ -88,7 +98,9 @@ def reconstruct_incident(
     lineage_bundle["behavioral_anchor_lineage"] = audit_anchor_lineage(db, anchor_result["anchors"], placed)
     lineage_consistency = build_lineage_consistency_record(lineage_bundle)
     quality_consistency = check_quality_consistency(
-        tx_result, eg_result, sl_result, report, anchor_result=anchor_result,
+        tx_result, eg_result, sl_result, report,
+        anchor_result=anchor_result,
+        incident_synthesis=incident_synthesis,
     )
     report = apply_quality_consistency(report, quality_consistency, lineage_consistency)
     manifest = reconstruction_manifest(
@@ -133,6 +145,9 @@ def reconstruct_incident(
         (out_dir / "unresolved_branches.json").write_text(
             json.dumps(sl_result["unresolved_branches"], indent=2, default=str), encoding="utf-8",
         )
+        (out_dir / "incident_synthesis.json").write_text(
+            json.dumps(incident_synthesis, indent=2, default=str), encoding="utf-8",
+        )
         (out_dir / "lineage.json").write_text(
             json.dumps(eg_result["fact_lineage"], indent=2, default=str), encoding="utf-8",
         )
@@ -168,6 +183,7 @@ def reconstruct_incident(
         "event_anchors": anchor_result,
         "event_graph": public_event_graph,
         "storylines": sl_result,
+        "incident_synthesis": incident_synthesis,
         "lineage_bundle_summary": {
             k: lineage_bundle[k]
             for k in ("requested_count", "expected_with_parents", "exported_count", "missing_ids", "row_check_failures")

@@ -139,6 +139,7 @@ def build_investigation_report(
     storyline_result: dict,
     explanation: dict,
     anchor_result: dict | None = None,
+    incident_synthesis: dict | None = None,
 ) -> dict:
     verified_claims = explanation["verification"].get("verified") or []
     rejected_claims = explanation["verification"].get("rejected") or []
@@ -319,6 +320,7 @@ def build_investigation_report(
         "behavioral_reconstruction": behavioral_summary(
             anchor_result, storyline_result, nodes_by_id, incident_start,
         ),
+        "incident_synthesis": incident_synthesis,
     }
     report["markdown"] = render_investigation_markdown(report)
     return report
@@ -479,6 +481,91 @@ def _render_behavioral(beh: dict, diagnostic: bool) -> list[str]:
     return lines
 
 
+def _render_incident_synthesis(syn: dict, diagnostic: bool) -> list[str]:
+    part = syn.get("local_storyline_partition") or {}
+    counts = part.get("counts") or {}
+    ledger = syn.get("source_dependency_ledger") or {}
+    bundles = syn.get("rtu_asdu_bundles") or []
+    bridges = syn.get("verified_element_bridges") or []
+    components = syn.get("bridged_bundle_components") or []
+    phases = syn.get("candidate_scenario_phases") or []
+    explanations = syn.get("competing_explanations") or []
+    withheld_tag = " (WITHHELD: diagnostic only)" if diagnostic else ""
+
+    lines = [
+        "",
+        f"## 2B. Incident Scenario Synthesis (Four-Layer Epistemic Integration){withheld_tag}",
+        f"- **Scenario Status**: `{syn.get('scenario_status')}`",
+        f"- **Layer 1 Partition**: `{counts.get('supported_multi_node_storyline_count', 0)}` supported multi-node chains, "
+        f"`{counts.get('verified_single_anchor_storyline_count', 0)}` verified single-anchor chains, "
+        f"`{counts.get('sequential_same_device_observation_count', 0)}` sequential same-entity observations (gate failed), "
+        f"`{counts.get('quarantined_unverified_observation_count', 0)}` quarantined unverified observations "
+        f"(`{counts.get('unverified_precursor_state_report_count', 0)}` unverified COT=3 precursor reports).",
+        f"- **Layer 2 Bundles & Bridges**: `{len(bundles)}` RTU ASDU bundles (each counted as `1` independent source), "
+        f"`{len(bridges)}` verified element bridges, `{len(components)}` multi-bundle bridged components.",
+        f"- **Layer 3 Candidate Phases**: `{len(phases)}` candidate scenario phases (all cross-device links kept `unresolved`).",
+        f"- **Layer 4 Source Dependency Ledger**: `{ledger.get('independent_asdu_container_count', 0)}` independent ASDU containers "
+        f"across `{ledger.get('distinct_rtu_count', 0)}` RTU(s) (`{ledger.get('distinct_rtu_ips', [])}`), "
+        f"`{ledger.get('co_reported_same_asdu_reduction_count', 0)}` co-reported same-ASDU points collapsed, "
+        f"mirror vantages `{ledger.get('mirror_vantages_observed', [])}`, "
+        f"`{ledger.get('ipal_correspondence_row_count', 0)}` IPAL rows excluded (`weight={ledger.get('ipal_independent_source_weight', 0)}`).",
+    ]
+
+    if bundles:
+        lines.extend(["", "### 2B.1 Layer 2 — RTU ASDU Bundles & Verified Element Bridges"])
+        for b in bundles:
+            lines.append(
+                f"- **{b['bundle_id']}** (`+{b['relative_time_s']}s`, RTU `{b.get('rtu_ip')}`, "
+                f"container=`{b['asdu_container_id']}`, independent_sources=`{b['independent_source_count']}`): "
+                f"anchors `{b['member_anchor_ids']}` -> `{b['member_entities']}`."
+            )
+        if bridges:
+            for br in bridges:
+                lines.append(
+                    f"- **Verified Element Bridge {br['bridge_id']}** (`{br['edge_id']}`, `{br['bridged_device_stem']}`, "
+                    f"`{br['from_bundle_id']}` -> `{br['to_bundle_id']}`, quantities=`{br['matched_quantities']}`, "
+                    f"independent_rtu=`{br['independent_rtu_support']}`): {br['what_bridge_establishes']} "
+                    f"{br['what_bridge_does_not_establish']}"
+                )
+        else:
+            lines.append("- **Verified Element Bridges**: `none` (0 corroborated multi-ASDU element bridges in this window).")
+        for comp in components:
+            lines.append(
+                f"- **Bridged Component {comp['component_id']}** (bundles `{comp['bundle_ids']}`, "
+                f"bridges `{comp['bridge_ids']}`, RTUs `{comp['rtu_ips']}`): {comp['epistemic_summary']}"
+            )
+
+    if phases:
+        lines.extend(["", "### 2B.2 Layer 3 — Candidate Scenario Phases (Cross-Device Links Unresolved)"])
+        for ph in phases:
+            ctx = ph.get("observed_host_and_link_context") or {}
+            lines.append(
+                f"- **{ph['phase_id']}** (`+{ph['start_relative_s']}s`..`+{ph['end_relative_s']}s`, "
+                f"profile=`{ph['phase_profile']}`): bundles=`{ph['verified_bundle_ids']}`, "
+                f"verified_bridges=`{ph['verified_bridge_ids']}`, "
+                f"sequential_same_device=`{ph['sequential_same_device_edge_ids']}`, "
+                f"unverified_precursors=`{ph['unverified_precursor_anchor_ids']}`, "
+                f"RTUs=`{ctx.get('rtu_ips')}`, ARP=`{ctx.get('arp_activity')}`, "
+                f"unresolved_candidates=`{ph['unresolved_cross_device_candidate_count']}`."
+            )
+
+    if explanations:
+        lines.extend(["", "### 2B.3 Layer 4 — Evidence-Anchored Competing Explanations & Missing Evidence"])
+        for exp in explanations:
+            lines.append(
+                f"- **{exp['explanation_id']}** (`{exp['hypothesis_class']}`, "
+                f"status=`{exp['verification_status']}`, causal_status=`{exp['causal_status']}`): "
+                f"{exp['explanation_summary']}"
+            )
+            lines.append(f"  - **Anchored by**: `{exp['anchoring_verified_evidence']}`")
+            if exp.get("unverified_or_candidate_links_assumed"):
+                lines.append(f"  - **Unverified/candidate links required**: `{exp['unverified_or_candidate_links_assumed']}`")
+            lines.append(f"  - **Alternative comparison**: {exp['alternative_comparison']}")
+            lines.append(f"  - **Missing disambiguating evidence**: `{exp['missing_disambiguating_evidence']}`")
+
+    return lines
+
+
 def inference_gate_summary(tx: dict) -> dict:
     """The gate record that decided this transaction's state status, with its quality inputs."""
     mt = tx.get("measurement_transition")
@@ -507,21 +594,26 @@ def apply_quality_consistency(
     quality_consistency: dict,
     lineage_consistency: dict | None = None,
 ) -> dict:
-    """Withhold every verified claim when the phases disagree on quality; diagnostics stay."""
-    report["quality_consistency_status"] = (
-        "consistent" if quality_consistency.get("consistent") else "inconsistent"
-    )
+    """Withhold every verified claim when quality OR lineage consistency fails; diagnostics stay."""
+    q_ok = bool(quality_consistency.get("consistent"))
+    l_ok = True if lineage_consistency is None else bool(lineage_consistency.get("consistent"))
+    report["quality_consistency_status"] = "consistent" if q_ok else "inconsistent"
     if lineage_consistency is not None:
-        report["lineage_consistency_status"] = (
-            "consistent" if lineage_consistency.get("consistent") else "inconsistent"
-        )
-    if quality_consistency.get("consistent"):
+        report["lineage_consistency_status"] = "consistent" if l_ok else "inconsistent"
+
+    if q_ok and l_ok:
         report["report_status"] = "quality_consistent"
     else:
-        report["report_status"] = "diagnostic_only_quality_inconsistent"
+        if not q_ok and l_ok:
+            report["report_status"] = "diagnostic_only_quality_inconsistent"
+        elif q_ok and not l_ok:
+            report["report_status"] = "diagnostic_only_lineage_inconsistent"
+        else:
+            report["report_status"] = "diagnostic_only_quality_and_lineage_inconsistent"
         report["withheld_verified_device_transitions"] = report["verified_device_transitions"]
         report["verified_device_transitions"] = []
         report["quality_consistency_issues"] = quality_consistency.get("issues") or []
+        report["lineage_consistency_issues"] = (lineage_consistency or {}).get("issues") or []
         beh = report.get("behavioral_reconstruction")
         if beh:
             beh["withheld_supported_chain_count"] = beh.get("supported_chain_count", 0)
@@ -530,12 +622,19 @@ def apply_quality_consistency(
                 if ch.get("supported_relations"):
                     ch["withheld_supported_relations"] = ch["supported_relations"]
                     ch["supported_relations"] = []
+        syn = report.get("incident_synthesis")
+        if isinstance(syn, dict):
+            syn["scenario_status"] = "diagnostic_only_withheld"
+            syn["withheld_verified_element_bridges"] = list(syn.get("verified_element_bridges") or [])
+            syn["verified_element_bridges"] = []
+            syn["withheld_bridged_bundle_components"] = list(syn.get("bridged_bundle_components") or [])
+            syn["bridged_bundle_components"] = []
     report["markdown"] = render_investigation_markdown(report)
     return report
 
 
 def render_investigation_markdown(report: dict) -> str:
-    diagnostic = report.get("report_status") == "diagnostic_only_quality_inconsistent"
+    diagnostic = str(report.get("report_status") or "").startswith("diagnostic_only")
     lines = [
         "# Evidence-Grounded Incident Reconstruction Report"
         + (" — DIAGNOSTIC ONLY, NOT VERIFIED" if diagnostic else ""),
@@ -546,11 +645,12 @@ def render_investigation_markdown(report: dict) -> str:
     ]
     if diagnostic:
         lines.extend([
-            "- **Quality consistency failed**: transaction, graph, storyline and report disagree on quality. "
-            "No transition below is reported as verified; "
+            "- **Consistency check failed**: quality consistency and/or evidence lineage consistency failed. "
+            "No transition or bridge below is reported as verified; "
             f"`{len(report.get('withheld_verified_device_transitions') or [])}` verified transition(s) withheld. "
-            "See `quality_consistency.json`.",
-            *(f"  - Issue: `{json.dumps(issue, ensure_ascii=False)}`" for issue in report.get("quality_consistency_issues") or []),
+            "See `quality_consistency.json` and `lineage_consistency.json`.",
+            *(f"  - Quality Issue: `{json.dumps(issue, ensure_ascii=False)}`" for issue in report.get("quality_consistency_issues") or []),
+            *(f"  - Lineage Issue: `{json.dumps(issue, ensure_ascii=False)}`" for issue in report.get("lineage_consistency_issues") or []),
         ])
     lines += [
         "",
@@ -590,6 +690,8 @@ def render_investigation_markdown(report: dict) -> str:
 
     if report.get("behavioral_reconstruction"):
         lines.extend(_render_behavioral(report["behavioral_reconstruction"], diagnostic))
+    if report.get("incident_synthesis"):
+        lines.extend(_render_incident_synthesis(report["incident_synthesis"], diagnostic))
 
     lines.extend(["", "## 2. Key Findings & Reconstructed Storylines (Contiguous Directed Spines)"])
     for sl in report["storyline_summaries"]:

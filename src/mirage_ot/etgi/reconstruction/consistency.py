@@ -29,6 +29,7 @@ def check_quality_consistency(
     report: dict,
     *,
     anchor_result: dict | None = None,
+    incident_synthesis: dict | None = None,
 ) -> dict:
     nodes = {n["fact_id"]: n for n in event_graph["nodes"]}
     edges = event_graph["edges"]
@@ -294,7 +295,7 @@ def check_quality_consistency(
         })
 
     beh_rep = report.get("behavioral_reconstruction")
-    if beh_rep and beh_rep.get("behavioral_mode") and report.get("report_status") != "diagnostic_only_quality_inconsistent":
+    if beh_rep and beh_rep.get("behavioral_mode") and not str(report.get("report_status", "")).startswith("diagnostic_only"):
         supported_in_sl = sum(
             1 for s in storylines.get("storylines") or []
             if s.get("storyline_kind") == "behavioral"
@@ -307,6 +308,94 @@ def check_quality_consistency(
                 "storylines": supported_in_sl,
             })
 
+    synthesis_checks: dict = {}
+    syn = incident_synthesis or report.get("incident_synthesis")
+    if isinstance(syn, dict):
+        unverified_aids = {
+            a["anchor_id"] for a in (anchor_result or {}).get("anchors") or []
+            if a.get("verification_status") != "verified_observation"
+        } | {
+            (nodes[fid].get("protocol_meta") or {}).get("anchor_id")
+            for fid in behavioral_fids
+            if fid in nodes and (nodes[fid].get("protocol_meta") or {}).get("verification_status") != "verified_observation"
+        } - {None}
+
+        bundle_unverified_hits = []
+        for b in syn.get("rtu_asdu_bundles") or []:
+            bad = sorted(set(b.get("member_anchor_ids") or []) & unverified_aids)
+            if bad or b.get("independent_source_count") != 1:
+                bundle_unverified_hits.append({"bundle_id": b.get("bundle_id"), "unverified_anchors": bad})
+                issues.append({
+                    "bundle_id": b.get("bundle_id"),
+                    "issue": "synthesis_unverified_anchor_or_inflated_count_in_bundle",
+                    "unverified_anchors": bad,
+                    "independent_source_count": b.get("independent_source_count"),
+                })
+
+        bridge_violations = []
+        for br in syn.get("verified_element_bridges") or []:
+            eid = br.get("edge_id")
+            edge = edges_by_id.get(eid)
+            recheck = rechecked_gates.get(eid)
+            if recheck is None and edge is not None and edge["source_fact_id"] in nodes and edge["target_fact_id"] in nodes:
+                recheck = evaluate_behavioral_relation_consistency(
+                    nodes[edge["source_fact_id"]], nodes[edge["target_fact_id"]],
+                )
+            endpoints_unverified = bool({br.get("from_anchor_id"), br.get("to_anchor_id")} & unverified_aids)
+            if (
+                edge is None
+                or edge.get("relation_type") != "corroborated_same_device_behavioral_transition"
+                or edge.get("verification_status") != "supported"
+                or not recheck
+                or not recheck.get("gate_passed")
+                or endpoints_unverified
+            ):
+                bridge_violations.append(br.get("bridge_id"))
+                issues.append({
+                    "bridge_id": br.get("bridge_id"),
+                    "edge_id": eid,
+                    "issue": "synthesis_bridge_without_corroborated_behavioral_gate",
+                })
+
+        promoted_candidates = []
+        for ph in syn.get("candidate_scenario_phases") or []:
+            for cand in ph.get("unresolved_cross_device_candidates") or []:
+                if (
+                    cand.get("verification_status") != "unresolved"
+                    or cand.get("causal_status") != "not_established"
+                    or cand.get("claim_level") in ("observed_fact", "supported_inference")
+                ):
+                    promoted_candidates.append(cand.get("edge_id"))
+                    issues.append({
+                        "phase_id": ph.get("phase_id"),
+                        "edge_id": cand.get("edge_id"),
+                        "issue": "synthesis_candidate_cooccurrence_promoted",
+                    })
+
+        ledger = syn.get("source_dependency_ledger") or {}
+        expected_containers = len({b["asdu_container_id"] for b in (syn.get("rtu_asdu_bundles") or [])})
+        ledger_ok = True
+        if syn.get("behavioral_mode") and ledger.get("independent_asdu_container_count") != expected_containers:
+            ledger_ok = False
+            issues.append({
+                "issue": "synthesis_source_ledger_container_count_mismatch",
+                "ledger": ledger.get("independent_asdu_container_count"),
+                "expected": expected_containers,
+            })
+        if ledger.get("ipal_independent_source_weight", 0) != 0:
+            ledger_ok = False
+            issues.append({
+                "issue": "synthesis_ipal_counted_as_independent_source",
+                "ipal_independent_source_weight": ledger.get("ipal_independent_source_weight"),
+            })
+
+        synthesis_checks = {
+            "synthesis_no_new_supported_edges": not bridge_violations,
+            "synthesis_unverified_quarantine_intact": not bundle_unverified_hits and not bridge_violations,
+            "synthesis_source_ledger_exact": ledger_ok,
+            "synthesis_candidate_links_unresolved": not promoted_candidates,
+        }
+
     return {
         "check_scope": "quality_and_behavioral_consistency",
         "lineage_check_recorded_separately_in": "lineage_consistency.json",
@@ -315,6 +404,7 @@ def check_quality_consistency(
         "behavioral_anchor_checks": behavioral_anchor_checks,
         "behavioral_edge_checks": behavioral_edge_checks,
         "behavioral_storyline_checks": behavioral_storyline_checks,
+        "synthesis_checks": synthesis_checks,
         "issues": issues,
     }
 

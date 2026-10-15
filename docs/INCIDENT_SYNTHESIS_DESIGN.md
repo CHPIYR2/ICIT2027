@@ -1,8 +1,9 @@
-# Technical Design: Evidence-Stratified Incident Synthesis (Pre-Implementation Specification)
+# Technical Design & Implementation: Evidence-Stratified Incident Synthesis
 
-- **Status**: Technical Design Specification (Task 5; not yet implemented in the reconstruction pipeline)
-- **Baseline Commit**: `265017c` + Behavioral Reconstruction Refinement (Tasks 1–4)
-- **Target Module (Planned)**: `src/mirage_ot/etgi/reconstruction/synthesis.py`
+- **Status**: Implemented in `src/mirage_ot/etgi/reconstruction/synthesis.py` (base `2083eb7`)
+- **Baseline Commit**: `2083eb76484f21a2db3b2d0c91c7a573fa077421`
+- **Target Module**: `src/mirage_ot/etgi/reconstruction/synthesis.py`
+- **Outputs**: `runs/etgi/synthesis-20261015/reconstruction/<episode_id>/incident_synthesis.json` & Section `2B` in `investigation_report.md`
 
 ---
 
@@ -163,3 +164,22 @@ When Incident Synthesis is implemented in the next round, `check_quality_consist
 2. **Quarantine Preservation (`synthesis_unverified_quarantine_intact`)**: No anchor with `verification_status == "unverified_observation"` may appear in `rtu_asdu_bundles` or `verified_element_bridges`.
 3. **Container Accounting Exactness (`synthesis_source_ledger_exact`)**: `independent_asdu_container_count` must equal the exact cardinality of unique `SRC-ASDU-...` / `SRC-...` containers across verified anchors, never the number of anchors or vantages.
 4. **Candidate Non-Promotion (`synthesis_candidate_links_unresolved`)**: Every cross-device link in `candidate_scenario_phases` must retain `verification_status == "unresolved"` and `causal_status == "not_established"`.
+
+---
+
+## 5. Pre-Implementation Reliability Hardening & Real Window Synthesis Results
+
+### 5.1 Three Pre-Synthesis Reliability Fixes
+1. **`_merge_iec_vantages()` (`anchors.py`)**: Merges two IEC-104 object rows only when they arrive on **strictly distinct vantages** (`vantage not in inst["vantage_times"]`) within `0.5 s` and pass `_vantage_payload_consistent()` across value, quality descriptors, and COT flags. Same-vantage independent packets or cross-vantage conflicting payloads are never merged and receive distinct disambiguated `asdu_key`s (`#pkt2`, ...); cross-vantage payload conflicts set `cross_vantage_conflict=True` (`post_cross_vantage_payload_conflict`).
+2. **`_obs_quality_fields()` (`anchors.py`)**: Checks `_REQUIRED_QUALITY_BITS` (`("iv", "nt", "sb", "bl")` for state types and `("iv", "nt", "sb", "bl", "ov")` for measurement types). Whenever any required bit is missing or `None`, `quality_flags_unknown=True` and `quality_good=None`, even if `quality_invalid=False` or `quality_good=True` was supplied in the payload.
+3. **Dual Quality + Lineage Gate on Final Report (`report.py`)**: `apply_quality_consistency(report, quality_consistency, lineage_consistency)` requires both `quality_consistency["consistent"]` and `lineage_consistency["consistent"]`. Failure of either downgrades `report_status` to `diagnostic_only_quality_inconsistent`, `diagnostic_only_lineage_inconsistent`, or `diagnostic_only_quality_and_lineage_inconsistent`, withholding verified transitions, supported chains, and `verified_element_bridges`.
+
+### 5.2 Real Window Synthesis Results (`runs/etgi/synthesis-20261015/reconstruction/`)
+
+| Window | Layer 1 Partition | Layer 2 Bundles & Verified Bridges | Layer 3 Candidate Phases | Layer 4 Source Ledger & Competing Explanations |
+| --- | --- | --- | --- | --- |
+| `ev_564bebaa` | `5` supported multi-node, `13` verified single-anchor, `3` sequential (`R0134`, `R0211`, `R0212`), `9` quarantined unverified (`2` COT=3 precursors `A001`, `A007`) | `12` RTU ASDU bundles (`independent_source_count=1` each), `5` verified element bridges (`BRG-001`..`BRG-005` on `line.0`, `line.3`, `line.4`, `line.1`, `line.12`), `2` bridged components (`CMP-001`, `CMP-002`) | `PHS-001` (`+0.896s`..`+10.695s`, `multi_rtu_corroborated_measurement_transitions`, `129` unresolved candidates) | `12` independent ASDU containers across `12` RTUs (`11` same-ASDU co-reported points collapsed), `62` IPAL rows (`weight=0`); `EXP-001` (physical switching/protection cascade) vs `EXP-002` (uncommanded/altered multi-RTU telemetry) |
+| `ev_cbe1e5` | `0` supported multi-node, `4` verified single-anchor (`A001` ARP + `A002`..`A004` links), `0` sequential, `3` quarantined unverified (`A005`..`A007`) | `4` bundles, **`0` verified element bridges**, `0` bridged components | `PHS-001` (`+1.381s`..`+128.208s`, `arp_burst_and_multi_rtu_iec104_link_disruptions`, ARP target overlap `['172.16.3.10', '172.16.3.20', '172.16.3.9']`, `7` unresolved candidates) | `4` independent containers across `3` RTUs + ARP host `172.16.3.28`, `3` IPAL rows (`weight=0`); `EXP-001` (ARP cache interference preceding session loss) vs `EXP-002` (concurrent L2 link disturbance with ARP re-resolution) |
+| `ev_4e913b` | `0` supported multi-node, `1` verified single-anchor (`A002`), `1` sequential (`R0035`), `3` quarantined (`1` COT=3 precursor `A001`) | `1` bundle (`BND-001` on `sgen.0:active_power`), `0` bridges | `PHS-001` (`+1.187s`..`+10.839s`, `localized_measurement_or_state_observations`, `0` unresolved candidates) | `1` ASDU container on RTU `172.16.3.15`, `4` IPAL rows (`weight=0`); `EXP-001` vs `EXP-002` |
+| `ev_812f80` | `0` supported multi-node, `2` verified single-anchor (`A001`, `A002` links), `0` quarantined | `2` bundles (RTUs `.22`, `.23`), `0` bridges | `PHS-001` (`+0.0s`..`+124.618s`, `multi_rtu_iec104_link_disruptions`, `1` unresolved candidate `R0029`) | `2` containers across `2` RTUs sharing master `172.16.1.2`; `EXP-001` vs `EXP-002` |
+

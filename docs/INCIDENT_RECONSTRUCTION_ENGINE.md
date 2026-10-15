@@ -136,3 +136,15 @@ Details: `docs/BEHAVIORAL_RECONSTRUCTION.md` (Section 10) and `docs/INCIDENT_SYN
    `A028 -> A029` and `line.14` late `A030 -> A031` due to failed persistence and direction/ratio mismatch). In
    `ev_4e913b`, `sgen.0` `A001 -> A002` is downgraded to `same_entity_sequential_observation` because `A001` lacks a
    prior state value in the window.
+
+## 9. Incident Synthesis implementation (`synthesis.py`)
+
+Details: `docs/INCIDENT_SYNTHESIS_DESIGN.md` (Section 5).
+
+1. **Pre-synthesis hardening.** `_merge_iec_vantages()` refuses to merge same-vantage packets or conflicting cross-vantage
+   payloads; `_obs_quality_fields()` requires all SIQ/DIQ/QDS quality bits to be present and boolean before setting
+   `quality_good=True`; `apply_quality_consistency()` requires both `quality_consistency` and `lineage_consistency` to pass.
+2. **Four-layer synthesis (`synthesis.py`).** `synthesize_incident_scenario()` builds Layer 1 (`local_storyline_partition`),
+   Layer 2 (`rtu_asdu_bundles`, `verified_element_bridges`, `bridged_bundle_components`), Layer 3
+   (`candidate_scenario_phases`), and Layer 4 (`source_dependency_ledger`, `competing_explanations`), exported to
+   `incident_synthesis.json` and rendered in Section `2B` of `investigation_report.md`.

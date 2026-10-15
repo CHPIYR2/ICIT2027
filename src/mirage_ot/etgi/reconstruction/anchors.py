@@ -113,25 +113,45 @@ def _load_rows(db, start: float, end: float) -> list[dict]:
     return rows
 
 
+_REQUIRED_QUALITY_BITS = {
+    **{t: ("iv", "nt", "sb", "bl") for t in (1, 2, 3, 4, 30, 31)},
+    **{t: ("iv", "nt", "sb", "bl", "ov") for t in (9, 10, 11, 12, 13, 14, 34, 35, 36)},
+}
+
+
 def _obs_quality_fields(p: dict) -> dict:
+    """Extract quality fields without ever assuming good quality when quality bits are incomplete."""
+    type_id = p.get("type_id")
+    required_bits = _REQUIRED_QUALITY_BITS.get(type_id, ())
     q_inv = p.get("quality_invalid")
     q_flags = p.get("quality_flags")
-    flags_set = sorted(k for k, v in q_flags.items() if v is True) if isinstance(q_flags, dict) else []
-    flags_unknown = (
-        (not isinstance(q_flags, dict) or any(v is None for v in q_flags.values()))
-        if q_flags is not None else False
-    )
     q_good_raw = p.get("quality_good")
-    if q_inv is True or flags_set:
+
+    flags_set = sorted(k for k, v in q_flags.items() if v is True) if isinstance(q_flags, dict) else []
+    if isinstance(q_flags, dict) and q_inv is None and isinstance(q_flags.get("iv"), bool):
+        q_inv = q_flags["iv"]
+
+    if required_bits:
+        bits_complete = (
+            isinstance(q_flags, dict)
+            and all(b in q_flags and isinstance(q_flags.get(b), bool) for b in required_bits)
+        )
+        flags_unknown = not bits_complete
+    else:
+        bits_complete = (
+            isinstance(q_flags, dict)
+            and bool(q_flags)
+            and all(isinstance(v, bool) for v in q_flags.values())
+        )
+        flags_unknown = bool(q_flags is not None and not bits_complete)
+
+    if q_inv is True or flags_set or q_good_raw is False:
         q_good = False
-    elif flags_unknown:
-        q_good = None
-    elif q_good_raw is not None:
-        q_good = bool(q_good_raw)
-    elif q_inv is False:
+    elif bits_complete and q_inv is False and q_good_raw is not False:
         q_good = True
     else:
         q_good = None
+
     return {
         "quality_good": q_good,
         "quality_invalid": q_inv,
@@ -145,6 +165,8 @@ def _sample_quality_issues(prefix: str, obs: dict | None) -> list[str]:
     if obs is None:
         return [f"{prefix}_sample_missing"]
     issues = []
+    if obs.get("cross_vantage_conflict"):
+        issues.append(f"{prefix}_cross_vantage_payload_conflict")
     if obs.get("quality_invalid") is True:
         issues.append(f"{prefix}_quality_invalid")
     elif obs.get("quality_flags_set"):
@@ -160,43 +182,43 @@ def _sample_quality_issues(prefix: str, obs: dict | None) -> list[str]:
     return issues
 
 
+def _vantage_payload_consistent(prior: dict, candidate: dict) -> bool:
+    """Two mirror-port captures may merge only when every decoded payload and quality field agrees."""
+    if (prior.get("entity"), prior.get("ca_ioa"), prior.get("type_id"), prior.get("cause")) != (
+        candidate.get("entity"), candidate.get("ca_ioa"), candidate.get("type_id"), candidate.get("cause")
+    ):
+        return False
+    p_val, c_val = prior.get("value"), candidate.get("value")
+    if (p_val is not None) != (c_val is not None):
+        return False
+    if p_val is not None and abs(float(p_val) - float(c_val)) > 1e-6:
+        return False
+    for key in (
+        "quality_good", "quality_invalid", "quality_flags_set",
+        "quality_flags_unknown", "cot_test", "cot_negative", "select_execute",
+    ):
+        if prior.get(key) != candidate.get(key):
+            return False
+    return True
+
+
 def _merge_iec_vantages(rows: list[dict]) -> list[dict]:
-    """One observation per information object, however many mirror ports captured it."""
-    merged: dict[tuple, dict] = {}
-    out = []
+    """Merge mirror-port captures of one information object only across distinct vantages with identical payload."""
+    asdu_instances_by_base: dict[tuple, list[dict]] = {}
+    out: list[dict] = []
+
     for row in rows:
         p = row["payload"]
         q = _obs_quality_fields(p)
-        asdu_key = (row.get("src_ip"), row.get("src_port"), row.get("dst_ip"), row.get("dst_port"),
-                    p.get("apci_tx"), p.get("asdu_index"))
-        key = (asdu_key, row.get("ca_ioa"), p.get("object_index"))
-        prior = merged.get(key)
-        if prior is not None and p.get("apci_tx") is not None and abs(row["timestamp"] - prior["time"]) <= VANTAGE_MERGE_SECONDS:
-            prior["vantages"] = sorted({*prior["vantages"], row.get("vantage")} - {None})
-            prior["evidence_ids"].append(row["evidence_id"])
-            if prior["quality_good"] is True and q["quality_good"] is True:
-                prior["quality_good"] = True
-            elif False in (prior["quality_good"], q["quality_good"]):
-                prior["quality_good"] = False
-            else:
-                prior["quality_good"] = None
-            if True in (prior["quality_invalid"], q["quality_invalid"]):
-                prior["quality_invalid"] = True
-            elif prior["quality_invalid"] is False and q["quality_invalid"] is False:
-                prior["quality_invalid"] = False
-            else:
-                prior["quality_invalid"] = None
-            prior["quality_flags_set"] = sorted({*prior["quality_flags_set"], *q["quality_flags_set"]})
-            prior["quality_flags_unknown"] = bool(prior["quality_flags_unknown"] or q["quality_flags_unknown"])
-            if True in (prior["cot_test"], q["cot_test"]):
-                prior["cot_test"] = True
-            elif prior["cot_test"] is False and q["cot_test"] is False:
-                prior["cot_test"] = False
-            else:
-                prior["cot_test"] = None
-            continue
+        base_asdu = (
+            row.get("src_ip"), row.get("src_port"), row.get("dst_ip"), row.get("dst_port"),
+            p.get("apci_tx"), p.get("asdu_index"),
+        )
+        obj_slot = (row.get("ca_ioa"), p.get("object_index"))
+        vantage = row.get("vantage")
+        parent_id = row.get("parent_evidence_id")
         entity = row["entity"]
-        obs = {
+        candidate = {
             "time": row["timestamp"],
             "entity": entity,
             "device_stem": entity.split(":", 1)[0] if ":" in entity else None,
@@ -207,14 +229,81 @@ def _merge_iec_vantages(rows: list[dict]) -> list[dict]:
             "cause": None if p.get("cause") in (None, "") else int(p["cause"]),
             "value": row.get("value") if row.get("value_present") else None,
             **q,
+            "cot_negative": p.get("cot_negative"),
+            "select_execute": p.get("select_execute"),
             "src_ip": row.get("src_ip"), "dst_ip": row.get("dst_ip"),
             "src_port": row.get("src_port"), "dst_port": row.get("dst_port"),
-            "asdu_key": "|".join(str(x) for x in asdu_key),
-            "vantages": [row.get("vantage")] if row.get("vantage") else [],
+            "asdu_key": "",
+            "vantages": [vantage] if vantage else [],
             "evidence_ids": [row["evidence_id"]],
+            "cross_vantage_conflict": False,
         }
-        merged[key] = obs
-        out.append(obs)
+
+        instances = asdu_instances_by_base.setdefault(base_asdu, [])
+        attached = False
+        for inst in reversed(instances):
+            # Case 1: another object slot in the exact same frame on the same vantage
+            if (
+                vantage in inst["vantage_times"]
+                and abs(row["timestamp"] - inst["vantage_times"][vantage]) <= 1e-9
+                and inst["vantage_parents"].get(vantage) == parent_id
+                and obj_slot not in inst["vantage_slots"][vantage]
+            ):
+                existing_obs = inst["objects"].get(obj_slot)
+                if existing_obs is not None:
+                    if _vantage_payload_consistent(existing_obs, candidate):
+                        existing_obs["vantages"] = sorted({*existing_obs["vantages"], vantage} - {None})
+                        existing_obs["evidence_ids"].append(row["evidence_id"])
+                        inst["vantage_slots"][vantage].add(obj_slot)
+                        attached = True
+                    else:
+                        existing_obs["cross_vantage_conflict"] = True
+                        candidate["cross_vantage_conflict"] = True
+                    break
+                candidate["asdu_key"] = inst["asdu_key"]
+                inst["objects"][obj_slot] = candidate
+                inst["vantage_slots"][vantage].add(obj_slot)
+                out.append(candidate)
+                attached = True
+                break
+
+            # Case 2: mirror capture on a strictly different vantage within VANTAGE_MERGE_SECONDS
+            if (
+                p.get("apci_tx") is not None
+                and vantage is not None
+                and vantage not in inst["vantage_times"]
+                and abs(row["timestamp"] - min(inst["vantage_times"].values())) <= VANTAGE_MERGE_SECONDS
+                and obj_slot in inst["objects"]
+            ):
+                existing_obs = inst["objects"][obj_slot]
+                if _vantage_payload_consistent(existing_obs, candidate):
+                    existing_obs["vantages"] = sorted({*existing_obs["vantages"], vantage} - {None})
+                    existing_obs["evidence_ids"].append(row["evidence_id"])
+                    inst["vantage_times"][vantage] = row["timestamp"]
+                    inst["vantage_parents"][vantage] = parent_id
+                    inst["vantage_slots"][vantage] = {obj_slot}
+                    attached = True
+                else:
+                    existing_obs["cross_vantage_conflict"] = True
+                    candidate["cross_vantage_conflict"] = True
+                break
+
+        if not attached:
+            base_key = "|".join(str(x) for x in base_asdu)
+            if p.get("apci_tx") is None or instances:
+                asdu_key_str = f"{base_key}#pkt{len(instances) + 1}"
+            else:
+                asdu_key_str = base_key
+            candidate["asdu_key"] = asdu_key_str
+            instances.append({
+                "asdu_key": asdu_key_str,
+                "vantage_times": {vantage: row["timestamp"]},
+                "vantage_parents": {vantage: parent_id},
+                "vantage_slots": {vantage: {obj_slot}},
+                "objects": {obj_slot: candidate},
+            })
+            out.append(candidate)
+
     out.sort(key=lambda o: (o["time"], o["entity"]))
     return out
 

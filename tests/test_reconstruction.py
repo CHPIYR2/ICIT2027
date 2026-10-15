@@ -892,14 +892,22 @@ def test_r4_consistency_checker_flags_a_graph_that_ignores_the_gate(tmp_path: Pa
 MASTER = "172.16.1.2"
 
 
+GOOD_SIQ = {"iv": False, "nt": False, "sb": False, "bl": False}
+
+
 def _iec(
     eid, t, entity, ca_ioa, value, *, rtu, tx, obj=0, type_id=13, cause="1",
     vantage="n302", quality=True, cot_test=False, extra_payload=None,
 ):
+    default_qflags = (
+        (GOOD_SIQ if type_id in (1, 2, 3, 4, 30, 31) else GOOD_QDS)
+        if quality is True else None
+    )
     return _row(eid, t, "network", entity, "iec104_asdu", value, vantage=vantage, ca_ioa=ca_ioa,
                 protocol_class="monitor", src_ip=rtu, src_port=2404, dst_ip=MASTER, dst_port=40000,
                 payload={"type_id": type_id, "cause": cause, "apci_tx": tx, "asdu_index": 0,
-                         "object_index": obj, "quality_good": quality, "cot_test": cot_test,
+                         "object_index": obj, "quality_invalid": False if quality is True else None,
+                         "quality_flags": default_qflags, "quality_good": quality, "cot_test": cot_test,
                          **(extra_payload or {})})
 
 
@@ -1103,7 +1111,7 @@ def test_behavioral_anchor_reliability_counterexamples_stay_unverified(tmp_path:
         rows.append(_iec(
             f"EV-qnt-{i}", t, "bus.2:voltage", "123.20", val, rtu=rtu_a, tx=200 + i,
             quality=(i != 1),
-            extra_payload={"quality_invalid": False, "quality_flags": {"ov": False, "bl": False, "sb": False, "nt": (i == 1)}},
+            extra_payload={"quality_invalid": False, "quality_flags": {"iv": False, "ov": False, "bl": False, "sb": False, "nt": (i == 1)}},
         ))
         # 3) post_test_bit_set on bus.3:voltage at step sample (i == 1)
         rows.append(_iec(
@@ -1262,3 +1270,205 @@ def test_quality_inconsistent_report_is_diagnostic_only(tmp_path: Path, monkeypa
         assert (tmp_path / "out" / name).exists(), name
     saved = json.loads((tmp_path / "out" / "investigation_report.json").read_text())
     assert saved["report_status"] == "diagnostic_only_quality_inconsistent"
+
+
+def test_obs_quality_fields_and_merge_iec_vantages_reject_incomplete_bits_and_bad_merges():
+    """Pre-synthesis fixes 1 & 2: incomplete quality bits stay unknown; same-vantage or conflicting packets never merge."""
+    from mirage_ot.etgi.reconstruction.anchors import _merge_iec_vantages, _obs_quality_fields
+
+    # Fix 2: incomplete quality bits must never be assumed good, even if quality_invalid=False or quality_good=True
+    q_no_flags = _obs_quality_fields({"type_id": 13, "quality_invalid": False, "quality_good": True})
+    assert q_no_flags["quality_good"] is None and q_no_flags["quality_flags_unknown"] is True
+
+    q_missing_ov = _obs_quality_fields({
+        "type_id": 13,
+        "quality_invalid": False,
+        "quality_good": True,
+        "quality_flags": {"iv": False, "nt": False, "sb": False, "bl": False},
+    })
+    assert q_missing_ov["quality_good"] is None and q_missing_ov["quality_flags_unknown"] is True
+
+    q_missing_bl_state = _obs_quality_fields({
+        "type_id": 1,
+        "quality_invalid": False,
+        "quality_good": True,
+        "quality_flags": {"iv": False, "nt": False, "sb": False},
+    })
+    assert q_missing_bl_state["quality_good"] is None and q_missing_bl_state["quality_flags_unknown"] is True
+
+    q_complete = _obs_quality_fields({
+        "type_id": 13,
+        "quality_invalid": False,
+        "quality_flags": {"iv": False, "nt": False, "sb": False, "bl": False, "ov": False},
+    })
+    assert q_complete["quality_good"] is True and q_complete["quality_flags_unknown"] is False
+
+    # Fix 1a: two independent packets on the SAME vantage (n302) within 0.5s must NOT merge and get distinct asdu_keys
+    same_vantage_rows = [
+        _iec("EV-sv1", 1005.0, "line.3:p_to", "123.1", 0.0, rtu="172.16.3.18", tx=11, obj=0, vantage="n302"),
+        _iec("EV-sv2", 1005.1, "line.3:p_to", "123.1", 0.0, rtu="172.16.3.18", tx=11, obj=0, vantage="n302"),
+    ]
+    merged_sv = _merge_iec_vantages(same_vantage_rows)
+    assert len(merged_sv) == 2
+    assert merged_sv[0]["asdu_key"] != merged_sv[1]["asdu_key"]
+
+    # Fix 1b: two packets on DIFFERENT vantages (n302 vs n318) with conflicting values or flags must NOT merge
+    conflicting_vantage_rows = [
+        _iec("EV-cv1", 1005.0, "line.3:p_to", "123.1", 0.0, rtu="172.16.3.18", tx=12, obj=0, vantage="n302"),
+        _iec("EV-cv2", 1005.0002, "line.3:p_to", "123.1", 99.0, rtu="172.16.3.18", tx=12, obj=0, vantage="n318"),
+    ]
+    merged_cv = _merge_iec_vantages(conflicting_vantage_rows)
+    assert len(merged_cv) == 2
+    assert all(o["cross_vantage_conflict"] is True for o in merged_cv)
+    assert merged_cv[0]["asdu_key"] != merged_cv[1]["asdu_key"]
+
+
+def test_incident_synthesis_enforces_four_layers_and_counterexamples(tmp_path: Path, monkeypatch):
+    """Verify Layer 1-4 synthesis invariants and counterexamples:
+    - Unverified anchors never form a bundle or Verified Element Bridge.
+    - Same-ASDU multi-IOA anchors are collapsed to 1 independent source container.
+    - Cross-device temporal candidates stay unresolved in candidate_scenario_phases.
+    - Missing/failed lineage downgrades the Final Report to diagnostic_only_lineage_inconsistent.
+    """
+    from mirage_ot.etgi.reconstruction import engine
+    from mirage_ot.etgi.reconstruction.report import apply_quality_consistency
+
+    db = _behavioral_db(tmp_path)
+    out = tmp_path / "out"
+    res = reconstruct_incident(db, 1000.0, 1060.0, background_start=985.0, background_end=1000.0, llm=None, out_dir=out)
+    assert (out / "incident_synthesis.json").exists()
+
+    syn = res["incident_synthesis"]
+    assert syn["scenario_status"] == "synthesized_consistent"
+    assert res["quality_consistency"]["consistent"] is True
+    assert res["quality_consistency"]["synthesis_checks"] == {
+        "synthesis_no_new_supported_edges": True,
+        "synthesis_unverified_quarantine_intact": True,
+        "synthesis_source_ledger_exact": True,
+        "synthesis_candidate_links_unresolved": True,
+    }
+
+    # 1) Unverified anchor A001 (switch.13:is_closed, no prior baseline) is quarantined and excluded from bundles/bridges
+    part = syn["local_storyline_partition"]
+    assert [q["anchor_id"] for q in part["quarantined_unverified_observations"]] == ["A001"]
+    assert [p["anchor_id"] for p in part["unverified_precursor_state_reports"]] == ["A001"]
+    bundle_anchor_ids = {aid for b in syn["rtu_asdu_bundles"] for aid in b["member_anchor_ids"]}
+    assert "A001" not in bundle_anchor_ids
+    bridge_anchor_ids = {
+        aid for br in syn["verified_element_bridges"] for aid in (br["from_anchor_id"], br["to_anchor_id"])
+    }
+    assert "A001" not in bridge_anchor_ids
+
+    # 2) Same-ASDU anchors (bus.5:voltage [A003], line.3:i_to,p_to [A004], line.8:p [A005]) share ONE RTU ASDU bundle
+    # with independent_source_count == 1 and reduce the container count by 2
+    shared_bundle = next(b for b in syn["rtu_asdu_bundles"] if "A004" in b["member_anchor_ids"])
+    assert shared_bundle["member_anchor_ids"] == ["A003", "A004", "A005"]
+    assert shared_bundle["independent_source_count"] == 1
+    ledger = syn["source_dependency_ledger"]
+    assert ledger["verified_anchor_count"] == 7
+    assert ledger["independent_asdu_container_count"] == 5
+    assert ledger["co_reported_same_asdu_reduction_count"] == 2
+    assert ledger["ipal_independent_source_weight"] == 0
+
+    # 3) Verified Element Bridge on line.3 links BND-002 (RTU .18) -> BND-003 (RTU .16) without promoting bus.5 or line.8
+    (bridge,) = syn["verified_element_bridges"]
+    assert bridge["bridged_device_stem"] == "line.3"
+    assert "Does NOT establish a physical topology connection" in bridge["what_bridge_does_not_establish"]
+
+    # 4) All cross-device candidates in candidate_scenario_phases stay strictly unresolved
+    for ph in syn["candidate_scenario_phases"]:
+        for cand in ph["unresolved_cross_device_candidates"]:
+            assert cand["verification_status"] == "unresolved"
+            assert cand["causal_status"] == "not_established"
+
+    # 5) Counterexample: tampering synthesis to put unverified A001 into a bridge or promote a candidate fails consistency
+    tampered_syn = copy.deepcopy(syn)
+    tampered_syn["verified_element_bridges"][0]["from_anchor_id"] = "A001"
+    tampered_syn["candidate_scenario_phases"][0]["unresolved_cross_device_candidates"][0]["verification_status"] = "supported"
+    tampered_syn["source_dependency_ledger"]["ipal_independent_source_weight"] = 1
+    bad_qc = check_quality_consistency(
+        res["transactions"], res["event_graph"], res["storylines"], res["report"],
+        anchor_result=res["event_anchors"], incident_synthesis=tampered_syn,
+    )
+    bad_issues = {i["issue"] for i in bad_qc["issues"]}
+    assert bad_qc["consistent"] is False
+    assert "synthesis_bridge_without_corroborated_behavioral_gate" in bad_issues
+    assert "synthesis_candidate_cooccurrence_promoted" in bad_issues
+    assert "synthesis_ipal_counted_as_independent_source" in bad_issues
+
+    # 6) Fix 3 counterexample: when quality_consistency is True but lineage_consistency fails, Final Report is downgraded
+    failed_lineage = {
+        "check_scope": "evidence_lineage_only",
+        "consistent": False,
+        "issues": [{"scope": "behavioral_anchor_lineage", "issue": "missing_evidence_ids", "ids": ["EV-missing"]}],
+    }
+    downgraded = apply_quality_consistency(copy.deepcopy(res["report"]), res["quality_consistency"], failed_lineage)
+    assert downgraded["report_status"] == "diagnostic_only_lineage_inconsistent"
+    assert downgraded["quality_consistency_status"] == "consistent"
+    assert downgraded["lineage_consistency_status"] == "inconsistent"
+    assert downgraded["behavioral_reconstruction"]["supported_chain_count"] == 0
+    assert downgraded["incident_synthesis"]["scenario_status"] == "diagnostic_only_withheld"
+    assert downgraded["incident_synthesis"]["verified_element_bridges"] == []
+    assert len(downgraded["incident_synthesis"]["withheld_verified_element_bridges"]) == 1
+    assert downgraded["markdown"].startswith("# Evidence-Grounded Incident Reconstruction Report — DIAGNOSTIC ONLY, NOT VERIFIED")
+    assert "Lineage Issue:" in downgraded["markdown"]
+
+    # 7) End-to-end engine check: when export_lineage_bundle reports a missing ID, the written report is diagnostic_only
+    monkeypatch.setattr(
+        engine,
+        "export_lineage_bundle",
+        lambda *a, **k: {
+            "db_fingerprint": "test",
+            "requested_count": 1,
+            "expected_with_parents": 1,
+            "exported_count": 0,
+            "missing_ids": ["EV-missing-from-db"],
+            "row_check_failures": [],
+            "rows": [],
+        },
+    )
+    out_bad_lin = tmp_path / "out_bad_lineage"
+    res_bad_lin = reconstruct_incident(
+        db, 1000.0, 1060.0, background_start=985.0, background_end=1000.0, llm=None, out_dir=out_bad_lin,
+    )
+    assert res_bad_lin["quality_consistency"]["consistent"] is True
+    assert res_bad_lin["lineage_consistency"]["consistent"] is False
+    assert res_bad_lin["report"]["report_status"] == "diagnostic_only_lineage_inconsistent"
+    assert res_bad_lin["report"]["incident_synthesis"]["verified_element_bridges"] == []
+
+
+def test_incident_synthesis_without_bridges_builds_arp_and_link_candidate_scenario(tmp_path: Path):
+    """When there are 0 Verified Element Bridges but ARP + IEC-104 link disruptions exist, Layer 3 & 4 still build a candidate scenario."""
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    rows = [
+        _row(f"EV-arp-{i:02d}", 1001.0 + i * 0.5, "network", "172.16.3.28/ARP", "arp_packet", None,
+             src_ip="172.16.3.28", dst_ip="172.16.3.10" if i % 2 == 0 else "172.16.3.9", payload={"op": 2})
+        for i in range(14)
+    ] + [
+        _tcp("EV-fin-10", 1007.0, MASTER, 56094, "172.16.3.10", 2404, 0x11),
+        _tcp("EV-syn-10a", 1008.0, MASTER, 56736, "172.16.3.10", 2404, 0x02),
+        _tcp("EV-syn-10b", 1009.0, MASTER, 56736, "172.16.3.10", 2404, 0x02),
+        _tcp("EV-fin-9", 1012.0, MASTER, 54426, "172.16.3.9", 2404, 0x11),
+        _tcp("EV-syn-9a", 1013.0, MASTER, 58512, "172.16.3.9", 2404, 0x02),
+    ]
+    for r in rows:
+        insert_evidence(conn, r)
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000.0, incident_end=1040.0)
+
+    res = reconstruct_incident(db, 1000.0, 1040.0, background_start=985.0, background_end=1000.0, llm=None, out_dir=tmp_path / "out")
+    syn = res["incident_synthesis"]
+    assert syn["verified_element_bridges"] == []
+    assert syn["bridged_bundle_components"] == []
+    assert len(syn["rtu_asdu_bundles"]) == 3
+    (phase,) = syn["candidate_scenario_phases"]
+    assert phase["phase_profile"] == "arp_burst_and_multi_rtu_iec104_link_disruptions"
+    assert phase["observed_host_and_link_context"]["arp_activity"][0]["arp_target_overlap_rtu_ips"] == [
+        "172.16.3.10", "172.16.3.9",
+    ]
+    assert phase["unresolved_cross_device_candidate_count"] >= 2
+    assert all(c["verification_status"] == "unresolved" for c in phase["unresolved_cross_device_candidates"])
+    classes = [e["hypothesis_class"] for e in syn["competing_explanations"]]
+    assert "arp_address_interference_preceding_iec104_session_loss_hypothesis" in classes
+    assert "concurrent_l2_link_disturbance_and_arp_re_resolution_hypothesis" in classes
