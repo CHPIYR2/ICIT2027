@@ -1366,7 +1366,10 @@ def test_incident_synthesis_enforces_four_layers_and_counterexamples(tmp_path: P
     assert shared_bundle["independent_source_count"] == 1
     ledger = syn["source_dependency_ledger"]
     assert ledger["verified_anchor_count"] == 7
-    assert ledger["independent_asdu_container_count"] == 5
+    assert ledger["iec104_asdu_container_count"] == 3
+    assert ledger["tcp_link_container_count"] == 1
+    assert ledger["arp_container_count"] == 1
+    assert ledger["verified_source_container_count"] == 5
     assert ledger["co_reported_same_asdu_reduction_count"] == 2
     assert ledger["ipal_independent_source_weight"] == 0
 
@@ -1472,3 +1475,80 @@ def test_incident_synthesis_without_bridges_builds_arp_and_link_candidate_scenar
     classes = [e["hypothesis_class"] for e in syn["competing_explanations"]]
     assert "arp_address_interference_preceding_iec104_session_loss_hypothesis" in classes
     assert "concurrent_l2_link_disturbance_and_arp_re_resolution_hypothesis" in classes
+    precedence = next(e for e in syn["competing_explanations"] if e["hypothesis_class"].startswith("arp_address"))
+    assert precedence["eligibility_gate"] == "passed_target_overlap_and_temporal_order"
+    assert precedence["eligible_arp_link_pairs"]
+
+
+def test_cross_rtu_bridge_rejects_same_rtu_and_inconsistent_endpoints(tmp_path: Path):
+    """A supported same-RTU relation is kept but is not a cross-RTU bridge. Tampered endpoints fail the checker."""
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    rtu = "172.16.3.17"
+    rows = [
+        _iec("EV-sgen1-pre", 990.0, "sgen.1:is_connected", "117.1", 1.0, rtu=rtu, tx=70, type_id=1, cause="20"),
+        _iec("EV-sgen1-st", 1002.0, "sgen.1:is_connected", "117.1", 0.0, rtu=rtu, tx=71, type_id=1, cause="3"),
+    ]
+    for i, (t, p) in enumerate([(990.0, 30000.0), (1008.0, 0.0), (1018.0, 0.0), (1028.0, 0.0)]):
+        rows.append(_iec(f"EV-sgen1-p-{i}", t, "sgen.1:active_power", "117.2", p, rtu=rtu, tx=80 + i))
+    for r in rows:
+        insert_evidence(conn, r)
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000.0, incident_end=1060.0)
+    res = reconstruct_incident(db, 1000.0, 1060.0, background_start=985.0, background_end=1000.0, llm=None, out_dir=tmp_path / "out")
+    syn = res["incident_synthesis"]
+    assert syn["verified_element_bridges"] == []
+    (same,) = syn["same_rtu_supported_relations"]
+    assert same["from_rtu_ip"] == same["to_rtu_ip"] == rtu
+    assert same["independent_rtu_support"] is False
+    assert res["quality_consistency"]["consistent"] is True
+
+    base = _behavioral_db(tmp_path / "cross")
+    cross = reconstruct_incident(base, 1000.0, 1060.0, background_start=985.0, background_end=1000.0, llm=None, out_dir=tmp_path / "cross-out")
+    original = cross["incident_synthesis"]
+    (bridge,) = original["verified_element_bridges"]
+    assert bridge["from_rtu_ip"] != bridge["to_rtu_ip"]
+
+    def issues_for(mutator):
+        tampered = copy.deepcopy(original)
+        mutator(tampered["verified_element_bridges"][0])
+        checked = check_quality_consistency(
+            cross["transactions"], cross["event_graph"], cross["storylines"], cross["report"],
+            anchor_result=cross["event_anchors"], incident_synthesis=tampered,
+        )
+        return {i["issue"] for i in checked["issues"]}
+
+    other_bundle = next(b["bundle_id"] for b in original["rtu_asdu_bundles"] if b["bundle_id"] != bridge["from_bundle_id"])
+    assert "synthesis_bridge_bundle_endpoint_mismatch" in issues_for(lambda br: br.update(from_bundle_id=other_bundle))
+    assert "synthesis_bridge_not_cross_rtu" in issues_for(lambda br: br.update(from_rtu_ip=br["to_rtu_ip"]))
+    other_anchor = next(
+        aid for b in original["rtu_asdu_bundles"] for aid in b["member_anchor_ids"] if aid != bridge["from_anchor_id"]
+    )
+    assert "synthesis_bridge_anchor_or_fact_mismatch" in issues_for(lambda br: br.update(from_anchor_id=other_anchor))
+
+
+def test_arp_precedence_hypothesis_requires_overlap_and_order(tmp_path: Path):
+    """ARP that does not address the disrupted RTU, or that starts after the link change, claims no precedence."""
+    conn = connect(tmp_path / "evidence.sqlite")
+    create(conn)
+    rows = [
+        _row(f"EV-arp-{i:02d}", 1030.0 + i, "network", "172.16.3.28/ARP", "arp_packet", None,
+             src_ip="172.16.3.28", dst_ip="172.16.3.99", payload={"op": 2})
+        for i in range(12)
+    ] + [
+        _tcp("EV-fin-10", 1005.0, MASTER, 56094, "172.16.3.10", 2404, 0x11),
+        _tcp("EV-syn-10", 1006.0, MASTER, 56736, "172.16.3.10", 2404, 0x02),
+    ]
+    for r in rows:
+        insert_evidence(conn, r)
+    conn.commit()
+    db = EvidenceDB(conn, incident_start=1000.0, incident_end=1060.0)
+    res = reconstruct_incident(db, 1000.0, 1060.0, background_start=985.0, background_end=1000.0, llm=None, out_dir=tmp_path / "out")
+    classes = [e["hypothesis_class"] for e in res["incident_synthesis"]["competing_explanations"]]
+    assert "arp_address_interference_preceding_iec104_session_loss_hypothesis" not in classes
+    general = next(e for e in res["incident_synthesis"]["competing_explanations"] if e["eligibility_gate"] == "failed_target_overlap_or_temporal_order")
+    assert "No precedence" in general["explanation_summary"]
+    ledger = res["incident_synthesis"]["source_dependency_ledger"]
+    assert ledger["arp_container_count"] == 1
+    assert ledger["tcp_link_container_count"] == 1
+    assert ledger["iec104_asdu_container_count"] == 0

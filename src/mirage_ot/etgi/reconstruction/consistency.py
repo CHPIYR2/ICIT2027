@@ -17,6 +17,7 @@
 """
 from __future__ import annotations
 from .behavior import evaluate_behavioral_relation_consistency
+from .synthesis import container_family
 
 VERIFIED = ("verified_state_transition", "verified_measurement_transition")
 VERIFIED_STORY = ("complete_with_verified_transition", "partial_missing_cot10_but_verified_measurement_transition")
@@ -332,6 +333,7 @@ def check_quality_consistency(
                     "independent_source_count": b.get("independent_source_count"),
                 })
 
+        bundles_by_id = {b["bundle_id"]: b for b in (syn.get("rtu_asdu_bundles") or []) if b.get("bundle_id")}
         bridge_violations = []
         for br in syn.get("verified_element_bridges") or []:
             eid = br.get("edge_id")
@@ -342,19 +344,62 @@ def check_quality_consistency(
                     nodes[edge["source_fact_id"]], nodes[edge["target_fact_id"]],
                 )
             endpoints_unverified = bool({br.get("from_anchor_id"), br.get("to_anchor_id")} & unverified_aids)
-            if (
+            gate_ok = not (
                 edge is None
                 or edge.get("relation_type") != "corroborated_same_device_behavioral_transition"
                 or edge.get("verification_status") != "supported"
                 or not recheck
                 or not recheck.get("gate_passed")
                 or endpoints_unverified
-            ):
+            )
+            if not gate_ok:
                 bridge_violations.append(br.get("bridge_id"))
                 issues.append({
                     "bridge_id": br.get("bridge_id"),
                     "edge_id": eid,
                     "issue": "synthesis_bridge_without_corroborated_behavioral_gate",
+                })
+            from_bundle = bundles_by_id.get(br.get("from_bundle_id"))
+            to_bundle = bundles_by_id.get(br.get("to_bundle_id"))
+            if (
+                from_bundle is None or to_bundle is None
+                or br.get("from_bundle_id") == br.get("to_bundle_id")
+                or br.get("from_anchor_id") not in (from_bundle or {}).get("member_anchor_ids", [])
+                or br.get("to_anchor_id") not in (to_bundle or {}).get("member_anchor_ids", [])
+                or br.get("from_fact_id") not in (from_bundle or {}).get("member_fact_ids", [])
+                or br.get("to_fact_id") not in (to_bundle or {}).get("member_fact_ids", [])
+            ):
+                bridge_violations.append(br.get("bridge_id"))
+                issues.append({
+                    "bridge_id": br.get("bridge_id"),
+                    "issue": "synthesis_bridge_bundle_endpoint_mismatch",
+                    "from_bundle_id": br.get("from_bundle_id"),
+                    "to_bundle_id": br.get("to_bundle_id"),
+                })
+            if not br.get("from_rtu_ip") or br.get("from_rtu_ip") == br.get("to_rtu_ip"):
+                bridge_violations.append(br.get("bridge_id"))
+                issues.append({
+                    "bridge_id": br.get("bridge_id"),
+                    "issue": "synthesis_bridge_not_cross_rtu",
+                    "from_rtu_ip": br.get("from_rtu_ip"),
+                    "to_rtu_ip": br.get("to_rtu_ip"),
+                })
+            src_node = nodes.get(edge["source_fact_id"]) if edge else None
+            dst_node = nodes.get(edge["target_fact_id"]) if edge else None
+            src_anchor = (src_node.get("protocol_meta") or {}).get("anchor_id") if src_node else None
+            dst_anchor = (dst_node.get("protocol_meta") or {}).get("anchor_id") if dst_node else None
+            if (
+                edge is None
+                or br.get("from_fact_id") != edge.get("source_fact_id")
+                or br.get("to_fact_id") != edge.get("target_fact_id")
+                or br.get("from_anchor_id") != src_anchor
+                or br.get("to_anchor_id") != dst_anchor
+            ):
+                bridge_violations.append(br.get("bridge_id"))
+                issues.append({
+                    "bridge_id": br.get("bridge_id"),
+                    "edge_id": eid,
+                    "issue": "synthesis_bridge_anchor_or_fact_mismatch",
                 })
 
         promoted_candidates = []
@@ -373,15 +418,35 @@ def check_quality_consistency(
                     })
 
         ledger = syn.get("source_dependency_ledger") or {}
-        expected_containers = len({b["asdu_container_id"] for b in (syn.get("rtu_asdu_bundles") or [])})
+        expected_by_family = {"iec104_asdu": set(), "tcp_link": set(), "arp": set(), "composite_event": set()}
+        for bundle in syn.get("rtu_asdu_bundles") or []:
+            expected_by_family[container_family(bundle)].add(bundle.get("asdu_container_id"))
+        ledger_fields = {
+            "iec104_asdu": "iec104_asdu_container_count",
+            "tcp_link": "tcp_link_container_count",
+            "arp": "arp_container_count",
+            "composite_event": "composite_event_container_count",
+        }
         ledger_ok = True
-        if syn.get("behavioral_mode") and ledger.get("independent_asdu_container_count") != expected_containers:
-            ledger_ok = False
-            issues.append({
-                "issue": "synthesis_source_ledger_container_count_mismatch",
-                "ledger": ledger.get("independent_asdu_container_count"),
-                "expected": expected_containers,
-            })
+        if syn.get("behavioral_mode"):
+            for family, field in ledger_fields.items():
+                if ledger.get(field) != len(expected_by_family[family]):
+                    ledger_ok = False
+                    issues.append({
+                        "issue": "synthesis_source_ledger_container_count_mismatch",
+                        "container_family": family,
+                        "ledger": ledger.get(field),
+                        "expected": len(expected_by_family[family]),
+                    })
+            expected_total = sum(len(v) for v in expected_by_family.values())
+            if ledger.get("verified_source_container_count") != expected_total:
+                ledger_ok = False
+                issues.append({
+                    "issue": "synthesis_source_ledger_container_count_mismatch",
+                    "container_family": "verified_source_total",
+                    "ledger": ledger.get("verified_source_container_count"),
+                    "expected": expected_total,
+                })
         if ledger.get("ipal_independent_source_weight", 0) != 0:
             ledger_ok = False
             issues.append({

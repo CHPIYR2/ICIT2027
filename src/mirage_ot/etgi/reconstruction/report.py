@@ -501,10 +501,14 @@ def _render_incident_synthesis(syn: dict, diagnostic: bool) -> list[str]:
         f"`{counts.get('sequential_same_device_observation_count', 0)}` sequential same-entity observations (gate failed), "
         f"`{counts.get('quarantined_unverified_observation_count', 0)}` quarantined unverified observations "
         f"(`{counts.get('unverified_precursor_state_report_count', 0)}` unverified COT=3 precursor reports).",
-        f"- **Layer 2 Bundles & Bridges**: `{len(bundles)}` RTU ASDU bundles (each counted as `1` independent source), "
-        f"`{len(bridges)}` verified element bridges, `{len(components)}` multi-bundle bridged components.",
+        f"- **Layer 2 Bundles & Bridges**: `{len(bundles)}` source bundles (each counted as `1` container), "
+        f"`{len(bridges)}` cross-RTU verified element bridges, "
+        f"`{len(syn.get('same_rtu_supported_relations') or [])}` same-RTU supported relations "
+        f"(not cross-RTU support), `{len(components)}` multi-bundle bridged components.",
         f"- **Layer 3 Candidate Phases**: `{len(phases)}` candidate scenario phases (all cross-device links kept `unresolved`).",
-        f"- **Layer 4 Source Dependency Ledger**: `{ledger.get('independent_asdu_container_count', 0)}` independent ASDU containers "
+        f"- **Layer 4 Source Dependency Ledger**: `{ledger.get('iec104_asdu_container_count', 0)}` IEC-104 ASDU, "
+        f"`{ledger.get('tcp_link_container_count', 0)}` TCP link, `{ledger.get('arp_container_count', 0)}` ARP, "
+        f"`{ledger.get('composite_event_container_count', 0)}` composite containers "
         f"across `{ledger.get('distinct_rtu_count', 0)}` RTU(s) (`{ledger.get('distinct_rtu_ips', [])}`), "
         f"`{ledger.get('co_reported_same_asdu_reduction_count', 0)}` co-reported same-ASDU points collapsed, "
         f"mirror vantages `{ledger.get('mirror_vantages_observed', [])}`, "
@@ -528,7 +532,12 @@ def _render_incident_synthesis(syn: dict, diagnostic: bool) -> list[str]:
                     f"{br['what_bridge_does_not_establish']}"
                 )
         else:
-            lines.append("- **Verified Element Bridges**: `none` (0 corroborated multi-ASDU element bridges in this window).")
+            lines.append("- **Cross-RTU Verified Element Bridges**: `none`.")
+        for rel in syn.get("same_rtu_supported_relations") or []:
+            lines.append(
+                f"- **Same-RTU supported relation {rel['relation_id']}** (`{rel['edge_id']}`, "
+                f"`{rel['bridged_device_stem']}`, RTU `{rel.get('from_rtu_ip')}`): {rel['not_a_cross_rtu_bridge']}"
+            )
         for comp in components:
             lines.append(
                 f"- **Bridged Component {comp['component_id']}** (bundles `{comp['bundle_ids']}`, "

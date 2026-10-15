@@ -71,10 +71,11 @@ def synthesize_incident_scenario(
         behavioral_mode=behavioral_mode,
         incident_start=incident_start,
     )
-    bridges = _build_verified_element_bridges(
+    bridges, same_rtu_relations = _build_verified_element_bridges(
         edges=edges,
         nodes_by_id=nodes_by_id,
         storylines=storylines,
+        bundles=bundles,
         bundle_by_fact_id=bundle_by_fact_id,
         incident_start=incident_start,
     )
@@ -123,7 +124,7 @@ def synthesize_incident_scenario(
     )
 
     return {
-        "synthesis_version": "1.0",
+        "synthesis_version": "1.1",
         "scenario_status": "synthesized_consistent",
         "behavioral_mode": behavioral_mode,
         "window": {
@@ -139,10 +140,12 @@ def synthesize_incident_scenario(
             "counts_mirror_vantages_as_independent": False,
             "counts_ipal_as_independent": False,
             "allows_unverified_anchors_in_supported_bridges": False,
+            "allows_same_rtu_relation_as_cross_rtu_bridge": False,
         },
         "local_storyline_partition": partition,
         "rtu_asdu_bundles": bundles,
         "verified_element_bridges": bridges,
+        "same_rtu_supported_relations": same_rtu_relations,
         "bridged_bundle_components": bridged_components,
         "candidate_scenario_phases": candidate_phases,
         "source_dependency_ledger": ledger,
@@ -387,21 +390,22 @@ def _build_verified_element_bridges(
     edges: list[dict],
     nodes_by_id: dict[str, dict],
     storylines: list[dict],
+    bundles: list[dict],
     bundle_by_fact_id: dict[str, str],
     incident_start: float,
-) -> list[dict]:
+) -> tuple[list[dict], list[dict]]:
+    """Cross-RTU bridges only. A same-RTU supported edge is kept, not promoted."""
     storyline_by_edge_id: dict[str, str] = {}
     for sl in storylines:
         for st in sl.get("confirmed_and_supported_steps") or []:
             storyline_by_edge_id[st["edge_id"]] = sl["storyline_id"]
 
-    bundles_by_id_members: dict[str, list[str]] = {}
-    for fid, bid in bundle_by_fact_id.items():
-        stem = nodes_by_id[fid].get("device_stem")
-        if stem:
-            bundles_by_id_members.setdefault(bid, []).append(stem)
+    stems_by_bundle: dict[str, list[str]] = {}
+    for bundle in bundles:
+        stems_by_bundle[bundle["bundle_id"]] = list(bundle.get("member_device_stems") or [])
 
     bridges: list[dict] = []
+    same_rtu: list[dict] = []
     for edge in edges:
         if edge.get("relation_type") != "corroborated_same_device_behavioral_transition":
             continue
@@ -422,16 +426,15 @@ def _build_verified_element_bridges(
             continue
         from_bid = bundle_by_fact_id.get(src_fid)
         to_bid = bundle_by_fact_id.get(dst_fid)
-        if not from_bid or not to_bid:
+        if not from_bid or not to_bid or from_bid == to_bid:
             continue
 
         sm, dm = src_node["protocol_meta"], dst_node["protocol_meta"]
+        from_rtu, to_rtu = sm.get("rtu_ip"), dm.get("rtu_ip")
         stem = src_node.get("device_stem")
-        other_from = sorted(set(bundles_by_id_members.get(from_bid, [])) - {stem})
-        other_to = sorted(set(bundles_by_id_members.get(to_bid, [])) - {stem})
-        bridge_id = f"BRG-{len(bridges) + 1:03d}"
-        bridges.append({
-            "bridge_id": bridge_id,
+        other_from = sorted(set(stems_by_bundle.get(from_bid, [])) - {stem})
+        other_to = sorted(set(stems_by_bundle.get(to_bid, [])) - {stem})
+        record = {
             "edge_id": edge["edge_id"],
             "storyline_id": storyline_by_edge_id.get(edge["edge_id"]),
             "bridged_device_stem": stem,
@@ -443,8 +446,8 @@ def _build_verified_element_bridges(
             "to_fact_id": dst_fid,
             "from_entity": src_node["entity"],
             "to_entity": dst_node["entity"],
-            "from_rtu_ip": sm.get("rtu_ip"),
-            "to_rtu_ip": dm.get("rtu_ip"),
+            "from_rtu_ip": from_rtu,
+            "to_rtu_ip": to_rtu,
             "from_time": src_node["time"],
             "to_time": dst_node["time"],
             "from_relative_s": round(src_node["time"] - incident_start, 3),
@@ -452,25 +455,42 @@ def _build_verified_element_bridges(
             "dt_seconds": recheck["dt_seconds"],
             "matched_quantities": recheck["matched_quantities"],
             "step_kinds": sm.get("step_kinds") or [sm.get("transition_status")],
-            "independent_rtu_support": bool(edge.get("independent_support")),
             "claim_level": "observed_fact",
             "verification_status": "supported",
             "causal_status": "not_established",
             "consistency_gate": recheck,
-            "what_bridge_establishes": (
-                f"Both endpoints of {stem} were reported in separate ASDUs ({from_bid} from RTU "
-                f"{sm.get('rtu_ip')} at +{round(src_node['time'] - incident_start, 3)}s and {to_bid} from "
-                f"RTU {dm.get('rtu_ip')} at +{round(dst_node['time'] - incident_start, 3)}s) with "
-                f"corroborated transitions on {recheck['matched_quantities']}."
-            ),
-            "what_bridge_does_not_establish": (
-                f"Does NOT establish a physical topology connection or causal link between other "
-                f"co-reported devices in {from_bid} ({other_from}) and {to_bid} ({other_to})."
-            ),
             "evidence_ids": list(edge.get("evidence_ids") or []),
-        })
-
-    return bridges
+        }
+        distinct_rtu = bool(from_rtu) and bool(to_rtu) and from_rtu != to_rtu
+        if distinct_rtu:
+            bridges.append({
+                **record,
+                "bridge_id": f"BRG-{len(bridges) + 1:03d}",
+                "bridge_scope": "cross_rtu_verified_element_bridge",
+                "independent_rtu_support": True,
+                "what_bridge_establishes": (
+                    f"Both endpoints of {stem} were reported by different RTUs in separate ASDUs "
+                    f"({from_bid} from RTU {from_rtu} at +{round(src_node['time'] - incident_start, 3)}s and "
+                    f"{to_bid} from RTU {to_rtu} at +{round(dst_node['time'] - incident_start, 3)}s) with "
+                    f"corroborated transitions on {recheck['matched_quantities']}."
+                ),
+                "what_bridge_does_not_establish": (
+                    f"Does NOT establish a physical topology connection or causal link between other "
+                    f"co-reported devices in {from_bid} ({other_from}) and {to_bid} ({other_to})."
+                ),
+            })
+        else:
+            same_rtu.append({
+                **record,
+                "relation_id": f"SRR-{len(same_rtu) + 1:03d}",
+                "relation_scope": "same_rtu_supported_relation",
+                "independent_rtu_support": False,
+                "not_a_cross_rtu_bridge": (
+                    f"Supported same-element relation on {stem}, reported twice by RTU {from_rtu}. "
+                    "Kept as a same-RTU observation; it is not independent cross-RTU support."
+                ),
+            })
+    return bridges, same_rtu
 
 
 def _build_bridged_bundle_components(
@@ -534,7 +554,7 @@ def _build_bridged_bundle_components(
             "bridge_ids": [br["bridge_id"] for br in comp_bridges],
             "member_anchor_ids": comp_anchor_ids,
             "rtu_ips": rtus,
-            "independent_asdu_container_count": len(comp_bids),
+            "member_bundle_count": len(comp_bids),
             "start_time": min(bundles_by_id[x]["time"] for x in comp_bids),
             "end_time": max(bundles_by_id[x]["time_end"] for x in comp_bids),
             "start_relative_s": round(min(bundles_by_id[x]["time"] for x in comp_bids) - incident_start, 3),
@@ -754,6 +774,19 @@ def _build_candidate_scenario_phases(
     return phases
 
 
+def container_family(bundle: dict) -> str:
+    """Classify a verified source container. IEC-104 ASDU, TCP link, ARP and other containers stay separate."""
+    container_id = str(bundle.get("asdu_container_id") or "")
+    kinds = set(bundle.get("member_anchor_types") or [])
+    if "arp_activity_increase" in kinds or container_id.startswith("SRC-ARP_ACTIVITY_INCREASE-"):
+        return "arp"
+    if "communication_change" in kinds or container_id.startswith("SRC-COMMUNICATION_CHANGE-"):
+        return "tcp_link"
+    if container_id.startswith("SRC-ASDU-") or kinds & {"measurement_step", "spontaneous_state_report"}:
+        return "iec104_asdu"
+    return "composite_event"
+
+
 def _build_source_dependency_ledger(
     *,
     transactions: list[dict],
@@ -766,19 +799,23 @@ def _build_source_dependency_ledger(
     verified_anchors = [a for a in anchors if a.get("verification_status") == "verified_observation" and not a.get("covered_by_transaction")]
     unverified_anchors = [a for a in anchors if a.get("verification_status") == "unverified_observation" and not a.get("covered_by_transaction")]
 
+    families = {"iec104_asdu": [], "tcp_link": [], "arp": [], "composite_event": []}
     if behavioral_mode:
-        container_ids = sorted({b["asdu_container_id"] for b in bundles})
+        for bundle in bundles:
+            families[container_family(bundle)].append(bundle["asdu_container_id"])
+        for key in families:
+            families[key] = sorted(set(families[key]))
+        iec_anchor_count = sum(
+            len(b["member_anchor_ids"]) for b in bundles if container_family(b) == "iec104_asdu"
+        )
         rtu_ips = sorted({b["rtu_ip"] for b in bundles if b.get("rtu_ip")})
         master_ips = sorted({b["master_ip"] for b in bundles if b.get("master_ip")})
         arp_hosts = sorted({b["host_ip"] for b in bundles if b.get("host_ip")})
         vantages = sorted({v for b in bundles for v in (b.get("vantages") or []) if v})
         raw_captures = sum(len(a.get("evidence_ids") or []) for a in verified_anchors)
         unique_ev_ids = list(dict.fromkeys(eid for a in verified_anchors for eid in (a.get("evidence_ids") or [])))
-        co_reported_reduction = max(0, len(verified_anchors) - len(container_ids))
+        co_reported_reduction = max(0, iec_anchor_count - len(families["iec104_asdu"]))
     else:
-        container_ids = sorted({
-            cid for tx in transactions for cid in (tx.get("canonical_source_ids") or [])
-        })
         rtu_ips = sorted({tx["rtu_ip"] for tx in transactions if tx.get("rtu_ip")})
         master_ips = sorted({tx["master_ip"] for tx in transactions if tx.get("master_ip")})
         arp_hosts = []
@@ -790,6 +827,9 @@ def _build_source_dependency_ledger(
         ))
         raw_captures = len(unique_ev_ids)
         co_reported_reduction = 0
+        families["composite_event"] = sorted({
+            cid for tx in transactions for cid in (tx.get("canonical_source_ids") or [])
+        })
 
     ipal_corr_edges = [e for e in edges if e.get("relation_category") == "temporal_correspondence"]
     ipal_corr_fids = sorted({e["target_fact_id"] for e in ipal_corr_edges})
@@ -798,8 +838,15 @@ def _build_source_dependency_ledger(
     return {
         "verified_anchor_count": len(verified_anchors),
         "quarantined_unverified_anchor_count": len(unverified_anchors),
-        "independent_asdu_container_ids": container_ids,
-        "independent_asdu_container_count": len(container_ids),
+        "iec104_asdu_container_ids": families["iec104_asdu"],
+        "iec104_asdu_container_count": len(families["iec104_asdu"]),
+        "tcp_link_container_ids": families["tcp_link"],
+        "tcp_link_container_count": len(families["tcp_link"]),
+        "arp_container_ids": families["arp"],
+        "arp_container_count": len(families["arp"]),
+        "composite_event_container_ids": families["composite_event"],
+        "composite_event_container_count": len(families["composite_event"]),
+        "verified_source_container_count": sum(len(v) for v in families.values()),
         "distinct_rtu_ips": rtu_ips,
         "distinct_rtu_count": len(rtu_ips),
         "distinct_master_ips": master_ips,
@@ -818,6 +865,28 @@ def _build_source_dependency_ledger(
             "ipal_state_updates": "weight_zero_temporal_correspondence_only",
             "unverified_observations": "quarantined_excluded_from_verified_containers",
         },
+    }
+
+
+def _arp_link_precedence(arp: dict, comm: dict) -> dict:
+    """A precedence claim needs target overlap, ARP before the link change, and the horizon."""
+    rtu = comm.get("rtu_ip")
+    targets = set((arp.get("targets") or {}))
+    overlap = bool(rtu) and rtu in targets
+    arp_time = float(arp["time"])
+    link_time = float(comm["time"])
+    arp_before_link = arp_time <= link_time
+    dt = round(link_time - arp_time, 6)
+    within_horizon = arp_before_link and 0.0 <= dt <= HORIZON_SECONDS
+    return {
+        "arp_anchor_id": arp.get("anchor_id"),
+        "communication_anchor_id": comm.get("anchor_id"),
+        "rtu_ip": rtu,
+        "target_overlap": overlap,
+        "arp_before_link": arp_before_link,
+        "dt_seconds": dt,
+        "within_horizon": within_horizon,
+        "eligible": overlap and within_horizon,
     }
 
 
@@ -899,7 +968,7 @@ def _build_competing_explanations(
                 "bridge_ids": bridge_ids,
                 "bridged_device_stems": bridged_stems,
                 "component_ids": comp_ids,
-                "independent_asdu_container_count": ledger["independent_asdu_container_count"],
+                "iec104_asdu_container_count": ledger["iec104_asdu_container_count"],
                 "distinct_rtu_count": ledger["distinct_rtu_count"],
                 "evidence_ids": ev_ids,
             },
@@ -933,13 +1002,13 @@ def _build_competing_explanations(
             "anchoring_verified_evidence": {
                 "bridge_ids": bridge_ids,
                 "iec104_control_objects_in_window": 0,
-                "independent_asdu_container_count": ledger["independent_asdu_container_count"],
+                "iec104_asdu_container_count": ledger["iec104_asdu_container_count"],
                 "evidence_ids": ev_ids,
             },
             "unverified_or_candidate_links_assumed": seq_ids,
             "explanation_summary": (
                 f"Zero IEC-104 control commands (types 45-69) were observed in the capture, yet "
-                f"{ledger['independent_asdu_container_count']} ASDU containers from {ledger['distinct_rtu_count']} "
+                f"{ledger['iec104_asdu_container_count']} IEC-104 ASDU containers from {ledger['distinct_rtu_count']} "
                 "RTUs reported abrupt `to_zero` and `level_shift` steps (including asymmetric endpoint behavior "
                 f"recorded in {seq_ids}). Consistent with uncommanded local RTU action or altered/replayed "
                 "network telemetry without SCADA command initiation."
@@ -973,41 +1042,74 @@ def _build_competing_explanations(
         if arp_anchors:
             arp_ids = [a["anchor_id"] for a in arp_anchors]
             arp_hosts = sorted({a.get("host_ip") for a in arp_anchors if a.get("host_ip")})
-            overlap_rtus = sorted({
-                t for a in arp_anchors for t in (a.get("targets") or {}) if t in set(comm_rtus)
-            })
             arp_evs = list(dict.fromkeys(eid for a in arp_anchors for eid in (a.get("evidence_ids") or [])[:3]))
-            explanations.append({
-                "explanation_id": f"EXP-{len(explanations) + 1:03d}",
-                "scope": [*arp_ids, *comm_ids],
-                "hypothesis_class": "arp_address_interference_preceding_iec104_session_loss_hypothesis",
-                "verification_status": "unresolved_competing_hypothesis",
-                "causal_status": "not_established",
-                "anchoring_verified_evidence": {
-                    "arp_anchor_ids": arp_ids,
-                    "communication_anchor_ids": comm_ids,
-                    "arp_source_hosts": arp_hosts,
-                    "overlapping_target_rtu_ips": overlap_rtus,
-                    "evidence_ids": [*arp_evs, *comm_evs][:10],
-                },
-                "unverified_or_candidate_links_assumed": cand_ids,
-                "explanation_summary": (
-                    f"Host(s) {arp_hosts} emitted elevated ARP traffic ({arp_ids}) explicitly targeting RTU IP(s) "
-                    f"{overlap_rtus}, followed within the 15s horizon by TCP FIN/RST teardowns, telemetry gaps, "
-                    f"unanswered SYN attempts, and subsequent GI/clock-sync recovery on IEC-104 links {comm_ids}. "
-                    "Consistent with L2 ARP cache interference affecting those RTU sessions."
-                ),
-                "alternative_comparison": (
-                    f"The link between {arp_ids} and {comm_ids} is supported by IP target overlap ({overlap_rtus}) "
-                    f"and temporal order, but candidate edges {cand_ids} remain `unresolved` because IP-level ARP "
-                    "counts alone do not prove MAC-spoofing causation."
-                ),
-                "missing_disambiguating_evidence": [
-                    f"ARP payload sender-MAC to sender-IP binding audit for {arp_hosts} vs legitimate MACs of {overlap_rtus} and master",
-                    "Managed switch CAM/ARP table logs and port-security counters at n302/n318",
-                    f"TCP stack reset/timeout logs on master 172.16.1.2 and RTUs {comm_rtus}",
-                ],
-            })
+            eligible = [
+                pair for arp in arp_anchors for comm in comm_anchors
+                if (pair := _arp_link_precedence(arp, comm))["eligible"]
+            ]
+            overlap_rtus = sorted({pair["rtu_ip"] for pair in eligible})
+            if eligible:
+                explanations.append({
+                    "explanation_id": f"EXP-{len(explanations) + 1:03d}",
+                    "scope": [*arp_ids, *comm_ids],
+                    "hypothesis_class": "arp_address_interference_preceding_iec104_session_loss_hypothesis",
+                    "verification_status": "unresolved_competing_hypothesis",
+                    "causal_status": "not_established",
+                    "eligibility_gate": "passed_target_overlap_and_temporal_order",
+                    "eligible_arp_link_pairs": eligible,
+                    "anchoring_verified_evidence": {
+                        "arp_anchor_ids": arp_ids,
+                        "communication_anchor_ids": comm_ids,
+                        "arp_source_hosts": arp_hosts,
+                        "overlapping_target_rtu_ips": overlap_rtus,
+                        "evidence_ids": [*arp_evs, *comm_evs][:10],
+                    },
+                    "unverified_or_candidate_links_assumed": cand_ids,
+                    "explanation_summary": (
+                        f"Host(s) {arp_hosts} emitted elevated ARP traffic ({arp_ids}) whose targets include RTU "
+                        f"IP(s) {overlap_rtus}, and those IEC-104 links changed only after the ARP activity and "
+                        f"within {HORIZON_SECONDS:.0f}s. This is an unresolved candidate for L2 ARP cache "
+                        "interference; the pairs are listed in eligible_arp_link_pairs."
+                    ),
+                    "alternative_comparison": (
+                        f"Target overlap and time order hold for {overlap_rtus}, but candidate edges {cand_ids} "
+                        "remain unresolved. ARP counts do not prove MAC spoofing."
+                    ),
+                    "missing_disambiguating_evidence": [
+                        f"ARP payload sender-MAC to sender-IP binding audit for {arp_hosts} vs legitimate MACs of {overlap_rtus} and master",
+                        "Managed switch CAM/ARP table logs and port-security counters at n302/n318",
+                        f"TCP stack reset/timeout logs on master 172.16.1.2 and RTUs {overlap_rtus}",
+                    ],
+                })
+            else:
+                explanations.append({
+                    "explanation_id": f"EXP-{len(explanations) + 1:03d}",
+                    "scope": [*arp_ids, *comm_ids],
+                    "hypothesis_class": "arp_and_iec104_link_observations_without_supported_precedence",
+                    "verification_status": "unresolved_competing_hypothesis",
+                    "causal_status": "not_established",
+                    "eligibility_gate": "failed_target_overlap_or_temporal_order",
+                    "anchoring_verified_evidence": {
+                        "arp_anchor_ids": arp_ids,
+                        "communication_anchor_ids": comm_ids,
+                        "arp_source_hosts": arp_hosts,
+                        "evidence_ids": [*arp_evs, *comm_evs][:10],
+                    },
+                    "unverified_or_candidate_links_assumed": cand_ids,
+                    "explanation_summary": (
+                        f"ARP activity {arp_ids} and IEC-104 link changes {comm_ids} were both observed. "
+                        "No pair has ARP target overlap with the affected RTU, ARP before the link change, and a "
+                        f"gap of at most {HORIZON_SECONDS:.0f}s. No precedence between them is claimed."
+                    ),
+                    "alternative_comparison": (
+                        "A general co-observation only. It does not say the ARP activity came first or addressed "
+                        "the RTU whose session changed."
+                    ),
+                    "missing_disambiguating_evidence": [
+                        "ARP target addresses that match the RTU whose IEC-104 session changed",
+                        "Timestamps showing the ARP activity before that session change and inside the horizon",
+                    ],
+                })
             explanations.append({
                 "explanation_id": f"EXP-{len(explanations) + 1:03d}",
                 "scope": [*arp_ids, *comm_ids],

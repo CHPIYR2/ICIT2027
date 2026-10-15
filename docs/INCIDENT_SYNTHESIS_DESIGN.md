@@ -183,3 +183,11 @@ When Incident Synthesis is implemented in the next round, `check_quality_consist
 | `ev_4e913b` | `0` supported multi-node, `1` verified single-anchor (`A002`), `1` sequential (`R0035`), `3` quarantined (`1` COT=3 precursor `A001`) | `1` bundle (`BND-001` on `sgen.0:active_power`), `0` bridges | `PHS-001` (`+1.187s`..`+10.839s`, `localized_measurement_or_state_observations`, `0` unresolved candidates) | `1` ASDU container on RTU `172.16.3.15`, `4` IPAL rows (`weight=0`); `EXP-001` vs `EXP-002` |
 | `ev_812f80` | `0` supported multi-node, `2` verified single-anchor (`A001`, `A002` links), `0` quarantined | `2` bundles (RTUs `.22`, `.23`), `0` bridges | `PHS-001` (`+0.0s`..`+124.618s`, `multi_rtu_iec104_link_disruptions`, `1` unresolved candidate `R0029`) | `2` containers across `2` RTUs sharing master `172.16.1.2`; `EXP-001` vs `EXP-002` |
 
+## 6. Reliability review of the bridges, checker and explanations
+
+`synthesis_version` `1.1` keeps the four layers and tightens three claims.
+
+1. **Cross-RTU bridge.** `verified_element_bridges` requires two different bundles, two different RTU addresses, and an edge that passed `evaluate_behavioral_relation_consistency()`. A supported relation whose endpoints share an RTU is stored in `same_rtu_supported_relations` with `independent_rtu_support=false`.
+2. **Endpoint check.** `check_quality_consistency()` rejects a bridge whose bundle id, anchor id, fact id or edge endpoints disagree, and a bridge whose two RTU addresses are the same.
+3. **Explanation eligibility and container names.** The ARP-before-link hypothesis is emitted only when an ARP target equals the disrupted RTU, the ARP anchor starts at or before the link anchor, and the gap is at most 15 s. Otherwise the output is `arp_and_iec104_link_observations_without_supported_precedence`. The ledger counts `iec104_asdu`, `tcp_link`, `arp` and `composite_event` containers separately.
+
