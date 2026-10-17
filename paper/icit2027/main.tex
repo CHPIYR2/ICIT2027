@@ -3,11 +3,13 @@
 \usepackage{cite}
 \usepackage{fontspec}
 \setmainfont{TeXGyreTermesX}
-\usepackage{amsmath,amssymb,booktabs}
+\usepackage{amsmath,amssymb,booktabs,array}
 \usepackage{graphicx}
 \usepackage{url}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 \usepackage{balance}
 
 \title{MIRAGE-OT: Evidence-Grounded Incident Reconstruction and Provenance-Constrained Scenario Synthesis for Operational Technology Networks}
@@ -31,16 +33,14 @@ sh.chang@ntut.edu.tw}}
 \maketitle
 
 \begin{abstract}
-An operational-technology alert is a time window, not an incident narrative.
-MIRAGE-OT reconstructs IEC~60870-5-104 transactions and behavioral measurement steps from the capture, keeps a relation only when protocol, quality, and persistence evidence support it, and abstains otherwise.
-Four-layer synthesis then groups reports that share one ASDU, links the two ends of one grid element across RTUs, and lists competing explanations with the evidence still missing.
-On all 103 Sherlock~v3 test windows, with the engine frozen after Basic, every window finishes.
-Cited evidence identifiers resolve in 103/103 windows; full lineage consistency holds in 102/103.
-A temporal-only baseline emits 107{,}666 candidate associations inside 15\,s: 66{,}706 are flagged by the baseline's explicit constraints, including 2{,}628 same-ASDU co-reports that violate a temporal-ordering assumption, and 18{,}130 remain unsubstantiated.
-A protocol-only baseline applies to 46 windows and does not express the no-command remainder.
-A counterfactual removal of the behavioral gate, computed on the frozen artifacts, would promote 2{,}171 unsupported relations.
-An offline Basic simulator comparison, which never enters reconstruction, finds 9/9 verified command transitions numerically compatible and 29/32 bridge attributes compatible, of which 9 are de-energized \texttt{NaN} encodings rather than numeric matches.
-Internal consistency is not external accuracy, and a cross-RTU bridge is not a physical cause.
+Process-aware intrusion detectors can flag a suspicious operational-technology (OT) window, but an alert does not say what happened, which records support it, or what the capture cannot decide.
+Answering those questions from packet captures is error-prone: mirror ports duplicate frames, one IEC~60870-5-104 ASDU carries many objects, and state transcriptions re-encode the same messages, so naive correlation multiplies weak evidence.
+MIRAGE-OT is a deterministic post-alert method that runs downstream of a detector.
+It reconstructs control transactions and sustained measurement steps, admits a relation only when protocol, quality, persistence, and direction evidence agree, and otherwise abstains.
+A four-layer synthesis counts each ASDU as one source, bridges two RTUs only on the same grid element, and lists competing explanations together with the evidence that would separate them.
+On all 103 Sherlock~v3 test windows, with parameters fixed after the first scenario, every window completes and 102/103 pass full lineage consistency.
+A time-proximity-only baseline emits 107{,}666 candidate links inside 15\,s, of which 66{,}706 violate an explicit evidence constraint.
+An offline comparison with simulator snapshots, which never enter the engine, finds all 15 verified command transitions and 138 of 142 bridge attributes compatible, with 20 of 23 bridges compatible at every endpoint.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -48,54 +48,34 @@ operational technology, IEC 60870-5-104, incident reconstruction, evidence prove
 \end{IEEEkeywords}
 
 \section{Introduction}
-After an alert, an operator needs a timeline of what the capture shows, which relations the records support, and which alternatives remain open.
-Attack-family labels do not answer that question, and co-occurrence of two measurements is not a cause.
-The useful output is therefore an evidence-bounded graph: supported where the protocol and the samples agree, unresolved where they do not, and explicit about missing disambiguators.
+Detection of attacks on industrial control systems has matured.
+Detectors flag departures from learned signal behavior~\cite{aoudi2018pasad}, physical invariants~\cite{feng2019invariants}, compact process features~\cite{wolsing2022simple}, or protocol specifications~\cite{hotellier2024specification}.
+Their output is an alert: a time window, a score, and at most an attack-family label.
 
-MIRAGE-OT is a deterministic post-alert reconstruction and synthesis method for operational technology (OT) networks.
-It reads switch packet captures and IPAL state~\cite{wolsing2022ipal} inside a supplied window.
-It does not read official event text, attack names, malicious flags, or simulator state.
-This paper makes three contributions.
+An alert is where incident response begins, not where it ends.
+A responder still has to establish which commands were sent and executed, which grid elements changed state, whether reports from different remote terminal units (RTUs) describe one event, and which questions the capture cannot settle.
+Incident-response frameworks for industrial systems describe these steps~\cite{smith2021air4ics,staves2022incidentresponse}, but they leave the evidence work to the analyst.
+
+Doing that work from packet captures has two traps.
+The first is evidence inflation.
+The same frame is captured at several mirror ports, one application service data unit (ASDU) reports dozens of information objects, and state transcriptions such as IPAL~\cite{wolsing2022ipal} re-encode the same message.
+Counted naively, one report becomes many confirmations.
+The second is over-association.
+In a disturbed grid many measurements change within seconds of one another, and temporal proximity is easily read as causation.
+A capture also lacks the bus-branch model and relay records that would decide physical causation, so a single causal graph is not identifiable from packets alone.
+
+These gaps motivate a separate, downstream task: explaining a window that a detector has already flagged.
+MIRAGE-OT takes such a window and returns an evidence-bounded scenario.
+Relations are supported where the protocol and the samples agree, unresolved where they do not, and every competing explanation names the evidence that would decide it.
+MIRAGE-OT neither detects nor classifies attacks.
+It reads switch captures and IPAL state, and it does not read event labels, attack names, or simulator state.
+The contributions are as follows.
 \begin{itemize}
-\item \textbf{Protocol-aware and behavioral post-alert reconstruction.}
-Control transactions follow IEC~60870-5-104 cause-of-transmission roles~\cite{iec60870}.
-Measurement and state steps become anchors only after vantage merge, quality checks, and a persistence test.
-\item \textbf{Evidence-constrained relation verification and explicit abstention.}
-A candidate becomes supported only when a stated telemetry constraint holds.
-Otherwise it stays unresolved, or it is quarantined when quality, a test bit, a vantage conflict, or a missing baseline fails.
-\item \textbf{Provenance-constrained incident synthesis.}
-Synthesis groups one ASDU as one source, bridges two RTUs only on the same element, and attaches competing explanations that name the missing evidence.
-A bridge records an observed two-end transition.
-Its causal status remains not established.
+\item \textbf{C1, protocol-aware and behavioral reconstruction.} IEC~60870-5-104 control transactions~\cite{iec60870} and sustained measurement or state steps are reconstructed, so that windows without any control command still yield structure.
+\item \textbf{C2, evidence-constrained verification with abstention.} A relation is supported only when stated telemetry constraints hold; otherwise it stays unresolved or is quarantined.
+\item \textbf{C3, provenance-constrained synthesis.} One ASDU counts as one source, cross-RTU bridges require the same grid element, and competing explanations carry their missing evidence. A bridge records an observed two-end transition, not a physical cause.
 \end{itemize}
-The evaluation uses every Sherlock~v3 test window~\cite{wagner2025sherlock,sherlockv3}: 28 Basic, 39 Semiurban, and 36 Rural.
-Baselines and ablations are accountings over those frozen artifacts.
-They are not independent end-to-end reruns of a modified engine, and they are not an accuracy score against attack labels.
-
-\section{Related Work}
-Process-aware intrusion detection looks for departures from normal control behavior.
-PASAD detects stealthy changes in process signals~\cite{aoudi2018pasad}.
-Invariant learning proposes physical consistency checks for industrial control systems~\cite{feng2019invariants}.
-SIMPLE asks how far a small set of process features can go for industrial intrusion detection~\cite{wolsing2022simple}.
-Specification-based detectors compare traffic with a protocol model~\cite{hotellier2024specification}.
-Cross-domain alert correlation combines cyber and physical alerts in industrial control systems~\cite{koucham2022crossdomain}.
-Incident-response frameworks organize operator procedure~\cite{smith2021air4ics,staves2022incidentresponse}.
-The works reviewed here primarily target anomaly scoring or incident-response procedure.
-MIRAGE-OT instead evaluates a post-alert window graph whose relations retain packet-level evidence references and explicit unresolved states.
-Sherlock provides power-grid packet captures and process state for process-aware detection research~\cite{wagner2025sherlock,sherlockv3}.
-We use its test windows as reconstruction inputs and keep its official labels out of the engine.
-No attack-family accuracy is claimed.
-
-\section{MIRAGE-OT Methodology}
-\subsection{Evidence index and anchors}
-A window is an interval $I=[t_s,t_e)$ plus a short background.
-The index stores TCP and ARP frames, IEC-104 ASDUs dissected from the capture, and IPAL rows marked as network-reported state.
-Information-object values are kept only when dissected fields align with information-object addresses.
-Mirror ports that carry the same frame are merged.
-If two vantages disagree on the payload, the anchor is marked with a cross-vantage conflict and quarantined.
-IPAL rows that correspond to the same report receive independent-source weight zero.
-Fig.~\ref{fig:arch} shows the path from the capture to the scenario.
-Simulator snapshots in \texttt{physical.zip} are not on that path.
+Table~\ref{tab:claims} maps each contribution to the comparison that tests it on all 103 Sherlock~v3 test windows~\cite{wagner2025sherlock,sherlockv3}.
 
 \begin{figure*}[t]
 \centering
@@ -108,7 +88,7 @@ Simulator snapshots in \texttt{physical.zip} are not on that path.
   darr/.style={-{Latex[length=2mm]}, thick, dashed}
 ]
 \node[stage] (in) {\textbf{1. Inputs}\\[1.5pt]
-PCAPs and IPAL state.\\
+Detector window, PCAPs, and IPAL state.\\
 No labels.\\
 No \texttt{physical.zip}.};
 \node[stage, right=of in] (idx) {\textbf{2. Evidence index}\\[1.5pt]
@@ -132,89 +112,118 @@ of frozen outputs};
 \draw[darr] (syn.south) -- (off.north);
 \draw[darr] (phys.east) -- node[above, font=\scriptsize] {does not enter reconstruction} (off.west);
 \end{tikzpicture}
-\caption{Four stages from the capture to a scenario. Solid arrows are reconstruction inputs and outputs. The dashed path compares frozen outputs with simulator snapshots and does not enter the engine. A same-element bridge is an observation; its cause remains unresolved.}
+\caption{Four stages from a detector's window to a scenario. Solid arrows are reconstruction inputs and outputs. The dashed path compares frozen outputs with simulator snapshots and does not enter the engine. A same-element bridge is an observation; its cause remains unresolved.}
 \label{fig:arch}
 \end{figure*}
 
+\section{Related Work}
+The detectors above score anomalies; MIRAGE-OT starts from their output.
+Cross-domain correlation combines cyber and physical alerts in industrial control systems~\cite{koucham2022crossdomain}, but it relates alerts rather than the packet records beneath them.
+Incident-response frameworks organize operator procedure~\cite{smith2021air4ics,staves2022incidentresponse}.
+MIRAGE-OT supplies an input to that procedure: a window graph whose relations keep packet-level evidence references and explicit unresolved states.
+The IPAL format provides a common representation of industrial traffic and state for detection research~\cite{wolsing2022ipal}.
+Here an IPAL row and a dissected ASDU can be two encodings of one message, and the synthesis gives the IPAL copy zero independent weight.
+
+\section{MIRAGE-OT Methodology}
+\subsection{Evidence index and anchors}
+A window is an interval $I=[t_s,t_e)$ plus a short background.
+The index stores TCP and ARP frames, IEC-104 ASDUs dissected from every capture, and IPAL rows marked as network-reported state.
+Copies of one frame at different mirror ports within 0.5\,s are merged; if their payloads disagree, the anchor is marked with a cross-vantage conflict and quarantined.
+Each mapped point has an entity name such as \texttt{line.3:current\_from}; its \emph{device stem} is the grid element before the colon (\texttt{line.3}).
+Fig.~\ref{fig:arch} shows the path from capture to scenario.
+
+A measurement sample $v_k$ is a step from $v_{k-1}$ when it falls to near zero ($|v_k|<10^{-3}$), rises from near zero, or changes by a relative amount $|v_k-v_{k-1}|/\max(|v_k|,|v_{k-1}|)\ge 0.5$.
+The step becomes an anchor only if the previous sample is at most 30\,s old, both samples have good quality and a clear test bit, and the step persists: at least two later samples, at least 80\% of them consistent with the new value (within 10\%, or near zero for a drop to zero).
+A state report becomes an anchor when the state differs from an in-window prior value; with no prior value it is kept as an unverified precursor.
+Link anchors mark IEC-104 telemetry gaps longer than $\max(25\,\mathrm{s}, 3\times$ the median background cadence$)$, and ARP anchors mark at least 10 ARP packets and at least five times the background rate.
+These parameters were set during development on Basic and were not changed afterward.
+
 \subsection{Verification and abstention}
 A control transaction is a cause-of-transmission (COT)~6 activation, a COT~7 confirmation with the negative bit clear, and, when present, a COT~10 termination~\cite{iec60870}.
-A verified transition also needs a pre-command sample and a post-command sample whose values differ in the direction the command states.
-If the pre-command IEC-104 sample is absent, the status is \texttt{state\_report\_observed\_no\_pre\_baseline}.
-The command is retained for audit and is not called verified.
+It is a verified transition only when pre-command and post-command samples differ in the direction the command states.
+Without an IEC-104 pre-command sample, the status is \texttt{state\_report\_observed\_no\_pre\_baseline}, and the command is kept for audit, not verified.
 
-A behavioral anchor is a sustained step on one entity: at least two later samples and at least 80\% of them consistent with the new value, with good quality and a clear test bit.
-Same-device ends reported in separate ASDUs may form a corroborated transition when the quantities, change type, and direction agree.
+Two anchors form a corroborated same-element transition only if all of the following hold: the same device stem; separate ASDUs; $0\le\Delta t\le 15$\,s; both anchors verified; transition intervals aligned within 1\,s; and complementary line ends (\texttt{from}/\texttt{to}) sharing a quantity with the same step kind.
+For level shifts the magnitudes must move in the same direction with a ratio agreement of at least 0.5, and active power must reverse sign across the two ends.
+A state report followed by a flow step must match open-to-zero or close-from-zero.
 Same-ASDU co-reports are one container, not a sequence.
-Pairs inside 15\,s that lack this evidence stay unresolved.
-They are not labeled false.
+Pairs inside 15\,s without this evidence stay unresolved; they are not labeled false.
 Pairs that violate quality, persistence, change type, direction, or vantage consistency are explicit conflicts.
 
 \subsection{Provenance-constrained synthesis}
-Synthesis has four layers.
-Layer~1 partitions local storylines into corroborated chains, verified single anchors, same-entity sequential observations that failed a gate, and quarantined unverified observations.
-Layer~2 builds RTU ASDU bundles.
-Every object in one ASDU shares one source identifier, so the bundle's independent-source count is one regardless of how many information objects or mirror ports it contains.
-A verified element bridge joins two bundles from different RTUs only when Layer~1 already corroborated the same device stem.
-The bridge's verification status is supported and its claim level is an observed fact.
-Its causal status stays \texttt{not\_established}.
-Co-reported neighbors of the bridged element are not thereby connected.
-Layer~3 groups remaining bundles into candidate phases by time and by shared RTU, shared master, or ARP-target overlap.
-Those links stay unresolved.
-Layer~4 writes a source-dependency ledger and competing explanations.
-Each explanation cites \texttt{missing\_disambiguating\_evidence}, such as a bus-branch topology or a relay trip record that the capture does not contain.
+Algorithm~\ref{alg:syn} lists the four layers as implemented.
+Layer~1 partitions local storylines.
+Layer~2 groups verified anchors by ASDU, so a bundle counts as one independent source however many objects or mirror ports it has.
+A bridge joins two bundles only through a supported same-element transition that passes the gate again, and only across distinct RTUs; a same-RTU relation is kept but is not a bridge.
+Co-reported neighbors of a bridged element are not connected by it.
+Layer~3 forms candidate phases by start time alone.
+RTU, master, and ARP-target overlap are recorded as phase context, and all cross-device links inside a phase stay unresolved.
+Layer~4 builds a source-dependency ledger and emits competing explanations from fixed rule templates.
+The templates fire on what the window contains: command transactions; cross-RTU bridges, which yield a switching or protection-cascade hypothesis and an uncommanded or altered-telemetry hypothesis; link-change anchors, with shared-path and independent-RTU hypotheses, or ARP variants graded by per-target precedence when ARP anchors exist; or, failing all of these, a same-element sequence that failed the gate.
+A window that triggers no template receives no explanation.
+Explanations are not ranked, and each lists \texttt{missing\_disambiguating\_evidence}, such as a bus-branch model or a relay trip record.
+
+\begin{algorithm}[t]
+\caption{Four-layer synthesis for one window}
+\label{alg:syn}
+\footnotesize
+\begin{algorithmic}[1]
+\Require transactions $T$, anchors $A$, event graph $G$, storylines $S$
+\State \textbf{L1:} split $S$ into supported chains, verified single anchors, same-element sequences that failed the gate, and quarantined anchors; mark state reports with no in-window prior as precursors
+\State \textbf{L2:} $B\gets$ verified anchors not covered by $T$, grouped by ASDU; each $b\in B$ has one independent source
+\For{each supported same-element edge $(u,v)\in G$ with $u,v$ in bundles of $B$}
+  \If{gate$(u,v)$ passes, $b(u)\neq b(v)$, and $\mathrm{rtu}(u)\neq\mathrm{rtu}(v)$}
+    \State add bridge $(b(u),b(v))$; claim: observed; cause: not established
+  \EndIf
+\EndFor
+\State \textbf{L3:} sort $T\cup B\cup$ precursors by start time; open a new phase when the gap to the latest start in the current phase exceeds 15\,s; attach bridges and unresolved candidates
+\State \textbf{L4:} write the ledger (containers, RTUs, vantages; IPAL weight 0); emit each template explanation whose trigger is present, with its missing evidence
+\State \Return bundles, bridges, phases, ledger, explanations
+\end{algorithmic}
+\end{algorithm}
 
 \section{Experimental Setup}
-The frozen engine is commit \texttt{2981fb0}, transferred with no parameter change from Basic (500 mapped points, 4 mirror vantages) to Semiurban (3{,}640 points, 6 vantages) and Rural (1{,}908 points, 8 vantages).
-All 103 test windows are evaluated.
-Official labels and \texttt{physical.zip} are excluded from indexing and reconstruction.
+\textbf{Dataset.}
+Sherlock~v3 is a power-grid dataset for process-aware intrusion detection~\cite{wagner2025sherlock,sherlockv3}.
+Its three scenarios run a control center and RTUs that speak IEC~60870-5-104 over simulated medium-voltage grids.
+The dataset configuration names the CIGRE MV grid for Basic and SimBench MV semi-urban and rural grids for Semiurban and Rural.
+Test runs combine a baseline operation playbook with attack playbooks named Industroyer, drift-off, control-and-freeze, and ARP spoofing.
+Each scenario provides switch captures from several mirror ports, IPAL state transcriptions, event labels, and \texttt{physical.zip}, a series of simulator snapshots taken every 0.5--2\,s.
+We evaluate all 103 test windows: 28 Basic (500 mapped points, 4 mirror vantages), 39 Semiurban (3{,}640 points, 6 vantages), and 36 Rural (1{,}908 points, 8 vantages).
+Event labels and \texttt{physical.zip} are excluded from indexing and reconstruction.
+The engine and its parameters were frozen after Basic and transferred unchanged to Semiurban and Rural.
 
-B1 builds temporal associations on the same anchors and the same 15\,s horizon.
-Cross-device candidates are capped at six outgoing links; same-device and same-ASDU pairs inside the horizon are kept.
-B1 partitions candidates into unsubstantiated candidates, candidates flagged by an explicit constraint, and same-device candidates with no detected constraint conflict.
-These are baseline categories.
-No detected conflict is not evidence that MIRAGE-OT supports the relation.
-B2 keeps the COT~6/7/10 transaction rules and is \texttt{NOT\_APPLICABLE} when a window has no control object.
-A1 recounts same-device pairs that the behavioral or command gate rejected.
-A2 decomposes raw observation rows into mirror duplicates, same-ASDU different addresses, IPAL rows, and multi-event anchors.
-A mirror duplicate is counted only across distinct vantages, only when the timestamps differ by at most 0.5\,s and the packet identity agrees.
-For an IEC-104 ASDU that identity is the flow 4-tuple, a non-null APCI transmit number, the ASDU index, the common address and information-object address, and the object index.
-For TCP it is a shared fingerprint, or the same 4-tuple, sequence number, and flags.
-For ARP it is a shared fingerprint, or the same source, destination, and opcode with timestamps within 0.05\,s.
-A row that lacks the fields its kind requires is unknown and is not treated as a duplicate.
-A3 stops at local storylines and omits bundles, bridges, phases, and explanations.
-These ablations re-account frozen outputs.
-They do not re-index the captures with the gate removed.
+\textbf{Comparisons.}
+\emph{Time-Proximity-Only} (B1) links the same anchors within the same 15\,s horizon, capping cross-device links at six per anchor and keeping all same-device and same-ASDU pairs.
+It sorts candidates into those flagged by an explicit constraint, unsubstantiated candidates, and same-device candidates with no detected conflict; the last is a baseline category, not a MIRAGE-OT supported relation.
+\emph{Control-Transaction-Only} (B2) keeps the COT~6/7/10 rules and does not apply to a window with no control object.
+Three ablations are computed on the frozen outputs and quantify what one component withholds or adds; they do not rerun a modified engine.
+\emph{Gate-rejected promotions} (A1) counts the same-device pairs that the behavioral or command gate rejected.
+\emph{Provenance accounting} (A2) attributes raw observation rows to mirror duplicates, extra objects in one ASDU, IPAL rows, and multi-event anchors.
+A row is a mirror duplicate only across distinct vantages within 0.5\,s and with the same packet identity (for IEC-104, flow, transmit sequence number, ASDU index, address, and object index); a row lacking those fields is counted as unknown.
+\emph{Synthesis-off} (A3) stops at local storylines.
 
-Traceability (E3) is four checks.
-Citation presence passes when every bundle and bridge that the window contains has a non-empty \texttt{evidence\_ids} list, and every competing explanation that it contains has both anchoring evidence identifiers and a non-empty missing-evidence list.
-A window with none of those objects still passes, so a pass does not mean the window emitted citations.
-Evidence-ID resolution looks up those cited identifiers in the window's \texttt{evidence.sqlite} and requires the timeline and behavioral \texttt{missing\_ids} lists to be empty.
-An empty citation list passes.
-If a \texttt{missing\_ids} or \texttt{row\_check\_failures} field is absent, the audit reads it as empty and does not fail.
-Fact and anchor consistency passes when both recorded failure lists are empty.
-A recorded failure is a cited row that disagrees with its fact or anchor on a field to which the check applies: entity, CA/IOA for an IEC-104 fact or anchor point, device or host when the anchor rule names one, or the cited time window.
-Full lineage consistency requires the first three checks and \texttt{lineage\_consistency.consistent}.
-If that flag is absent, the audit defaults it to true.
-Across these 103 windows, one window has an empty synthesis citation list, and 45 windows have a behavioral-anchor check count of zero.
-Their empty behavioral \texttt{row\_check\_failures} lists are recorded check results, not missing fields.
-The four pass counts remain 103/103, 103/103, 102/103, and 102/103.
-Bootstrap intervals are descriptive summaries of window-to-window variation.
-Windows cut from one recording are not an i.i.d.\ sample.
-Four synthetic counterexamples test known answers and are reported separately from Sherlock.
-The Basic physical comparison runs after freeze, against 40{,}319 one-second snapshots, using the nearest snapshot and no interpolation.
+\textbf{Traceability (E3)} has four nested checks per window: \emph{citation presence}, where every emitted bundle and bridge cites evidence and every explanation cites anchoring and missing evidence; \emph{evidence-ID resolution}, where every cited identifier exists in the window's index; \emph{fact and anchor consistency}, where every cited row matches its fact or anchor on entity, CA/IOA, device or host, and time window; and \emph{full lineage consistency}, which adds the engine's own lineage flag.
+A check over an empty set passes, so coverage matters.
+Bundles are empty in 48 windows, bridges in 97, and explanations in 18; only 6 windows contain all three.
+One window cites no identifier, and 45 windows check no behavioral anchor.
+Bootstrap intervals are descriptive only, because windows cut from one recording share grid state and are not independent.
+
+\textbf{Offline physical comparison.}
+After freezing, the outputs of all three scenarios are compared with their snapshots: 40{,}319 for Basic (0.5--2\,s apart) and about 22{,}000 each for Semiurban and Rural (mostly 2\,s apart), using the nearest snapshot without interpolation.
+With relative difference $\delta=|v_{\mathrm{phys}}-v_{\mathrm{net}}|/\max(1,|v_{\mathrm{net}}|)$, a comparison is exact when the absolute difference is at most $10^{-3}$ or $\delta\le 10^{-4}$, and within tolerance when $\delta\le 0.05$ for transactions or $\le 0.10$ for bridge points.
+A simulator \texttt{NaN} paired with a network value within $10^{-3}$ of zero is semantic compatibility for a de-energized island, not numeric equality.
+For a \texttt{to\_zero} step the pre-value is also compared numerically.
 
 \section{Results and Discussion}
 \subsection{Cross-scenario reconstruction}
 Table~\ref{tab:cross} summarizes the frozen run.
 Every window completes.
-Citation presence and evidence-ID resolution pass in all 103 windows.
-Fact and anchor consistency and full lineage consistency pass in 102/103.
-The exception is Semiurban \texttt{ev\_5dd0102}, whose report is downgraded to \texttt{diagnostic\_only\_lineage\_inconsistent} after a cross-switch timestamp inconsistency.
-That downgrade is the consistency mechanism working.
-It is not counted as a pass.
-Median reconstruction-and-synthesis time is 0.66\,s on Basic, 14.04\,s on Semiurban, and 7.74\,s on Rural (6.40\,s across all 103 windows).
-Shared indexing is separate and larger.
-Stage~3's cached evaluation pass is not that runtime.
+Citation presence and evidence-ID resolution pass in all 103 windows, and fact/anchor and full lineage consistency in 102/103.
+In the exception, Semiurban window \texttt{ev\_5dd0102}, a cross-switch timestamp inconsistency downgrades the report to diagnostic-only.
+The consistency check therefore withholds a report rather than passing it.
+Semiurban has 15 windows with reconstructed COT~6 transactions and 16 in which B2 applies; the extra window, \texttt{ev\_5dd0102}, contains 62 unpaired COT~7 replies and no matching COT~6 command.
+Median reconstruction-and-synthesis time is 0.66\,s on Basic, 14.04\,s on Semiurban, and 7.74\,s on Rural (6.40\,s over all windows), excluding shared indexing.
 
 \begin{table}[t]
 \caption{Frozen reconstruction across 103 Sherlock~v3 test windows.}
@@ -244,68 +253,62 @@ Recon.\ median / mean (s) & 0.66/0.91 & 14.0/21.2 & 7.74/11.6 & 6.40/12.3 \\
 \end{tabular}
 \end{table}
 
-Semiurban has 15 windows with reconstructed COT~6 transactions and 16 windows in which B2 applies.
-The extra window, \texttt{ev\_5dd0102}, contains 62 unpaired COT~7 replies and no matching COT~6 command.
-B2 is the right tool there for the replies it can see, and it still omits behavioral anchors.
-
-\subsection{Baselines and counterfactual ablations}
-Table~\ref{tab:ablate} separates what each comparison measures.
-B1 emits 107{,}666 candidate associations: 78{,}238 cross-device, 26{,}800 same-device in separate ASDUs, and 2{,}628 same-ASDU co-reports.
-Of these, 66{,}706 are flagged by the baseline's explicit constraints, 18{,}130 are unsubstantiated temporal candidates, and 22{,}830 are same-device candidates with no detected constraint conflict.
-The last two labels are candidate categories, not MIRAGE-OT supported relations.
-The 2{,}628 same-ASDU cases sit inside the 66{,}706.
-They are ordering conflicts created by treating co-reported objects as a sequence, not pairwise measurement contradictions.
-Other constraint tags, led by a step that is not sustained (66{,}042 links), cover quality, persistence, direction, and cross-vantage disagreement.
-Tags overlap, so they are not a partition of 66{,}706.
-MIRAGE-OT does not promote the unsubstantiated set to false causes.
-Descriptive 95\% intervals for the per-window B1-minus-MIRAGE counts are $[435, 882]$ for conflicts and $[126, 237]$ for unsubstantiated candidates.
-
-B2 verifies the same 15 command transitions and applies in 46/103 windows.
-On the other 57 it contributes no incident structure, omitting 2{,}776 verified non-command anchors, all 23 cross-RTU bridges, and 134 ARP or link-disruption anomalies.
-
-A1 would promote 2{,}171 relations that fail a gate, including 409 cross-RTU bridge promotions, in 52/103 windows.
-One window, \texttt{ev\_52f5ee}, accounts for the maximum of 1{,}966 promotions.
-Excluding it leaves 205 promotions and 49 bridge promotions in 51/102 windows.
-The gate still changes the result after the outlier is removed.
-These counts are counterfactual tallies of rejected pairs.
-They are not false-positive rates against an external label, and they are not a second reconstruction run.
-
-A2 explains 5{,}343 excess rows over 4{,}493 message or event containers: 1{,}845 mirror duplicates, 572 extra information objects in the same ASDU, 2{,}262 IPAL rows, 268 further messages in the same TCP session, and 396 distinct-time events inside one anchor.
-The unknown remainder is 0.
-The mean per-window duplicate-and-derived inflation factor is 2.44.
-Containers are protocol objects, not additional physical sensors.
-A3 leaves 11{,}050 local storylines without the 1{,}700 bundles, 23 bridges, 143 phases, or 161 explanations.
-We claim that organization is traceable.
-We do not claim a measured saving in analyst time.
-
 \begin{table}[t]
-\caption{Baselines and counterfactual ablations on the same 103 frozen windows.}
-\label{tab:ablate}
+\caption{Contributions, the comparisons that test them, and what remains unshown (103 windows unless stated).}
+\label{tab:claims}
 \centering
 \scriptsize
-\setlength{\tabcolsep}{2.4pt}
-\begin{tabular}{@{}lp{0.72\columnwidth}@{}}
+\setlength{\tabcolsep}{2.2pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.09\columnwidth}>{\raggedright\arraybackslash}p{0.6\columnwidth}>{\raggedright\arraybackslash}p{0.27\columnwidth}@{}}
 \toprule
-Variant & Result \\
+Claim & Comparison and result & Not shown \\
 \midrule
-B1 temporal & 107{,}666 candidates: 66{,}706 flagged by baseline constraints, including 2{,}628 same-ASDU ordering conflicts that are not measurement contradictions; 18{,}130 unsubstantiated; 22{,}830 same-device candidates with no detected constraint conflict. The latter two are candidate labels, not MIRAGE-OT supported relations. \\
-B2 protocol & Applicable in 46/103 windows; 15 verified transitions. Omits 2{,}776 non-command anchors, 23 bridges, and 134 link or ARP anomalies. \\
-A1 no gate & Counterfactual: 2{,}171 unsupported promotions (409 bridges). Without \texttt{ev\_52f5ee}: 205 promotions and 49 bridges in 51/102 windows. \\
-A2 no dedup & 9{,}836 rows versus 4{,}493 containers. Excess 5{,}343 is fully accounted for; mean per-window inflation factor 2.44. \\
-A3 no synthesis & 11{,}050 storylines. Omits bundles, bridges, phases, and competing explanations. E3 stays 103/103 for citation presence and ID resolution, and 102/103 for fact/anchor and full lineage consistency. \\
+C1 & Control-Transaction-Only: applies in 46/103 windows with the same 15 verified transitions; omits 2{,}776 non-command anchors, 23 bridges, and 134 link or ARP anomalies. & Whether omitted anchors aid a responder. \\
+C2 & Time-Proximity-Only: 107{,}666 candidates; 66{,}706 constraint-flagged, including 2{,}628 same-ASDU ordering conflicts; 18{,}130 unsubstantiated; 22{,}830 same-device with no detected conflict. Gate-rejected promotions: 2{,}171 (409 bridges); without \texttt{ev\_52f5ee}, 205 (49) in 51/102 windows. & Whether any rejected pair is a true relation. \\
+C3 & Provenance accounting: 9{,}836 rows over 4{,}493 containers, excess fully attributed. Synthesis-off: 11{,}050 storylines without bundles, bridges, phases, or explanations. Case study in Sec.~\ref{sec:case}. & Analyst time or comprehension. \\
+C1--C3 & Offline simulator check across all scenarios: 15/15 transitions and 138/142 bridge attributes compatible (74 numeric, 64 semantic \texttt{NaN}); 20/23 bridges fully compatible. & Physical causality. \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Multi-RTU observation bridge}
-Fig.~\ref{fig:bridge} shows Basic window \texttt{ev\_564bebaa} (180.2\,s).
-Five bridges are supported observations with causal status not established.
-The de-energized cluster links \texttt{line.3} (RTU 172.16.3.18 at $+5.645$\,s to 172.16.3.16 at $+10.695$\,s), \texttt{line.4} (.18 at $+5.645$\,s to .22 at $+7.772$\,s), and \texttt{line.12} (.22 at $+7.772$\,s to .24 at $+7.844$\,s).
-A second cluster links \texttt{line.0} and \texttt{line.1} as level shifts.
-The bridge on \texttt{line.3} states that both ends were reported, in separate ASDUs, with corroborated \texttt{to\_zero} steps.
-It states that this does not connect the co-reported bus, load, and neighboring line.
-The ledger for this window counts 12 verified source containers, gives IPAL correspondence weight zero, and the two competing explanations both name a missing bus-branch model and missing relay records.
-Nine further anchors in the window stay quarantined.
+\subsection{What each component changes}
+Table~\ref{tab:claims} pairs each claim with its test.
+For C1, B2 verifies the same 15 command transitions but applies in only 46/103 windows.
+On the other 57 it yields no incident structure, whereas the behavioral anchors still reconstruct steps, bridges, and link or ARP anomalies.
+
+For C2, B1 shows how far time proximity alone over-associates.
+Its 107{,}666 candidates are 78{,}238 cross-device pairs, 26{,}800 same-device pairs in separate ASDUs, and 2{,}628 same-ASDU co-reports.
+Of these, 66{,}706 are flagged by explicit constraints, 18{,}130 are unsubstantiated, and 22{,}830 are same-device candidates with no detected conflict.
+The 2{,}628 same-ASDU cases lie inside the 66{,}706; they are ordering conflicts created by treating co-reported objects as a sequence, not measurement contradictions.
+Other constraint tags, led by a step that is not sustained (66{,}042 links), cover quality, persistence, direction, and vantage disagreement, and they overlap.
+MIRAGE-OT keeps the unsubstantiated set unresolved instead of promoting it.
+Descriptive 95\% intervals for the per-window B1-minus-MIRAGE counts are $[435, 882]$ for conflicts and $[126, 237]$ for unsubstantiated candidates.
+A1 measures what the gate withholds: 2{,}171 relations in 52/103 windows, including 409 cross-RTU bridges.
+One window, \texttt{ev\_52f5ee}, accounts for 1{,}966 of them; without it the gate still withholds 205 relations and 49 bridges in 51/102 windows.
+These are rejected pairs, not confirmed false positives.
+
+For C3, A2 explains 5{,}343 excess rows: 1{,}845 mirror duplicates, 572 extra objects in the same ASDU, 2{,}262 IPAL rows, 268 further messages in the same TCP session, and 396 distinct-time events inside one anchor, with no unknown remainder.
+The mean per-window inflation factor is 2.44.
+A3 leaves 11{,}050 local storylines in place of 1{,}700 bundles, 23 bridges, 143 phases, and 161 explanations.
+The case below shows what that organization adds in one window.
+
+\subsection{Case study: a multi-RTU de-energization}
+\label{sec:case}
+Basic window \texttt{ev\_564bebaa} (180.2\,s) has no control command, so B2 does not apply.
+Its 109 raw observation rows reduce to 12 ASDU containers after removing 3 mirror duplicates, 41 extra objects in shared ASDUs, and 53 IPAL rows.
+Of 32 anchors, 23 are verified and 9 are quarantined.
+B1 emits 157 candidate links: 29 constraint-flagged, 123 unsubstantiated, and 5 same-device candidates with no detected conflict.
+The gate supports five same-element transitions, all across distinct RTUs, and withholds three more cross-RTU promotions that A1 counts.
+
+Fig.~\ref{fig:bridge} shows the resulting bridges.
+The de-energized component links \texttt{line.3} (RTU 172.16.3.18 at $+5.645$\,s to 172.16.3.16 at $+10.695$\,s), \texttt{line.4} (.18 to .22 at $+7.772$\,s), and \texttt{line.12} (.22 to .24 at $+7.844$\,s), with corroborated \texttt{to\_zero} steps on both ends.
+A second component links \texttt{line.0} and \texttt{line.1} as level shifts.
+The \texttt{line.3} bridge records both ends reported in separate ASDUs, and it does not connect the co-reported bus, load, and neighboring line.
+Layer~3 places all 12 bundles in one phase that holds 129 unresolved cross-device candidates, the same pairs as B1's cross-device candidates, which include its 123 unsubstantiated ones; B1's other 28 pairs are same-ASDU or same-device.
+Layer~4 emits two explanations.
+A switching or protection cascade lists three missing items: a bus-branch topology, a pre-window baseline for two spontaneous state reports, and relay trip records.
+Uncommanded or altered telemetry lists two: out-of-band electrical measurements and RTU logs.
+Instead of 157 temporal links, the responder sees five observed bridges in two components, two open hypotheses, and the five missing items that would separate them.
 
 \begin{figure}[t]
 \centering
@@ -322,81 +325,72 @@ Nine further anchors in the window stay quarantined.
 \draw[arr] (b) -- node[above, font=\tiny] {line.12} (c);
 \draw[arr] (a) -- node[left, font=\tiny] {line.3} (d);
 \end{tikzpicture}
-\caption{Same-element observation bridges in \texttt{ev\_564bebaa}. Arrows are corroborated two-end reports, and causal status is not established. \texttt{line.0} and \texttt{line.1} form a separate level-shift cluster and are omitted for space.}
+\caption{Same-element observation bridges in \texttt{ev\_564bebaa}. Arrows are corroborated two-end reports, and causal status is not established. \texttt{line.0} and \texttt{line.1} form a separate level-shift component and are omitted for space.}
 \label{fig:bridge}
 \end{figure}
 
 \subsection{Physical compatibility and fail-closed cases}
-The offline check uses relative difference
-\begin{equation}
-\delta = \frac{|v_{\mathrm{phys}}-v_{\mathrm{net}}|}{\max(1,|v_{\mathrm{net}}|)}.
-\label{eq:delta}
-\end{equation}
-A comparison is exact when the absolute difference is at most $10^{-3}$ or $\delta \le 10^{-4}$, and within tolerance when $\delta$ is larger but at most 0.05 for transactions or 0.10 for bridge points.
-A simulator \texttt{NaN} paired with a network post-value within $10^{-3}$ of zero is semantic compatibility for a de-energized island.
-It is not numeric equality.
-For a \texttt{to\_zero} step the pre-value is compared numerically.
-A finite pre-snapshot that is not compared does not count as agreement.
-Maximum $|\Delta t|$ is 0.730\,s on the nine transactions and 0.418\,s on the 32 bridge attributes.
+Table~\ref{tab:phys} gives the offline comparison for all three scenarios.
+All 15 verified command transitions are numerically compatible: 14 exact and 1 within 5\% (\texttt{sgen.6} active power in Basic \texttt{ev\_0961f1c2}).
+Of 142 bridge attributes, 138 are compatible, but only 74 of these are numeric matches (44 exact, 30 within 10\%); the other 64 are semantic \texttt{NaN} on a de-energized island, not numeric equality.
+Maximum $|\Delta t|$ is 1.443\,s for transactions (Semiurban) and 1.068\,s for bridge attributes (Rural), reflecting the roughly 2\,s snapshot spacing there.
 
-Table~\ref{tab:phys} replaces a single 100\% figure.
-All 9 verified Basic command transitions are numerically compatible: 8 exact and 1 within 5\% (\texttt{sgen.6} active power in \texttt{ev\_0961f1c2}).
-Of 32 bridge attributes, 10 are exact, 10 are within 10\%, 9 are semantic \texttt{NaN}, and 3 are not agreed.
-The three failures are pre-event currents in \texttt{ev\_564bebaa}.
-Their post-values are \texttt{NaN} and were checked; that semantic post-check does not repair the pre-current mismatch.
-\texttt{line.4:current\_from} has $\delta=0.153$ (4.713 versus 3.993).
-\texttt{line.12:current\_from} has $\delta=0.266$ (0.175 versus $-0.092$), and \texttt{line.12:current\_to} has $\delta=0.427$ (0.294 versus $-0.133$).
-Fully compatible bridges are therefore 4/6: \texttt{line.0}, \texttt{line.1}, \texttt{line.3}, and \texttt{line.2} in \texttt{ev\_b15ac1c8}.
-A 2026-10-15 audit had reported 6/6 and 32/32 under a \texttt{to\_zero} rule that did not numerically compare pre-values.
-That record is retained and is not the recalibrated result.
+All four failures are pre-event currents of \texttt{to\_zero} steps, whose \texttt{NaN} post-values do not repair the pre-current mismatch.
+Three are in Basic \texttt{ev\_564bebaa}: \texttt{line.4:current\_from} has $\delta=0.153$ (4.713 versus 3.993), \texttt{line.12:current\_from} has $\delta=0.266$ (0.175 versus $-0.092$), and \texttt{line.12:current\_to} has $\delta=0.427$ (0.294 versus $-0.133$).
+The fourth is \texttt{line.100:current\_to} in Rural \texttt{ev\_0d966f9}, with $\delta=0.241$ (0.0814 versus $-0.1594$).
+Bridges compatible at every endpoint are therefore 20/23: 4/6 in Basic, 6/6 in Semiurban, and 10/11 in Rural.
+Four of the six Semiurban bridges are in \texttt{ev\_d3c4667}, where one \texttt{line.6} report from one RTU bridges to four \texttt{line.6} reports from another; with a \texttt{line.7} bridge they form one of Semiurban's two bridged components, so 6/6 does not mean six independent elements.
 
 \begin{table}[t]
-\caption{Basic physical comparison after the pre-value rule. Semantic \texttt{NaN} is not a numeric match.}
+\caption{Offline physical comparison of frozen outputs. Semantic \texttt{NaN} is not a numeric match.}
 \label{tab:phys}
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lrr@{}}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
-Class & Transactions & Bridge attributes \\
+ & Basic & Semi. & Rural & All \\
 \midrule
-Checked & 9 & 32 \\
-Exact numeric & 8 & 10 \\
-Within tolerance & 1 & 10 \\
-Semantic \texttt{NaN} versus 0 & 0 & 9 \\
-Not agreed & 0 & 3 \\
-Compatible & 9 & 29 \\
+\multicolumn{5}{@{}l}{\emph{Verified command transitions}} \\
+Checked & 9 & 3 & 3 & 15 \\
+Exact numeric & 8 & 3 & 3 & 14 \\
+Within tolerance & 1 & 0 & 0 & 1 \\
+Compatible & 9 & 3 & 3 & 15 \\
+Max $|\Delta t|$ (s) & 0.730 & 1.443 & 0.962 & 1.443 \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Bridge attributes}} \\
+Checked & 32 & 36 & 74 & 142 \\
+Exact numeric & 10 & 14 & 20 & 44 \\
+Within tolerance & 10 & 4 & 16 & 30 \\
+Semantic \texttt{NaN} versus 0 & 9 & 18 & 37 & 64 \\
+Not agreed & 3 & 0 & 1 & 4 \\
+Compatible & 29 & 36 & 73 & 138 \\
+Max $|\Delta t|$ (s) & 0.418 & 1.064 & 1.068 & 1.068 \\
+Bridges fully compatible & 4/6 & 6/6 & 10/11 & 20/23 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Fail-closed behavior is part of the result.
-In \texttt{ev\_0961f1c2}, three switch transactions show a simulator change whose post-value matches the reported spontaneous sample.
-The reconstruction still withholds verification because the 15\,s pre-window has no IEC-104 pre-state.
+Abstention is visible in the same data.
+In \texttt{ev\_0961f1c2}, three switch transactions show a simulator change whose post-value matches the reported spontaneous sample, yet reconstruction withholds verification because the 15\,s pre-window has no IEC-104 pre-state.
 In \texttt{ev\_52f5ee}, 671 anchors are quarantined for cross-vantage payload conflict.
 Three physical samples, aligned within 0.87\,s, show \texttt{switch.21} closed, closed, then open, and \texttt{sgen.12} power near 14{,}000\,W, near 14{,}000\,W, then 0\,W.
-No quarantined anchor was compared pointwise.
-The samples are compatible with an opening between the second and third times.
-They do not show a single opening, continuous zero power, or that each of the 671 anchors is physically false.
-
-The four synthetic counterexamples pass their constructed checks: a test-bit and opposing-direction pair is a conflict and not a bridge; one ASDU with two objects, two mirrors, and two IPAL rows collapses to one container; an unverified switch preceding a verified line stays unresolved while the line bridges; and a multi-packet communication anchor on one vantage is not counted as a mirror duplicate.
-These checks do not estimate Sherlock accuracy.
+They are compatible with one opening between the second and third samples, but no quarantined anchor was compared pointwise, so they do not show that each of the 671 anchors is physically false.
+Four synthetic counterexamples with known answers, kept separate from Sherlock, also pass; for example, one ASDU with two objects, two mirrors, and two IPAL rows is one container.
 
 \subsection{Limits}
-Citation and lineage rates measure internal traceability.
-Bridge counts measure how often two RTUs report the same element under the gate.
-Neither is a causal accuracy.
-The physical check covers the verified Basic transactions and Basic bridges only, at one-second resolution.
-Cross-scenario windows have no counterpart in this comparison.
-Competing explanations name missing evidence.
-They do not rank attack families.
-Consecutive windows share grid state, so the bootstrap intervals are descriptive.
+Without a bus-branch model or relay records, MIRAGE-OT reports evidence boundaries rather than causes, and its metrics follow that choice.
+Traceability rates measure internal consistency, and bridge counts measure how often two RTUs report the same element under the gate; neither is a causal accuracy.
+The physical check is limited by the 0.5--2\,s snapshot spacing, and 64 of its 142 bridge attributes are semantic \texttt{NaN} compatibility after de-energization rather than numeric comparisons.
+A1 counts what the gate rejects; it does not estimate how many rejected pairs were true relations, so the cost of abstention is unmeasured.
+Thresholds were not varied, and no responder study measures usefulness.
 
 \section{Conclusion}
-MIRAGE-OT turns a post-alert OT window into a provenance-constrained scenario: protocol and behavioral reconstruction, relations that are supported only when a stated evidence constraint holds, and synthesis that refuses to treat one ASDU, a mirror port, or a temporal neighbor as an independent cause.
-On 103 Sherlock~v3 test windows the frozen engine resolves every cited identifier, withholds one lineage-inconsistent report, and keeps cross-RTU bridges at causal status not established.
-The Basic simulator check agrees numerically with all nine verified command transitions and with 29 of 32 bridge attributes, and it records the three current mismatches and the limits of three snapshots in the conflict window.
-The next measurement that this evidence does not provide is an external causal graph.
+Detection tells a responder that a window is suspicious; MIRAGE-OT turns that window into a provenance-constrained scenario.
+It reconstructs protocol and behavioral steps, supports a relation only when a stated evidence constraint holds, and refuses to count one ASDU, a mirror port, or a temporal neighbor as an independent cause.
+On 103 Sherlock~v3 test windows the frozen engine resolves every cited identifier and withholds one lineage-inconsistent report, while cross-RTU bridges remain observations without asserted causes.
+Against offline simulator snapshots of all three scenarios it agrees with all 15 verified command transitions and 138 of 142 bridge attributes, and it records the four pre-event current mismatches.
+The next steps are sensitivity analysis of the gate thresholds, an independent case review by responders, and evaluation on further OT protocols and datasets.
 
 \balance
 \bibliographystyle{IEEEtran}

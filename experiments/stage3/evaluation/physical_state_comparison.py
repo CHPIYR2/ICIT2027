@@ -2,7 +2,8 @@
 
 Isolation:
 - Runs only against frozen reconstruction JSON.
-- Reads ``01-Basic/raw/test/physical.zip`` inside this module.
+- Reads ``<scenario>/raw/test/physical.zip`` (01-Basic, 02-Semiurban, 03-Rural)
+  inside this module.
 - Does not import the reconstruction engine and does not pass simulator
   snapshots into it.
 
@@ -18,11 +19,13 @@ to the network pre-value is not counted as agreement.
 """
 from __future__ import annotations
 
+import argparse
 import bisect
 import io
 import json
 import math
 import re
+import statistics
 import zipfile
 from pathlib import Path
 
@@ -78,7 +81,7 @@ COMPARISON_CRITERIA = {
         "post-value or semantic NaN compatibility. An unchecked post-value is not agreement."
     ),
     "alignment": (
-        "Each network time is paired with the nearest 1-second simulator snapshot. "
+        "Each network time is paired with the nearest simulator snapshot (0.5-2 s spacing). "
         "alignment_error_seconds = snapshot_time - target_time. Values are not interpolated."
     ),
     "physical_zip_isolation": (
@@ -297,16 +300,43 @@ def _tally(rows: list[dict]) -> dict:
     }
 
 
+SCENARIOS = ("01-Basic", "02-Semiurban", "03-Rural")
+_VERIFIED_TX = ("verified_state_transition", "verified_measurement_transition")
+
+
+def episodes_with_physical_targets(recon_root: Path) -> list[str]:
+    """Windows whose frozen output has a verified command transition or a cross-RTU bridge."""
+    episodes = []
+    for ep_dir in sorted(p for p in recon_root.iterdir() if p.is_dir()):
+        tx_res = json.loads((ep_dir / "transactions.json").read_text(encoding="utf-8"))
+        syn_res = json.loads((ep_dir / "incident_synthesis.json").read_text(encoding="utf-8"))
+        has_tx = any(
+            tx.get("device_state_change_status") in _VERIFIED_TX for tx in tx_res.get("transactions") or []
+        )
+        if has_tx or syn_res.get("verified_element_bridges"):
+            episodes.append(ep_dir.name)
+    return episodes
+
+
 def run_post_freeze_physical_state_comparison(
     *,
     basic_zip_path: Path,
     stage1_recon_root: Path,
+    scenario: str = "01-Basic",
+    episodes: list[str] | None = None,
 ) -> dict:
+    """``basic_zip_path`` is the scenario archive; the name is kept for existing callers."""
     if not basic_zip_path.exists():
         return {"status": "skipped_archive_not_found"}
+    if episodes is None:
+        episodes = (
+            FIXED_PHYSICAL_AUDIT_EPISODES
+            if scenario == "01-Basic"
+            else episodes_with_physical_targets(stage1_recon_root)
+        )
 
     with zipfile.ZipFile(basic_zip_path) as zf:
-        raw_phys = zf.read("01-Basic/raw/test/physical.zip")
+        raw_phys = zf.read(f"{scenario}/raw/test/physical.zip")
 
     entries: list[tuple[float, str]] = []
     with zipfile.ZipFile(io.BytesIO(raw_phys)) as pzf:
@@ -337,7 +367,7 @@ def run_post_freeze_physical_state_comparison(
         endpoint_rows = []
         mitm_conflict_quarantine_checks = []
 
-        for ep in FIXED_PHYSICAL_AUDIT_EPISODES:
+        for ep in episodes:
             ep_dir = stage1_recon_root / ep
             tx_res = json.loads((ep_dir / "transactions.json").read_text(encoding="utf-8"))
             anc_res = json.loads((ep_dir / "event_anchors.json").read_text(encoding="utf-8"))
@@ -574,22 +604,29 @@ def run_post_freeze_physical_state_comparison(
     tx_tally = _tally(verified_tx_checks)
     endpoint_tally = _tally(endpoint_rows)
     bridge_compatible = sum(1 for c in cross_rtu_bridge_checks if c["all_endpoints_compatible"])
+    gaps = [b - a for a, b in zip(times, times[1:])]
 
     return {
+        "scenario": scenario,
         "evaluation_scope": (
             "Post-freeze air-gapped physical state comparison "
-            "(`01-Basic` `test/physical.zip`). Offline evaluation only."
+            f"(`{scenario}` `test/physical.zip`). Offline evaluation only."
         ),
         "epistemic_boundary": (
-            "Compares frozen network transitions with nearest 1-second simulator snapshots. "
+            "Compares frozen network transitions with the nearest simulator snapshots. "
             "Reports exact numeric agreement, tolerance agreement, and de-energized NaN "
             "compatibility separately. Does not verify a physical causal graph, and does not "
             "feed physical.zip into reconstruction."
         ),
         "comparison_criteria": COMPARISON_CRITERIA,
-        "prior_audit_record": PRIOR_AUDIT_RECORD,
+        "prior_audit_record": PRIOR_AUDIT_RECORD if scenario == "01-Basic" else None,
+        "episodes_evaluated": list(episodes),
         "physical_snapshot_count": len(entries),
-        "sampling_resolution_seconds": 1.0,
+        "snapshot_spacing_seconds": {
+            "median": _r(statistics.median(gaps), 3) if gaps else None,
+            "p05": _r(sorted(gaps)[int(0.05 * len(gaps))], 3) if gaps else None,
+            "p95": _r(sorted(gaps)[int(0.95 * len(gaps))], 3) if gaps else None,
+        },
         "verified_transaction_agreement_summary": {
             **tx_tally,
             "checks": verified_tx_checks,
@@ -603,3 +640,74 @@ def run_post_freeze_physical_state_comparison(
         },
         "mitm_cross_vantage_conflict_quarantine_check": mitm_conflict_quarantine_checks,
     }
+
+
+def _sum_tallies(tallies: list[dict]) -> dict:
+    out = {}
+    for key in tallies[0]:
+        if key == "max_abs_alignment_error_seconds":
+            vals = [t[key] for t in tallies if t[key] is not None]
+            out[key] = max(vals) if vals else None
+        else:
+            out[key] = sum(t[key] for t in tallies)
+    return out
+
+
+def run_cross_scenario_physical_state_comparison(
+    *,
+    raw_dir: Path,
+    recon_roots: dict[str, Path],
+) -> dict:
+    per_scenario = {
+        scenario: run_post_freeze_physical_state_comparison(
+            basic_zip_path=raw_dir / f"{scenario}.zip",
+            stage1_recon_root=recon_roots[scenario],
+            scenario=scenario,
+        )
+        for scenario in SCENARIOS
+    }
+    completed = [r for r in per_scenario.values() if "status" not in r]
+    tx = [
+        {k: v for k, v in r["verified_transaction_agreement_summary"].items() if k != "checks"}
+        for r in completed
+    ]
+    endpoints = [r["cross_rtu_bridge_agreement_summary"]["endpoint_attribute_summary"] for r in completed]
+    return {
+        "evaluation_scope": "Post-freeze air-gapped physical state comparison across all Sherlock v3 test scenarios.",
+        "comparison_criteria": COMPARISON_CRITERIA,
+        "totals": {
+            "verified_transactions": _sum_tallies(tx) if tx else None,
+            "bridge_endpoint_attributes": _sum_tallies(endpoints) if endpoints else None,
+            "checked_bridge_count": sum(
+                r["cross_rtu_bridge_agreement_summary"]["checked_bridge_count"] for r in completed
+            ),
+            "all_endpoints_compatible_bridge_count": sum(
+                r["cross_rtu_bridge_agreement_summary"]["all_endpoints_compatible_bridge_count"] for r in completed
+            ),
+        },
+        "per_scenario": per_scenario,
+    }
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--raw-dir", type=Path, default=Path("data/raw/sherlock/v3"))
+    parser.add_argument("--stage1-dir", type=Path, default=Path("runs/etgi/stage1-basic-frozen-20261015"))
+    parser.add_argument("--stage2-dir", type=Path, default=Path("runs/etgi/stage2-cross-scenario-frozen-20261015"))
+    parser.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args()
+    if args.out.exists():
+        raise SystemExit(f"refusing to overwrite {args.out}")
+    result = run_cross_scenario_physical_state_comparison(
+        raw_dir=args.raw_dir,
+        recon_roots={
+            "01-Basic": args.stage1_dir / "reconstruction",
+            "02-Semiurban": args.stage2_dir / "semiurban" / "reconstruction",
+            "03-Rural": args.stage2_dir / "rural" / "reconstruction",
+        },
+    )
+    args.out.write_text(json.dumps(result, indent=2, default=str) + "\n", encoding="utf-8")
+
+
+if __name__ == "__main__":
+    main()
