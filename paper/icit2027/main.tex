@@ -12,9 +12,20 @@
 
 \title{MIRAGE-OT: Evidence-Grounded Incident Reconstruction and Provenance-Constrained Scenario Synthesis for Operational Technology Networks}
 
-\author{\IEEEauthorblockN{PoTing Lu\IEEEauthorrefmark{1}, Eric Mao\IEEEauthorrefmark{1}\thanks{Corresponding author: Eric Mao.}, and Shih-Hao Chang\IEEEauthorrefmark{2}}
-\IEEEauthorblockA{\IEEEauthorrefmark{1}\textit{AvocadoAI Co., Ltd.}, Taipei, Taiwan\\eric.mao@mail.avocadolab.ai}
-\IEEEauthorblockA{\IEEEauthorrefmark{2}\textit{Department of Computer Science and Information Engineering},\\\textit{National Taipei University of Technology}, Taipei, Taiwan\\sh.chang@ntut.edu.tw}}
+\author{\IEEEauthorblockN{PoTing Lu}
+\IEEEauthorblockA{\textit{AvocadoAI Co., Ltd.}\\
+Taipei, Taiwan}
+\and
+\IEEEauthorblockN{Eric Mao\thanks{Corresponding author: Eric Mao.}}
+\IEEEauthorblockA{\textit{AvocadoAI Co., Ltd.}\\
+Taipei, Taiwan\\
+eric.mao@mail.avocadolab.ai}
+\and
+\IEEEauthorblockN{Shih-Hao Chang}
+\IEEEauthorblockA{\textit{Department of Computer Science and Information Engineering}\\
+\textit{National Taipei University of Technology}\\
+Taipei, Taiwan\\
+sh.chang@ntut.edu.tw}}
 
 \begin{document}
 \maketitle
@@ -25,7 +36,7 @@ MIRAGE-OT reconstructs IEC~60870-5-104 transactions and behavioral measurement s
 Four-layer synthesis then groups reports that share one ASDU, links the two ends of one grid element across RTUs, and lists competing explanations with the evidence still missing.
 On all 103 Sherlock~v3 test windows, with the engine frozen after Basic, every window finishes.
 Cited evidence identifiers resolve in 103/103 windows; full lineage consistency holds in 102/103.
-A temporal-only baseline emits 107{,}666 associations inside 15\,s: 66{,}706 conflict with checkable telemetry and 18{,}130 stay unsubstantiated.
+A temporal-only baseline emits 107{,}666 candidate associations inside 15\,s: 66{,}706 are flagged by the baseline's explicit constraints, including 2{,}628 same-ASDU co-reports that violate a temporal-ordering assumption, and 18{,}130 remain unsubstantiated.
 A protocol-only baseline applies to 46 windows and does not express the no-command remainder.
 A counterfactual removal of the behavioral gate, computed on the frozen artifacts, would promote 2{,}171 unsupported relations.
 An offline Basic simulator comparison, which never enters reconstruction, finds 9/9 verified command transitions numerically compatible and 29/32 bridge attributes compatible, of which 9 are de-energized \texttt{NaN} encodings rather than numeric matches.
@@ -42,7 +53,7 @@ Attack-family labels do not answer that question, and co-occurrence of two measu
 The useful output is therefore an evidence-bounded graph: supported where the protocol and the samples agree, unresolved where they do not, and explicit about missing disambiguators.
 
 MIRAGE-OT is a deterministic post-alert reconstruction and synthesis method for operational technology (OT) networks.
-It reads switch packet captures and IPAL state inside a supplied window.
+It reads switch packet captures and IPAL state~\cite{wolsing2022ipal} inside a supplied window.
 It does not read official event text, attack names, malicious flags, or simulator state.
 This paper makes three contributions.
 \begin{itemize}
@@ -67,12 +78,10 @@ PASAD detects stealthy changes in process signals~\cite{aoudi2018pasad}.
 Invariant learning proposes physical consistency checks for industrial control systems~\cite{feng2019invariants}.
 SIMPLE asks how far a small set of process features can go for industrial intrusion detection~\cite{wolsing2022simple}.
 Specification-based detectors compare traffic with a protocol model~\cite{hotellier2024specification}.
-These methods score anomalies.
-They do not publish a window graph in which each supported edge cites packet evidence and each withheld edge cites the failed constraint.
-
 Cross-domain alert correlation combines cyber and physical alerts in industrial control systems~\cite{koucham2022crossdomain}.
 Incident-response frameworks organize operator procedure~\cite{smith2021air4ics,staves2022incidentresponse}.
-Neither binds an IEC-104 information object to a deduplicated source container, nor do they separate a same-element observation from a physical cause.
+The works reviewed here primarily target anomaly scoring or incident-response procedure.
+MIRAGE-OT instead evaluates a post-alert window graph whose relations retain packet-level evidence references and explicit unresolved states.
 Sherlock provides power-grid packet captures and process state for process-aware detection research~\cite{wagner2025sherlock,sherlockv3}.
 We use its test windows as reconstruction inputs and keep its official labels out of the engine.
 No attack-family accuracy is claimed.
@@ -88,27 +97,44 @@ IPAL rows that correspond to the same report receive independent-source weight z
 Fig.~\ref{fig:arch} shows the path from the capture to the scenario.
 Simulator snapshots in \texttt{physical.zip} are not on that path.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
 \begin{tikzpicture}[
-  font=\scriptsize,
-  node distance=1.6mm,
-  box/.style={draw, align=center, inner sep=1.6pt, text width=0.92\columnwidth},
-  arr/.style={-{Latex[length=1.6mm]}, thick}
+  font=\footnotesize,
+  node distance=3.2mm,
+  stage/.style={draw, align=center, inner sep=2.4pt, text width=0.22\textwidth, minimum height=3.15cm},
+  side/.style={draw, dashed, align=center, inner sep=2.4pt, text width=0.22\textwidth},
+  arr/.style={-{Latex[length=2mm]}, thick},
+  darr/.style={-{Latex[length=2mm]}, thick, dashed}
 ]
-\node[box] (in) {PCAPs and IPAL state. No labels. No \texttt{physical.zip}.};
-\node[box, below=of in] (idx) {Evidence index and vantage merge};
-\node[box, below=of idx] (rec) {Transactions (COT 6/7/10) and behavioral anchors};
-\node[box, below=of rec] (gate) {Quality, persistence, direction, and baseline gates};
-\node[box, below=of gate] (syn) {Bundles, same-element bridges, unresolved phases, competing explanations};
+\node[stage] (in) {\textbf{1. Inputs}\\[1.5pt]
+PCAPs and IPAL state.\\
+No labels.\\
+No \texttt{physical.zip}.};
+\node[stage, right=of in] (idx) {\textbf{2. Evidence index}\\[1.5pt]
+TCP, ARP, and IEC-104.\\
+Vantage merge.\\
+Output: indexed rows.};
+\node[stage, right=of idx] (rec) {\textbf{3. Reconstruction}\\[1.5pt]
+COT 6/7/10 transactions and behavioral anchors.\\
+Gates: quality, persistence, direction, baseline.\\
+Status: supported, unresolved, or quarantined.};
+\node[stage, right=of rec] (syn) {\textbf{4. Four-layer synthesis}\\[1.5pt]
+ASDU bundles, same-element bridges, candidate phases, competing explanations.\\
+Output: scenario. Cause not established.};
+\node[side, below=of in] (phys) {\texttt{physical.zip}\\
+simulator snapshots};
+\node[side, below=of syn] (off) {Offline comparison\\
+of frozen outputs};
 \draw[arr] (in) -- (idx);
 \draw[arr] (idx) -- (rec);
-\draw[arr] (rec) -- (gate);
-\draw[arr] (gate) -- (syn);
+\draw[arr] (rec) -- (syn);
+\draw[darr] (syn.south) -- (off.north);
+\draw[darr] (phys.east) -- node[above, font=\scriptsize] {does not enter reconstruction} (off.west);
 \end{tikzpicture}
-\caption{MIRAGE-OT reconstructs from the capture and abstains when a gate fails. Synthesis does not promote co-occurrence to a cause. Physical snapshots are an offline check after the outputs are frozen.}
+\caption{Four stages from the capture to a scenario. Solid arrows are reconstruction inputs and outputs. The dashed path compares frozen outputs with simulator snapshots and does not enter the engine. A same-element bridge is an observation; its cause remains unresolved.}
 \label{fig:arch}
-\end{figure}
+\end{figure*}
 
 \subsection{Verification and abstention}
 A control transaction is a cause-of-transmission (COT)~6 activation, a COT~7 confirmation with the negative bit clear, and, when present, a COT~10 termination~\cite{iec60870}.
@@ -144,15 +170,34 @@ Official labels and \texttt{physical.zip} are excluded from indexing and reconst
 
 B1 builds temporal associations on the same anchors and the same 15\,s horizon.
 Cross-device candidates are capped at six outgoing links; same-device and same-ASDU pairs inside the horizon are kept.
-Each B1 link is a candidate, then classed as unsubstantiated, as an explicit constraint conflict, or as a corroborated same-device pair.
+B1 partitions candidates into unsubstantiated candidates, candidates flagged by an explicit constraint, and same-device candidates with no detected constraint conflict.
+These are baseline categories.
+No detected conflict is not evidence that MIRAGE-OT supports the relation.
 B2 keeps the COT~6/7/10 transaction rules and is \texttt{NOT\_APPLICABLE} when a window has no control object.
 A1 recounts same-device pairs that the behavioral or command gate rejected.
 A2 decomposes raw observation rows into mirror duplicates, same-ASDU different addresses, IPAL rows, and multi-event anchors.
+A mirror duplicate is counted only across distinct vantages, only when the timestamps differ by at most 0.5\,s and the packet identity agrees.
+For an IEC-104 ASDU that identity is the flow 4-tuple, a non-null APCI transmit number, the ASDU index, the common address and information-object address, and the object index.
+For TCP it is a shared fingerprint, or the same 4-tuple, sequence number, and flags.
+For ARP it is a shared fingerprint, or the same source, destination, and opcode with timestamps within 0.05\,s.
+A row that lacks the fields its kind requires is unknown and is not treated as a duplicate.
 A3 stops at local storylines and omits bundles, bridges, phases, and explanations.
 These ablations re-account frozen outputs.
 They do not re-index the captures with the gate removed.
 
-Traceability (E3) checks citation presence, SQLite identifier resolution, agreement of cited rows with the stated entity and time, and full lineage consistency.
+Traceability (E3) is four checks.
+Citation presence passes when every bundle and bridge that the window contains has a non-empty \texttt{evidence\_ids} list, and every competing explanation that it contains has both anchoring evidence identifiers and a non-empty missing-evidence list.
+A window with none of those objects still passes, so a pass does not mean the window emitted citations.
+Evidence-ID resolution looks up those cited identifiers in the window's \texttt{evidence.sqlite} and requires the timeline and behavioral \texttt{missing\_ids} lists to be empty.
+An empty citation list passes.
+If a \texttt{missing\_ids} or \texttt{row\_check\_failures} field is absent, the audit reads it as empty and does not fail.
+Fact and anchor consistency passes when both recorded failure lists are empty.
+A recorded failure is a cited row that disagrees with its fact or anchor on a field to which the check applies: entity, CA/IOA for an IEC-104 fact or anchor point, device or host when the anchor rule names one, or the cited time window.
+Full lineage consistency requires the first three checks and \texttt{lineage\_consistency.consistent}.
+If that flag is absent, the audit defaults it to true.
+Across these 103 windows, one window has an empty synthesis citation list, and 45 windows have a behavioral-anchor check count of zero.
+Their empty behavioral \texttt{row\_check\_failures} lists are recorded check results, not missing fields.
+The four pass counts remain 103/103, 103/103, 102/103, and 102/103.
 Bootstrap intervals are descriptive summaries of window-to-window variation.
 Windows cut from one recording are not an i.i.d.\ sample.
 Four synthetic counterexamples test known answers and are reported separately from Sherlock.
@@ -162,8 +207,8 @@ The Basic physical comparison runs after freeze, against 40{,}319 one-second sna
 \subsection{Cross-scenario reconstruction}
 Table~\ref{tab:cross} summarizes the frozen run.
 Every window completes.
-Evidence identifiers resolve in all 103 windows.
-Fact and lineage checks pass in 102/103.
+Citation presence and evidence-ID resolution pass in all 103 windows.
+Fact and anchor consistency and full lineage consistency pass in 102/103.
 The exception is Semiurban \texttt{ev\_5dd0102}, whose report is downgraded to \texttt{diagnostic\_only\_lineage\_inconsistent} after a cross-switch timestamp inconsistency.
 That downgrade is the consistency mechanism working.
 It is not counted as a pass.
@@ -190,8 +235,10 @@ Bridged components & 3 & 2 & 6 & 11 \\
 Candidate phases & 27 & 55 & 61 & 143 \\
 Competing explanations & 46 & 63 & 52 & 161 \\
 Storylines if synthesis stops & 1{,}270 & 5{,}518 & 4{,}262 & 11{,}050 \\
-E3 citation and id resolution & 28/28 & 39/39 & 36/36 & 103/103 \\
-E3 fact and lineage & 28/28 & 38/39 & 36/36 & 102/103 \\
+E3 citation presence & 28/28 & 39/39 & 36/36 & 103/103 \\
+E3 evidence-ID resolution & 28/28 & 39/39 & 36/36 & 103/103 \\
+E3 fact/anchor consistency & 28/28 & 38/39 & 36/36 & 102/103 \\
+E3 full lineage consistency & 28/28 & 38/39 & 36/36 & 102/103 \\
 Recon.\ median / mean (s) & 0.66/0.91 & 14.0/21.2 & 7.74/11.6 & 6.40/12.3 \\
 \bottomrule
 \end{tabular}
@@ -204,8 +251,11 @@ B2 is the right tool there for the replies it can see, and it still omits behavi
 \subsection{Baselines and counterfactual ablations}
 Table~\ref{tab:ablate} separates what each comparison measures.
 B1 emits 107{,}666 candidate associations: 78{,}238 cross-device, 26{,}800 same-device in separate ASDUs, and 2{,}628 same-ASDU co-reports.
-Of these, 66{,}706 carry an explicit telemetry conflict and 18{,}130 are unsubstantiated temporal candidates.
-The dominant conflict tag is a step that is not sustained (66{,}042 links).
+Of these, 66{,}706 are flagged by the baseline's explicit constraints, 18{,}130 are unsubstantiated temporal candidates, and 22{,}830 are same-device candidates with no detected constraint conflict.
+The last two labels are candidate categories, not MIRAGE-OT supported relations.
+The 2{,}628 same-ASDU cases sit inside the 66{,}706.
+They are ordering conflicts created by treating co-reported objects as a sequence, not pairwise measurement contradictions.
+Other constraint tags, led by a step that is not sustained (66{,}042 links), cover quality, persistence, direction, and cross-vantage disagreement.
 Tags overlap, so they are not a partition of 66{,}706.
 MIRAGE-OT does not promote the unsubstantiated set to false causes.
 Descriptive 95\% intervals for the per-window B1-minus-MIRAGE counts are $[435, 882]$ for conflicts and $[126, 237]$ for unsubstantiated candidates.
@@ -238,11 +288,11 @@ We do not claim a measured saving in analyst time.
 \toprule
 Variant & Result \\
 \midrule
-B1 temporal & 107{,}666 candidates: 66{,}706 explicit conflicts, 18{,}130 unsubstantiated, 22{,}830 corroborated same-device pairs. \\
+B1 temporal & 107{,}666 candidates: 66{,}706 flagged by baseline constraints, including 2{,}628 same-ASDU ordering conflicts that are not measurement contradictions; 18{,}130 unsubstantiated; 22{,}830 same-device candidates with no detected constraint conflict. The latter two are candidate labels, not MIRAGE-OT supported relations. \\
 B2 protocol & Applicable in 46/103 windows; 15 verified transitions. Omits 2{,}776 non-command anchors, 23 bridges, and 134 link or ARP anomalies. \\
 A1 no gate & Counterfactual: 2{,}171 unsupported promotions (409 bridges). Without \texttt{ev\_52f5ee}: 205 promotions and 49 bridges in 51/102 windows. \\
 A2 no dedup & 9{,}836 rows versus 4{,}493 containers. Excess 5{,}343 is fully accounted for; mean per-window inflation factor 2.44. \\
-A3 no synthesis & 11{,}050 storylines. Omits bundles, bridges, phases, and competing explanations. Traceability stays 103/103 and 102/103. \\
+A3 no synthesis & 11{,}050 storylines. Omits bundles, bridges, phases, and competing explanations. E3 stays 103/103 for citation presence and ID resolution, and 102/103 for fact/anchor and full lineage consistency. \\
 \bottomrule
 \end{tabular}
 \end{table}
