@@ -16,7 +16,8 @@
 
 \author{\IEEEauthorblockN{PoTing Lu}
 \IEEEauthorblockA{\textit{AvocadoAI Co., Ltd.}\\
-Taipei, Taiwan}
+Taipei, Taiwan\\
+potinglu@mail.avocadolab.ai}
 \and
 \IEEEauthorblockN{Eric Mao\thanks{Corresponding author: Eric Mao.}}
 \IEEEauthorblockA{\textit{AvocadoAI Co., Ltd.}\\
@@ -40,7 +41,7 @@ It reconstructs control transactions and sustained measurement steps, admits a r
 A four-layer synthesis counts each ASDU as one source, bridges two RTUs only on the same grid element, and lists competing explanations together with the evidence that would separate them.
 On all 103 Sherlock~v3 test windows, with parameters fixed after the first scenario, every window completes and 102/103 pass full lineage consistency.
 A time-proximity-only baseline emits 107{,}666 candidate links inside 15\,s, of which 66{,}706 violate an explicit evidence constraint.
-An offline comparison with simulator snapshots, which never enter the engine, finds all 15 verified command transitions and 138 of 142 bridge attributes compatible, with 20 of 23 bridges compatible at every endpoint.
+An offline comparison with simulator snapshots, which never enter the engine, finds all 15 verified command transitions and 138 of 142 bridge attributes compatible (74 numeric, 64 semantic NaN), with 20 of the 23 bridges, which form 11 bridged components, compatible at every endpoint.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -122,7 +123,6 @@ Cross-domain correlation combines cyber and physical alerts in industrial contro
 Incident-response frameworks organize operator procedure~\cite{smith2021air4ics,staves2022incidentresponse}.
 MIRAGE-OT supplies an input to that procedure: a window graph whose relations keep packet-level evidence references and explicit unresolved states.
 The IPAL format provides a common representation of industrial traffic and state for detection research~\cite{wolsing2022ipal}.
-Here an IPAL row and a dissected ASDU can be two encodings of one message, and the synthesis gives the IPAL copy zero independent weight.
 
 \section{MIRAGE-OT Methodology}
 \subsection{Evidence index and anchors}
@@ -136,7 +136,6 @@ A measurement sample $v_k$ is a step from $v_{k-1}$ when it falls to near zero (
 The step becomes an anchor only if the previous sample is at most 30\,s old, both samples have good quality and a clear test bit, and the step persists: at least two later samples, at least 80\% of them consistent with the new value (within 10\%, or near zero for a drop to zero).
 A state report becomes an anchor when the state differs from an in-window prior value; with no prior value it is kept as an unverified precursor.
 Link anchors mark IEC-104 telemetry gaps longer than $\max(25\,\mathrm{s}, 3\times$ the median background cadence$)$, and ARP anchors mark at least 10 ARP packets and at least five times the background rate.
-These parameters were set during development on Basic and were not changed afterward.
 
 \subsection{Verification and abstention}
 A control transaction is a cause-of-transmission (COT)~6 activation, a COT~7 confirmation with the negative bit clear, and, when present, a COT~10 termination~\cite{iec60870}.
@@ -189,7 +188,7 @@ Its three scenarios run a control center and RTUs that speak IEC~60870-5-104 ove
 The dataset configuration names the CIGRE MV grid for Basic and SimBench MV semi-urban and rural grids for Semiurban and Rural.
 Test runs combine a baseline operation playbook with attack playbooks named Industroyer, drift-off, control-and-freeze, and ARP spoofing.
 Each scenario provides switch captures from several mirror ports, IPAL state transcriptions, event labels, and \texttt{physical.zip}, a series of simulator snapshots taken every 0.5--2\,s.
-We evaluate all 103 test windows: 28 Basic (500 mapped points, 4 mirror vantages), 39 Semiurban (3{,}640 points, 6 vantages), and 36 Rural (1{,}908 points, 8 vantages).
+We evaluate all 103 event-bounded test windows, each taking only the start and end time of one labeled test event in place of a detector alert: 28 Basic (500 mapped points, 4 mirror vantages), 39 Semiurban (3{,}640 points, 6 vantages), and 36 Rural (1{,}908 points, 8 vantages).
 Event labels and \texttt{physical.zip} are excluded from indexing and reconstruction.
 The engine and its parameters were frozen after Basic and transferred unchanged to Semiurban and Rural.
 
@@ -221,7 +220,6 @@ Table~\ref{tab:cross} summarizes the frozen run.
 Every window completes.
 Citation presence and evidence-ID resolution pass in all 103 windows, and fact/anchor and full lineage consistency in 102/103.
 In the exception, Semiurban window \texttt{ev\_5dd0102}, a cross-switch timestamp inconsistency downgrades the report to diagnostic-only.
-The consistency check therefore withholds a report rather than passing it.
 Semiurban has 15 windows with reconstructed COT~6 transactions and 16 in which B2 applies; the extra window, \texttt{ev\_5dd0102}, contains 62 unpaired COT~7 replies and no matching COT~6 command.
 Median reconstruction-and-synthesis time is 0.66\,s on Basic, 14.04\,s on Semiurban, and 7.74\,s on Rural (6.40\,s over all windows), excluding shared indexing.
 
@@ -272,7 +270,6 @@ C1--C3 & Offline simulator check across all scenarios: 15/15 transitions and 138
 \end{table}
 
 \subsection{What each component changes}
-Table~\ref{tab:claims} pairs each claim with its test.
 For C1, B2 verifies the same 15 command transitions but applies in only 46/103 windows.
 On the other 57 it yields no incident structure, whereas the behavioral anchors still reconstruct steps, bridges, and link or ARP anomalies.
 
@@ -281,7 +278,6 @@ Its 107{,}666 candidates are 78{,}238 cross-device pairs, 26{,}800 same-device p
 Of these, 66{,}706 are flagged by explicit constraints, 18{,}130 are unsubstantiated, and 22{,}830 are same-device candidates with no detected conflict.
 The 2{,}628 same-ASDU cases lie inside the 66{,}706; they are ordering conflicts created by treating co-reported objects as a sequence, not measurement contradictions.
 Other constraint tags, led by a step that is not sustained (66{,}042 links), cover quality, persistence, direction, and vantage disagreement, and they overlap.
-MIRAGE-OT keeps the unsubstantiated set unresolved instead of promoting it.
 Descriptive 95\% intervals for the per-window B1-minus-MIRAGE counts are $[435, 882]$ for conflicts and $[126, 237]$ for unsubstantiated candidates.
 A1 measures what the gate withholds: 2{,}171 relations in 52/103 windows, including 409 cross-RTU bridges.
 One window, \texttt{ev\_52f5ee}, accounts for 1{,}966 of them; without it the gate still withholds 205 relations and 49 bridges in 51/102 windows.
@@ -290,7 +286,6 @@ These are rejected pairs, not confirmed false positives.
 For C3, A2 explains 5{,}343 excess rows: 1{,}845 mirror duplicates, 572 extra objects in the same ASDU, 2{,}262 IPAL rows, 268 further messages in the same TCP session, and 396 distinct-time events inside one anchor, with no unknown remainder.
 The mean per-window inflation factor is 2.44.
 A3 leaves 11{,}050 local storylines in place of 1{,}700 bundles, 23 bridges, 143 phases, and 161 explanations.
-The case below shows what that organization adds in one window.
 
 \subsection{Case study: a multi-RTU de-energization}
 \label{sec:case}
@@ -301,7 +296,7 @@ B1 emits 157 candidate links: 29 constraint-flagged, 123 unsubstantiated, and 5 
 The gate supports five same-element transitions, all across distinct RTUs, and withholds three more cross-RTU promotions that A1 counts.
 
 Fig.~\ref{fig:bridge} shows the resulting bridges.
-The de-energized component links \texttt{line.3} (RTU 172.16.3.18 at $+5.645$\,s to 172.16.3.16 at $+10.695$\,s), \texttt{line.4} (.18 to .22 at $+7.772$\,s), and \texttt{line.12} (.22 to .24 at $+7.844$\,s), with corroborated \texttt{to\_zero} steps on both ends.
+The de-energized component links \texttt{line.3} (RTU 172.16.3.18 at $+5.645$\,s to 172.16.3.16 at $+10.695$\,s), \texttt{line.4} (.18 to .22 at $+7.772$\,s), and \texttt{line.12} (.22 to .24 at $+7.844$\,s), with corroborated \texttt{to\_zero} steps on both ends; the pre-event currents of \texttt{line.4} and \texttt{line.12} are audited in Sec.~\ref{sec:phys}.
 A second component links \texttt{line.0} and \texttt{line.1} as level shifts.
 The \texttt{line.3} bridge records both ends reported in separate ASDUs, and it does not connect the co-reported bus, load, and neighboring line.
 Layer~3 places all 12 bundles in one phase that holds 129 unresolved cross-device candidates, the same pairs as B1's cross-device candidates, which include its 123 unsubstantiated ones; B1's other 28 pairs are same-ASDU or same-device.
@@ -330,6 +325,7 @@ Instead of 157 temporal links, the responder sees five observed bridges in two c
 \end{figure}
 
 \subsection{Physical compatibility and fail-closed cases}
+\label{sec:phys}
 Table~\ref{tab:phys} gives the offline comparison for all three scenarios.
 All 15 verified command transitions are numerically compatible: 14 exact and 1 within 5\% (\texttt{sgen.6} active power in Basic \texttt{ev\_0961f1c2}).
 Of 142 bridge attributes, 138 are compatible, but only 74 of these are numeric matches (44 exact, 30 within 10\%); the other 64 are semantic \texttt{NaN} on a de-energized island, not numeric equality.
@@ -379,7 +375,6 @@ They are compatible with one opening between the second and third samples, but n
 Four synthetic counterexamples with known answers, kept separate from Sherlock, also pass; for example, one ASDU with two objects, two mirrors, and two IPAL rows is one container.
 
 \subsection{Limits}
-Without a bus-branch model or relay records, MIRAGE-OT reports evidence boundaries rather than causes, and its metrics follow that choice.
 Traceability rates measure internal consistency, and bridge counts measure how often two RTUs report the same element under the gate; neither is a causal accuracy.
 The physical check is limited by the 0.5--2\,s snapshot spacing, and 64 of its 142 bridge attributes are semantic \texttt{NaN} compatibility after de-energization rather than numeric comparisons.
 A1 counts what the gate rejects; it does not estimate how many rejected pairs were true relations, so the cost of abstention is unmeasured.
@@ -387,10 +382,10 @@ Thresholds were not varied, and no responder study measures usefulness.
 
 \section{Conclusion}
 Detection tells a responder that a window is suspicious; MIRAGE-OT turns that window into a provenance-constrained scenario.
-It reconstructs protocol and behavioral steps, supports a relation only when a stated evidence constraint holds, and refuses to count one ASDU, a mirror port, or a temporal neighbor as an independent cause.
+It supports a relation only when a stated evidence constraint holds, and never counts one ASDU, a mirror port, or a temporal neighbor as an independent cause.
 On 103 Sherlock~v3 test windows the frozen engine resolves every cited identifier and withholds one lineage-inconsistent report, while cross-RTU bridges remain observations without asserted causes.
 Against offline simulator snapshots of all three scenarios it agrees with all 15 verified command transitions and 138 of 142 bridge attributes, and it records the four pre-event current mismatches.
-The next steps are sensitivity analysis of the gate thresholds, an independent case review by responders, and evaluation on further OT protocols and datasets.
+The next steps are sensitivity analysis of the gate thresholds, an independent case review by responders, evaluation on further OT protocols and datasets, and use of the deterministic output as a verifiable grounding layer for downstream responders or LLM summarization.
 
 \balance
 \bibliographystyle{IEEEtran}
