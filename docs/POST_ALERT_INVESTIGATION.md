@@ -121,7 +121,7 @@ Five-stage coverage for B4 typed references:
 3. **The model never chooses an electrical fact.** Four electrical facts are exposed per window, and the chosen and published sets are network-only. On ev_0961 the published fact is now the IEC-104 control command on `switch.23:closed` (TL009); after atomicity, that command is its own fact instead of being grouped with other objects from its frame.
 4. **The preceding window has no usable background.** The index starts exactly at its start, so the 15 s background is clipped to zero and all of its scores use the within-window or no-background basis. This is recorded in `window_policy.json`.
 5. **Known labeling gap.** An invented edge id (`R_TL001-TL003` in B1 on ev_0961) is rejected as `missing_evidence_ids` because the evidence check runs before the edge lookup. The claim is correctly rejected but the reason should read `unknown_edge_id`. This only affects the offline audit of an unverified baseline. It is left unchanged so the rerun matches its recorded code hash, and will be fixed in the next code round.
-6. **IEC-104 control commands have no numeric value, so their score is 0.** They reach the timeline only through the fixed control quota. The score is not an importance gold, and the T3 study compares it against random and model choices on an independent gold (`docs/T3_GOLD_AND_STUDY_DESIGN.md`).
+6. **IEC-104 control commands have no numeric value, so their score is 0.** They reach the timeline only through the fixed control quota. The score is not an importance gold.
 
 Three windows from two development events are too few to claim any method is better. These are development diagnostics.
 
@@ -143,4 +143,4 @@ Three windows from two development events are too few to claim any method is bet
 - `test_two_stage_evaluation_metrics_and_awaiting_human_gold_guard`
 - `test_pilot_package_deidentifies_and_excludes_scores_and_llm_outputs`
 
-Total offline tests passing: **62** (`34` in `tests/test_postalert.py`, `28` in `tests/test_etgi.py`). See `docs/T3_READINESS_AND_POSITION_BIAS.md` for the full Position Bias diagnostic (`runs/etgi/position-bias-20261015/`), the de-identified Pilot Candidate Pool (`runs/etgi/t3-pilot-pool-20261015/`), and the two-stage evaluation harness (`eval_t3.py`).
+Total offline tests passing: **62** (`34` in `tests/test_postalert.py`, `28` in `tests/test_etgi.py`). The Position Bias diagnostic is under `runs/etgi/position-bias-20261015/`, the de-identified pilot pool under `runs/etgi/t3-pilot-pool-20261015/`, and the two-stage harness is `src/mirage_ot/etgi/postalert/eval_t3.py`.

@@ -140,7 +140,6 @@ mirage-ot evaluate --checkpoint runs/no-graph.pt --data runs/rural-test/features
 This is a **forecasting utility** comparison, not an edge precision estimate.
 Further baselines, true experiment splits, N/P ablations, multiple seeds,
 confidence calibration and relation evaluation require additional work.
-See `docs/RESEARCH_PROTOCOL.md`.
 
 ## Local Qwen/Gemma reporting (optional)
 
@@ -153,13 +152,12 @@ Requires Ollama at `http://127.0.0.1:11434`. **Reporting does not change graph
 edges or scores**. LLM text is not automatically factual; citations must be
 audited prior to use in papers.
 
-## Research environment and handoff
+## Research environment
 
 - Suggested new branch: orphan `mirage-ot` with new Git worktree
   `/Users/potinglu/Documents/ICIT2027-mirage`.
 - All new code is in this ZIP; nothing from the old EBRL was imported.
 - Original Sherlock v3 dataset should be mounted as a path, not copied or pushed.
-- See `docs/CURSOR_HANDOFF_zh-TW.md` for precise next actions on macOS.
 - References: Sherlock v3 https://doi.org/10.5281/zenodo.18467070;
   Neural Relational Inference https://proceedings.mlr.press/v80/kipf18a.html;
   Temporal Graph Networks https://arxiv.org/abs/2006.10637;
